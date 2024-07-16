@@ -2,5 +2,6 @@
 #include "Options.hpp"
 
 namespace pre {
-    std::vector<std::string> loadSourceFiles(Options& options);
+    std::string loadSourceFile(Options& options);
+    std::string processIncludes(std::string sourceFile);
 }

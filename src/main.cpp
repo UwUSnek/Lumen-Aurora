@@ -12,7 +12,7 @@
 Options parseOptions(int argc, char* argv[]){
     Options r;
     for(int i = 1; i < argc; ++i) {
-        r.sourceFiles.push_back(std::string(argv[i]));
+        r.sourceFile = std::string(argv[i]);
     }
     return r;
 }
@@ -21,6 +21,9 @@ Options parseOptions(int argc, char* argv[]){
 
 int main(int argc, char* argv[]){
     Options options = parseOptions(argc, argv);
-    pre::loadSourceFiles(options);
+
+    std::string sourceFile = pre::loadSourceFile(options);
+    std::string sourceCode = pre::processIncludes(sourceFile);
+    std::cout << sourceCode;
     //std::string fileBuffer =
 }

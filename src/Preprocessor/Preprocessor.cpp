@@ -5,68 +5,51 @@
 #include <cstring>
 
 #include "Preprocessor.hpp"
-
-
-//TODO move to utils file
-namespace ansi {
-    std::string fgBlack   = "\033[30m";    std::string bgBlack   = "\033[40m";
-    std::string fgRed     = "\033[31m";    std::string bgRed     = "\033[41m";
-    std::string fgGreen   = "\033[32m";    std::string bgGreen   = "\033[42m";
-    std::string fgYellow  = "\033[33m";    std::string bgYellow  = "\033[43m";
-    std::string fgBlue    = "\033[34m";    std::string bgBlue    = "\033[44m";
-    std::string fgMagenta = "\033[35m";    std::string bgMagenta = "\033[45m";
-    std::string fgCyan    = "\033[36m";    std::string bgCyan    = "\033[46m";
-    std::string fgWhite   = "\033[37m";    std::string bgWhite   = "\033[47m";
-
-    std::string bold       = "\033[1m";    std::string boldOff      = "\033[21m";
-    std::string underline  = "\033[4m";    std::string underlineOff = "\033[24m";
-    std::string inverse    = "\033[7m";    std::string inverseOff   = "\033[27m";
-
-    std::string reset      = "\033[0m";
-
-    //! Bold often uses a brighter shade of the same color
-    //! Inverse swaps foreground and background colors
-}
+#include "utils.hpp"
 
 
 
 namespace pre {
-    //TODO move to utils file
-    static void printError(std::string message) {
-        std::cout << message;
-    }
-
+    /**
+     * @brief Reads a single source file and returns its contents as a string.
+     *        Prints an error message if the file cannot be opened or doesn't exist.
+     * @param fileName The path to the file
+     * @return The contents of the file
+     */
     static std::string readAndCheckFile(std::string fileName) {
         std::ifstream f(fileName);
-        if(!f) {
-            std::cerr << ansi::fgRed << ansi::bold << "Preprocessor error:" << ansi::reset << "\n";
-            std::cerr << "    Could not open file \"" << fileName << "\": " << std::strerror(errno) << ".\n";
-            std::cerr << "    Current working directory is: " << std::filesystem::current_path() << ".\n";
-            exit(1);
-        }
+        if(!f) utils::printError(
+            utils::ErrType::PREPROCESSOR,
+            "Could not open file \"" + fileName + "\": " + std::strerror(errno) + ".\n" +
+            "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
+        );
 
         std::string l, r;
-        while(f >> l) r += l + "\n";
-        std::cout << r;
+        while(getline(f, l)) r += l + "\n";
         return r;
     }
 
 
 
 
-    std::vector<std::string> loadSourceFiles(Options& options) {
-        std::vector<std::string> r;
-
-        for(int i = 0; i < options.sourceFiles.size(); ++i) {
-            r.push_back(readAndCheckFile(options.sourceFiles[i]));
-        }
-        return r;
+    /**
+     * @brief Loads the source file using the provided options without processing any of it
+     * @param options The options
+     * @return The contents of the source file as a string
+     */
+    std::string loadSourceFile(Options& options) {
+        return readAndCheckFile(options.sourceFile);
     }
 
 
 
 
-    std::string processIncludes() {
-
+    /**
+     * @brief Finds and processes include directives
+     * @param sourceFile The source file as a string
+     * @return The full source code as a string
+     */
+    std::string processIncludes(std::string sourceFile) {
+        return sourceFile;
     }
 }

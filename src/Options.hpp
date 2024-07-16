@@ -4,5 +4,5 @@
 
 
 struct Options {
-    std::vector<std::string> sourceFiles;
+    std::string sourceFile;
 };
