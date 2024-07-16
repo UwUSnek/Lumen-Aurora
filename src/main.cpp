@@ -21,6 +21,6 @@ Options parseOptions(int argc, char* argv[]){
 
 int main(int argc, char* argv[]){
     Options options = parseOptions(argc, argv);
-    pre::mergeSourceFiles(options);
+    pre::loadSourceFiles(options);
     //std::string fileBuffer =
 }

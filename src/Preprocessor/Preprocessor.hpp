@@ -2,5 +2,5 @@
 #include "Options.hpp"
 
 namespace pre {
-    std::string mergeSourceFiles(Options& options);
+    std::vector<std::string> loadSourceFiles(Options& options);
 }
