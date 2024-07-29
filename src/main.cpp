@@ -4,7 +4,7 @@
 #include <fstream>
 
 #include "Options.hpp"
-#include "Preprocessor/Preprocessor.hpp"
+#include "Preprocessor/preprocessor.hpp"
 
 
 
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
     Options options = parseOptions(argc, argv);
 
     std::string sourceFile = pre::loadSourceFile(options);
-    std::string sourceCode = pre::processIncludes(sourceFile);
+    std::string sourceCode = pre::processDirectives(sourceFile);
     std::cout << sourceCode;
     //std::string fileBuffer =
 }

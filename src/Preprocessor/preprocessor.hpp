@@ -3,5 +3,5 @@
 
 namespace pre {
     std::string loadSourceFile(Options& options);
-    std::string processIncludes(std::string sourceFile);
+    std::string processDirectives(std::string s);
 }

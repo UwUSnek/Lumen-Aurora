@@ -7,7 +7,7 @@ g++                                             \
 -std=c++20                                      \
     ./src/utils.cpp                             \
     ./src/main.cpp                              \
-    ./src/Preprocessor/Preprocessor.cpp         \
+    ./src/Preprocessor/preprocessor.cpp         \
 -I                                              \
     ./src/                                      \
 -o                                              \
