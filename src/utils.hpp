@@ -11,9 +11,6 @@ namespace utils {
     };
 
     void printError(ErrType errorType, std::string message);
-
-    ulong computeStrLiteralLen(std::string buffer, ulong index);
-    void checkCharLiteral(std::string buffer, ulong index);
 }
 
 

@@ -8,6 +8,7 @@ g++                                             \
     ./src/utils.cpp                             \
     ./src/main.cpp                              \
     ./src/Preprocessor/preprocessor.cpp         \
+    ./src/Preprocessor/include.cpp              \
 -I                                              \
     ./src/                                      \
 -o                                              \
