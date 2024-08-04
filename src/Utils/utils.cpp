@@ -54,14 +54,11 @@ namespace utils {
             "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
         );
 
-        //FIXME move this to the detection fuctions
-        //FIXME skip these automatically and return both versions (with and without)
         // Read all the lines and return a string containing all of them
         std::string l, r;
         while(getline(f, l)) {
             r += l;
-            // Remove line continuation tokens and merge lines if needed
-            if(l[l.length() - 1] != '\\') r += "\n"; else r.resize(r.length() - 1);
+            r += '\n';
         }
         return r;
     }

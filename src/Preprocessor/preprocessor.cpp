@@ -6,7 +6,7 @@
 
 #include "preprocessor.hpp"
 #include "include.hpp"
-#include "utils.hpp"
+#include "Utils/utils.hpp"
 
 
 
@@ -157,11 +157,13 @@ namespace pre {
      */
     ParsingResult parseComment(std::string b, ulong index) {
         ParsingResult r;
-        if(b[index] != '/' || (b[index + 1] != '/' && b[index + 1] != '*')) return r;
-        r.trueValue += '/';  r.trueValue += b[index + 1];
-        r.finalValue += '/'; r.finalValue += b[index + 1];
+        if(b[index] != '/') return r;
+        r.trueValue  += '/';
+        r.finalValue += '/';
 
 
+        char last = b[index];
+        char commType = '\0'; // '\0' if unknow, '/' if single line, '*' if multiline
         ulong i = index + 2;
         while(true) {
             // Check line continuation token
@@ -169,25 +171,38 @@ namespace pre {
                 r.trueValue += "\\\n";
                 i += 2;
             }
-            // Check closing sequences
             else {
+                // Starting sequence
+                if(commType == '\0') {
+                    if(b[i] == '/' || b[i] == '*') {
+                        r.trueValue  += b[i];
+                        r.finalValue += b[i];
+                        commType = b[i];
+                        continue;
+                    }
+                    else {  //! Starting sequence not found (this includes \n and \0 cases)
+                        return r;
+                    }
+                }
+
                 // Single character closing sequences (End of file or single line comments)
-                if(b[i] == '\0' || (b[index + 1] == '/' && b[i] == '\n')) {
-                    r.trueValue += b[i];
+                else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
+                    r.trueValue  += b[i];
                     r.finalValue += b[i];
                     break;
                 }
 
                 // Double character closing sequences (Multi line comments)
-                else if(b[index + 1] == '*' && b[i] == '*' && b[i + 1] == '/') {
-                    r.trueValue += "*/";
-                    r.finalValue += "*/";
+                else if(commType == '*' && last == '*' && b[i] == '/') {
+                    r.trueValue  += '/';
+                    r.finalValue += '/';
                     break;
                 }
 
                 // Normal characters (part of the comment)
                 else {
-                    r.trueValue += b[i];
+                    last = b[i];
+                    r.trueValue  += b[i];
                     r.finalValue += b[i];
                     ++i;
                 }
@@ -196,8 +211,10 @@ namespace pre {
 
         r.elmType = SourceElmType::COMMENT;
         return r;
-        //return i - index + 1;
     }
+
+
+
 
 
 
@@ -214,10 +231,11 @@ namespace pre {
     ParsingResult parseStrLiteral(std::string b, ulong index) {
         ParsingResult r;
         if(b[index] != '"') return r;
-        r.trueValue += '"';
+        r.trueValue  += '"';
         r.finalValue += '"';
 
 
+        char last = b[index];
         ulong i = index + 1;
         while(true) {
             // Check line continuation token
@@ -225,25 +243,33 @@ namespace pre {
                 r.trueValue += "\\\n";
                 i += 2;
             }
-            // Check closing sequences
             else {
                 // Malformed strings
-                if(b[i] == '\0' || b[i] == '\n') {
+                if(b[i] == '\0') {
                     utils::printError(utils::ErrType::PREPROCESSOR, "String literal is missing a closing '\"' character.");
+                    exit(1);
+                }
+                if(b[i] == '\n') {
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        "String literal is missing a closing '\"' character.\n"
+                        "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
+                    );
                     exit(1);
                 }
 
                 // Closing sequence
-                else if(b[i] == '"' && i > 0 && b[i - 1] != '\\') {
-                    r.trueValue += '"';
+                else if(last != '\\' && b[i] == '"') {
+                    r.trueValue  += '"';
                     r.finalValue += '"';
                     break;
                 }
 
                 // Normal characters (part of the string)
                 else {
-                    r.trueValue += b[i];
+                    r.trueValue  += b[i];
                     r.finalValue += b[i];
+                    last = b[i];
                     ++i;
                 }
             }
@@ -251,8 +277,12 @@ namespace pre {
 
         r.elmType = SourceElmType::STRING;
         return r;
-        //return i - index + 1;
     }
+
+
+
+
+
 
 
 
@@ -266,36 +296,97 @@ namespace pre {
     ParsingResult parseCharLiteral(std::string b, ulong index) {
         ParsingResult r;
         if(b[index] != '\'') return r;
-        r.trueValue += '\'';
+        r.trueValue  += '\'';
         r.finalValue += '\'';
 
 
-        if(b[index + 1] == '\'') {
-            utils::printError(utils::ErrType::PREPROCESSOR, "Char literal cannot be empty.");
-            exit(1);
-        }
+        // Check for empty char literals or unescaped ' characters
+
         //TODO check if the actual character is valid. \n \0 and others are not valid. they need to be escaped
         //TODO Print a special error if they are actually used raw. tell the user to escape them
         //TODO
 
-        //FIXME use a loop to detect and save the whole malformed literal
-        if(b[index + 2] == '\0' || b[index + 2] == '\n') {
-            utils::printError(utils::ErrType::PREPROCESSOR, "Char literal is missing a closing ' character.");
-            exit(1);
+
+
+        char last = b[index];
+        ulong i = index + 1;
+        while(true) {
+            // Check line continuation token
+            if(b[i] == '\\' && b[i + 1] == '\n') {
+                r.trueValue += "\\\n";
+                i += 2;
+            }
+            else {
+                // Closing sequence
+                if(last != '\\' && b[i] == '\'') {
+                    r.trueValue  += '\'';
+                    r.finalValue += '\'';
+                    break;
+                }
+
+                // Missing closing sequence
+                if(b[i] == '\0') {
+                    utils::printError(utils::ErrType::PREPROCESSOR, "Char literal is missing a closing ' character.");
+                    exit(1);
+                }
+                if(b[i] == '\n') {
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        "Char literal is missing a closing ' character.\n"
+                        "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
+                    );
+                    exit(1);
+                }
+
+                // Normal characters and escape sequences
+                else {
+                    r.trueValue  += b[i];
+                    r.finalValue += b[i];
+                    last = b[i];
+                    ++i;
+                }
+            }
         }
-        if(b[index + 2] != '\'') {
+
+
+
+
+        ulong finalLen = r.finalValue.length();
+        if(finalLen > 4 || finalLen == 4 && r.finalValue[1] != '\\') {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
                 "Char literal contains more than one byte. This is not allowed.\n"
-                "If you wish to store strings or a multi-bye Unicode character, you can use the \"str\" type (module <string>)." //TODO check if this is the correct type
+                "If you wish to store strings or a multi-bye Unicode character, you can use the str type (module <string>)." //TODO check if this is the correct type
             );
             exit(1);
         }
+        else if(r.finalValue.length() == 4) { //!  && r.finalValue[1] == '\\'
+            //TODO check valid escape sequences
+        }
+        else if(r.finalValue.length() == 3) {
+            if(r.finalValue[1] == '\\') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    "Char literal is missing a closing ' character.\n"
+                    "Did you mean " + ansi::fgCyan + ansi::bold + "'\\'" + ansi::reset + "?"
+                );
+                exit(1);
+            }
+            //! Else return;
+        }
+        else if(r.finalValue.length() == 2) {
+            utils::printError(
+                utils::ErrType::PREPROCESSOR,
+                "Char literal cannot be empty."
+            );
+            exit(1);
+        }
+
+
 
         r.elmType = SourceElmType::CHAR;
         return r;
     }
 
     //TODO REMOVE COMMENTS BEFORE PROCESSING ANY OTHER PREPROCESSOR THING
-    //TODO CHECK ESCAPED CHARACTER. they are valid char literals.
 }
