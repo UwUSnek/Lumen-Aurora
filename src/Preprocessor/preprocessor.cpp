@@ -11,85 +11,101 @@
 
 
 namespace pre {
-    /**
-     * @brief Reads a single source file and returns its contents as a string.
-     *     Line continuation tokens are automatically recognized and replaced.
-     *     Prints an error message if the file cannot be opened or doesn't exist.
-     * @param fileName The path to the file
-     * @return The contents of the file
-     */
-    static std::string readAndCheckFile(std::string fileName) {
-        // Create file stream and print an error if the file cannot be opened
-        std::ifstream f(fileName);
-        if(!f) utils::printError(
-            utils::ErrType::PREPROCESSOR,
-            "Could not open file \"" + fileName + "\": " + std::strerror(errno) + ".\n" +
-            "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
-        );
-
-        // Read all the lines and return a string containing all of them
-        std::string l, r;
-        while(getline(f, l)) {
-            r += l;
-            // Remove line continuation tokens and merge lines if needed
-            if(l[l.length() - 1] != '\\') r += "\n"; else r.resize(r.length() - 1);
-        }
-        return r;
-    }
-
-
-
 
     /**
-     * @brief Loads the source file using the provided options without processing any of its directives.
-     *     Line continuation tokens are automatically recognized and replaced
+     * @brief Loads the source file, including all of the files included by it and processes any preprocessor directives.
      * @param options The options
-     * @return The contents of the source file as a string
+     * @return The contents of the source file as a StructuredSource
      */
-    std::string loadSourceFile(Options& options) {
-        return readAndCheckFile(options.sourceFile);
+    StructuredSource loadSourceCode(Options& options) {
+        return parseUnprocessedCode(options.sourceFile, options); //TODO include the files
     }
+
+
+
+
+
 
 
 
     //TODO add element metadata
     /**
-     * @brief Reads a source file and converts it to a StructuredSource
-     * @param s The source file as a string
+     * @brief Loads a source file using its path and the provided options and converts it to a StructuredSource
+     * @param filePath The path to the source file
+     * @param options The options
      * @return The generated StructuredSource value
      */
-    StructuredSource parseSourceFile(std::string s) { //FIXME call this function from somewhere. prob straight from processDirectives, before actually stitching the files and expanding the macros
+    StructuredSource parseUnprocessedCode(std::string filePath, Options& options) { //TODO use options or remove the parameter if not needed
+        std::string s = utils::readAndCheckFile(filePath);
+
         StructuredSource r;
+        ulong varLen = 0;               // The length of the current variable-size element (code or directive)
+        bool isVarDirective = false;    // False if the current variable-size element is arbitrary code, true if it is a directive (they can't both be on the same line)
 
         for(ulong i = 0; i < s.length();){
-            ulong len = 0;
-            SourceElmType elmType;
-            ;    if(len = checkCharLiteral(s, i))     elmType = SourceElmType::CHAR;
-            else if(len = computeStrLiteralLen(s, i)) elmType = SourceElmType::STRING;
-            else if(len = computeCommentLen(s, i))    elmType = SourceElmType::COMMENT;
+            //ulong len = 0;
+            //SourceElmType elmType;
+            ParsingResult pr;
+
+
+
+
+            // Check for known elements and save the result
+            if((pr = parseCharLiteral(s, i)).elmType == SourceElmType::NONE)
+            if((pr =  parseStrLiteral(s, i)).elmType == SourceElmType::NONE)
+            ;  (pr =     parseComment(s, i));
+
+
+
+
+            // If the current index is inside a variable-length element
+            if(pr.elmType == SourceElmType::NONE) {
+                if(s[i] == '#') isVarDirective = true;  // Set the directive state to true if a '#' character is found in the wild
+                ++varLen;                               // Increase the variable length value
+                ++i;                                    // Skip this character
+            }
             else {
+                // Push previous variable-length element is present
+                if(varLen > 0) {
+                    std::string elmTrueValue = s.substr(i - varLen, varLen);
+                    r.elms.push_back(SourceElm{
+                        isVarDirective ? SourceElmType::DIRECTIVE : SourceElmType::CODE,
+                        elmTrueValue,
+                        SourceElmMeta{ i - varLen, "test file TODO", 0, elmTrueValue } //TODO save file & line number in meta
+                    });
+                }
+                varLen = 0;                 // Set the variable length value back to 0
+                isVarDirective = false;     // Set the directive state back to false
+
+
+                // Push current parsed element
+                r.elms.push_back(SourceElm{
+                    pr.elmType,
+                    pr.finalValue,
+                    SourceElmMeta{ i, "test file TODO", 0, pr.trueValue} //TODO save file & line number in meta
+                });
+                i += pr.trueValue.length();
+            }
+
+
+
+
+
+
+/*
+            ;    if(len = parseCharLiteral(s, i))     { elmType = SourceElmType::CHAR;    varLen = 0; }
+            else if(len = parseStrLiteral(s, i)) { elmType = SourceElmType::STRING;  varLen = 0; }
+            else if(len = parseComment(s, i))    { elmType = SourceElmType::COMMENT; varLen = 0; }
+            else {
+                ++varLen;
                 ++i;
-                //TODO arbitrary code & directives
             }
             r.elms.push_back(SourceElm{ elmType, s.substr(i, len), SourceElmMeta{ i, "test file TODO" }});
             i += len;
+*/
         }
 
         return r;
-    }
-
-
-
-
-    /**
-     * @brief Finds and processes preprocessor directives.
-     * @param s The source file as a string
-     * @return The full source code as a string, without any preprocessor directives
-     */
-    StructuredSource processDirectives(std::string s) {
-        //std::string r;
-        //r = pre::stitchFiles(s);
-        return parseSourceFile(s);
     }
 
 
@@ -139,18 +155,48 @@ namespace pre {
      * @return The length of the comment, including the length of the opening and closing character sequences.
      *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
      */
-    ulong computeCommentLen(std::string b, ulong index) {
-        if(b[index] != '/' || (b[index + 1] != '/' && b[index + 1] != '*')) return 0;
+    ParsingResult parseComment(std::string b, ulong index) {
+        ParsingResult r;
+        if(b[index] != '/' || (b[index + 1] != '/' && b[index + 1] != '*')) return r;
+        r.trueValue += '/';  r.trueValue += b[index + 1];
+        r.finalValue += '/'; r.finalValue += b[index + 1];
+
 
         ulong i = index + 2;
-        for(;; ++i) {
-            if(b[i] == '\0' || (b[index + 1] == '/' && b[i] == '\n')) break;     //! Single character closing sequences (End of file or single line comments)
-            if(b[index + 1] == '*' && b[i] == '*' && b[i + 1] == '/') {          //! Double character closing sequences (Multi line comments)
-                ++i;  // Skip first character of the closing sequence
-                break;
+        while(true) {
+            // Check line continuation token
+            if(b[i] == '\\' && b[i + 1] == '\n') {
+                r.trueValue += "\\\n";
+                i += 2;
+            }
+            // Check closing sequences
+            else {
+                // Single character closing sequences (End of file or single line comments)
+                if(b[i] == '\0' || (b[index + 1] == '/' && b[i] == '\n')) {
+                    r.trueValue += b[i];
+                    r.finalValue += b[i];
+                    break;
+                }
+
+                // Double character closing sequences (Multi line comments)
+                else if(b[index + 1] == '*' && b[i] == '*' && b[i + 1] == '/') {
+                    r.trueValue += "*/";
+                    r.finalValue += "*/";
+                    break;
+                }
+
+                // Normal characters (part of the comment)
+                else {
+                    r.trueValue += b[i];
+                    r.finalValue += b[i];
+                    ++i;
+                }
             }
         }
-        return i - index + 1;
+
+        r.elmType = SourceElmType::COMMENT;
+        return r;
+        //return i - index + 1;
     }
 
 
@@ -165,18 +211,47 @@ namespace pre {
      * @return The length of the string literal, including the two " characters
      *     If the buffer doesn't contain a string literal that starts at index <index>, 0 is returned.
      */
-    ulong computeStrLiteralLen(std::string b, ulong index) {
-        if(b[index] != '"') return 0;
+    ParsingResult parseStrLiteral(std::string b, ulong index) {
+        ParsingResult r;
+        if(b[index] != '"') return r;
+        r.trueValue += '"';
+        r.finalValue += '"';
+
 
         ulong i = index + 1;
-        for(;; ++i) {
-            if(b[i] == '\0' || b[i] == '\n') {
-                utils::printError(utils::ErrType::PREPROCESSOR, "String literal is missing a closing '\"' character.");
-                exit(1);
+        while(true) {
+            // Check line continuation token
+            if(b[i] == '\\' && b[i + 1] == '\n') {
+                r.trueValue += "\\\n";
+                i += 2;
             }
-            if(b[i] == '"' && b[i - 1] != '\\') break;
+            // Check closing sequences
+            else {
+                // Malformed strings
+                if(b[i] == '\0' || b[i] == '\n') {
+                    utils::printError(utils::ErrType::PREPROCESSOR, "String literal is missing a closing '\"' character.");
+                    exit(1);
+                }
+
+                // Closing sequence
+                else if(b[i] == '"' && i > 0 && b[i - 1] != '\\') {
+                    r.trueValue += '"';
+                    r.finalValue += '"';
+                    break;
+                }
+
+                // Normal characters (part of the string)
+                else {
+                    r.trueValue += b[i];
+                    r.finalValue += b[i];
+                    ++i;
+                }
+            }
         }
-        return i - index + 1;
+
+        r.elmType = SourceElmType::STRING;
+        return r;
+        //return i - index + 1;
     }
 
 
@@ -188,8 +263,12 @@ namespace pre {
      * @return The value 3.
      *     If the buffer doesn't contain a char literal that starts at index <index>, no error is printed and 0 is returned.
      */
-    ulong checkCharLiteral(std::string b, ulong index) {
-        if(b[index] != '\'') return 0;
+    ParsingResult parseCharLiteral(std::string b, ulong index) {
+        ParsingResult r;
+        if(b[index] != '\'') return r;
+        r.trueValue += '\'';
+        r.finalValue += '\'';
+
 
         if(b[index + 1] == '\'') {
             utils::printError(utils::ErrType::PREPROCESSOR, "Char literal cannot be empty.");
@@ -198,6 +277,8 @@ namespace pre {
         //TODO check if the actual character is valid. \n \0 and others are not valid. they need to be escaped
         //TODO Print a special error if they are actually used raw. tell the user to escape them
         //TODO
+
+        //FIXME use a loop to detect and save the whole malformed literal
         if(b[index + 2] == '\0' || b[index + 2] == '\n') {
             utils::printError(utils::ErrType::PREPROCESSOR, "Char literal is missing a closing ' character.");
             exit(1);
@@ -206,12 +287,13 @@ namespace pre {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
                 "Char literal contains more than one byte. This is not allowed.\n"
-                "If you wish to store strings or multi-bye Unicode character, you should use the \"str\" type (module <string>)." //TODO check if this is the correct type
-                );
+                "If you wish to store strings or a multi-bye Unicode character, you can use the \"str\" type (module <string>)." //TODO check if this is the correct type
+            );
             exit(1);
         }
 
-        return 3;
+        r.elmType = SourceElmType::CHAR;
+        return r;
     }
 
     //TODO REMOVE COMMENTS BEFORE PROCESSING ANY OTHER PREPROCESSOR THING

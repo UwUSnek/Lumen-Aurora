@@ -1,28 +1,43 @@
 #pragma once
 #include <string>
-#include <string>
 #include <vector>
 
 
 
 namespace pre {
     enum class SourceElmType {
+        NONE,       // Specified element not found
         DIRECTIVE,
         STRING,
         CHAR,
         COMMENT,
         CODE
     };
+    static inline std::string sourceElmTypeToString(SourceElmType type) {
+        switch(type) {
+            case SourceElmType::DIRECTIVE: return "DIRECTIVE";
+            case SourceElmType::STRING:    return "STRING";
+            case SourceElmType::CHAR:      return "CHAR";
+            case SourceElmType::COMMENT:   return "COMMENT";
+            case SourceElmType::CODE:      return "CODE";
+        }
+        return "NONE";
+    }
+
 
 
     struct SourceElmMeta {
         ulong start;
         std::string file; //TODO set this from the parser function
+        ulong lineNum;
+        std::string trueValue;
 
         SourceElmMeta() = delete;
-        SourceElmMeta(ulong _start, std::string _file) :
+        SourceElmMeta(ulong _start, std::string _file, ulong _lineNum, std::string _trueValue) :
             start(_start),
-            file(_file) {
+            file(_file),
+            lineNum(_lineNum),
+            trueValue(_trueValue) {
         }
     };
 
@@ -47,8 +62,13 @@ namespace pre {
         std::vector<SourceElm> elms = std::vector<SourceElm>();
 
         std::string toString(){
+            static ulong elmTypeNameMaxSpace = 12;
             std::string r = "";
             for(SourceElm elm : elms) {
+                std::string elmTypeName = sourceElmTypeToString(elm.type);
+                r += elmTypeName;
+                r.append(elmTypeNameMaxSpace - elmTypeName.length(), ' ');
+                r += "| ";
                 r += elm.s;
             }
             return r;

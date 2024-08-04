@@ -11,6 +11,7 @@ namespace utils {
     };
 
     void printError(ErrType errorType, std::string message);
+    std::string readAndCheckFile(std::string fileName);
 }
 
 

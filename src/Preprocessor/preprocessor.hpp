@@ -1,16 +1,17 @@
 #pragma once
+#include <string>
 #include "Options.hpp"
 #include "StructuredSource.hpp"
+#include "ParsingResult.hpp"
 
 
 
 
 namespace pre {
-    std::string loadSourceFile(Options& options);
-    StructuredSource processDirectives(std::string s);
+    StructuredSource loadSourceCode(Options &options);
+    StructuredSource parseUnprocessedCode(std::string filePath, Options &options);
 
-
-    ulong computeCommentLen(std::string b, ulong index);
-    ulong computeStrLiteralLen(std::string b, ulong index);
-    ulong checkCharLiteral(std::string b, ulong index);
+    ParsingResult parseComment(std::string b, ulong index);
+    ParsingResult parseStrLiteral(std::string b, ulong index);
+    ParsingResult parseCharLiteral(std::string b, ulong index);
 }

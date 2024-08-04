@@ -23,8 +23,6 @@ Options parseOptions(int argc, char* argv[]){
 int main(int argc, char* argv[]){
     Options options = parseOptions(argc, argv);
 
-    std::string sourceFile = pre::loadSourceFile(options);
-    pre::StructuredSource sourceCode = pre::processDirectives(sourceFile);
+    pre::StructuredSource sourceCode = pre::loadSourceCode(options);
     std::cout << sourceCode.toString();
-    //std::string fileBuffer =
 }
