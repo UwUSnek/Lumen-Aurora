@@ -9,7 +9,20 @@
             "args": [],
             "problemMatcher": [ "$gcc" ],
             "options": { "cwd": "${workspaceFolder}" },
-            "group": "build"
+            "group": "build",
+            "presentation": { "reveal": "always" }
+        },
+        {
+            "type": "shell",
+            "label": "Run tests (no debug)",
+            "command": "bash",
+            "args": [
+                "-c",
+                "clear && ./Build/out ./Test/main.lum" ],
+            "problemMatcher": [],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "presentation": { "reveal": "always" }
         }
     ]
 }

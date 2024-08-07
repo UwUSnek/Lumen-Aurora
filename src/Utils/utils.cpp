@@ -20,7 +20,7 @@ namespace utils {
      * @param message The error message. This can contain multiple lines.
      *      One \n character is automatically added at the end of the string.
      */
-    void printError(ErrType errType, ElmCoords &elmCoords, std::string message) {
+    void printError(ErrType errType, ElmCoords elmCoords, std::string message) {
         // Print error type and location
         std::cerr << ansi::fgRed << ansi::bold;
         if(errType == ErrType::COMMAND) {
@@ -29,7 +29,8 @@ namespace utils {
         else {
             if(errType == ErrType::PREPROCESSOR) std::cerr << "Preprocessor";
             if(errType == ErrType::COMPILER)     std::cerr << "Compilation";
-            std::cerr << " error:\n    File: \"" << elmCoords.filePath << "\"\n    Line: " + elmCoords.lineNum;
+            std::cerr << " error:\n";
+            if(elmCoords.filePath.length()) std::cerr << "    File | " << ansi::reset << elmCoords.filePath << ansi::fgRed << ansi::bold << "\n    Line | " << ansi::reset << elmCoords.lineNum;
         }
         std::cerr << ansi::reset << "\n";
 

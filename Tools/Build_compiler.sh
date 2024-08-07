@@ -3,13 +3,19 @@
 
 
 mkdir -p ./Build
+
+
 g++                                             \
--std=c++20                                      \
     ./src/Utils/utils.cpp                       \
     ./src/main.cpp                              \
     ./src/Preprocessor/preprocessor.cpp         \
     ./src/Preprocessor/include.cpp              \
+-std=c++20                                      \
+-O0 -g                                          \
 -I                                              \
     ./src/                                      \
 -o                                              \
     ./Build/out
+
+
+#TODO add a separate build for the optimized version, maybe wait til rewrite

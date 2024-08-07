@@ -67,6 +67,7 @@ namespace pre {
                     isVarDirective = true;  // Set the directive state to true
                     ++varLen;               // Increase the variable length value
                     ++i;                    // Skip this character
+                    continue;
                 }
 
                 // If a line continuation character is found
@@ -75,7 +76,12 @@ namespace pre {
                     ++varLenHeight;  // Increase the variable-length element width
                     varLen += 2;     // Increase the variable-length element value
                     i += 2;          // Skip line continuation token token
+                    continue;
                 }
+
+                // If a normal character is found
+                ++varLen;  // Increase the variable-length element value
+                ++i;       // Skip it
             }
             else {
                 // Push previous variable-length element is present
