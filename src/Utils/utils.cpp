@@ -31,7 +31,7 @@ namespace utils {
             if(errType == ErrType::COMPILER)     std::cerr << "Compilation";
             std::cerr << " error:\n";
             if(elmCoords.filePath.length()) std::cerr << "    File | " << ansi::reset << elmCoords.filePath << ansi::fgRed << ansi::bold << "\n    Line | " << ansi::reset << elmCoords.lineNum;
-        }
+        } //FIXME incorrect line number
         std::cerr << ansi::reset << "\n";
 
 

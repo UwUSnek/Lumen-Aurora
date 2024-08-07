@@ -14,7 +14,7 @@ void main(){
 }
 
 
-// test "comment"\""\
+// test "comment"\""\ //FIXME THIS DOESNT PARSE CORRECTLY
    \""""a""'"'''""
 
 /* test "comment\""
