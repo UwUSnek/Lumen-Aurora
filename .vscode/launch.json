@@ -8,7 +8,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/Build/out",
             "args": [ "./Test/main.lum" ],
-            "stopAtEntry": false,
+            "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,

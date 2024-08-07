@@ -12,3 +12,12 @@ void main(){
     io.print("h\"\
     i");
 }
+
+
+// test "comment"\""\
+   \""""a""'"'''""
+
+/* test "comment\""
+   "'""'''\"\" */
+
+import <math>

@@ -54,7 +54,8 @@ namespace pre {
             // Check for known elements and save the result
             if((pr = parseCharLiteral(s, i, curLine)).elmType == SourceElmType::NONE)
             if((pr =  parseStrLiteral(s, i, curLine)).elmType == SourceElmType::NONE)
-            ;  (pr =     parseComment(s, i, curLine));
+               (pr =     parseComment(s, i, curLine));
+            //FIXME parse default modules <> (or check it later, as it becomes part of the #directive element)
 
 
 
@@ -87,11 +88,11 @@ namespace pre {
                 // Push previous variable-length element is present
                 if(varLen > 0) {
                     std::string elmTrueValue = s.substr(i - varLen, varLen);
-                    r.elms.push_back(SourceElm{
+                    r.elms.push_back(SourceElm(
                         isVarDirective ? SourceElmType::DIRECTIVE : SourceElmType::CODE,
                         elmTrueValue,
-                        SourceElmMeta{ i - varLen, "test file TODO", varLenHeight, elmTrueValue } //TODO save file & line number in meta
-                    });
+                        SourceElmMeta(i - varLen, "test file TODO", varLenHeight, elmTrueValue) //TODO save file & line number in meta
+                    ));
                 }
                 varLen = 0;              // Set the variable-length element width back to 0
                 varLenHeight = 0;        // Set the variable-length element height back to 0
@@ -99,31 +100,14 @@ namespace pre {
 
 
                 // Push current parsed element
-                r.elms.push_back(SourceElm{
+                r.elms.push_back(SourceElm(
                     pr.elmType,
                     pr.finalValue,
-                    SourceElmMeta{ i, "test file TODO", curLine, pr.trueValue} //TODO save file & line number in meta
-                });
+                    SourceElmMeta(i, "test file TODO", curLine, pr.trueValue) //TODO save file & line number in meta
+                ));
                 curLine += pr.height - 1;  // Add the additional element height to the line counter
                 i += pr.trueValue.length();
             }
-
-
-
-
-
-
-/*
-            ;    if(len = parseCharLiteral(s, i))     { elmType = SourceElmType::CHAR;    varLen = 0; }
-            else if(len = parseStrLiteral(s, i)) { elmType = SourceElmType::STRING;  varLen = 0; }
-            else if(len = parseComment(s, i))    { elmType = SourceElmType::COMMENT; varLen = 0; }
-            else {
-                ++varLen;
-                ++i;
-            }
-            r.elms.push_back(SourceElm{ elmType, s.substr(i, len), SourceElmMeta{ i, "test file TODO" }});
-            i += len;
-*/
         }
 
         return r;
@@ -273,7 +257,7 @@ namespace pre {
                 if(b[i] == '\0') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine, index, i),
+                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
                         "String literal is missing a closing '\"' character."
                     );
                     exit(1);
@@ -281,7 +265,7 @@ namespace pre {
                 if(b[i] == '\n') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine, index, i),
+                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
                         "String literal is missing a closing '\"' character.\n"
                         "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
                     );
@@ -360,7 +344,7 @@ namespace pre {
                 if(b[i] == '\0') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine, index, i),
+                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
                         "Char literal is missing a closing ' character."
                     );
                     exit(1);
@@ -368,7 +352,7 @@ namespace pre {
                 if(b[i] == '\n') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine, index, i),
+                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
                         "Char literal is missing a closing ' character.\n"
                         "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
                     );
@@ -392,7 +376,7 @@ namespace pre {
         if(finalLen > 4 || finalLen == 4 && r.finalValue[1] != '\\') {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
-                ElmCoords("test file", DEBUG_curLine, index, i),
+                ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
                 "Char literal contains more than one byte. This is not allowed.\n"
                 "If you wish to store strings or a multi-bye Unicode character, you can use the str type (module <string>)." //TODO check if this is the correct type
             );
@@ -405,7 +389,7 @@ namespace pre {
             if(r.finalValue[1] == '\\') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords("test file", DEBUG_curLine, index, i),
+                    ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
                     "Char literal is missing a closing ' character.\n"
                     "Did you mean " + ansi::fgCyan + ansi::bold + "'\\'" + ansi::reset + "?"
                 );

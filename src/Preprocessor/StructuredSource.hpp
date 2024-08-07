@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <regex>
+
+#include "Utils/utils.hpp"
+
 
 
 
@@ -69,7 +73,8 @@ namespace pre {
                 r += elmTypeName;
                 r.append(elmTypeNameMaxSpace - elmTypeName.length(), ' ');
                 r += "| ";
-                r += elm.s;
+                r += std::regex_replace(elm.s, std::regex("\n"), ansi::fgBlack + "\\n" + ansi::reset);
+                r += "\n";
             }
             return r;
         }
