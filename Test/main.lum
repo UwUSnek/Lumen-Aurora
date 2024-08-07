@@ -1,0 +1,14 @@
+import <io>
+
+
+
+#include "src/test.lu\
+m\
+\
+";
+'"'
+
+void main(){
+    io.print("h\"\
+    i");
+}
