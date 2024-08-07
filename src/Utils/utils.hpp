@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include "Preprocessor/ElmCoords.hpp"
+
 
 
 
@@ -10,7 +12,7 @@ namespace utils {
         COMPILER
     };
 
-    void printError(ErrType errorType, std::string message);
+    void printError(ErrType errorType, ElmCoords elmCoords, std::string message);
     std::string readAndCheckFile(std::string fileName);
 }
 

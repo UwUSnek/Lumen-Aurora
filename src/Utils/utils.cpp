@@ -20,15 +20,21 @@ namespace utils {
      * @param message The error message. This can contain multiple lines.
      *      One \n character is automatically added at the end of the string.
      */
-    void printError(ErrType errorType, std::string message) {
+    void printError(ErrType errType, ElmCoords &elmCoords, std::string message) {
+        // Print error type and location
         std::cerr << ansi::fgRed << ansi::bold;
-        switch(errorType) {
-            case ErrType::COMMAND:      { std::cerr << "Could not parse terminal command:"; break; }
-            case ErrType::PREPROCESSOR: { std::cerr << "Preprocessor error:";               break; }
-            case ErrType::COMPILER:     { std::cerr << "Compilation error:";                break; }
+        if(errType == ErrType::COMMAND) {
+            std::cerr << "Could not parse terminal command:";
+        }
+        else {
+            if(errType == ErrType::PREPROCESSOR) std::cerr << "Preprocessor";
+            if(errType == ErrType::COMPILER)     std::cerr << "Compilation";
+            std::cerr << " error:\n    File: \"" << elmCoords.filePath << "\"\n    Line: " + elmCoords.lineNum;
         }
         std::cerr << ansi::reset << "\n";
 
+
+        // Print the actual error after indenting it by 4 spaces
         std::cerr << "    " << std::regex_replace(message, std::regex("\n"), "\n    ") << "\n";
     }
 
@@ -48,8 +54,9 @@ namespace utils {
     std::string readAndCheckFile(std::string fileName) {
         // Create file stream and print an error if the file cannot be opened
         std::ifstream f(fileName);
-        if(!f) utils::printError(
+        if(!f) printError(
             utils::ErrType::PREPROCESSOR,
+            ElmCoords(),
             "Could not open file \"" + fileName + "\": " + std::strerror(errno) + ".\n" +
             "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
         );

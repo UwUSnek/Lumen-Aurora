@@ -15,7 +15,7 @@ namespace pre {
         ParsingResult(SourceElmType _elmType) :
             trueValue(""),
             finalValue(""),
-            height(0),
+            height(1),
             elmType(_elmType) {
         }
 

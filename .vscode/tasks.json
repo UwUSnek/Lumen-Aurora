@@ -1,0 +1,15 @@
+
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build compiler",
+            "command": "./Tools/Build_compiler.sh",
+            "args": [],
+            "problemMatcher": [ "$gcc" ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build"
+        }
+    ]
+}

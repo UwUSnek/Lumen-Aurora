@@ -6,6 +6,7 @@
 
 #include "preprocessor.hpp"
 #include "include.hpp"
+#include "ElmCoords.hpp"
 #include "Utils/utils.hpp"
 
 
@@ -37,32 +38,44 @@ namespace pre {
      */
     StructuredSource parseUnprocessedCode(std::string filePath, Options& options) { //TODO use options or remove the parameter if not needed
         std::string s = utils::readAndCheckFile(filePath);
+        ulong curLine = 0; //The current line in the original file.
 
         StructuredSource r;
         ulong varLen = 0;               // The length of the current variable-size element (code or directive)
+        ulong varLenHeight = 1;         // The height of the current variable-size element (code or directive)
         bool isVarDirective = false;    // False if the current variable-size element is arbitrary code, true if it is a directive (they can't both be on the same line)
 
         for(ulong i = 0; i < s.length();){
-            //ulong len = 0;
-            //SourceElmType elmType;
             ParsingResult pr;
 
 
 
 
             // Check for known elements and save the result
-            if((pr = parseCharLiteral(s, i)).elmType == SourceElmType::NONE)
-            if((pr =  parseStrLiteral(s, i)).elmType == SourceElmType::NONE)
-            ;  (pr =     parseComment(s, i));
+            if((pr = parseCharLiteral(s, i, curLine)).elmType == SourceElmType::NONE)
+            if((pr =  parseStrLiteral(s, i, curLine)).elmType == SourceElmType::NONE)
+            ;  (pr =     parseComment(s, i, curLine));
 
 
 
 
             // If the current index is inside a variable-length element
             if(pr.elmType == SourceElmType::NONE) {
-                if(s[i] == '#') isVarDirective = true;  // Set the directive state to true if a '#' character is found in the wild
-                ++varLen;                               // Increase the variable length value
-                ++i;                                    // Skip this character
+
+                // If the current variable-length element contains a # character
+                if(s[i] == '#') {
+                    isVarDirective = true;  // Set the directive state to true
+                    ++varLen;               // Increase the variable length value
+                    ++i;                    // Skip this character
+                }
+
+                // If a line continuation character is found
+                else if(s[i] == '\\' && s[i + 1] == '\n') {
+                    ++curLine;       // Update the line counter
+                    ++varLenHeight;  // Increase the variable-length element width
+                    varLen += 2;     // Increase the variable-length element value
+                    i += 2;          // Skip line continuation token token
+                }
             }
             else {
                 // Push previous variable-length element is present
@@ -71,19 +84,21 @@ namespace pre {
                     r.elms.push_back(SourceElm{
                         isVarDirective ? SourceElmType::DIRECTIVE : SourceElmType::CODE,
                         elmTrueValue,
-                        SourceElmMeta{ i - varLen, "test file TODO", 0, elmTrueValue } //TODO save file & line number in meta
+                        SourceElmMeta{ i - varLen, "test file TODO", varLenHeight, elmTrueValue } //TODO save file & line number in meta
                     });
                 }
-                varLen = 0;                 // Set the variable length value back to 0
-                isVarDirective = false;     // Set the directive state back to false
+                varLen = 0;              // Set the variable-length element width back to 0
+                varLenHeight = 0;        // Set the variable-length element height back to 0
+                isVarDirective = false;  // Set the directive state back to false
 
 
                 // Push current parsed element
                 r.elms.push_back(SourceElm{
                     pr.elmType,
                     pr.finalValue,
-                    SourceElmMeta{ i, "test file TODO", 0, pr.trueValue} //TODO save file & line number in meta
+                    SourceElmMeta{ i, "test file TODO", curLine, pr.trueValue} //TODO save file & line number in meta
                 });
+                curLine += pr.height - 1;  // Add the additional element height to the line counter
                 i += pr.trueValue.length();
             }
 
@@ -152,10 +167,11 @@ namespace pre {
      * @brief Calculates the length of the comment that strarts at index <index> and ends at the first newline character or at the end of the file.
      * @param b The string buffer that contains the comment.
      * @param index The index at which the comment starts.
+     * @param DEBUG_curLine The current line number in the original file at which the comment starts.
      * @return The length of the comment, including the length of the opening and closing character sequences.
      *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
      */
-    ParsingResult parseComment(std::string b, ulong index) {
+    ParsingResult parseComment(std::string b, ulong index, ulong DEBUG_curLine) {
         ParsingResult r;
         if(b[index] != '/') return r;
         r.trueValue  += '/';
@@ -169,6 +185,7 @@ namespace pre {
             // Check line continuation token
             if(b[i] == '\\' && b[i + 1] == '\n') {
                 r.trueValue += "\\\n";
+                ++r.height;
                 i += 2;
             }
             else {
@@ -225,10 +242,11 @@ namespace pre {
      * @brief Calculates the length of the string literal that strarts at index <index> and ends at the first non-escaped " character.
      * @param b The string buffer that contains the string literal.
      * @param index The index at which the string literal starts.
+     * @param DEBUG_curLine The current line number in the original file at which the string literal starts.
      * @return The length of the string literal, including the two " characters
      *     If the buffer doesn't contain a string literal that starts at index <index>, 0 is returned.
      */
-    ParsingResult parseStrLiteral(std::string b, ulong index) {
+    ParsingResult parseStrLiteral(std::string b, ulong index, ulong DEBUG_curLine) {
         ParsingResult r;
         if(b[index] != '"') return r;
         r.trueValue  += '"';
@@ -241,17 +259,23 @@ namespace pre {
             // Check line continuation token
             if(b[i] == '\\' && b[i + 1] == '\n') {
                 r.trueValue += "\\\n";
+                ++r.height;
                 i += 2;
             }
             else {
                 // Malformed strings
                 if(b[i] == '\0') {
-                    utils::printError(utils::ErrType::PREPROCESSOR, "String literal is missing a closing '\"' character.");
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        ElmCoords("test file", DEBUG_curLine, index, i),
+                        "String literal is missing a closing '\"' character."
+                    );
                     exit(1);
                 }
                 if(b[i] == '\n') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
+                        ElmCoords("test file", DEBUG_curLine, index, i),
                         "String literal is missing a closing '\"' character.\n"
                         "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
                     );
@@ -290,10 +314,11 @@ namespace pre {
      * @brief Checks that the char literal that starts at index <index> contains a single 8-bit character.
      * @param b The string buffer that contains the char literal.
      * @param index The index at which the char literal starts.
+     * @param DEBUG_curLine The current line number in the original file at which the char literal starts.
      * @return The value 3.
      *     If the buffer doesn't contain a char literal that starts at index <index>, no error is printed and 0 is returned.
      */
-    ParsingResult parseCharLiteral(std::string b, ulong index) {
+    ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine) {
         ParsingResult r;
         if(b[index] != '\'') return r;
         r.trueValue  += '\'';
@@ -314,6 +339,7 @@ namespace pre {
             // Check line continuation token
             if(b[i] == '\\' && b[i + 1] == '\n') {
                 r.trueValue += "\\\n";
+                ++r.height;
                 i += 2;
             }
             else {
@@ -326,12 +352,17 @@ namespace pre {
 
                 // Missing closing sequence
                 if(b[i] == '\0') {
-                    utils::printError(utils::ErrType::PREPROCESSOR, "Char literal is missing a closing ' character.");
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        ElmCoords("test file", DEBUG_curLine, index, i),
+                        "Char literal is missing a closing ' character."
+                    );
                     exit(1);
                 }
                 if(b[i] == '\n') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
+                        ElmCoords("test file", DEBUG_curLine, index, i),
                         "Char literal is missing a closing ' character.\n"
                         "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
                     );
@@ -355,6 +386,7 @@ namespace pre {
         if(finalLen > 4 || finalLen == 4 && r.finalValue[1] != '\\') {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
+                ElmCoords("test file", DEBUG_curLine, index, i),
                 "Char literal contains more than one byte. This is not allowed.\n"
                 "If you wish to store strings or a multi-bye Unicode character, you can use the str type (module <string>)." //TODO check if this is the correct type
             );
@@ -367,6 +399,7 @@ namespace pre {
             if(r.finalValue[1] == '\\') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
+                    ElmCoords("test file", DEBUG_curLine, index, i),
                     "Char literal is missing a closing ' character.\n"
                     "Did you mean " + ansi::fgCyan + ansi::bold + "'\\'" + ansi::reset + "?"
                 );
@@ -377,6 +410,7 @@ namespace pre {
         else if(r.finalValue.length() == 2) {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
+                ElmCoords("test file", DEBUG_curLine, index, i),
                 "Char literal cannot be empty."
             );
             exit(1);
