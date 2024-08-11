@@ -14,10 +14,11 @@ void main(){
 }
 
 
-// test "comment"\""\ //FIXME THIS DOESNT PARSE CORRECTLY
-   \""""a""'"'''""
+// test "comment"\""\
+    \""""a""'"'''""
 
 /* test "comment\""
-   "'""'''\"\" */
+    "'""'''\"\" */
 
 import <math>
+//TODO last element is not parsed

@@ -176,7 +176,7 @@ namespace pre {
 
         char last = b[index];
         char commType = '\0'; // '\0' if unknow, '/' if single line, '*' if multiline
-        ulong i = index + 2;
+        ulong i = index + 1;
         while(true) {
             // Check line continuation token
             if(isLct(b, i)) {
