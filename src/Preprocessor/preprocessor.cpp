@@ -25,6 +25,10 @@ namespace pre {
 
 
 
+    static inline bool isLct(std::string b, ulong index) {
+        return b[index] == '\\' && b[index + 1] == '\n';
+    }
+
 
 
 
@@ -52,9 +56,9 @@ namespace pre {
 
 
             // Check for known elements and save the result
-            if((pr = parseCharLiteral(s, i, curLine)).elmType == SourceElmType::NONE)
-            if((pr =  parseStrLiteral(s, i, curLine)).elmType == SourceElmType::NONE)
-               (pr =     parseComment(s, i, curLine));
+            if((pr = parseCharLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
+            if((pr =  parseStrLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
+               (pr =     parseComment(s, i, curLine, filePath));
             //FIXME parse default modules <> (or check it later, as it becomes part of the #directive element)
 
 
@@ -72,7 +76,7 @@ namespace pre {
                 }
 
                 // If a line continuation character is found
-                else if(s[i] == '\\' && s[i + 1] == '\n') {
+                else if(isLct(s, i)) {
                     ++curLine;       // Update the line counter
                     ++varLenHeight;  // Increase the variable-length element width
                     varLen += 2;     // Increase the variable-length element value
@@ -81,6 +85,7 @@ namespace pre {
                 }
 
                 // If a normal character is found
+                if(s[i] == '\n') ++varLenHeight;
                 ++varLen;  // Increase the variable-length element value
                 ++i;       // Skip it
             }
@@ -91,7 +96,7 @@ namespace pre {
                     r.elms.push_back(SourceElm(
                         isVarDirective ? SourceElmType::DIRECTIVE : SourceElmType::CODE,
                         elmTrueValue,
-                        SourceElmMeta(i - varLen, "test file TODO", varLenHeight, elmTrueValue) //TODO save file & line number in meta
+                        SourceElmMeta(i - varLen, filePath, varLenHeight, elmTrueValue)
                     ));
                 }
                 varLen = 0;              // Set the variable-length element width back to 0
@@ -103,7 +108,7 @@ namespace pre {
                 r.elms.push_back(SourceElm(
                     pr.elmType,
                     pr.finalValue,
-                    SourceElmMeta(i, "test file TODO", curLine, pr.trueValue) //TODO save file & line number in meta
+                    SourceElmMeta(i, filePath, curLine, pr.trueValue)
                 ));
                 curLine += pr.height - 1;  // Add the additional element height to the line counter
                 i += pr.trueValue.length();
@@ -144,9 +149,9 @@ namespace pre {
 
 
     //TODO add include backtrace with line and column number
-    //TODO add line display in error message
-
     //TODO don't allow multi-byte characters inside of char literals
+
+
 
 
 
@@ -158,10 +163,11 @@ namespace pre {
      * @param b The string buffer that contains the comment.
      * @param index The index at which the comment starts.
      * @param DEBUG_curLine The current line number in the original file at which the comment starts.
+     * @param DEBUG_filePath The path to the file the buffer string was read from.
      * @return The length of the comment, including the length of the opening and closing character sequences.
      *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
      */
-    ParsingResult parseComment(std::string b, ulong index, ulong DEBUG_curLine) {
+    ParsingResult parseComment(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
         ParsingResult r;
         if(b[index] != '/') return r;
         r.trueValue  += '/';
@@ -173,7 +179,7 @@ namespace pre {
         ulong i = index + 2;
         while(true) {
             // Check line continuation token
-            if(b[i] == '\\' && b[i + 1] == '\n') {
+            if(isLct(b, i)) {
                 r.trueValue += "\\\n";
                 ++r.height;
                 i += 2;
@@ -194,6 +200,7 @@ namespace pre {
 
                 // Single character closing sequences (End of file or single line comments)
                 else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
+                    if(b[i] == '\n') ++r.height;
                     r.trueValue  += b[i];
                     r.finalValue += b[i];
                     break;
@@ -208,6 +215,7 @@ namespace pre {
 
                 // Normal characters (part of the comment)
                 else {
+                    if(b[i] == '\n') ++r.height;
                     last = b[i];
                     r.trueValue  += b[i];
                     r.finalValue += b[i];
@@ -233,10 +241,11 @@ namespace pre {
      * @param b The string buffer that contains the string literal.
      * @param index The index at which the string literal starts.
      * @param DEBUG_curLine The current line number in the original file at which the string literal starts.
+     * @param DEBUG_filePath The path to the file the buffer string was read from.
      * @return The length of the string literal, including the two " characters
      *     If the buffer doesn't contain a string literal that starts at index <index>, 0 is returned.
      */
-    ParsingResult parseStrLiteral(std::string b, ulong index, ulong DEBUG_curLine) {
+    ParsingResult parseStrLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
         ParsingResult r;
         if(b[index] != '"') return r;
         r.trueValue  += '"';
@@ -247,7 +256,7 @@ namespace pre {
         ulong i = index + 1;
         while(true) {
             // Check line continuation token
-            if(b[i] == '\\' && b[i + 1] == '\n') {
+            if(isLct(b, i)) {
                 r.trueValue += "\\\n";
                 ++r.height;
                 i += 2;
@@ -257,7 +266,7 @@ namespace pre {
                 if(b[i] == '\0') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
+                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                         "String literal is missing a closing '\"' character."
                     );
                     exit(1);
@@ -265,7 +274,7 @@ namespace pre {
                 if(b[i] == '\n') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
+                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                         "String literal is missing a closing '\"' character.\n"
                         "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
                     );
@@ -305,10 +314,11 @@ namespace pre {
      * @param b The string buffer that contains the char literal.
      * @param index The index at which the char literal starts.
      * @param DEBUG_curLine The current line number in the original file at which the char literal starts.
+     * @param DEBUG_filePath The path to the file the buffer string was read from.
      * @return The value 3.
      *     If the buffer doesn't contain a char literal that starts at index <index>, no error is printed and 0 is returned.
      */
-    ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine) {
+    ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
         ParsingResult r;
         if(b[index] != '\'') return r;
         r.trueValue  += '\'';
@@ -327,7 +337,7 @@ namespace pre {
         ulong i = index + 1;
         while(true) {
             // Check line continuation token
-            if(b[i] == '\\' && b[i + 1] == '\n') {
+            if(isLct(b, i)) {
                 r.trueValue += "\\\n";
                 ++r.height;
                 i += 2;
@@ -344,7 +354,7 @@ namespace pre {
                 if(b[i] == '\0') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
+                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                         "Char literal is missing a closing ' character."
                     );
                     exit(1);
@@ -352,7 +362,7 @@ namespace pre {
                 if(b[i] == '\n') {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
+                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                         "Char literal is missing a closing ' character.\n"
                         "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
                     );
@@ -376,7 +386,7 @@ namespace pre {
         if(finalLen > 4 || finalLen == 4 && r.finalValue[1] != '\\') {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
-                ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
+                ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                 "Char literal contains more than one byte. This is not allowed.\n"
                 "If you wish to store strings or a multi-bye Unicode character, you can use the str type (module <string>)." //TODO check if this is the correct type
             );
@@ -389,7 +399,7 @@ namespace pre {
             if(r.finalValue[1] == '\\') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords("test file", DEBUG_curLine + r.height - 1, index, i),
+                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                     "Char literal is missing a closing ' character.\n"
                     "Did you mean " + ansi::fgCyan + ansi::bold + "'\\'" + ansi::reset + "?"
                 );
@@ -400,7 +410,7 @@ namespace pre {
         else if(r.finalValue.length() == 2) {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
-                ElmCoords("test file", DEBUG_curLine, index, i),
+                ElmCoords(DEBUG_filePath, DEBUG_curLine, index, i),
                 "Char literal cannot be empty."
             );
             exit(1);

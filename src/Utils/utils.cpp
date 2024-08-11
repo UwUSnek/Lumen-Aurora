@@ -13,6 +13,13 @@
 
 
 namespace utils {
+    static inline void printChar(char c) {
+        if(c == ' ') std::cerr << "·";
+        else std::cerr << c;
+    }
+
+
+
     /**
      * @brief Prints an error to stderr, specifying the error type.
      *      This function doesn't stop the program.
@@ -30,13 +37,69 @@ namespace utils {
             if(errType == ErrType::PREPROCESSOR) std::cerr << "Preprocessor";
             if(errType == ErrType::COMPILER)     std::cerr << "Compilation";
             std::cerr << " error:\n";
-            if(elmCoords.filePath.length()) std::cerr << "    File | " << ansi::reset << elmCoords.filePath << ansi::fgRed << ansi::bold << "\n    Line | " << ansi::reset << elmCoords.lineNum;
-        } //FIXME incorrect line number
-        std::cerr << ansi::reset << "\n";
+            if(elmCoords.filePath.length()) {
+                std::cerr << "    File │ " << ansi::reset << std::filesystem::canonical(elmCoords.filePath) << ansi::fgRed << ansi::bold << "\n";
+                std::cerr << "    Line │ " << ansi::reset << elmCoords.lineNum;
+            }
+        }
+
+
+
+
+        // Print the offending lines and highlight the problem
+        std::string s = readAndCheckFile(elmCoords.filePath);
+        ulong curLine = elmCoords.lineNum;
+        bool borderLineReached = false;
+        ulong i = elmCoords.start;
+        while(i > 0) {
+            if(s[i] == '\n') {
+                if(borderLineReached) break;
+                borderLineReached = true;
+                ++curLine;
+            }
+            --i;
+        }
+        if(i) ++i;  //! Skip \n character if found
+
+        std::cerr << "\n\n" << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
+        while(i < elmCoords.start) {
+            printChar(s[i]);
+            if(s[i] == '\n') {
+                ++curLine;
+                std::cerr << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
+            }
+            ++i;
+        }
+
+        std::cerr << ansi::fgMagenta << ansi::bold;
+        while(i < elmCoords.end + 1) {
+            printChar(s[i]);
+            if(s[i] == '\n') {
+                ++curLine;
+                std::cerr << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
+            }
+            ++i;
+        }
+
+        std::cerr << ansi::reset << ansi::fgBlack;
+        borderLineReached = false;
+        while(s[i] != '\0') {
+            printChar(s[i]);
+            if(s[i] == '\n') {
+                if(borderLineReached) break;
+                borderLineReached = true;
+                ++curLine;
+                std::cerr << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
+            }
+            ++i;
+        }
+        std::cerr << ansi::reset;
+
+
 
 
         // Print the actual error after indenting it by 4 spaces
-        std::cerr << "    " << std::regex_replace(message, std::regex("\n"), "\n    ") << "\n";
+        std::cerr << "\n\n    " << std::regex_replace(message, std::regex("\n"), "\n    ") << "\n";
     }
 
 
