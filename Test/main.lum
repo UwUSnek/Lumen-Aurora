@@ -21,4 +21,3 @@ void main(){
     "'""'''\"\" */
 
 import <math>
-//TODO last element is not parsed

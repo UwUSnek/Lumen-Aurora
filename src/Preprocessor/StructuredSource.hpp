@@ -73,7 +73,7 @@ namespace pre {
                 r += elmTypeName;
                 r.append(elmTypeNameMaxSpace - elmTypeName.length(), ' ');
                 r += "| ";
-                r += std::regex_replace(elm.s, std::regex("\n"), ansi::fgBlack + "\\n" + ansi::reset);
+                r += std::regex_replace(std::regex_replace(elm.s, std::regex("\n"), ansi::fgBlack + "\\n" + ansi::reset), std::regex(" "), ansi::fgBlack + "·" + ansi::reset);
                 r += "\n";
             }
             return r;

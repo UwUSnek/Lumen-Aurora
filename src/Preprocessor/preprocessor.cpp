@@ -67,10 +67,21 @@ namespace pre {
             // If the current index is inside a variable-length element
             if(pr.elmType == SourceElmType::NONE) {
 
-                // If the current variable-length element contains a # character
-                if(s[i] == '#') {
+                // If the current variable-length element contains a # character and is not a directive
+                if(s[i] == '#' && !isVarDirective) {
+                    // Push preceding characters as arbitrary code if there are any
+                    if(varLen > 0) {
+                        std::string elmTrueValue = s.substr(i - varLen, varLen);
+                        r.elms.push_back(SourceElm(
+                            SourceElmType::CODE,
+                            elmTrueValue,
+                            SourceElmMeta(i - varLen, filePath, varLenHeight, elmTrueValue)
+                        ));
+                    }
+
                     isVarDirective = true;  // Set the directive state to true
-                    ++varLen;               // Increase the variable length value
+                    varLenHeight = 1;       // Reset the variable-length element height
+                    varLen = 1;             // Reset and increase the variable-length element width
                     ++i;                    // Skip this character
                     continue;
                 }
@@ -78,8 +89,8 @@ namespace pre {
                 // If a line continuation character is found
                 else if(isLct(s, i)) {
                     ++curLine;       // Update the line counter
-                    ++varLenHeight;  // Increase the variable-length element width
-                    varLen += 2;     // Increase the variable-length element value
+                    ++varLenHeight;  // Increase the variable-length element height
+                    varLen += 2;     // Increase the variable-length element width
                     i += 2;          // Skip line continuation token token
                     continue;
                 }
@@ -89,8 +100,10 @@ namespace pre {
                 ++varLen;  // Increase the variable-length element value
                 ++i;       // Skip it
             }
+
+            // If not
             else {
-                // Push previous variable-length element is present
+                // Push previous variable-length element if present
                 if(varLen > 0) {
                     std::string elmTrueValue = s.substr(i - varLen, varLen);
                     r.elms.push_back(SourceElm(
@@ -115,6 +128,16 @@ namespace pre {
             }
         }
 
+
+        // Push current variable-length element if present
+        if(varLen > 0) {
+            std::string elmTrueValue = s.substr(s.length() - 1 - varLen, varLen);
+            r.elms.push_back(SourceElm(
+                isVarDirective ? SourceElmType::DIRECTIVE : SourceElmType::CODE,
+                elmTrueValue,
+                SourceElmMeta(s.length() - 1, filePath, curLine, elmTrueValue)
+            ));
+        }
         return r;
     }
 
