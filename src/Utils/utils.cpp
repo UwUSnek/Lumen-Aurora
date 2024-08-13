@@ -20,14 +20,10 @@ namespace utils {
     }
 
 
-    // Prints a character and updates the current line number.
-    static inline void printChar(char c, ulong &curLine) {
+    // Prints a character.
+    static inline void printChar(char c) {
         if(c == ' ') std::cerr << "·";
-        else if(c == '\n') {
-            std::cerr << "\\n";
-            printLineNum(curLine);
-            ++curLine;
-        }
+        else if(c == '\n');
         else std::cerr << c;
     }
 
@@ -63,12 +59,12 @@ namespace utils {
         // Find the line in the original file and calculate the starting index of the preceding line
         std::string s = readAndCheckFile(elmCoords.filePath);
         ulong curLine = elmCoords.lineNum;
-        bool borderLineReached = false;
+        int linesPrinted = 0;
         ulong i = elmCoords.start;
         while(i > 0) {
             if(s[i] == '\n') {
-                if(borderLineReached) break;
-                borderLineReached = true;
+                if(linesPrinted > 0) break;
+                linesPrinted++;
                 ++curLine;
             }
             --i;
@@ -80,7 +76,11 @@ namespace utils {
         std::cerr << "\n\n";
         printLineNum(curLine);
         while(i < elmCoords.start) {
-            printChar(s[i], curLine);
+            printChar(s[i]);
+            if(s[i] == '\n') {
+                ++curLine;
+                printLineNum(curLine);
+            }
             ++i;
         }
 
@@ -88,19 +88,25 @@ namespace utils {
         // Print offending substring
         std::cerr << ansi::fgMagenta << ansi::bold << ansi::underline;
         while(i < elmCoords.end + 1) {
-            printChar(s[i], curLine);
+            printChar(s[i]);
+            if(s[i] == '\n') {
+                ++curLine;
+                printLineNum(curLine);
+            }
             ++i;
         }
 
 
         // Print subsequent characters in the same line + subsequent line
         std::cerr << ansi::reset << ansi::fgBlack;
-        borderLineReached = false;
+        linesPrinted = 0;
         while(s[i] != '\0') {
-            printChar(s[i], curLine);
+            printChar(s[i]);
             if(s[i] == '\n') {
-                if(borderLineReached) break;
-                borderLineReached = true;
+                if(linesPrinted > 1) break;
+                ++curLine;
+                ++linesPrinted;
+                if(linesPrinted < 2) printLineNum(curLine);
             }
             ++i;
         }

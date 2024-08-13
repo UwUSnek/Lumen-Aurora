@@ -29,6 +29,8 @@ namespace pre {
 
     static inline bool isLct(std::string b, ulong index) {
         return b[index] == '\\' && b[index + 1] == '\n';
+        //FIXME LCTs CAN BE TERMINATED BY A \n.
+        //FIXME CHECK THIS CASE. only skip 1 character if that happens
     }
 
 
@@ -413,6 +415,7 @@ namespace pre {
                     r.trueValue += stringCheck.trueValue;
                     r.height += stringCheck.height - 1;
                     i += stringCheck.trueValue.length();
+                    //FIXME add standard module inclusion <>
                 }
                 else {
                     utils::printError(
