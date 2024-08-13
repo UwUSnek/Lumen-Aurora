@@ -11,7 +11,8 @@
 namespace pre {
     enum class SourceElmType {
         NONE,       // Specified element not found
-        DIRECTIVE,
+        DIRECTIVE_INCLUDE,
+        DIRECTIVE_DEFINE,
         STRING,
         CHAR,
         COMMENT,
@@ -19,7 +20,8 @@ namespace pre {
     };
     static inline std::string sourceElmTypeToString(SourceElmType type) {
         switch(type) {
-            case SourceElmType::DIRECTIVE: return "DIRECTIVE";
+            case SourceElmType::DIRECTIVE_INCLUDE: return "DIRECTIVE_INCLUDE";
+            case SourceElmType::DIRECTIVE_DEFINE: return "DIRECTIVE_DEFINE";
             case SourceElmType::STRING:    return "STRING";
             case SourceElmType::CHAR:      return "CHAR";
             case SourceElmType::COMMENT:   return "COMMENT";

@@ -14,6 +14,8 @@ namespace pre {
 
     std::pair<ulong, ulong> countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
     std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
+
+    ParsingResult   parseDirective(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
     ParsingResult  parseStrLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
     ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
 }

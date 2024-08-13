@@ -9,7 +9,7 @@ g++                                             \
     ./src/Utils/utils.cpp                       \
     ./src/main.cpp                              \
     ./src/Preprocessor/preprocessor.cpp         \
-    ./src/Preprocessor/include.cpp              \
+    ./src/Preprocessor/ElmCoords.cpp            \
 -std=c++20                                      \
 -O0 -g                                          \
 -I                                              \

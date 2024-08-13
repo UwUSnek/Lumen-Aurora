@@ -14,10 +14,23 @@
 
 
 namespace utils {
-    static inline void printChar(char c) {
+    // Prints the formatted line indicator
+    static inline void printLineNum(ulong n) {
+        std::cerr << "\n" << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << n << " │ " << ansi::reset << ansi::fgBlack;
+    }
+
+
+    // Prints a character and updates the current line number.
+    static inline void printChar(char c, ulong &curLine) {
         if(c == ' ') std::cerr << "·";
+        else if(c == '\n') {
+            std::cerr << "\\n";
+            printLineNum(curLine);
+            ++curLine;
+        }
         else std::cerr << c;
     }
+
 
 
 
@@ -47,7 +60,7 @@ namespace utils {
 
 
 
-        // Print the offending lines and highlight the problem
+        // Find the line in the original file and calculate the starting index of the preceding line
         std::string s = readAndCheckFile(elmCoords.filePath);
         ulong curLine = elmCoords.lineNum;
         bool borderLineReached = false;
@@ -62,35 +75,32 @@ namespace utils {
         }
         if(i) ++i;  //! Skip \n character if found
 
-        std::cerr << "\n\n" << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
+
+        // Print preceding line + preceding characters in the same line
+        std::cerr << "\n\n";
+        printLineNum(curLine);
         while(i < elmCoords.start) {
-            printChar(s[i]);
-            if(s[i] == '\n') {
-                ++curLine;
-                std::cerr << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
-            }
+            printChar(s[i], curLine);
             ++i;
         }
 
-        std::cerr << ansi::fgMagenta << ansi::bold;
+
+        // Print offending substring
+        std::cerr << ansi::fgMagenta << ansi::bold << ansi::underline;
         while(i < elmCoords.end + 1) {
-            printChar(s[i]);
-            if(s[i] == '\n') {
-                ++curLine;
-                std::cerr << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
-            }
+            printChar(s[i], curLine);
             ++i;
         }
 
+
+        // Print subsequent characters in the same line + subsequent line
         std::cerr << ansi::reset << ansi::fgBlack;
         borderLineReached = false;
         while(s[i] != '\0') {
-            printChar(s[i]);
+            printChar(s[i], curLine);
             if(s[i] == '\n') {
                 if(borderLineReached) break;
                 borderLineReached = true;
-                ++curLine;
-                std::cerr << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << curLine << " │ " << ansi::reset << ansi::fgBlack;
             }
             ++i;
         }
