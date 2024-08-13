@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
-#include "Preprocessor/ElmCoords.hpp"
 
 
 
 
+
+struct ElmCoords;
 namespace utils {
     enum class ErrType:int {
         COMMAND,

@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <cerrno>
 #include <cstring>
+#include <tuple>
 
 #include "preprocessor.hpp"
 #include "include.hpp"
@@ -15,11 +16,13 @@ namespace pre {
 
     /**
      * @brief Loads the source file, including all of the files included by it and processes any preprocessor directives.
-     * @param options The options
-     * @return The contents of the source file as a StructuredSource
+     * @param options The options.
+     * @return The contents of the source file as a StructuredSource.
      */
     StructuredSource loadSourceCode(Options& options) {
-        return parseUnprocessedCode(options.sourceFile, options); //TODO include the files
+        StructuredSource output;
+        loadSourceCode_loop(options.sourceFile, options, output);
+        return output;
     }
 
 
@@ -35,12 +38,12 @@ namespace pre {
 
     //TODO add element metadata
     /**
-     * @brief Loads a source file using its path and the provided options and converts it to a StructuredSource
-     * @param filePath The path to the source file
-     * @param options The options
-     * @return The generated StructuredSource value
+     * @brief Loads the source file, including all of the files included by it and processes any preprocessor directives.
+     * @param filePath The path to the source file.
+     * @param options The options.
+     * @return The contents of the source file as a StructuredSource.
      */
-    StructuredSource parseUnprocessedCode(std::string filePath, Options& options) { //TODO use options or remove the parameter if not needed
+    void loadSourceCode_loop(std::string filePath, Options& options, StructuredSource &output) { //TODO use options or remove the parameter if not needed
         std::string s = utils::readAndCheckFile(filePath);
         ulong curLine = 0; //The current line in the original file.
 
@@ -54,11 +57,16 @@ namespace pre {
 
 
 
+            // Skip whitespace
+            std::pair<ulong, ulong> wsRes = countWhitespaceCharacters(s, i, curLine, filePath);
+            i += wsRes.first;
+            curLine += wsRes.second;
 
             // Check for known elements and save the result
             if((pr = parseCharLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
             if((pr =  parseStrLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
-               (pr =     parseComment(s, i, curLine, filePath));
+            ;
+
             //FIXME parse default modules <> (or check it later, as it becomes part of the #directive element)
 
 
@@ -105,13 +113,22 @@ namespace pre {
             else {
                 // Push previous variable-length element if present
                 if(varLen > 0) {
-                    std::string elmTrueValue = s.substr(i - varLen, varLen);
-                    r.elms.push_back(SourceElm(
-                        isVarDirective ? SourceElmType::DIRECTIVE : SourceElmType::CODE,
-                        elmTrueValue,
-                        SourceElmMeta(i - varLen, filePath, varLenHeight, elmTrueValue)
-                    ));
+                    // Execute additional parsing for directives
+                    if(isVarDirective) {
+                        //FIXME choose if to save everything or check right now and only save payload
+
+                    }
+                    // Push other elements normally
+                    else {
+                        std::string elmTrueValue = s.substr(i - varLen, varLen);
+                        r.elms.push_back(SourceElm(
+                            SourceElmType::CODE,
+                            elmTrueValue,
+                            SourceElmMeta(i - varLen, filePath, varLenHeight, elmTrueValue)
+                        ));
+                    }
                 }
+
                 varLen = 0;              // Set the variable-length element width back to 0
                 varLenHeight = 0;        // Set the variable-length element height back to 0
                 isVarDirective = false;  // Set the directive state back to false
@@ -129,7 +146,7 @@ namespace pre {
         }
 
 
-        // Push current variable-length element if present
+        // Push last variable-length element if present
         if(varLen > 0) {
             std::string elmTrueValue = s.substr(s.length() - 1 - varLen, varLen);
             r.elms.push_back(SourceElm(
@@ -138,22 +155,50 @@ namespace pre {
                 SourceElmMeta(s.length() - 1, filePath, curLine, elmTrueValue)
             ));
         }
-        return r;
+
+
+
+        mergeSourceElements(output, r);
     }
 
 
 
 
-//     /**
-//      * @brief Converts char and string literals to their numerical representation. //TODO
-//      * @param sourceFile The source file as a string
-//      * @return The modified source file as a string
-//      */
-//     std::string convertStrings(std::string sourceFile) {
-//         std::string r;
-//         for()
-//         //if(sourceFile[i] == '"' && (i == 0 || sourceFile[i - 1])) {
-//     }
+
+
+
+
+    // Add elements to output array. If include directives are found, parse the files and include them recursively
+    void mergeSourceElements(StructuredSource &output, StructuredSource &r) {
+        auto &e = r.elms;
+        for(ulong i = 0; i < e.size();) {
+
+            // Replace include directives with the specified file
+            // if(e[i].type == SourceElmType::DIRECTIVE) {
+
+                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+                // if(i < e.size() - 1 && e[i +1].type == SourceElmType::STRING) {
+
+                // }
+                // else utils::printError(
+                //     utils::ErrType::PREPROCESSOR,
+                //     ElmCoords(e[i].meta),
+                //     "Missing file path in include directive. A string literal was expected, but could not be found."
+                // );
+                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+
+            //     continue;
+            // }
+
+            // Append anything else
+            output.elms.push_back(e[i]);
+            ++i;
+        }
+    }
 
 
 
@@ -162,6 +207,20 @@ namespace pre {
 
 
 
+    //TODO check if multi-byte unicode characters can screw with the string detection
+    /**
+     * @brief Calculates the length of the data attached to a preprocessor directive.
+     *     This function does NOT check if the payload contains valid data, but it does check if it's of the correct type based on the given directive.
+     * @param b The string buffer that contains the payload.
+     * @param index The index at which the payload starts.
+     * @param DEBUG_curLine The current line number in the original file at which the payload starts.
+     * @param DEBUG_filePath The path to the file the buffer string was read from.
+     * @return
+     */
+    void parseDirectivePayload(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+        //FIXME actually parse it
+
+    }
 
 
 
@@ -173,6 +232,53 @@ namespace pre {
 
     //TODO add include backtrace with line and column number
     //TODO don't allow multi-byte characters inside of char literals
+    /**
+     * @brief Counts the whitespace characters in the string <b>, from the character at index <index> until the first non-whitespace character.
+     *      Comments are considered whitespace.
+     *      Line continuation tokens are counted as 2 whitespace characters.
+     * @param b The string buffer that contains the whitespace.
+     * @param index The index at which the whitespace starts.
+     * @param DEBUG_curLine The current line number in the original file at which the whitespace starts.
+     * @param DEBUG_filePath The path to the file the buffer string was read from.
+     * @return A pair containing the number of whitespace characters found and the number of lines they occupy
+     */
+    std::pair<ulong, ulong> countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+        ulong i = index, h = 1;
+        while(true) {
+            // LCTs
+            if(isLct(b, index)) {
+                i += 2;
+                ++h;
+            }
+
+            // Normal whitespace
+            else if(b[index] == ' ' || b[index] == '\t') {
+                ++i;
+            }
+
+            // Newlines
+            else if(b[index] == '\n') {
+                ++i;
+                ++h;
+            }
+
+
+            else {
+                // Comments
+                std::pair<ulong, ulong> commentRes = countCommentCharacters(b, i, DEBUG_curLine + h - 1, DEBUG_filePath);
+                if(commentRes.first > 0) {
+                    i += commentRes.first;
+                    h += commentRes.second - 1;
+                }
+
+                // Stop at non-whitespace characters (includes \0)
+                else {
+                    return std::pair<ulong, ulong>(i, h);
+                }
+            }
+        }
+    }
+
 
 
 
@@ -187,68 +293,59 @@ namespace pre {
      * @param index The index at which the comment starts.
      * @param DEBUG_curLine The current line number in the original file at which the comment starts.
      * @param DEBUG_filePath The path to the file the buffer string was read from.
-     * @return The length of the comment, including the length of the opening and closing character sequences.
-     *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
+     * @return A pair containing the length of the comment and the lines it occupies, including the length of the opening and closing character sequences (including \\n but excluding \0).
+     *     If the buffer doesn't contain a comment that starts at index <index>, (0, 1) is returned.
      */
-    ParsingResult parseComment(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
-        ParsingResult r;
-        if(b[index] != '/') return r;
-        r.trueValue  += '/';
-        r.finalValue += '/';
+    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+        if(b[index] != '/') return std::pair<ulong, ulong>(0, 1);
 
 
         char last = b[index];
         char commType = '\0'; // '\0' if unknow, '/' if single line, '*' if multiline
-        ulong i = index + 1;
+        ulong i = index + 1, h = 1;
         while(true) {
             // Check line continuation token
             if(isLct(b, i)) {
-                r.trueValue += "\\\n";
-                ++r.height;
+                ++h;
                 i += 2;
             }
-            else {
-                // Starting sequence
-                if(commType == '\0') {
-                    if(b[i] == '/' || b[i] == '*') {
-                        r.trueValue  += b[i];
-                        r.finalValue += b[i];
-                        commType = b[i];
-                        continue;
-                    }
-                    else {  //! Starting sequence not found (this includes \n and \0 cases)
-                        return r;
-                    }
-                }
 
-                // Single character closing sequences (End of file or single line comments)
-                else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
-                    if(b[i] == '\n') ++r.height;
-                    r.trueValue  += b[i];
-                    r.finalValue += b[i];
-                    break;
+            // Starting sequence
+            else if(commType == '\0') {
+                if(b[i] == '/' || b[i] == '*') {
+                    commType = b[i];
+                    continue;
                 }
-
-                // Double character closing sequences (Multi line comments)
-                else if(commType == '*' && last == '*' && b[i] == '/') {
-                    r.trueValue  += '/';
-                    r.finalValue += '/';
-                    break;
+                else {  //! Starting sequence not found (this includes \n and \0 cases)
+                    return std::pair<ulong, ulong>(0, 1);
                 }
+            }
 
-                // Normal characters (part of the comment)
-                else {
-                    if(b[i] == '\n') ++r.height;
-                    last = b[i];
-                    r.trueValue  += b[i];
-                    r.finalValue += b[i];
+            // Single character closing sequences (End of file or single line comments)
+            else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
+                if(b[i] == '\n') {
+                    ++h;
                     ++i;
                 }
+                break;
+            }
+
+            // Double character closing sequences (Multi line comments)
+            else if(commType == '*' && last == '*' && b[i] == '/') {
+                ++i;
+                break;
+            }
+
+            // Normal characters (part of the comment)
+            else {
+                if(b[i] == '\n') ++h;
+                last = b[i];
+                ++i;
             }
         }
 
-        r.elmType = SourceElmType::COMMENT;
-        return r;
+
+        return std::pair<ulong, ulong>(i, h);
     }
 
 
@@ -260,13 +357,13 @@ namespace pre {
 
     //TODO check if multi-byte unicode characters can screw with the string detection
     /**
-     * @brief Calculates the length of the string literal that strarts at index <index> and ends at the first non-escaped " character.
+     * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " character.
      * @param b The string buffer that contains the string literal.
      * @param index The index at which the string literal starts.
      * @param DEBUG_curLine The current line number in the original file at which the string literal starts.
      * @param DEBUG_filePath The path to the file the buffer string was read from.
-     * @return The length of the string literal, including the two " characters
-     *     If the buffer doesn't contain a string literal that starts at index <index>, 0 is returned.
+     * @return Informations about the string literal, including the two " characters
+     *     If the buffer doesn't contain a string literal that starts at index <index>, a result with type NONE is returned.
      */
     ParsingResult parseStrLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
         ParsingResult r;
@@ -284,40 +381,39 @@ namespace pre {
                 ++r.height;
                 i += 2;
             }
+
+            // Malformed strings
+            else if(b[i] == '\0') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+                    "String literal is missing a closing '\"' character."
+                );
+                exit(1);
+            }
+            else if(b[i] == '\n') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+                    "String literal is missing a closing '\"' character.\n"
+                    "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
+                );
+                exit(1);
+            }
+
+            // Closing sequence
+            else if(last != '\\' && b[i] == '"') {
+                r.trueValue  += '"';
+                r.finalValue += '"';
+                break;
+            }
+
+            // Normal characters (part of the string)
             else {
-                // Malformed strings
-                if(b[i] == '\0') {
-                    utils::printError(
-                        utils::ErrType::PREPROCESSOR,
-                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
-                        "String literal is missing a closing '\"' character."
-                    );
-                    exit(1);
-                }
-                if(b[i] == '\n') {
-                    utils::printError(
-                        utils::ErrType::PREPROCESSOR,
-                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
-                        "String literal is missing a closing '\"' character.\n"
-                        "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
-                    );
-                    exit(1);
-                }
-
-                // Closing sequence
-                else if(last != '\\' && b[i] == '"') {
-                    r.trueValue  += '"';
-                    r.finalValue += '"';
-                    break;
-                }
-
-                // Normal characters (part of the string)
-                else {
-                    r.trueValue  += b[i];
-                    r.finalValue += b[i];
-                    last = b[i];
-                    ++i;
-                }
+                r.trueValue  += b[i];
+                r.finalValue += b[i];
+                last = b[i];
+                ++i;
             }
         }
 
@@ -333,13 +429,13 @@ namespace pre {
 
 
     /**
-     * @brief Checks that the char literal that starts at index <index> contains a single 8-bit character.
+     * @brief Parses the char literal that starts at index <index> and checks if it contains a single 8-bit character (or a valid escape sequence).
      * @param b The string buffer that contains the char literal.
      * @param index The index at which the char literal starts.
      * @param DEBUG_curLine The current line number in the original file at which the char literal starts.
      * @param DEBUG_filePath The path to the file the buffer string was read from.
-     * @return The value 3.
-     *     If the buffer doesn't contain a char literal that starts at index <index>, no error is printed and 0 is returned.
+     * @return Informations about the char literal, including the two ' characters.
+     *     If the buffer doesn't contain a char literal that starts at index <index>, a result with type NONE is returned.
      */
     ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
         ParsingResult r;
@@ -365,40 +461,39 @@ namespace pre {
                 ++r.height;
                 i += 2;
             }
+
+            // Closing sequence
+            else if(last != '\\' && b[i] == '\'') {
+                r.trueValue  += '\'';
+                r.finalValue += '\'';
+                break;
+            }
+
+            // Missing closing sequence
+            else if(b[i] == '\0') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+                    "Char literal is missing a closing ' character."
+                );
+                exit(1);
+            }
+            else if(b[i] == '\n') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+                    "Char literal is missing a closing ' character.\n"
+                    "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
+                );
+                exit(1);
+            }
+
+            // Normal characters and escape sequences
             else {
-                // Closing sequence
-                if(last != '\\' && b[i] == '\'') {
-                    r.trueValue  += '\'';
-                    r.finalValue += '\'';
-                    break;
-                }
-
-                // Missing closing sequence
-                if(b[i] == '\0') {
-                    utils::printError(
-                        utils::ErrType::PREPROCESSOR,
-                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
-                        "Char literal is missing a closing ' character."
-                    );
-                    exit(1);
-                }
-                if(b[i] == '\n') {
-                    utils::printError(
-                        utils::ErrType::PREPROCESSOR,
-                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
-                        "Char literal is missing a closing ' character.\n"
-                        "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
-                    );
-                    exit(1);
-                }
-
-                // Normal characters and escape sequences
-                else {
-                    r.trueValue  += b[i];
-                    r.finalValue += b[i];
-                    last = b[i];
-                    ++i;
-                }
+                r.trueValue  += b[i];
+                r.finalValue += b[i];
+                last = b[i];
+                ++i;
             }
         }
 
@@ -416,7 +511,7 @@ namespace pre {
             exit(1);
         }
         else if(r.finalValue.length() == 4) { //!  && r.finalValue[1] == '\\'
-            //TODO check valid escape sequences
+            //FIXME check valid escape sequences
         }
         else if(r.finalValue.length() == 3) {
             if(r.finalValue[1] == '\\') {
@@ -445,5 +540,5 @@ namespace pre {
         return r;
     }
 
-    //TODO REMOVE COMMENTS BEFORE PROCESSING ANY OTHER PREPROCESSOR THING
+    //FIXME REMOVE COMMENTS BEFORE PROCESSING ANY OTHER PREPROCESSOR THING
 }

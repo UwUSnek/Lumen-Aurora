@@ -2,6 +2,9 @@
 #include <string>
 
 
+namespace pre {
+    struct SourceElmMeta;
+}
 struct ElmCoords {
     std::string filePath;
     ulong lineNum;
@@ -21,4 +24,6 @@ struct ElmCoords {
         start(_start),
         end(_end) {
     }
+
+    ElmCoords(pre::SourceElmMeta &meta);
 };
