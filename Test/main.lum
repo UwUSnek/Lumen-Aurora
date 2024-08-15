@@ -1,4 +1,4 @@
-import <io> //FIXME initial stuff doesn't get parsed
+import <io> //FIXME parser is skipping some characters in code elements
 
 
 

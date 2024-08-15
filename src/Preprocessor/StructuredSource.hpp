@@ -16,7 +16,6 @@ namespace pre {
         DIRECTIVE_DEFINE,
         STRING,
         CHAR,
-        COMMENT,
         CODE
     };
     static inline std::string sourceElmTypeToString(SourceElmType type) {
@@ -25,7 +24,6 @@ namespace pre {
             case SourceElmType::DIRECTIVE_DEFINE: return "DIRECTIVE_DEFINE";
             case SourceElmType::STRING:    return "STRING";
             case SourceElmType::CHAR:      return "CHAR";
-            case SourceElmType::COMMENT:   return "COMMENT";
             case SourceElmType::CODE:      return "CODE";
         }
         return "NONE";
@@ -36,14 +34,14 @@ namespace pre {
     struct SourceElmMeta {
         ulong start;
         std::string file; //TODO set this from the parser function
-        ulong lineNum;
+        ulong height;
         std::string trueValue;
 
         SourceElmMeta() = delete;
-        SourceElmMeta(ulong _start, std::string _file, ulong _lineNum, std::string _trueValue) :
+        SourceElmMeta(ulong _start, std::string _file, ulong _height, std::string _trueValue) :
             start(_start),
             file(_file),
-            lineNum(_lineNum),
+            height(_height),
             trueValue(_trueValue) {
         }
     };

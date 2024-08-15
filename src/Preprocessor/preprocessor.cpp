@@ -59,88 +59,61 @@ namespace pre {
 
 
             // Skip whitespace
-            std::pair<ulong, ulong> wsRes = countWhitespaceCharacters(s, i, curLine, filePath);
-            i += wsRes.first;
-            curLine += wsRes.second - 1;
-
-            // Check for known elements and save the result
-            if((pr =   parseDirective(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
-            if((pr = parseCharLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
-            if((pr =  parseStrLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
-            ;
-
-            //FIXME parse default modules <> (or check it later, as it becomes part of the #directive element)
-
-
-
-
-            // If the current index is inside a variable-length element
-            if(pr.elmType == SourceElmType::NONE) {
-
-                // // If the current variable-length element contains a # character and is not a directive
-                // //if(s[i] == '#' && !isVarDirective) {
-                // if(s[i] == '#') {
-                //     // Push preceding characters as arbitrary code if there are any
-                //     if(varLen > 0) {
-                //         std::string elmTrueValue = s.substr(i - varLen, varLen);
-                //         r.elms.push_back(SourceElm(
-                //             SourceElmType::CODE,
-                //             elmTrueValue,
-                //             SourceElmMeta(i - varLen, filePath, varLenHeight, elmTrueValue)
-                //         ));
-                //     }
-
-
-                //     //isVarDirective = true;  // Set the directive state to true
-                //     varLenHeight = 1;       // Reset the variable-length element height
-                //     varLen = 1;             // Reset and increase the variable-length element width
-                //     ++i;                    // Skip this character
-                //     continue;
-                // }
-
-                // If a line continuation character is found
-
-                //else if(isLct(s, i)) {
-                if(isLct(s, i)) {
-                    ++curLine;       // Update the line counter
-                    ++varLenHeight;  // Increase the variable-length element height
-                    varLen += 2;     // Increase the variable-length element width
-                    i += 2;          // Skip line continuation token token
-                    continue;
-                }
-
-                // If a normal character is found
-                if(s[i] == '\n') ++varLenHeight;
-                ++varLen;  // Increase the variable-length element value
-                ++i;       // Skip it
-            }
-
-            // If not
-            else {
+            WhitespaceInfo wsRes = countWhitespaceCharacters(s, i, curLine, filePath);
+            if(wsRes.w > 0) {
                 // Push previous variable-length element if present
-                if(varLen > 0) {
+                if(wsRes.isBreaking && varLen > 0) {
                     std::string elmTrueValue = s.substr(i - varLen, varLen);
                     r.elms.push_back(SourceElm(
                         SourceElmType::CODE,
                         elmTrueValue,
                         SourceElmMeta(i - varLen, filePath, varLenHeight, elmTrueValue)
                     ));
+
+                    // varLen += wsRes.w;
+                    // varLenHeight += wsRes.h - 1;
+                    varLen = 0;
+                    varLenHeight = 1;
                 }
-                //isVarDirective = false;  // Set the directive state back to false
+
+                // Update counters
+                i += wsRes.w;
+                curLine += wsRes.h - 1;
+            }
 
 
-                // Push current parsed element
-                r.elms.push_back(SourceElm(
-                    pr.elmType,
-                    pr.finalValue,
-                    SourceElmMeta(i, filePath, curLine, pr.trueValue)
-                ));
-                curLine += pr.height - 1;  // Add the additional element height to the line counter
-                i += pr.trueValue.length();
+            // If no whitespace is found
+            else {
+                //FIXME parse default modules <> (or check it later, as it becomes part of the #directive element)
+                // Check for known elements and save the result
+                if((pr =   parseDirective(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
+                if((pr = parseCharLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
+                if((pr =  parseStrLiteral(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
+                ;
 
 
-                varLen = 0;              // Set the variable-length element width back to 0
-                varLenHeight = 0;        // Set the variable-length element height back to 0
+                // If a normal character is found
+                if(pr.elmType == SourceElmType::NONE) {
+                    ++varLen;  // Increase the variable-length element value
+                    ++i;       // Skip it
+                }
+
+
+                // If not
+                else {
+                    // Push current parsed element
+                    r.elms.push_back(SourceElm(
+                        pr.elmType,
+                        pr.finalValue,
+                        SourceElmMeta(i, filePath, curLine, pr.trueValue)
+                    ));
+                    curLine += pr.height - 1;  // Add the additional element height to the line counter
+                    i += pr.trueValue.length();
+
+
+                    varLen = 0;              // Set the variable-length element width back to 0
+                    varLenHeight = 0;        // Set the variable-length element height back to 0
+                }
             }
         }
 
@@ -222,38 +195,43 @@ namespace pre {
      * @param DEBUG_filePath The path to the file the buffer string was read from.
      * @return A pair containing the number of whitespace characters found and the number of lines they occupy
      */
-    std::pair<ulong, ulong> countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
-        ulong i = index, h = 1;
+    WhitespaceInfo countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+        WhitespaceInfo r;
+        ulong i = index;
         while(true) {
             // LCTs
             if(isLct(b, i)) {
                 i += 2;
-                ++h;
+                ++r.h;
             }
 
             // Normal whitespace
             else if(b[i] == ' ' || b[i] == '\t') {
                 ++i;
+                r.isBreaking = true;
             }
 
             // Newlines
             else if(b[i] == '\n') {
                 ++i;
-                ++h;
+                ++r.h;
+                r.isBreaking = true;
             }
 
 
             else {
                 // Comments
-                std::pair<ulong, ulong> commentRes = countCommentCharacters(b, i, DEBUG_curLine + h - 1, DEBUG_filePath);
+                std::pair<ulong, ulong> commentRes = countCommentCharacters(b, i, DEBUG_curLine + r.h - 1, DEBUG_filePath);
                 if(commentRes.first > 0) {
                     i += commentRes.first;
-                    h += commentRes.second - 1;
+                    r.h += commentRes.second - 1;
+                    r.isBreaking = true;
                 }
 
                 // Stop at non-whitespace characters (includes \0)
                 else {
-                    return std::pair<ulong, ulong>(i - index, h);
+                    r.w = i - index;
+                    return r;
                 }
             }
         }
@@ -390,19 +368,19 @@ namespace pre {
 
 
             // Check if whitespace is present and skip it
-            std::pair<ulong, ulong> wsCheck = countWhitespaceCharacters(b, i, DEBUG_curLine + r.height - 1, DEBUG_filePath);
-            if(wsCheck.first > 0) {
-                r.trueValue += b.substr(i, wsCheck.first);
+            WhitespaceInfo wsCheck = countWhitespaceCharacters(b, i, DEBUG_curLine + r.height - 1, DEBUG_filePath);
+            if(wsCheck.w > 0) {
+                r.trueValue += b.substr(i, wsCheck.w);
                 r.finalValue += " ";
-                r.height += wsCheck.second - 1;
-                i += wsCheck.first;
+                r.height += wsCheck.h - 1;
+                i += wsCheck.w;
             }
             else {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                     "Missing whitespace after include statement.\n"
-                    "The name of the directive and its parameters must be separated by one or more whitespace characters."
+                    "The name of the directive and its definition must be separated by one or more whitespace characters."
                 );
                 exit(1);
             }
