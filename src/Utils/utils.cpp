@@ -16,7 +16,7 @@
 namespace utils {
     // Prints the formatted line indicator
     static inline void printLineNum(ulong n) {
-        std::cerr << "\n" << ansi::fgBlack << ansi::bold << std::right << std::setw(8) << n << " │ " << ansi::reset << ansi::fgBlack;
+        std::cerr << ansi::reset << ansi::bold_black << "\n" << std::right << std::setw(8) << n << " │ " << ansi::black;
     }
 
 
@@ -35,88 +35,95 @@ namespace utils {
      *      This function doesn't stop the program.
      * @param errorType The type of the error
      * @param message The error message. This can contain multiple lines.
-     *      One \n character is automatically added at the end of the string.
+     *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
      */
     void printError(ErrType errType, ElmCoords elmCoords, std::string message) {
-        // Print error type and location
-        std::cerr << ansi::fgRed << ansi::bold;
+        std::cerr << ansi::bold_red;
         if(errType == ErrType::COMMAND) {
+
+            // Print error type
             std::cerr << "Could not parse terminal command:";
         }
         else {
+            // Print error type and location
             if(errType == ErrType::PREPROCESSOR) std::cerr << "Preprocessor";
             if(errType == ErrType::COMPILER)     std::cerr << "Compilation";
             std::cerr << " error:\n";
+
+
+            // Find the line in the original file and calculate the starting index of the preceding line
+            std::string s = readAndCheckFile(elmCoords.filePath);
+            ulong curLine = elmCoords.lineNum;
+            int linesPrinted = 0;
+            ulong i = elmCoords.start;
+            while(i > 0) {
+                if(s[i] == '\n') {
+                    if(linesPrinted > 0) break;
+                    linesPrinted++;
+                    --curLine;
+                }
+                --i;
+            }
+            if(i) ++i;  //! Skip \n character if found
+
+
+            // Print location
+            ulong elmHeight = std::count(s.c_str() + elmCoords.start, s.c_str() + elmCoords.end, '\n');
             if(elmCoords.filePath.length()) {
-                std::cerr << "    File │ " << ansi::reset << std::filesystem::canonical(elmCoords.filePath) << ansi::fgRed << ansi::bold << "\n";
-                std::cerr << "    Line │ " << ansi::reset << elmCoords.lineNum;
+                std::cerr << "    File │ " << ansi::reset << std::filesystem::canonical(elmCoords.filePath) << ansi::bold_red << "\n";
+                std::cerr << "    Line │ " << ansi::reset;
+                if(elmHeight == 0) std::cerr << elmCoords.lineNum;
+                else               std::cerr << "From " << elmCoords.lineNum << " to " << elmCoords.lineNum + elmHeight;
+            }
+
+
+            // Print preceding line + preceding characters in the same line
+            std::cerr << "\n";
+            printLineNum(curLine);
+            while(i < elmCoords.start) {
+                printChar(s[i]);
+                if(s[i] == '\n') {
+                    ++curLine;
+                    printLineNum(curLine);
+                }
+                ++i;
+            }
+
+
+            // Print offending substring
+            std::cerr << ansi::bold_magenta << ansi::underline;
+            while(i < elmCoords.end + 1) {
+                printChar(s[i]);
+                if(s[i] == '\n') {
+                    ++curLine;
+                    printLineNum(curLine);
+                    std::cerr << ansi::bold_magenta << ansi::underline;  //! Re-set custom color after line indicator
+                }
+                ++i;
+            }
+
+
+            // Print subsequent characters in the same line + subsequent line
+            std::cerr << ansi::black;
+            linesPrinted = 0;
+            while(s[i] != '\0') {
+                printChar(s[i]);
+                if(s[i] == '\n') {
+                    if(linesPrinted > 1) break;
+                    ++curLine;
+                    ++linesPrinted;
+                    if(linesPrinted < 2) printLineNum(curLine);
+                }
+                ++i;
             }
         }
-
-
-
-
-        // Find the line in the original file and calculate the starting index of the preceding line
-        std::string s = readAndCheckFile(elmCoords.filePath);
-        ulong curLine = elmCoords.lineNum;
-        int linesPrinted = 0;
-        ulong i = elmCoords.start;
-        while(i > 0) {
-            if(s[i] == '\n') {
-                if(linesPrinted > 0) break;
-                linesPrinted++;
-                ++curLine;
-            }
-            --i;
-        }
-        if(i) ++i;  //! Skip \n character if found
-
-
-        // Print preceding line + preceding characters in the same line
-        std::cerr << "\n\n";
-        printLineNum(curLine);
-        while(i < elmCoords.start) {
-            printChar(s[i]);
-            if(s[i] == '\n') {
-                ++curLine;
-                printLineNum(curLine);
-            }
-            ++i;
-        }
-
-
-        // Print offending substring
-        std::cerr << ansi::fgMagenta << ansi::bold << ansi::underline;
-        while(i < elmCoords.end + 1) {
-            printChar(s[i]);
-            if(s[i] == '\n') {
-                ++curLine;
-                printLineNum(curLine);
-            }
-            ++i;
-        }
-
-
-        // Print subsequent characters in the same line + subsequent line
-        std::cerr << ansi::reset << ansi::fgBlack;
-        linesPrinted = 0;
-        while(s[i] != '\0') {
-            printChar(s[i]);
-            if(s[i] == '\n') {
-                if(linesPrinted > 1) break;
-                ++curLine;
-                ++linesPrinted;
-                if(linesPrinted < 2) printLineNum(curLine);
-            }
-            ++i;
-        }
-        std::cerr << ansi::reset;
 
 
 
 
         // Print the actual error after indenting it by 4 spaces
-        std::cerr << "\n\n    " << std::regex_replace(message, std::regex("\n"), "\n    ") << "\n";
+        //std::cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+        std::cerr << ansi::bold_red << "\n" << std::regex_replace(message, std::regex("\033\\[0m"), ansi::bold_red) << "\n";
     }
 
 

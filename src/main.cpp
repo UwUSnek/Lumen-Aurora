@@ -20,6 +20,7 @@ Options parseOptions(int argc, char* argv[]){
 
 
 
+//TODO run all passes concurrently. make the next pass wait for the previous one when it reached it and make them read from streams
 int main(int argc, char* argv[]){
     Options options = parseOptions(argc, argv);
 

@@ -2,8 +2,11 @@ import <io>
 
 
 
+
 import <thread>
-#include "src/test.lu\
+/*test comment*/#i\
+nclu\
+de "src/test.lu\
 m\
 ";
 '"'

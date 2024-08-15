@@ -167,12 +167,12 @@ namespace pre {
 
 
 
-    // Add elements to output array. If include directives are found, parse the files and include them recursively
+    // Add elements to output array. If include statements are found, parse the files and include them recursively
     void mergeSourceElements(StructuredSource &output, StructuredSource &r) {
         auto &e = r.elms;
         for(ulong i = 0; i < e.size();) {
 
-            // Replace include directives with the specified file
+            // Replace include statements with the specified file
             // if(e[i].type == SourceElmType::DIRECTIVE) {
 
                 // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
@@ -185,7 +185,7 @@ namespace pre {
                 //     utils::printError(
                 //         utils::ErrType::PREPROCESSOR,
                 //         ElmCoords(e[i].meta),
-                //         "Missing file path in include directive. A string literal was expected, but could not be found."
+                //         "Missing file path in include statement. A string literal was expected, but could not be found."
                 //     );
                 //     exit(1);
                 // }
@@ -363,17 +363,17 @@ namespace pre {
 
         ulong i = index + 1;
         std::smatch matchRes;
-        if(std::regex_search(std::string::const_iterator(b.begin() + i), std::string::const_iterator(b.end()), matchRes, std::regex("^([a-zA-Z]|\\\n)+"))){
+        if(std::regex_search(std::string::const_iterator(b.begin() + i), std::string::const_iterator(b.end()), matchRes, std::regex(R"(^([a-zA-Z]|(\\\n))+)"))){
 
             // Find directive name
-            r.trueValue += matchRes[0].str();
-            r.finalValue = std::regex_replace(r.trueValue, std::regex("\\\n"), "");
+            r.trueValue += matchRes[0].str(); //FIXME line numbers don't match
+            r.finalValue = std::regex_replace(r.trueValue, std::regex(R"(\\\n)"), "");
             r.height += (r.trueValue.length() - r.finalValue.length()) / 2;
-            i += r.trueValue.length();
+            i += r.trueValue.length() - 1;  //! -1 to account for the '#' character
 
 
             // Check if it is valid and set the source element type
-            if(r.finalValue == "#include") {
+            if(r.finalValue == "#include") { //FIXME add glob patterns to include statements
                 r.elmType = SourceElmType::DIRECTIVE_INCLUDE;
             }
             else if(r.finalValue == "#define") {
@@ -382,8 +382,8 @@ namespace pre {
             else {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(DEBUG_filePath, DEBUG_curLine, index, i - 1),
-                    "Unknown preprocessor directie \"" + r.finalValue + "\"."
+                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i - 1),
+                    "Unknown preprocessor directive \"" + r.finalValue + "\"."
                 );
                 exit(1);
             }
@@ -400,14 +400,14 @@ namespace pre {
             else {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(DEBUG_filePath, DEBUG_curLine, index, i),
-                    "Missing whitespace after include directive. The directive name and it's parameters must be separated by one or more whitespace characters."
+                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+                    "Missing whitespace after include statement.\nThe name of the directive and its parameters must be separated by one or more whitespace characters."
                 );
                 exit(1);
             }
 
 
-            // Parse string if the directive is an include directive
+            // Parse string if the directive is an include statement
             if(r.elmType == SourceElmType::DIRECTIVE_INCLUDE && b[i]) {
                 ParsingResult stringCheck = parseStrLiteral(b, i, DEBUG_curLine + r.height - 1, DEBUG_filePath);
                 if(stringCheck.elmType == SourceElmType::STRING) {
@@ -420,8 +420,8 @@ namespace pre {
                 else {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
-                        ElmCoords(DEBUG_filePath, DEBUG_curLine, index, i),
-                        "Missing file path in include directive. A string literal was expected, but could not be found."
+                        ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+                        "Missing file path in include statement. A string literal was expected, but could not be found."
                     );
                     exit(1);
                 }
@@ -521,7 +521,7 @@ namespace pre {
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                     "String literal is missing a closing '\"' character.\n"
-                    "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
+                    "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
                 );
                 exit(1);
             }
@@ -608,7 +608,7 @@ namespace pre {
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                     "Char literal is missing a closing ' character.\n"
-                    "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::fgCyan + ansi::bold + "\\n" + ansi::reset + "\"."
+                    "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
                 );
                 exit(1);
             }
@@ -644,7 +644,7 @@ namespace pre {
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
                     "Char literal is missing a closing ' character.\n"
-                    "Did you mean " + ansi::fgCyan + ansi::bold + "'\\'" + ansi::reset + "?"
+                    "Did you mean " + ansi::bold_cyan + "'\\'" + ansi::reset + "?"
                 );
                 exit(1);
             }
