@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <algorithm>
 
 #include "Utils/utils.hpp"
 
@@ -68,12 +69,12 @@ namespace pre {
         std::vector<SourceElm> elms = std::vector<SourceElm>();
 
         std::string toString(){
-            static ulong elmTypeNameMaxSpace = 12;
+            static ulong elmTypeNameMaxSpace = 32;
             std::string r = "";
             for(SourceElm elm : elms) {
                 std::string elmTypeName = sourceElmTypeToString(elm.type);
                 r += elmTypeName;
-                r.append(elmTypeNameMaxSpace - elmTypeName.length(), ' ');
+                r.append(std::max(1l, (long)elmTypeNameMaxSpace - (long)elmTypeName.length()), ' ');
                 r += "| ";
                 r += std::regex_replace(std::regex_replace(elm.s, std::regex("\n"), ansi::black + "\\n" + ansi::reset), std::regex(" "), ansi::black + "·" + ansi::reset);
                 r += "\n";

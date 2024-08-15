@@ -366,10 +366,10 @@ namespace pre {
         if(std::regex_search(std::string::const_iterator(b.begin() + i), std::string::const_iterator(b.end()), matchRes, std::regex(R"(^([a-zA-Z]|(\\\n))+)"))){
 
             // Find directive name
-            r.trueValue += matchRes[0].str(); //FIXME line numbers don't match
+            r.trueValue += matchRes[0].str();
             r.finalValue = std::regex_replace(r.trueValue, std::regex(R"(\\\n)"), "");
-            r.height += (r.trueValue.length() - r.finalValue.length()) / 2;
-            i += r.trueValue.length() - 1;  //! -1 to account for the '#' character
+            r.height += (r.trueValue.length() - r.finalValue.length()) / 2;     //! Find number of removed LCTs by comparing the lengths of the strings
+            i += r.trueValue.length() - 1;                                      //! -1 to account for the '#' character
 
 
             // Check if it is valid and set the source element type
@@ -390,7 +390,7 @@ namespace pre {
 
 
             // Check if whitespace is present and skip it
-            std::pair<ulong, ulong> wsCheck = countWhitespaceCharacters(b, index, DEBUG_curLine + r.height - 1, DEBUG_filePath);
+            std::pair<ulong, ulong> wsCheck = countWhitespaceCharacters(b, i, DEBUG_curLine + r.height - 1, DEBUG_filePath);
             if(wsCheck.first > 0) {
                 r.trueValue += b.substr(i, wsCheck.first);
                 r.finalValue += " ";
@@ -401,7 +401,8 @@ namespace pre {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
-                    "Missing whitespace after include statement.\nThe name of the directive and its parameters must be separated by one or more whitespace characters."
+                    "Missing whitespace after include statement.\n"
+                    "The name of the directive and its parameters must be separated by one or more whitespace characters."
                 );
                 exit(1);
             }
@@ -421,7 +422,8 @@ namespace pre {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
                         ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
-                        "Missing file path in include statement. A string literal was expected, but could not be found."
+                        "Missing file path in include statement.\n"
+                        "A string literal was expected, but could not be found." //TODO check if this error works
                     );
                     exit(1);
                 }

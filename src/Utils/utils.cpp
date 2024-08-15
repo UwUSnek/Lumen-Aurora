@@ -122,8 +122,7 @@ namespace utils {
 
 
         // Print the actual error after indenting it by 4 spaces
-        //std::cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
-        std::cerr << ansi::bold_red << "\n" << std::regex_replace(message, std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+        std::cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
     }
 
 
