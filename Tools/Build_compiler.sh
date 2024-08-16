@@ -5,18 +5,17 @@
 mkdir -p ./Build
 
 
-g++                                             \
-    ./src/Utils/utils.cpp                       \
-    ./src/main.cpp                              \
-    ./src/Preprocessor/preprocessor.cpp         \
-    ./src/Preprocessor/Cleanup/cleanup.cpp      \
-    ./src/Preprocessor/Cleanup/ICF_Clean.cpp    \
-    ./src/Preprocessor/ElmCoords.cpp            \
--std=c++20                                      \
--O0 -g                                          \
--I                                              \
-    ./src/                                      \
--o                                              \
+g++                                                       \
+    ./src/Utils/utils.cpp                                 \
+    ./src/main.cpp                                        \
+    ./src/Preprocessor/preprocessor.cpp                   \
+    ./src/Preprocessor/CleanupPhase/cleanupPhase.cpp      \
+    ./src/Preprocessor/CleanupPhase/ICF_Clean.cpp         \
+-std=c++20                                                \
+-O0 -g                                                    \
+-I                                                        \
+    ./src/                                                \
+-o                                                        \
     ./Build/out
 
 

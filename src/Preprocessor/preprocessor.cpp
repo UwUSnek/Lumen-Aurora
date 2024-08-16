@@ -41,7 +41,7 @@ namespace pre {
     void loadSourceCode_loop(std::string filePath, Options& options, StructuredSource &output) { //TODO use options or remove the parameter if not needed
         std::string s = utils::readAndCheckFile(filePath);
 
-        ICF_Clean CleanSourceCode = cleanup(s, filePath);
+        ICF_Clean CleanSourceCode = startCleanupPhase(s, filePath);
         std::cout << CleanSourceCode.toString();
         // if((pr =   parseDirective(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
         // mergeSourceElements(output, r);

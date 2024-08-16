@@ -1,5 +1,5 @@
 #include <tuple>
-#include "cleanup.hpp"
+#include "cleanupPhase.hpp"
 #include "WhitespaceInfo.hpp"
 #include "Preprocessor/ElmCoords.hpp"
 
@@ -312,7 +312,7 @@ namespace pre {
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height, index, i),
                 "Char literal contains more than one byte. This is not allowed.\n"
-                "If you wish to store strings or a multi-bye Unicode character, you can use the str type (module <string>)." //TODO check if this is the correct type
+                "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
             );
             exit(1);
         }
@@ -354,7 +354,7 @@ namespace pre {
 
 
     //FIXME use a stream and process the steps concurrently
-    ICF_Clean cleanup(std::string rawCode, std::string filePath) {
+    ICF_Clean startCleanupPhase(std::string rawCode, std::string filePath) {
         ICF_Clean r;
 
 

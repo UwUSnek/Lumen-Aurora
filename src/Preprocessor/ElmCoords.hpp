@@ -24,6 +24,4 @@ struct ElmCoords {
         start(_start),
         end(_end) {
     }
-
-    ElmCoords(pre::SourceElmMeta &meta);
 };

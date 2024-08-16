@@ -2,8 +2,8 @@
 #include <string>
 #include "Options.hpp"
 #include "StructuredSource.hpp"
-#include "Cleanup/ParsingResult.hpp"
-#include "Cleanup/cleanup.hpp"
+#include "CleanupPhase/ParsingResult.hpp"
+#include "CleanupPhase/cleanupPhase.hpp"
 
 
 
