@@ -9,7 +9,7 @@ nclu\
 de "src/test.lu\
 m\
 ";
-'"a'
+'"'
 void main(){
     io.print("h\"\
     i");

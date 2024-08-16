@@ -360,7 +360,7 @@ namespace pre {
 
 
 
-        ulong i = 0, curLine = 0;   // Current index and line number
+        ulong i = 0, curLine = 1;   // Current index and line number
         ulong w = 0, h = 0;         // Length and height of the variable-length element
         std::string trueElm;        // Clean value of the varaible-length element
         while(i < rawCode.length()) {
@@ -390,7 +390,7 @@ namespace pre {
 
                 // Update counters
                 i += wsRes.w;
-                curLine += wsRes.h - 1;
+                curLine += wsRes.h;
             }
 
 
@@ -437,7 +437,7 @@ namespace pre {
                         i, i + res.trueValue.length()
                     ));
                     i += res.trueValue.length();
-                    curLine += res.height - 1;  // Add the additional element height to the line counter
+                    curLine += res.height;  // Add the additional element height to the line counter
                 }
             }
         }
