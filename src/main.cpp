@@ -30,7 +30,6 @@ int main(int argc, char* argv[]){
     // Preprocessing
     auto timeStartPre = std::chrono::high_resolution_clock::now();
     pre::StructuredSource sourceCode = pre::loadSourceCode(options);
-    std::cout << sourceCode.toString();
     std::chrono::duration<double> timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 

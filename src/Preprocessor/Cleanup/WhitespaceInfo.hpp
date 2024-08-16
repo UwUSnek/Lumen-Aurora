@@ -10,7 +10,7 @@ namespace pre {
 
         WhitespaceInfo() :
             w(0),
-            h(1),
+            h(0),
             isBreaking(false) {
         }
     };
