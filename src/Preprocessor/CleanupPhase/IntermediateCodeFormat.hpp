@@ -84,15 +84,14 @@ namespace pre {
 
                 // Clean value
                 r += "| ";
-                std::string elmValue = std::regex_replace(elm.s, std::regex(" "), ansi::black + "·" + ansi::reset);
-                r += elmValue;
-                r.append(std::max(1l, (long)lineValueMaxSpace - (long)elmValue.length()), ' ');
+                r += std::regex_replace(elm.s, std::regex(" "), ansi::black + "·" + ansi::reset);
+                r.append(std::max(1l, (long)lineValueMaxSpace - (long)elm.s.length()), ' ');
 
 
                 // Raw value
                 r += "| ";
                 r += std::regex_replace(std::regex_replace(elm.OG_s, std::regex("\n"), ansi::black + "\\n" + ansi::reset), std::regex(" "), ansi::black + "·" + ansi::reset);
-                r += "\n";
+                r += "\n"; //FIXME strings appear to have wrong length
             }
             return r;
         }
