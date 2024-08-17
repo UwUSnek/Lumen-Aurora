@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
-#include "IntermediateCodeFormat.hpp"
+#include "Preprocessor/IntermediateCodeFormat.hpp"
 #include "WhitespaceInfo.hpp"
-#include "ParsingResult.hpp"
+#include "Preprocessor/ParsingResult.hpp"
 
 
 

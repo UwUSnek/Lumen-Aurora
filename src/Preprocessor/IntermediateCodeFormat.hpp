@@ -91,7 +91,7 @@ namespace pre {
                 // Raw value
                 r += "| ";
                 r += std::regex_replace(std::regex_replace(elm.OG_s, std::regex("\n"), ansi::black + "\\n" + ansi::reset), std::regex(" "), ansi::black + "·" + ansi::reset);
-                r += "\n"; //FIXME strings appear to have wrong length
+                r += "\n";
             }
             return r;
         }

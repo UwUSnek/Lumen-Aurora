@@ -8,6 +8,8 @@
 #include "preprocessor.hpp"
 #include "ElmCoords.hpp"
 #include "Utils/utils.hpp"
+#include "CleanupPhase/cleanupPhase.hpp"
+#include "DirectivesPhase/directivesPhase.hpp"
 
 
 
@@ -18,8 +20,8 @@ namespace pre {
      * @param options The options.
      * @return The contents of the source file as a StructuredSource.
      */
-    StructuredSource loadSourceCode(Options& options) {
-        StructuredSource output;
+    IntermediateCodeFormat loadSourceCode(Options& options) {
+        IntermediateCodeFormat output;
         loadSourceCode_loop(options.sourceFile, options, output);
         return output;
     }
@@ -38,13 +40,12 @@ namespace pre {
      * @param options The options.
      * @return The contents of the source file as a StructuredSource.
      */
-    void loadSourceCode_loop(std::string filePath, Options& options, StructuredSource &output) { //TODO use options or remove the parameter if not needed
+    void loadSourceCode_loop(std::string filePath, Options& options, IntermediateCodeFormat &output) { //TODO use options or remove the parameter if not needed
         std::string s = utils::readAndCheckFile(filePath);
 
-        IntermediateCodeFormat cleanSourceCode = startCleanupPhase(s, filePath);
-        // ICF_Directives DirectivesSourceCode = startDirectivesPhase
-        std::cout << cleanSourceCode.toString();
-        // if((pr =   parseDirective(s, i, curLine, filePath)).elmType == SourceElmType::NONE)
+        IntermediateCodeFormat r1 = startCleanupPhase(s, filePath);
+        IntermediateCodeFormat r2 = startDirectivesPhase(r1, filePath);
+        output = r2;
         // mergeSourceElements(output, r);
     }
 
@@ -56,7 +57,7 @@ namespace pre {
 
 
     // Add elements to output array. If include statements are found, parse the files and include them recursively
-    void mergeSourceElements(StructuredSource &output, StructuredSource &r) {
+    void mergeSourceElements(IntermediateCodeFormat &output, IntermediateCodeFormat &r) {
         auto &e = r.elms;
         for(ulong i = 0; i < e.size();) {
 

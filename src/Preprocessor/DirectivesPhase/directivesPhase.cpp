@@ -1,3 +1,5 @@
+#include <iostream>
+#include <regex>
 #include "directivesPhase.hpp"
 
 
@@ -6,13 +8,44 @@
 
 
 
-
 namespace pre {
-    IntermediateCodeFormat startDirectivesPhase(IntermediateCodeFormat cleanCode, std::string filePath) {
-        ulong i;
-        while(i < cleanCode.elms.size()) {
-            ++i; //TODO
+    IntermediateCodeFormat startDirectivesPhase(IntermediateCodeFormat b, std::string filePath) {
+        IntermediateCodeFormat r;
+
+
+
+
+        ulong i = 0;
+        while(i < b.elms.size()) {
+
+            // If the element is arbitrary code (the only type that can contain directives)
+            if(b[i].t == IFC_ElmType::OTHER) {
+
+                // If it contains a directive
+                std::smatch match;
+                std::regex regex("(.*?)(#[a-zA-Z_][a-zA-Z_0-9]*)");
+                if(std::regex_match(b[i].s, match, regex)) {
+
+                    // Find the directive value and preceding characters in both the raw and clean strings
+                    std::smatch trueMatch;
+                    std::regex_match(b[i].OG_s, trueMatch, regex);
+
+
+                }
+                ++i; //TODO
+            }
+
+
+
+
+            // If not
+            else {
+                r.elms.push_back(b[i]);
+                ++i;
+            }
         }
+
+        return r;
     }
 
 
