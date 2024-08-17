@@ -8,7 +8,7 @@ import <thread>
 nclu\
 de "src/test.lu\
 m\
-";
+"
 '"'
 void main(){
     io.print("h\"\

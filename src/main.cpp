@@ -39,11 +39,18 @@ int main(int argc, char* argv[]){
     std::chrono::duration<double> timeComp = std::chrono::high_resolution_clock::now() - timeStartComp;
 
 
+    // Optimization
+    auto timeStartOpt = std::chrono::high_resolution_clock::now();
+    //TODO actually optimize the code
+    std::chrono::duration<double> timeOpt = std::chrono::high_resolution_clock::now() - timeStartOpt;
+
+
     // Successful command output
     std::string fullCommand; for(int i = 0; i < argc; ++i) fullCommand += std::string(argv[i]) + ' ';
     std::cout << ansi::bold_green << fullCommand << ansi::reset << "completed successfully.";
     std::cout << ansi::bold_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) << timePre.count()  << " seconds.";
     std::cout << ansi::bold_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
+    std::cout << ansi::bold_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) << timeOpt.count() << " seconds.";
     // std::cout << "\n    Output written to \"\""; //TODO
     std::cout << "\n\n";
 }

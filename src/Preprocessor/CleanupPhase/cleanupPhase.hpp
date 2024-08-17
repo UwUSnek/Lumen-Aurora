@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "ICF_Clean.hpp"
+#include "IntermediateCodeFormat.hpp"
 #include "WhitespaceInfo.hpp"
 #include "ParsingResult.hpp"
 
@@ -17,5 +17,5 @@ namespace pre {
     ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
 
 
-    ICF_Clean startCleanupPhase(std::string rawCode, std::string filePath);
+    IntermediateCodeFormat startCleanupPhase(std::string rawCode, std::string filePath);
 }

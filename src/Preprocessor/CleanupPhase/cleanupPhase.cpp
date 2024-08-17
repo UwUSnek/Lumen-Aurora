@@ -222,7 +222,7 @@ namespace pre {
             }
         }
 
-        r.elmType = IFC_CleanType::STRING;
+        r.elmType = IFC_ElmType::STRING;
         return r;
     }
 
@@ -342,7 +342,7 @@ namespace pre {
 
 
 
-        r.elmType = IFC_CleanType::CHAR;
+        r.elmType = IFC_ElmType::CHAR;
         return r;
     }
 
@@ -354,8 +354,8 @@ namespace pre {
 
 
     //FIXME use a stream and process the steps concurrently
-    ICF_Clean startCleanupPhase(std::string rawCode, std::string filePath) {
-        ICF_Clean r;
+    IntermediateCodeFormat startCleanupPhase(std::string rawCode, std::string filePath) {
+        IntermediateCodeFormat r;
 
 
 
@@ -373,11 +373,12 @@ namespace pre {
                 // Push previous variable-length element if present
                 if(w > 0) {
                     if(wsRes.isBreaking) {
-                        r.elms.push_back(ICF_CleanElm(
-                            IFC_CleanType::OTHER,
+                        r.elms.push_back(ICF_Elm(
+                            IFC_ElmType::OTHER,
                             trueElm,
-                            curLine, h,
-                            i, i + w
+                            rawCode.substr(i - w, w),
+                            h,
+                            curLine, i
                         ));
                         trueElm.clear();
                         w = 0;
@@ -385,6 +386,7 @@ namespace pre {
                     }
                     else {
                         h += wsRes.h;
+                        w += wsRes.w;
                     }
                 }
 
@@ -400,13 +402,13 @@ namespace pre {
                 ParsingResult res;
 
                 // Check for known elements and save the result
-                if((res = parseCharLiteral(rawCode, i, curLine, filePath)).elmType == IFC_CleanType::NONE)
-                if((res =  parseStrLiteral(rawCode, i, curLine, filePath)).elmType == IFC_CleanType::NONE)
+                if((res = parseCharLiteral(rawCode, i, curLine, filePath)).elmType == IFC_ElmType::NONE)
+                if((res =  parseStrLiteral(rawCode, i, curLine, filePath)).elmType == IFC_ElmType::NONE)
                 ;
 
 
                 // If a normal character is found
-                if(res.elmType == IFC_CleanType::NONE) {
+                if(res.elmType == IFC_ElmType::NONE) {
                     trueElm += rawCode[i];
                     ++w;  // Increase the variable-length element value
                     ++i;  // Skip the character
@@ -417,11 +419,12 @@ namespace pre {
                 else {
                     // Push past variable-length element
                     if(w > 0) {
-                        r.elms.push_back(ICF_CleanElm(
-                            IFC_CleanType::OTHER,
+                        r.elms.push_back(ICF_Elm(
+                            IFC_ElmType::OTHER,
                             trueElm,
-                            curLine, h,
-                            i, i + w
+                            rawCode.substr(i - w, w),
+                            h,
+                            curLine, i
                         ));
                         trueElm.clear();
                         w = 0;        // Set the variable-length element width back to 0
@@ -430,11 +433,12 @@ namespace pre {
 
 
                     // Push current parsed element
-                    r.elms.push_back(ICF_CleanElm(
+                    r.elms.push_back(ICF_Elm(
                         res.elmType,
                         res.finalValue,
-                        curLine, res.height,
-                        i, i + res.trueValue.length()
+                        res.trueValue,
+                        res.height,
+                        curLine, i
                     ));
                     i += res.trueValue.length();
                     curLine += res.height;  // Add the additional element height to the line counter
@@ -447,11 +451,12 @@ namespace pre {
 
         // Push last variable-length element if present
         if(w > 0) {
-            r.elms.push_back(ICF_CleanElm(
-                IFC_CleanType::OTHER,
+            r.elms.push_back(ICF_Elm(
+                IFC_ElmType::OTHER,
                 trueElm,
-                curLine, h,
-                i, i + w
+                rawCode.substr(i - w, w),
+                h,
+                curLine, i
             ));
         }
 
