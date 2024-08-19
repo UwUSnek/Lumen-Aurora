@@ -32,12 +32,12 @@ namespace pre {
      * @brief Calculates the length of the comment that strarts at index <index> and ends at the first newline character or at the end of the file.
      * @param b The string buffer that contains the comment.
      * @param index The index at which the comment starts.
-     * @param DEBUG_curLine The current line number in the original file at which the comment starts.
-     * @param DEBUG_filePath The path to the file the buffer string was read from.
+     * @param DBG_curLine The current line number in the original file at which the comment starts.
+     * @param DBG_filePath The path to the file the buffer string was read from.
      * @return A pair containing the length of the comment and the number of additional lines it occupies, including the length of the opening and closing character sequences (including \\n but excluding \0).
      *     If the buffer doesn't contain a comment that starts at index <index>, (0, 0) is returned.
      */
-    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DBG_curLine, std::string DBG_filePath) {
         if(b[index] != '/') return std::pair<ulong, ulong>(0, 0);
 
 
@@ -103,11 +103,11 @@ namespace pre {
      *      Line continuation tokens are counted as 2 whitespace characters.
      * @param b The string buffer that contains the whitespace.
      * @param index The index at which the whitespace starts.
-     * @param DEBUG_curLine The current line number in the original file at which the whitespace starts.
-     * @param DEBUG_filePath The path to the file the buffer string was read from.
+     * @param DBG_curLine The current line number in the original file at which the whitespace starts.
+     * @param DBG_filePath The path to the file the buffer string was read from.
      * @return A pair containing the number of whitespace characters found and the number of lines they occupy
      */
-    WhitespaceInfo countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+    WhitespaceInfo countWhitespaceCharacters(std::string b, ulong index, ulong DBG_curLine, std::string DBG_filePath) {
         WhitespaceInfo r;
         ulong i = index;
         while(true) {
@@ -134,7 +134,7 @@ namespace pre {
 
             else {
                 // Comments
-                std::pair<ulong, ulong> commentRes = countCommentCharacters(b, i, DEBUG_curLine + r.h, DEBUG_filePath);
+                std::pair<ulong, ulong> commentRes = countCommentCharacters(b, i, DBG_curLine + r.h, DBG_filePath);
                 if(commentRes.first > 0) {
                     i += commentRes.first;
                     r.h += commentRes.second;
@@ -164,12 +164,12 @@ namespace pre {
      * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " character.
      * @param b The string buffer that contains the string literal.
      * @param index The index at which the string literal starts.
-     * @param DEBUG_curLine The current line number in the original file at which the string literal starts.
-     * @param DEBUG_filePath The path to the file the buffer string was read from.
+     * @param DBG_curLine The current line number in the original file at which the string literal starts.
+     * @param DBG_filePath The path to the file the buffer string was read from.
      * @return Informations about the string literal, including the two " characters
      *     If the buffer doesn't contain a string literal that starts at index <index>, a result with type NONE is returned.
      */
-    ParsingResult parseStrLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+    ParsingResult parseStrLiteral(std::string b, ulong index, ulong DBG_curLine, std::string DBG_filePath) {
         ParsingResult r;
         if(b[index] != '"') return r;
         r.trueValue  += '"';
@@ -191,7 +191,7 @@ namespace pre {
             else if(b[i] == '\0') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height, index, i),
+                    ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
                     "String literal is missing a closing '\"' character."
                 );
                 exit(1);
@@ -199,9 +199,9 @@ namespace pre {
             else if(b[i] == '\n') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height, index, i),
+                    ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
                     "String literal is missing a closing '\"' character.\n"
-                    "If you wish to use a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
+                    "If you wish to include a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
                 );
                 exit(1);
             }
@@ -222,7 +222,7 @@ namespace pre {
             }
         }
 
-        r.elmType = IFC_ElmType::STRING;
+        r.elmType = ICF_ElmType::STRING;
         return r;
     }
 
@@ -237,12 +237,12 @@ namespace pre {
      * @brief Parses the char literal that starts at index <index> and checks if it contains a single 8-bit character (or a valid escape sequence).
      * @param b The string buffer that contains the char literal.
      * @param index The index at which the char literal starts.
-     * @param DEBUG_curLine The current line number in the original file at which the char literal starts.
-     * @param DEBUG_filePath The path to the file the buffer string was read from.
+     * @param DBG_curLine The current line number in the original file at which the char literal starts.
+     * @param DBG_filePath The path to the file the buffer string was read from.
      * @return Informations about the char literal, including the two ' characters.
      *     If the buffer doesn't contain a char literal that starts at index <index>, a result with type NONE is returned.
      */
-    ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+    ParsingResult parseCharLiteral(std::string b, ulong index, ulong DBG_curLine, std::string DBG_filePath) {
         ParsingResult r;
         if(b[index] != '\'') return r;
         r.trueValue  += '\'';
@@ -279,7 +279,7 @@ namespace pre {
             else if(b[i] == '\0') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height, index, i),
+                    ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
                     "Char literal is missing a closing ' character."
                 );
                 exit(1);
@@ -287,7 +287,7 @@ namespace pre {
             else if(b[i] == '\n') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height, index, i),
+                    ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
                     "Char literal is missing a closing ' character.\n"
                     "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
                 );
@@ -310,7 +310,7 @@ namespace pre {
         if(finalLen > 4 || finalLen == 4 && r.finalValue[1] != '\\') {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
-                ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height, index, i),
+                ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
                 "Char literal contains more than one byte. This is not allowed.\n"
                 "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
             );
@@ -323,7 +323,7 @@ namespace pre {
             if(r.finalValue[1] == '\\') {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height, index, i),
+                    ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
                     "Char literal is missing a closing ' character.\n"
                     "Did you mean " + ansi::bold_cyan + "'\\'" + ansi::reset + "?"
                 );
@@ -334,7 +334,7 @@ namespace pre {
         else if(r.finalValue.length() == 2) {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
-                ElmCoords(DEBUG_filePath, DEBUG_curLine, index, i),
+                ElmCoords(DBG_filePath, DBG_curLine, index, i),
                 "Char literal cannot be empty."
             );
             exit(1);
@@ -342,7 +342,7 @@ namespace pre {
 
 
 
-        r.elmType = IFC_ElmType::CHAR;
+        r.elmType = ICF_ElmType::CHAR;
         return r;
     }
 
@@ -354,7 +354,7 @@ namespace pre {
 
 
     //FIXME use a stream and process the steps concurrently
-    IntermediateCodeFormat startCleanupPhase(std::string rawCode, std::string filePath) {
+    IntermediateCodeFormat startCleanupPhase(std::string rawCode, std::string DBG_filePath) {
         IntermediateCodeFormat r;
 
 
@@ -367,14 +367,14 @@ namespace pre {
 
 
             // Check whitespace
-            WhitespaceInfo wsRes = countWhitespaceCharacters(rawCode, i, curLine, filePath);
+            WhitespaceInfo wsRes = countWhitespaceCharacters(rawCode, i, curLine, DBG_filePath);
             if(wsRes.w > 0) {
 
                 // Push previous variable-length element if present
                 if(w > 0) {
                     if(wsRes.isBreaking) {
                         r.elms.push_back(ICF_Elm(
-                            IFC_ElmType::OTHER,
+                            ICF_ElmType::OTHER,
                             trueElm,
                             rawCode.substr(i - w, w),
                             h,
@@ -402,13 +402,13 @@ namespace pre {
                 ParsingResult res;
 
                 // Check for known elements and save the result
-                if((res = parseCharLiteral(rawCode, i, curLine, filePath)).elmType == IFC_ElmType::NONE)
-                if((res =  parseStrLiteral(rawCode, i, curLine, filePath)).elmType == IFC_ElmType::NONE)
+                if((res = parseCharLiteral(rawCode, i, curLine, DBG_filePath)).elmType == ICF_ElmType::NONE)
+                if((res =  parseStrLiteral(rawCode, i, curLine, DBG_filePath)).elmType == ICF_ElmType::NONE)
                 ;
 
 
                 // If a normal character is found
-                if(res.elmType == IFC_ElmType::NONE) {
+                if(res.elmType == ICF_ElmType::NONE) {
                     trueElm += rawCode[i];
                     ++w;  // Increase the variable-length element value
                     ++i;  // Skip the character
@@ -420,7 +420,7 @@ namespace pre {
                     // Push past variable-length element
                     if(w > 0) {
                         r.elms.push_back(ICF_Elm(
-                            IFC_ElmType::OTHER,
+                            ICF_ElmType::OTHER,
                             trueElm,
                             rawCode.substr(i - w, w),
                             h,
@@ -452,7 +452,7 @@ namespace pre {
         // Push last variable-length element if present
         if(w > 0) {
             r.elms.push_back(ICF_Elm(
-                IFC_ElmType::OTHER,
+                ICF_ElmType::OTHER,
                 trueElm,
                 rawCode.substr(i - w, w),
                 h,

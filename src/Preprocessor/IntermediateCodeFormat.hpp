@@ -12,14 +12,14 @@
 
 
 namespace pre {
-    enum class IFC_ElmType {
+    enum class ICF_ElmType {
         NONE,
         STRING,
         CHAR,
         MACRO,
         OTHER
     };
-    std::string IFC_CleanTypeToString(IFC_ElmType e);
+    std::string IFC_CleanTypeToString(ICF_ElmType e);
 
 
 
@@ -35,7 +35,7 @@ namespace pre {
      */
     class ICF_Elm {
     public:
-        IFC_ElmType t;
+        ICF_ElmType t;
         std::string s;
         std::string OG_s;
         ulong OG_lineNum;  //! Redundant, used for performance reasons
@@ -43,7 +43,7 @@ namespace pre {
         ulong OG_start;
 
 
-        ICF_Elm(IFC_ElmType _t, std::string _s, std::string _OG_s, ulong _OG_lineNum, ulong _OG_height, ulong _OG_start) :
+        ICF_Elm(ICF_ElmType _t, std::string _s, std::string _OG_s, ulong _OG_lineNum, ulong _OG_height, ulong _OG_start) :
             t(_t),
             s(_s),
             OG_s(_OG_s),

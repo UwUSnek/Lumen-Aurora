@@ -10,10 +10,6 @@ de "src/test.lu\
 m\
 "
 '"'
-void main(){
-    io.print("h\"\
-    i");
-}
 
 
 // test "comment"\""\
@@ -23,3 +19,14 @@ void main(){
     "'""'''\"\" */
 
 import <math>
+#include "test\"\"/**///\/\""
+#define a
+#define test(first, second) \
+    first + second
+
+
+
+void main(){
+    io.print("h\"\
+    i");
+}

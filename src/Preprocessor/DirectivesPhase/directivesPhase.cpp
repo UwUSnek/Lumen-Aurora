@@ -1,6 +1,12 @@
 #include <iostream>
 #include <regex>
+#include <fstream>
+#include <cstring>
+#include <filesystem>
+
 #include "directivesPhase.hpp"
+#include "Preprocessor/ElmCoords.hpp"
+#include "Preprocessor/CleanupPhase/cleanupPhase.hpp"
 
 
 
@@ -9,7 +15,7 @@
 
 
 namespace pre {
-    IntermediateCodeFormat startDirectivesPhase(IntermediateCodeFormat b, std::string filePath) {
+    IntermediateCodeFormat startDirectivesPhase(IntermediateCodeFormat b, std::string DBG_filePath) {
         IntermediateCodeFormat r;
 
 
@@ -19,20 +25,57 @@ namespace pre {
         while(i < b.elms.size()) {
 
             // If the element is arbitrary code (the only type that can contain directives)
-            if(b[i].t == IFC_ElmType::OTHER) {
+            if(b[i].t == ICF_ElmType::OTHER) {
 
                 // If it contains a directive
                 std::smatch match;
-                std::regex regex("(.*?)(#[a-zA-Z_][a-zA-Z_0-9]*)");
-                if(std::regex_match(b[i].s, match, regex)) {
+                if(std::regex_match(b[i].s, match, std::regex(R"(^(.*?)#([a-zA-Z_][a-zA-Z_0-9]*)(.*)$)"))) {
+                    //                                          " ╰ 1 ╯ ╰────────── 2 ─────────╯╰3 ╯ "
 
                     // Find the directive value and preceding characters in both the raw and clean strings
-                    std::smatch trueMatch;
-                    std::regex_match(b[i].OG_s, trueMatch, regex);
+                    std::smatch OG_match;
+                    std::regex_match(b[i].OG_s, OG_match, std::regex(R"(^((?:.|\n)*?)#((?:\\\n)?[a-zA-Z_](?:[a-zA-Z_0-9]|\\\n)*)((.|\n)*)$)"));
+                    //                                                   │╰──────╯  │ │╰──────╯          ╰───────────────────╯ │╰── 3 ──╯
+                    //                                                 " ╰─── 1 ────╯ ╰────────────────── 2 ───────────────────╯          "
 
+                    // Push preceding characters if present
+                    if(match[1].length()) {
+                        r.elms.push_back(ICF_Elm(
+                            b[i].t,                                             // Copy old type
+                            match[1],                                           // Use the match as string value
+                            OG_match[1],                                        // Use the OG match as OG string value
+                            b[i].OG_lineNum,                                    // Copy old line number
+                            (OG_match[1].length() - match[1].length()) / 2,     // Calculate the height using the length difference between the two matches (each \n is 2 +length)
+                            b[i].OG_start                                       // Copy old starting index
+                        ));
+                    }
 
+                    // Parse directive and update counter
+                    std::cout << "found " << match[2] << "\n";
+                    if(match[2] == "include") {
+                        processInclude(r, b, i, match, OG_match, DBG_filePath);
+                        i += 2;
+                    }
+                    else if(match[2] == "define") {
+                        // processDefine();
+                        //FIXME increase i
+                    }
+                    else {
+                        // processMacroCall();
+                        //FIXME increase i
+                        //TODO check if ( is the next character or element
+                        //TODO     If not there, the directive name is unknown. if found, save it in the output value and leave it for the next phase
+                        //TODO     ^ specify that macro calls need parameters and that they are passed with () after its name
+                    }
                 }
-                ++i; //TODO
+
+
+                // If not
+                else {
+                    // Push element as-is
+                    r.elms.push_back(b[i]);
+                    ++i;
+                }
             }
 
 
@@ -40,6 +83,7 @@ namespace pre {
 
             // If not
             else {
+                // Push element as-is
                 r.elms.push_back(b[i]);
                 ++i;
             }
@@ -62,6 +106,83 @@ namespace pre {
 
 
 
+    /**
+     * @brief Parses and processes an include directive, appending all the elements of the new file to <r>.
+     * @param r The output global buffer.
+     * @param b The buffer that contains the elements of the current file.
+     * @param i The index of the current element.
+     * @param match The match results of the current element.
+     * @param OG_match The match results of the raw value of the current element.
+     * @param DBG_filePath The path to the current file
+     * @return ulong The number of elements to skip, including the current one.
+     */
+    void processInclude(IntermediateCodeFormat &r, IntermediateCodeFormat &b, ulong i, std::smatch &match, std::smatch &OG_match, std::string DBG_filePath){
+
+        // No whitespace
+        if(match[3].length()) {
+            utils::printError(
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i].OG_start + OG_match[1].length(), b[i].OG_start + OG_match[1].length() + OG_match[2].length() + 1),
+                "Missing whitespace after include statement.\n"
+                "The name of the directive and its definition must be separated by one or more whitespace characters."
+            );
+            exit(1);
+        }
+
+
+        // Missing file path
+        else if(b[++i].t != ICF_ElmType::STRING) {
+            utils::printError(
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i].OG_start + OG_match[1].length(), b[i].OG_start + OG_match[1].length() + OG_match[2].length() + 1), //💀
+                "Missing file path in include statement.\n"
+                "A string literal was expected, but could not be found."
+            );
+            exit(1);
+        }
+
+
+        // File path and whitespace are present
+        //FIXME add glob patterns
+        //FIXME add standard module includes
+        else {
+            // Calculate the actual file path
+            std::string rawIncludeFilePath = b[i].s.substr(1, b[i].s.length() - 2);                                                         //! Include path as written in the source file
+            std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(DBG_filePath).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include directive was used in
+            std::string canonicalIncludeFilePath;                                                                                           //! Canonical version of the adjusted file path. No changes if file was not found
+            try { canonicalIncludeFilePath = std::filesystem::canonical(adjustedIncludeFilePath).string(); }
+            catch(std::filesystem::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
+            std::ifstream includeFile(canonicalIncludeFilePath);
+
+            // Print an error if the file cannot be opened
+            if(!includeFile) {
+                printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(DBG_filePath, b[i - 1].OG_lineNum, b[i].OG_start + OG_match[1].length(), b[i].OG_start + b[i].OG_s.length()),
+                    "Could not open file \"" + rawIncludeFilePath + "\": " + std::strerror(errno) + ".\n" +
+                    "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + ".\n" +
+                    "Make sure that the path is correct and the compiler has read access to the file."
+                );
+                exit(1);
+            }
+
+            // If it can be opened and read
+            else {
+                // Read all the lines and save them in a string
+                std::string l, includeFileStr;
+                while(getline(includeFile, l)) {
+                    includeFileStr += l;
+                    includeFileStr += '\n';
+                }
+
+                // Preprocess the string as a regular source file and add it to the output list (without actually compiling it)
+                IntermediateCodeFormat includeFileCode1 = startCleanupPhase(includeFileStr,      rawIncludeFilePath);
+                IntermediateCodeFormat includeFileCode2 = startDirectivesPhase(includeFileCode2, rawIncludeFilePath);
+                r.elms.insert(r.elms.end(), includeFileCode2.elms.begin(), includeFileCode2.elms.end());
+            }
+        }
+    }
+
 
     // //TODO check if multi-byte unicode characters can screw with the string detection
     // /**
@@ -71,10 +192,10 @@ namespace pre {
     //  * @param b The string buffer that contains the directive.
     //  * @param index The index at which the directive starts.
     //  * @param DEBUG_curLine The current line number in the original file at which the directive starts.
-    //  * @param DEBUG_filePath The path to the file the buffer string was read from.
+    //  * @param DBG_filePath The path to the file the buffer string was read from.
     //  * @return
     //  */
-    // ParsingResult parseDirective(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath) {
+    // ParsingResult parseDirective(std::string b, ulong index, ulong DEBUG_curLine, std::string DBG_filePath) {
     //     ParsingResult r;
     //     if(b[index] != '#') return r;
     //     r.trueValue  += '#';
@@ -102,7 +223,7 @@ namespace pre {
     //         else {
     //             utils::printError(
     //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i - 1),
+    //                 ElmCoords(DBG_filePath, DEBUG_curLine + r.height - 1, index, i - 1),
     //                 "Unknown preprocessor directive \"" + r.finalValue + "\"."
     //             );
     //             exit(1);
@@ -110,7 +231,7 @@ namespace pre {
 
 
     //         // Check if whitespace is present and skip it
-    //         WhitespaceInfo wsCheck = countWhitespaceCharacters(b, i, DEBUG_curLine + r.height - 1, DEBUG_filePath);
+    //         WhitespaceInfo wsCheck = countWhitespaceCharacters(b, i, DEBUG_curLine + r.height - 1, DBG_filePath);
     //         if(wsCheck.w > 0) {
     //             r.trueValue += b.substr(i, wsCheck.w);
     //             r.finalValue += " ";
@@ -120,7 +241,7 @@ namespace pre {
     //         else {
     //             utils::printError(
     //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+    //                 ElmCoords(DBG_filePath, DEBUG_curLine + r.height - 1, index, i),
     //                 "Missing whitespace after include statement.\n"
     //                 "The name of the directive and its definition must be separated by one or more whitespace characters."
     //             );
@@ -130,7 +251,7 @@ namespace pre {
 
     //         // Parse string if the directive is an include statement
     //         if(r.elmType == SourceElmType::DIRECTIVE_INCLUDE && b[i]) {
-    //             ParsingResult stringCheck = parseStrLiteral(b, i, DEBUG_curLine + r.height - 1, DEBUG_filePath);
+    //             ParsingResult stringCheck = parseStrLiteral(b, i, DEBUG_curLine + r.height - 1, DBG_filePath);
     //             if(stringCheck.elmType == SourceElmType::STRING) {
     //                 r.finalValue += stringCheck.finalValue;
     //                 r.trueValue += stringCheck.trueValue;
@@ -141,7 +262,7 @@ namespace pre {
     //             else {
     //                 utils::printError(
     //                     utils::ErrType::PREPROCESSOR,
-    //                     ElmCoords(DEBUG_filePath, DEBUG_curLine + r.height - 1, index, i),
+    //                     ElmCoords(DBG_filePath, DEBUG_curLine + r.height - 1, index, i),
     //                     "Missing file path in include statement.\n"
     //                     "A string literal was expected, but could not be found." //TODO check if this error works
     //                 );
