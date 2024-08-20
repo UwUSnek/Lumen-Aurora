@@ -9,7 +9,7 @@
 #include "ElmCoords.hpp"
 #include "Utils/utils.hpp"
 #include "CleanupPhase/cleanupPhase.hpp"
-#include "DirectivesPhase/directivesPhase.hpp"
+#include "IncludePhase/includePhase.hpp"
 
 
 
@@ -20,10 +20,11 @@ namespace pre {
      * @param options The options.
      * @return The contents of the source file as a StructuredSource.
      */
-    IntermediateCodeFormat loadSourceCode(Options& options) {
-        IntermediateCodeFormat output;
-        loadSourceCode_loop(options.sourceFile, options, output);
-        return output;
+    std::pair<std::string, LineReference> loadSourceCode(Options& options) {
+        std::string s = utils::readAndCheckFile(options.sourceFile);
+        std::pair<std::string, LineReference> r1 = startCleanupPhase(s, options.sourceFile);
+        std::pair<std::string, LineReference> r2 = startDirectivesPhase(r1, options.sourceFile);
+        return r2;
     }
 
 
@@ -32,64 +33,40 @@ namespace pre {
 
 
 
+    // // Add elements to output array. If include statements are found, parse the files and include them recursively
+    // void mergeSourceElements(IntermediateCodeFormat &output, IntermediateCodeFormat &r) {
+    //     auto &e = r.elms;
+    //     for(ulong i = 0; i < e.size();) {
 
-    //TODO add element metadata
-    /**
-     * @brief Loads the source file, including all of the files included by it and processes any preprocessor directives.
-     * @param filePath The path to the source file.
-     * @param options The options.
-     * @return The contents of the source file as a StructuredSource.
-     */
-    void loadSourceCode_loop(std::string filePath, Options& options, IntermediateCodeFormat &output) { //TODO use options or remove the parameter if not needed
-        std::string s = utils::readAndCheckFile(filePath);
+    //         // Replace include statements with the specified file
+    //         // if(e[i].type == SourceElmType::DIRECTIVE) {
 
-        IntermediateCodeFormat r1 = startCleanupPhase(s, filePath);
-        IntermediateCodeFormat r2 = startDirectivesPhase(r1, filePath);
-        output = r2;
-        // mergeSourceElements(output, r);
-    }
+    //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+    //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+    //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+    //             // if(i < e.size() - 1 && e[i +1].type == SourceElmType::STRING) {
 
+    //             // }
+    //             // else {
+    //             //     utils::printError(
+    //             //         utils::ErrType::PREPROCESSOR,
+    //             //         ElmCoords(e[i].meta),
+    //             //         "Missing file path in include statement. A string literal was expected, but could not be found."
+    //             //     );
+    //             //     exit(1);
+    //             // }
+    //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+    //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
+    //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
 
+    //         //     continue;
+    //         // }
 
-
-
-
-
-
-    // Add elements to output array. If include statements are found, parse the files and include them recursively
-    void mergeSourceElements(IntermediateCodeFormat &output, IntermediateCodeFormat &r) {
-        auto &e = r.elms;
-        for(ulong i = 0; i < e.size();) {
-
-            // Replace include statements with the specified file
-            // if(e[i].type == SourceElmType::DIRECTIVE) {
-
-                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
-                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
-                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
-                // if(i < e.size() - 1 && e[i +1].type == SourceElmType::STRING) {
-
-                // }
-                // else {
-                //     utils::printError(
-                //         utils::ErrType::PREPROCESSOR,
-                //         ElmCoords(e[i].meta),
-                //         "Missing file path in include statement. A string literal was expected, but could not be found."
-                //     );
-                //     exit(1);
-                // }
-                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
-                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
-                // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
-
-            //     continue;
-            // }
-
-            // Append anything else
-            output.elms.push_back(e[i]);
-            ++i;
-        }
-    }
+    //         // Append anything else
+    //         output.elms.push_back(e[i]);
+    //         ++i;
+    //     }
+    // }
 
 
 
