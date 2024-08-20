@@ -1,13 +1,11 @@
-import <io> //FIXME parser is skipping some characters in code elements
+import <io>
 
 
 
 
 import <thread>
-/*test comment*/#i\
-nclu\
-de "src/test.lu\
-m\
+/*test comment*/aa#inclu\
+de/*test*/"\
 "
 '"'
 

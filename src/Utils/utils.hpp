@@ -13,7 +13,8 @@ namespace utils {
         COMPILER
     };
 
-    void printError(ErrType errorType, ElmCoords elmCoords, std::string message);
+    void printError(ErrType errType,                   ElmCoords errPos, std::string message);
+    void printError(ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message);
     std::string readAndCheckFile(std::string fileName);
 }
 

@@ -107,7 +107,7 @@ namespace pre {
 
 
     /**
-     * @brief Parses and processes an include directive, appending all the elements of the new file to <r>.
+     * @brief Parses and processes an include statement, appending all the elements of the new file to <r>.
      * @param r The output global buffer.
      * @param b The buffer that contains the elements of the current file.
      * @param i The index of the current element.
@@ -116,27 +116,40 @@ namespace pre {
      * @param DBG_filePath The path to the current file
      * @return ulong The number of elements to skip, including the current one.
      */
+    //FIXME test all error output of this function extensively
     void processInclude(IntermediateCodeFormat &r, IntermediateCodeFormat &b, ulong i, std::smatch &match, std::smatch &OG_match, std::string DBG_filePath){
 
-        // No whitespace
+        // Missing file path (junk after "#include")
         if(match[3].length()) {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
-                ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i].OG_start + OG_match[1].length(), b[i].OG_start + OG_match[1].length() + OG_match[2].length() + 1),
-                "Missing whitespace after include statement.\n"
-                "The name of the directive and its definition must be separated by one or more whitespace characters."
+                ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i].OG_start, b[i].OG_start + OG_match[1].length() + OG_match[2].length() + 1), //💀
+                "Missing file path in include statement.\n"
+                "A string literal was expected, but could not be found."
             );
             exit(1);
         }
 
 
-        // Missing file path
+        // Missing file path (no string literal element)
         else if(b[++i].t != ICF_ElmType::STRING) {
             utils::printError(
                 utils::ErrType::PREPROCESSOR,
-                ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i].OG_start + OG_match[1].length(), b[i].OG_start + OG_match[1].length() + OG_match[2].length() + 1), //💀
+                ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i - 1].OG_start, b[i].OG_start + 1),
                 "Missing file path in include statement.\n"
                 "A string literal was expected, but could not be found."
+            );
+            exit(1);
+        }
+
+
+        // Missing file name (empty string)
+        else if(b[i].s.length() <= 2) {
+            utils::printError(
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i - 1].OG_start + OG_match[1].length(), b[i].OG_start + 1),
+                "Empty file path in include statement.\n"
+                "A file path must be specified"
             );
             exit(1);
         }
@@ -148,7 +161,7 @@ namespace pre {
         else {
             // Calculate the actual file path
             std::string rawIncludeFilePath = b[i].s.substr(1, b[i].s.length() - 2);                                                         //! Include path as written in the source file
-            std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(DBG_filePath).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include directive was used in
+            std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(DBG_filePath).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include statement was used in
             std::string canonicalIncludeFilePath;                                                                                           //! Canonical version of the adjusted file path. No changes if file was not found
             try { canonicalIncludeFilePath = std::filesystem::canonical(adjustedIncludeFilePath).string(); }
             catch(std::filesystem::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }

@@ -35,14 +35,40 @@ namespace utils {
     //FIXME    ALSO WRITE WHICH MACRO CALL CREATED IT.
     //FIXME    maybe even write a raw version of the lines on the left and a replaced version of them on the right
     //FIXME
+
+    //TODO     Add part of "interest" in the error output
+    //TODO     e.g. if an include path is not valid, "#include" is the interested part, while the invalid path is the offending part
+    //TODO     color them in purple/bold_red or magenta/bold_red
+
     /**
      * @brief Prints an error to stderr, specifying the error type.
      *      This function doesn't stop the program.
-     * @param errorType The type of the error
+     * @param errorType The type of the error.
+     * @param errPos The section of the code that caused the error.
      * @param message The error message. This can contain multiple lines.
      *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
      */
-    void printError(ErrType errType, ElmCoords elmCoords, std::string message) {
+    void printError(ErrType errType, ElmCoords errPos, std::string message) {
+        printError(errType, ElmCoords(), errPos, message);
+    }
+
+
+
+
+
+
+
+
+    /**
+     * @brief Prints an error to stderr, specifying the error type.
+     *      This function doesn't stop the program.
+     * @param errorType The type of the error.
+     * @param relPos The relevant section of the code.
+     * @param errPos The section of the code that caused the error.
+     * @param message The error message. This can contain multiple lines.
+     *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
+     */
+    void printError(ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message) {
         std::cerr << ansi::bold_red;
         if(errType == ErrType::COMMAND) {
 
@@ -57,10 +83,11 @@ namespace utils {
 
 
             // Find the line in the original file and calculate the starting index of the preceding line
-            std::string s = readAndCheckFile(elmCoords.filePath);
-            ulong curLine = elmCoords.lineNum;
+            bool useRelevant = relPos.filePath.length();
+            std::string s = readAndCheckFile(errPos.filePath);
+            ulong curLine = useRelevant ? std::min(relPos.lineNum, errPos.lineNum) : errPos.lineNum;
+            ulong i       = useRelevant ? std::min(relPos.start,     errPos.start) : errPos.start;
             int linesPrinted = 0;
-            ulong i = elmCoords.start;
             while(i > 0) {
                 if(s[i] == '\n') {
                     if(linesPrinted > 0) break;
@@ -73,54 +100,81 @@ namespace utils {
 
 
             // Print location
-            ulong elmHeight = std::count(s.c_str() + elmCoords.start, s.c_str() + elmCoords.end, '\n');
-            if(elmCoords.filePath.length()) {
-                std::cerr << "    File │ " << ansi::reset << std::filesystem::canonical(elmCoords.filePath) << ansi::bold_red << "\n";
+            ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
+            if(errPos.filePath.length()) {
+                std::cerr << "    File │ " << ansi::reset << std::filesystem::canonical(errPos.filePath) << ansi::bold_red << "\n";
                 std::cerr << "    Line │ " << ansi::reset;
-                if(elmHeight == 0) std::cerr << elmCoords.lineNum;
-                else               std::cerr << "From " << elmCoords.lineNum << " to " << elmCoords.lineNum + elmHeight;
+                if(errHeight == 0) std::cerr << errPos.lineNum;
+                else               std::cerr << "From " << errPos.lineNum << " to " << errPos.lineNum + errHeight;
             }
 
 
-            // Print preceding line + preceding characters in the same line
+            // Print all the interested lines and change color according to the indices of the relevant and offending sections
             std::cerr << "\n";
             printLineNum(curLine);
-            while(i < elmCoords.start) {
+            ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
+            ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight); //! No need to check useRelevant as its line is always 0 when unused
+            const char* lastColor;
+            for(; s[i] != '\0'; ++i) {
+
+                // Calculate current color based on the current character index and print it if it differs form the last one
+                const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::cyan : ansi::reset)).c_str();
+                if(curColor != lastColor) {
+                    std::cerr << curColor;
+                    lastColor = curColor;
+                }
+
+                // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
                 printChar(s[i]);
                 if(s[i] == '\n') {
                     ++curLine;
+                    if(curLine > targetLineNum) {
+                        break;
+                    }
                     printLineNum(curLine);
                 }
-                ++i;
             }
 
 
-            // Print offending substring
-            std::cerr << ansi::bold_magenta << ansi::underline;
-            while(i < elmCoords.end + 1) {
-                printChar(s[i]);
-                if(s[i] == '\n') {
-                    ++curLine;
-                    printLineNum(curLine);
-                    std::cerr << ansi::bold_magenta << ansi::underline;  //! Re-set custom color after line indicator
-                }
-                ++i;
-            }
+            // // Print preceding line + preceding characters in the same line
+            // std::cerr << "\n";
+            // printLineNum(curLine);
+            // while(i < errPos.start) {
+            //     printChar(s[i]);
+            //     if(s[i] == '\n') {
+            //         ++curLine;
+            //         printLineNum(curLine);
+            //     }
+            //     ++i;
+            // }
 
 
-            // Print subsequent characters in the same line + subsequent line
-            std::cerr << ansi::black;
-            linesPrinted = 0;
-            while(s[i] != '\0') {
-                printChar(s[i]);
-                if(s[i] == '\n') {
-                    if(linesPrinted > 1) break;
-                    ++curLine;
-                    ++linesPrinted;
-                    if(linesPrinted < 2) printLineNum(curLine);
-                }
-                ++i;
-            }
+            // // Print offending substring
+            // std::cerr << ansi::bold_magenta << ansi::underline;
+            // while(i < errPos.end + 1) {
+            //     printChar(s[i]);
+            //     if(s[i] == '\n') {
+            //         ++curLine;
+            //         printLineNum(curLine);
+            //         std::cerr << ansi::bold_magenta << ansi::underline;  //! Re-set custom color after line indicator
+            //     }
+            //     ++i;
+            // }
+
+
+            // // Print subsequent characters in the same line + subsequent line
+            // std::cerr << ansi::black;
+            // linesPrinted = 0;
+            // while(s[i] != '\0') {
+            //     printChar(s[i]);
+            //     if(s[i] == '\n') {
+            //         if(linesPrinted > 1) break;
+            //         ++curLine;
+            //         ++linesPrinted;
+            //         if(linesPrinted < 2) printLineNum(curLine);
+            //     }
+            //     ++i;
+            // }
         }
 
 
