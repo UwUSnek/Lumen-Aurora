@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
     // Preprocessing
     auto timeStartPre = std::chrono::high_resolution_clock::now();
     std::pair<std::string, pre::LineReference> sourceCode = pre::loadSourceCode(options);
-    std::cout << sourceCode.first;
+    std::cout << pre::lineReferencedDataToString(sourceCode); //TODO make this a method of lineReferencedData
     std::chrono::duration<double> timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 

@@ -1,3 +1,6 @@
+#pragma once
+#include <string>
+#include <tuple>
 #include <vector>
 
 
@@ -10,4 +13,7 @@ namespace pre {
      *      Its value indicates the character index in the modified file in which the OG line used to start
      */
     typedef std::vector<unsigned long> LineReference;
+
+
+    std::string lineReferencedDataToString(std::pair<std::string, LineReference> b);
 }

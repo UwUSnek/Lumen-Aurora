@@ -104,6 +104,7 @@ namespace pre {
     std::pair<std::string, LineReference> startCleanupPhase(std::string b, std::string DBG_filePath) {
         std::string r;
         LineReference lineRef;
+        lineRef.push_back(0);
 
 
 
@@ -117,7 +118,7 @@ namespace pre {
             if(lct) {
                 i += lct;
                 ++curLine;
-                lineRef.push_back(i);
+                lineRef.push_back(r.length());
                 continue;
             }
 
@@ -127,18 +128,18 @@ namespace pre {
                 i += comment.first;
                 curLine += comment.second;
                 for(int j = 0; j < comment.second; ++j){
-                    lineRef.push_back(i);
+                    lineRef.push_back(r.length());
                 }
             }
 
             // Normal characters
             else {
                 r += b[i];
-                ++i;
-                if(b[i - 1] == '\n') {
+                if(b[i] == '\n') {
                     ++curLine;
-                    lineRef.push_back(i);
+                    lineRef.push_back(r.length());
                 }
+                ++i;
             }
 
             // // Check whitespace

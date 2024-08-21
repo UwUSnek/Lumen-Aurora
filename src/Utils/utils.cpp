@@ -21,10 +21,10 @@ namespace utils {
 
 
     // Prints a character.
-    static inline void printChar(char c) {
-        if(c == ' ') std::cerr << "·";
-        else if(c == '\n');
-        else std::cerr << c;
+    std::string formatChar(char c, bool useColor) {
+        /**/ if(c ==  ' ') return useColor ? ansi::black + "·" + ansi::reset : "·";
+        else if(c == '\n') return useColor ? ansi::black + "↓" + ansi::reset : "↓";
+        else return std::string(1, c);
     }
 
 
@@ -125,7 +125,7 @@ namespace utils {
                 }
 
                 // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
-                printChar(s[i]);
+                std::cerr << formatChar(s[i]);
                 if(s[i] == '\n') {
                     ++curLine;
                     if(curLine > targetLineNum) {
@@ -140,7 +140,7 @@ namespace utils {
             // std::cerr << "\n";
             // printLineNum(curLine);
             // while(i < errPos.start) {
-            //     printChar(s[i]);
+            //     std::cerr << formatChar(s[i]);
             //     if(s[i] == '\n') {
             //         ++curLine;
             //         printLineNum(curLine);
@@ -152,7 +152,7 @@ namespace utils {
             // // Print offending substring
             // std::cerr << ansi::bold_magenta << ansi::underline;
             // while(i < errPos.end + 1) {
-            //     printChar(s[i]);
+            //     std::cerr << formatChar(s[i]);
             //     if(s[i] == '\n') {
             //         ++curLine;
             //         printLineNum(curLine);
@@ -166,7 +166,7 @@ namespace utils {
             // std::cerr << ansi::black;
             // linesPrinted = 0;
             // while(s[i] != '\0') {
-            //     printChar(s[i]);
+            //     std::cerr << formatChar(s[i]);
             //     if(s[i] == '\n') {
             //         if(linesPrinted > 1) break;
             //         ++curLine;
@@ -199,7 +199,7 @@ namespace utils {
      */
     std::string readAndCheckFile(std::string fileName) {
         // Create file stream and print an error if the file cannot be opened
-        std::ifstream f(fileName);
+        std::ifstream f(fileName, std::ios::binary);
         if(!f) {
             printError(
                 utils::ErrType::PREPROCESSOR,
@@ -211,13 +211,13 @@ namespace utils {
         }
 
 
-        // Read all the lines and return a string containing all of them
-        std::string l, r;
-        while(getline(f, l)) {
-            r += l;
-            r += '\n';
-        }
-        return r;
+        // Read the contents of the file and return them as string
+        f.seekg(0, std::ios::end);              // Move file pointer to the end of the file
+        std::streamsize fileSize = f.tellg();   // Get file size in bytes
+        f.seekg(0, std::ios::beg);              // Move file pointer back to index 0
+        std::string r(fileSize, '\0');          // Preallocate the string
+        f.read(&r[0], fileSize);                // Read the whole file at once
+        return r;                               // Return the string value
     }
 }
 
