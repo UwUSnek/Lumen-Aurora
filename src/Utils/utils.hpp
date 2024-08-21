@@ -17,7 +17,9 @@ namespace utils {
 
     void printError(ErrType errType,                   ElmCoords errPos, std::string message);
     void printError(ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message);
+
     std::string readAndCheckFile(std::string fileName);
+    std::string readFile(std::ifstream &f);
 }
 
 

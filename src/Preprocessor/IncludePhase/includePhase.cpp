@@ -4,6 +4,7 @@
 #include <cstring>
 #include <filesystem>
 
+#include "Preprocessor/preprocessor.hpp"
 #include "includePhase.hpp"
 #include "Preprocessor/ElmCoords.hpp"
 #include "Preprocessor/CleanupPhase/cleanupPhase.hpp"
@@ -13,11 +14,132 @@
 
 
 
-
+//FIXME fix line references
 namespace pre {
     std::pair<std::string, LineReference> startDirectivesPhase(std::pair<std::string, LineReference> &b, std::string DBG_filePath) {
-        std::string s;
+        std::string r;
         LineReference lineRef;
+
+
+
+
+        std::string& bStr = b.first;        // Alias
+        LineReference& bRef = b.second;     // Alias
+        ulong i = 0, curLine = 0;           // The current index and line number relative to the current file
+        ulong i2 = 0, curLine2 = 0;         // The current index and line number relative to the source code of the current file and all of the files included by it
+        while(i < bStr.length()) {
+
+            // Detect include directives an replace them with the contents of the file
+            std::smatch match;
+            if(std::regex_search(bStr.cbegin() + i, bStr.cend(), match, std::regex(R"(^#include[ \t]*)"))) {
+                ElmCoords relevantCoords(DBG_filePath, 0, i, i + match[0].length()); //FIXME set line number
+                i  += match[0].length();
+                i2 += match[0].length();
+
+                // Detect specified file path
+                std::smatch filePathMatch;
+                if(std::regex_search(bStr.cbegin() + i, bStr.cend(), filePathMatch, std::regex(R"(("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
+                //                                                                                │ ╰────────────╯   │ │ ╰────────────╯   │
+                //                                                                                ╰────── file ──────╯ ╰───── module ─────╯
+                    ElmCoords filePathCoords(DBG_filePath, 0, i, i + filePathMatch[0].length()); //FIXME set line number
+                    i  += filePathMatch[0].length();
+                    i2 += filePathMatch[0].length();
+
+
+                    // File path is present
+                    if(filePathMatch[0].length() > 2) {
+                        std::string rawIncludeFilePath = filePathMatch[0].str().substr(1, filePathMatch[0].length() - 2);  //! Include path as written in the source file
+
+                        // If the included file is a standard module
+                        if(filePathMatch[0].str()[0] == '<') {
+                            //FIXME check name correctness and include the module
+                            //TODO write this part without the check and copy parts to make the preprocessor work before standard modules are implemented
+                            //TODO or maybe just check the name but don't include, since we already know what modules will be available
+                        }
+
+                        // If it is an actual file
+                        else {
+                            //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
+                            //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
+                            //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
+                            // Calculate the actual file path
+                            std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(DBG_filePath).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include statement was used in
+                            std::string canonicalIncludeFilePath;                                                                                           //! Canonical version of the adjusted file path. No changes if file was not found
+                            try { canonicalIncludeFilePath = std::filesystem::canonical(adjustedIncludeFilePath).string(); }
+                            catch(std::filesystem::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
+
+                            // Print an error if the file is a directory
+                            if(std::filesystem::is_directory(canonicalIncludeFilePath)) {
+                                printError(
+                                    utils::ErrType::PREPROCESSOR,
+                                    relevantCoords,
+                                    filePathCoords,
+                                    "Could not include the specified path: \"" + rawIncludeFilePath + "\" is a directory.\n" +
+                                    "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + "."
+                                );
+                                exit(1);
+                            }
+
+                            // Print an error if the file cannot be opened
+                            std::ifstream includeFile(canonicalIncludeFilePath);
+                            if(!includeFile) {
+                                printError(
+                                    utils::ErrType::PREPROCESSOR,
+                                    relevantCoords,
+                                    filePathCoords,
+                                    "Could not open file \"" + rawIncludeFilePath + "\": " + std::strerror(errno) + ".\n" +
+                                    "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + ".\n" +
+                                    "Make sure that the path is correct and the compiler has read access to the file."
+                                );
+                                exit(1);
+                            }
+
+                            // Copy file contents
+                            std::string fileContents = utils::readFile(includeFile);
+                            std::pair<std::string, LineReference> preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath);
+                            r += preprocessedCode.first;
+
+                            //FIXME update line references
+                        }
+                    }
+
+                    // Empty string
+                    else {
+                        utils::printError(
+                            utils::ErrType::PREPROCESSOR,
+                            relevantCoords,
+                            filePathCoords,
+                            "Empty file path in include statement.\n"
+                            "A file path must be specified"
+                        );
+                        exit(1);
+                    }
+                }
+
+                // String literal not found
+                else {
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        relevantCoords,
+                        ElmCoords(DBG_filePath, 0, i, i), //FIXME set line number
+                        "Missing file path in include statement.\n"
+                        "A valid string literal was expected, but could not be found."
+                    );
+                    exit(1); //FIXME move this to the printError function itself
+                }
+            }
+
+
+
+
+            // Copy normal characters
+            else {
+                r += bStr[i];
+                ++i;
+            }
+        }
+        //sourceFilePaths.push_back(std::filesystem::canonical(options.sourceFile)); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
+
 
 
 
@@ -90,8 +212,8 @@ namespace pre {
         //     }
         // }
 
-        // return std::pair<std::String, LineReference>(s, lineRef); //FIXME actually return the output and not a copy of the input
-        return b;
+        return std::pair<std::string, LineReference>(r, lineRef); //FIXME actually return the output and not a copy of the input
+        // return b;
     }
 
 

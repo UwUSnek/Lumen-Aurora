@@ -8,7 +8,7 @@ import <thread>
 /*test comment*/aa#inclu\
 de/*test*/"\
 "
-'"'//TODO write unit tests. test each error case indipendently. maybe automate input using strings and a single file
+'"'//TODO write unit tests. test each error case indipendently. maybe automate input using strings and a single actual input file
 
 
 // test "comment"\""\

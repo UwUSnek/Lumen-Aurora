@@ -194,10 +194,22 @@ namespace utils {
     /**
      * @brief Reads a single source file and returns its contents as a string.
      *     Prints an error message if the file cannot be opened or doesn't exist.
-     * @param fileName The path to the file
-     * @return The contents of the file
+     * @param fileName The path to the file.
+     * @return The contents of the file as a string.
      */
     std::string readAndCheckFile(std::string fileName) {
+        // Print an error if the file is a directory
+        if(std::filesystem::is_directory(fileName)) {
+            printError(
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(),
+                "Could not open the specified file: \"" + fileName + "\": is a directory.\n" +
+                "File path was interpreted as: " + ansi::white + "\"" + std::filesystem::canonical(fileName).string() + "\"" + ansi::reset + ".\n" +
+                "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
+            );
+            exit(1);
+        }
+
         // Create file stream and print an error if the file cannot be opened
         std::ifstream f(fileName, std::ios::binary);
         if(!f) {
@@ -212,6 +224,22 @@ namespace utils {
 
 
         // Read the contents of the file and return them as string
+        return readFile(f);
+    }
+
+
+
+
+
+
+
+
+    /**
+     * @brief Reads the contents of a file without performing any check or printing errors.
+     * @param f The open file stream to read from.
+     * @return The contents of the file as a string.
+     */
+    std::string readFile(std::ifstream &f) {
         f.seekg(0, std::ios::end);              // Move file pointer to the end of the file
         std::streamsize fileSize = f.tellg();   // Get file size in bytes
         f.seekg(0, std::ios::beg);              // Move file pointer back to index 0

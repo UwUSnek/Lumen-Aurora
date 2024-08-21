@@ -14,16 +14,34 @@
 
 
 namespace pre {
+    std::vector<std::string> sourceFilePaths;
+
+
+
 
     /**
      * @brief Loads the source file, including all of the files included by it and processes any preprocessor directives.
      * @param options The options.
-     * @return The contents of the source file as a StructuredSource.
+     * @return The contents of the source file as a StructuredSource. //FIXME fix all comments that referenc StructuredSource s
      */
     std::pair<std::string, LineReference> loadSourceCode(Options& options) {
         std::string s = utils::readAndCheckFile(options.sourceFile);
-        std::pair<std::string, LineReference> r1 = startCleanupPhase(s, options.sourceFile);
-        std::pair<std::string, LineReference> r2 = startDirectivesPhase(r1, options.sourceFile);
+        return loadSourceCode(s, options.sourceFile);
+    }
+
+
+
+
+    /**
+     * @brief Load the source code, including all of the files included by it and processes any preprocessor directives.
+     * @param b The source code as a string.
+     * @param filePath The path of the original source code file.
+     * @return std::pair<std::string, LineReference>.
+     */
+    std::pair<std::string, LineReference> loadSourceCode(std::string b, std::string filePath) {
+        sourceFilePaths.push_back(std::filesystem::canonical(filePath)); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
+        std::pair<std::string, LineReference> r1 = startCleanupPhase(b, filePath);
+        std::pair<std::string, LineReference> r2 = startDirectivesPhase(r1, filePath);
         return r2;
     }
 
