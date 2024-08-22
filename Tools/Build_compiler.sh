@@ -12,7 +12,7 @@ g++                                                            \
     ./src/Preprocessor/IntermediateCodeFormat.cpp              \
     ./src/Preprocessor/CleanupPhase/cleanupPhase.cpp           \
     ./src/Preprocessor/IncludePhase/includePhase.cpp           \
-    ./src/Preprocessor/CleanupPhase/LineReference.cpp          \
+    ./src/Preprocessor/CleanupPhase/SegmentedCleanSource.cpp   \
 -std=c++20                                                     \
 -O0 -g                                                         \
 -I                                                             \

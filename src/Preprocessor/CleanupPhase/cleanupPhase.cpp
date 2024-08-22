@@ -2,7 +2,7 @@
 #include "cleanupPhase.hpp"
 #include "WhitespaceInfo.hpp"
 #include "Preprocessor/ElmCoords.hpp"
-#include "LineReference.hpp"
+#include "SegmentedCleanSource.hpp"
 
 
 
@@ -38,7 +38,7 @@ namespace pre {
      * @return A pair containing the length of the comment and the number of additional lines it occupies, including the length of the opening and closing character sequences (including \\n but excluding \0).
      *     If the buffer doesn't contain a comment that starts at index <index>, (0, 0) is returned.
      */
-    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex) {
+    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DBG_filePathIndex) {
         if(b[index] != '/') return std::pair<ulong, ulong>(0, 0);
 
 
@@ -101,157 +101,55 @@ namespace pre {
     //FIXME or recycle it for the tokenization phase
 
     //FIXME use a stream and process the steps concurrently
-    LineReferencedSource startCleanupPhase(std::string b, ulong DBG_filePathIndex) {
-        LineReferencedSource r;
+    SegmentedCleanSource startCleanupPhase(std::string b, ulong DBG_filePathIndex) {
+        SegmentedCleanSource r;
 
 
 
-        ulong i = 0, curLine = 0;   // Current index and line number
-        ulong finalLineLen = 0;     // Final length of the current line
-        // ulong w = 0, h = 0;         // Length and height of the variable-length element
-        // std::string trueElm;        // Clean value of the varaible-length element
+
+        ulong i = 0;         // Current index and line number relative to the raw data
+        ulong sgmStart = 0;  // The starting index of the last variable length segment
         while(i < b.length()) {
 
 
             // LCTs
             ulong lct = checkLct(b, i);
             if(lct) {
-                r.ref.push_back(LineReference(i + 1 - finalLineLen, finalLineLen, curLine, DBG_filePathIndex));
-                finalLineLen = 0;
+                // Push last segment and deleted segment
+                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, DBG_filePathIndex, false));
+                r.sgm.push_back(SourceSegment(i, lct, DBG_filePathIndex, true));
 
+                // Update indices
                 i += lct;
-                ++curLine;
+                sgmStart = i;
                 continue;
             }
 
 
             // Comments
-            std::pair<ulong, ulong> comment = countCommentCharacters(b, i, curLine, DBG_filePathIndex);
+            std::pair<ulong, ulong> comment = countCommentCharacters(b, i, DBG_filePathIndex);
             if(comment.first > 0) {
-                if(comment.second > 0) {
-                    // Push current line
-                    r.ref.push_back(LineReference(i + 1 - finalLineLen, finalLineLen, curLine, DBG_filePathIndex));
-                    ++curLine;
-                    finalLineLen = 0;
-                }
 
-                // Push extra empty lines
-                for(int j = 0; j + 1 < comment.second; ++j){  //! comment.second - 1 overflows into the negatives
-                    r.ref.push_back(LineReference(i + 1 - finalLineLen, 0, curLine, DBG_filePathIndex));
-                    ++curLine;
-                }
+                // Push last segment and deleted segment
+                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart,  DBG_filePathIndex, false));
+                r.sgm.push_back(SourceSegment(i, comment.first, DBG_filePathIndex, true));
 
+                // Update indices
                 i += comment.first;
+                sgmStart = i;
             }
 
 
             // Normal characters
             else {
                 r.str += b[i];
-                ++finalLineLen;
-
-                if(b[i] == '\n') {
-                    r.ref.push_back(LineReference(i + 1 - finalLineLen, finalLineLen, curLine, DBG_filePathIndex));
-                    finalLineLen = 0;
-                    ++curLine;
-                }
                 ++i;
             }
-
-
-            // // Check whitespace
-            // WhitespaceInfo wsRes = countWhitespaceCharacters(rawCode, i, curLine, DBG_filePath);
-            // if(wsRes.w > 0) {
-
-            //     // Push previous variable-length element if present
-            //     if(w > 0) {
-            //         if(wsRes.isBreaking) {
-            //             r.elms.push_back(ICF_Elm(
-            //                 ICF_ElmType::OTHER,
-            //                 trueElm,
-            //                 rawCode.substr(i - w, w),
-            //                 h,
-            //                 curLine, i
-            //             ));
-            //             trueElm.clear();
-            //             w = 0;
-            //             h = 0;
-            //         }
-            //         else {
-            //             h += wsRes.h;
-            //             w += wsRes.w;
-            //         }
-            //     }
-
-            //     // Update counters
-            //     i += wsRes.w;
-            //     curLine += wsRes.h;
-            // }
-
-
-
-
-            // else {
-                // ParsingResult res;
-
-                // // Check for known elements and save the result
-                // if((res = parseCharLiteral(rawCode, i, curLine, DBG_filePath)).elmType == ICF_ElmType::NONE)
-                // if((res =  parseStrLiteral(rawCode, i, curLine, DBG_filePath)).elmType == ICF_ElmType::NONE)
-                // ;
-
-
-                // // If a normal character is found
-                // if(res.elmType == ICF_ElmType::NONE) {
-                //     trueElm += rawCode[i];
-                //     ++w;  // Increase the variable-length element value
-                //     ++i;  // Skip the character
-                // }
-
-
-                // // If not
-                // else {
-                //     // Push past variable-length element
-                //     if(w > 0) {
-                //         r.elms.push_back(ICF_Elm(
-                //             ICF_ElmType::OTHER,
-                //             trueElm,
-                //             rawCode.substr(i - w, w),
-                //             h,
-                //             curLine, i
-                //         ));
-                //         trueElm.clear();
-                //         w = 0;        // Set the variable-length element width back to 0
-                //         h = 0;        // Set the variable-length element height back to 0
-                //     }
-
-
-                //     // Push current parsed element
-                //     r.elms.push_back(ICF_Elm(
-                //         res.elmType,
-                //         res.finalValue,
-                //         res.trueValue,
-                //         res.height,
-                //         curLine, i
-                //     ));
-                //     i += res.trueValue.length();
-                //     curLine += res.height;  // Add the additional element height to the line counter
-                // }
-            // }
         }
 
 
-
-
-        // Push last variable-length element if present
-        // if(w > 0) {
-        //     r.elms.push_back(ICF_Elm(
-        //         ICF_ElmType::OTHER,
-        //         trueElm,
-        //         rawCode.substr(i - w, w),
-        //         h,
-        //         curLine, i
-        //     ));
-        // }
+        // If present, push leftover characters as last segment
+        if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart,  DBG_filePathIndex, false));
 
 
 
@@ -266,33 +164,6 @@ namespace pre {
 
 
 
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
-//TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
 //TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
 //TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
 //TODO USE THESE IN THE TOKENIZER //FIXME REMOVE LCT AND COMMENT CHECKS FROM WHITESPACE COUNTER
@@ -543,30 +414,6 @@ namespace pre {
     //     r.elmType = ICF_ElmType::CHAR;
     //     return r;
     // }
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
-//TODO USE THESE IN THE TOKENIZER
 //TODO USE THESE IN THE TOKENIZER
 //TODO USE THESE IN THE TOKENIZER
 //TODO USE THESE IN THE TOKENIZER

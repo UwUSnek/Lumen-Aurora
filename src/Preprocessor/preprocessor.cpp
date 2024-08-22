@@ -22,9 +22,9 @@ namespace pre {
     /**
      * @brief Loads the source file, including all of the files included by it and processes any preprocessor directives.
      * @param options The options.
-     * @return The contents of the source file as a LineReferencedSource. //FIXME fix all comments that reference StructuredSource s
+     * @return The contents of the source file as a SegmentedCleanSource. //FIXME fix all comments that reference StructuredSource s
      */
-    LineReferencedSource loadSourceCode(Options& options) {
+    SegmentedCleanSource loadSourceCode(Options& options) {
         std::string s = utils::readAndCheckFile(options.sourceFile);
         return loadSourceCode(s, options.sourceFile);
     }
@@ -36,9 +36,9 @@ namespace pre {
      * @brief Load the source code, including all of the files included by it and processes any preprocessor directives.
      * @param b The source code as a string.
      * @param filePath The path of the original source code file.
-     * @return The contents of the source file as a LineReferencedSource.
+     * @return The contents of the source file as a SegmentedCleanSource.
      */
-    LineReferencedSource loadSourceCode(std::string b, std::string filePath) {
+    SegmentedCleanSource loadSourceCode(std::string b, std::string filePath) {
         sourceFilePaths.push_back(std::filesystem::canonical(filePath)); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
         //FIXME ^automatically fish up cached files if found. loop through them (for now)
         //FIXME                                               ^ use a hash map to save the paths of the preprocessed files
@@ -46,9 +46,9 @@ namespace pre {
         //FIXME CHECK CIRCULAR DEPENDENCIES
         //FIXME SAFE INCLUDE STACK
 
-        LineReferencedSource r1 = startCleanupPhase(b, sourceFilePaths.size() - 1);
-        // LineReferencedSource r2 = startDirectivesPhase(r1, sourceFilePaths.size() - 1); //FIXME rename to startInclidePhase
-        LineReferencedSource r2 = r1; //FIXME replace with directive phase call
+        SegmentedCleanSource r1 = startCleanupPhase(b, sourceFilePaths.size() - 1);
+        // SegmentedCleanSource r2 = startDirectivesPhase(r1, sourceFilePaths.size() - 1); //FIXME rename to startInclidePhase
+        SegmentedCleanSource r2 = r1; //FIXME replace with directive phase call
         return r2;
     }
 

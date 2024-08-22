@@ -16,22 +16,22 @@
 
 // //FIXME fix line references
 // namespace pre {
-//     LineReferencedSource startDirectivesPhase(std::pair<std::string, LineReferencedSource> &b, std::string DBG_filePath) {
+//     SegmentedCleanSource startDirectivesPhase(std::pair<std::string, SegmentedCleanSource> &b, std::string DBG_filePath) {
 //         std::string r;
-//         LineReferencedSource lineRef;
+//         SegmentedCleanSource lineRef;
 //         lineRef.push_back(0);
 
 
 
 //         std::string& bStr = b.first;        // Alias
-//         LineReferencedSource& bRef = b.second;     // Alias
+//         SegmentedCleanSource& bRef = b.second;     // Alias
 //         ulong lastLineStart = 0;            // TODO comment
 //         ulong i = 0, curLine = 0;           // The current index and line number relative to the current file
 //         ulong i2 = 0/*, curLine2 = 0*/;         // The current index and line number relative to the source code of the current file and all of the files included by it
 //         while(i < bStr.length()) {
 
 //             // Find original line using the current index and current line
-//             while(i == bRef[curLine]) {  //TODO maybe make this loop into an actual function. there is one in the print function "lineReferencedDataToString" as well
+//             while(i == bRef[curLine]) {  //TODO maybe make this loop into an actual function. there is one in the print function "SourceSegmentdDataToString" as well
 //                 // if(curLine) r += "\n";
 //                 ++curLine;
 //                 lineRef.push_back(i2);
@@ -105,11 +105,11 @@
 
 //                             // Copy file contents
 //                             std::string fileContents = utils::readFile(includeFile);
-//                             std::pair<std::string, LineReferencedSource> preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath); //FIXME run concurrently
+//                             std::pair<std::string, SegmentedCleanSource> preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath); //FIXME run concurrently
 //                             // r += preprocessedCode.first;
 //                             std::string& ps = preprocessedCode.first;
 //                             for(ulong j = 0; j < ps.length(); ++j) {
-//                                 // while(i == bRef[curLine]) {  //TODO maybe make this loop into an actual function. there is one in the print function "lineReferencedDataToString" as well
+//                                 // while(i == bRef[curLine]) {  //TODO maybe make this loop into an actual function. there is one in the print function "SourceSegmentdDataToString" as well
 //                                     // if(curLine) r += "\n";
 //                                     // ++curLine;
 //                                     // ++curLine2;
@@ -231,7 +231,7 @@
 //         //     }
 //         // }
 
-//         return std::pair<std::string, LineReferencedSource>(r, lineRef); //FIXME actually return the output and not a copy of the input
+//         return std::pair<std::string, SegmentedCleanSource>(r, lineRef); //FIXME actually return the output and not a copy of the input
 //         // return b;
 //     }
 

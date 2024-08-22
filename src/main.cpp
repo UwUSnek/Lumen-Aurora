@@ -6,7 +6,7 @@
 
 #include "Options.hpp"
 #include "Preprocessor/preprocessor.hpp"
-#include "Preprocessor/CleanupPhase/LineReference.hpp"
+#include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
 
 
 
@@ -43,8 +43,8 @@ int main(int argc, char* argv[]){
     //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
     // Preprocessing
     auto timeStartPre = std::chrono::high_resolution_clock::now();
-    pre::LineReferencedSource sourceCode = pre::loadSourceCode(options);
-    std::cout << sourceCode.toString();
+    pre::SegmentedCleanSource sourceCode = pre::loadSourceCode(options);
+    std::cout << sourceCode.toString() << "\n";
     std::chrono::duration<double> timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 
