@@ -8,7 +8,7 @@
 
 namespace pre {
     ulong checkLct(std::string b, ulong index);
-    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
+    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DEBUG_curLine, ulong DBG_filePathIndex);
     // WhitespaceInfo       countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
 
 
@@ -16,5 +16,5 @@ namespace pre {
     // ParsingResult parseCharLiteral(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
 
 
-    std::pair<std::string, LineReference> startCleanupPhase(std::string b, std::string filePath);
+    LineReferencedSource startCleanupPhase(std::string b, ulong DBG_filePathIndex);
 }

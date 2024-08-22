@@ -3,22 +3,17 @@
 
 
 
+
 namespace pre {
-    std::string lineReferencedDataToString(std::pair<std::string, LineReference> b) {
+    std::string LineReferencedSource::toString() {
         std::string r;
-
-        ulong lastLineStart = 0;
-        ulong i = 0, curLine = 0;
-        while(i < b.first.length()) {
-            while(i == b.second[curLine]) {
-                if(curLine) r += "\n";
-                ++curLine;
-                r += std::to_string(curLine) + " | ";
+        for(ulong i = 0; i < ref.size(); ++i) {
+            if(i) r += "\n";
+            r += "F" + std::to_string(ref[i].OG_fileIndex) + " L" + std::to_string(ref[i].OG_lineNum) + " │ ";
+            for(ulong j = ref[i].start; j < ref[i].start + ref[i].len; ++j) {
+                r += utils::formatChar(str[j], true);
             }
-            r += utils::formatChar(b.first[i], true);
-            ++i;
         }
-
         r += "\n";
         return r;
     }

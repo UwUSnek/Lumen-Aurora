@@ -38,7 +38,7 @@ namespace pre {
      * @return A pair containing the length of the comment and the number of additional lines it occupies, including the length of the opening and closing character sequences (including \\n but excluding \0).
      *     If the buffer doesn't contain a comment that starts at index <index>, (0, 0) is returned.
      */
-    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DBG_curLine, std::string DBG_filePath) {
+    std::pair<ulong, ulong> countCommentCharacters(std::string b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex) {
         if(b[index] != '/') return std::pair<ulong, ulong>(0, 0);
 
 
@@ -101,46 +101,63 @@ namespace pre {
     //FIXME or recycle it for the tokenization phase
 
     //FIXME use a stream and process the steps concurrently
-    std::pair<std::string, LineReference> startCleanupPhase(std::string b, std::string DBG_filePath) {
-        std::string r;
-        LineReference lineRef;
-        lineRef.push_back(0);
+    LineReferencedSource startCleanupPhase(std::string b, ulong DBG_filePathIndex) {
+        LineReferencedSource r;
 
 
 
-        ulong i = 0, curLine = 1;   // Current index and line number
+        ulong i = 0, curLine = 0;   // Current index and line number
+        ulong finalLineLen = 0;     // Final length of the current line
         // ulong w = 0, h = 0;         // Length and height of the variable-length element
         // std::string trueElm;        // Clean value of the varaible-length element
         while(i < b.length()) {
 
+
             // LCTs
             ulong lct = checkLct(b, i);
             if(lct) {
+                r.ref.push_back(LineReference(i + 1 - finalLineLen, finalLineLen, curLine, DBG_filePathIndex));
+                finalLineLen = 0;
+
                 i += lct;
                 ++curLine;
-                lineRef.push_back(r.length());
                 continue;
             }
 
+
             // Comments
-            std::pair<ulong, ulong> comment = countCommentCharacters(b, i, curLine, DBG_filePath);
+            std::pair<ulong, ulong> comment = countCommentCharacters(b, i, curLine, DBG_filePathIndex);
             if(comment.first > 0) {
-                i += comment.first;
-                curLine += comment.second;
-                for(int j = 0; j < comment.second; ++j){
-                    lineRef.push_back(r.length());
+                if(comment.second > 0) {
+                    // Push current line
+                    r.ref.push_back(LineReference(i + 1 - finalLineLen, finalLineLen, curLine, DBG_filePathIndex));
+                    ++curLine;
+                    finalLineLen = 0;
                 }
+
+                // Push extra empty lines
+                for(int j = 0; j + 1 < comment.second; ++j){  //! comment.second - 1 overflows into the negatives
+                    r.ref.push_back(LineReference(i + 1 - finalLineLen, 0, curLine, DBG_filePathIndex));
+                    ++curLine;
+                }
+
+                i += comment.first;
             }
+
 
             // Normal characters
             else {
-                r += b[i];
+                r.str += b[i];
+                ++finalLineLen;
+
                 if(b[i] == '\n') {
+                    r.ref.push_back(LineReference(i + 1 - finalLineLen, finalLineLen, curLine, DBG_filePathIndex));
+                    finalLineLen = 0;
                     ++curLine;
-                    lineRef.push_back(r.length());
                 }
                 ++i;
             }
+
 
             // // Check whitespace
             // WhitespaceInfo wsRes = countWhitespaceCharacters(rawCode, i, curLine, DBG_filePath);
@@ -239,7 +256,7 @@ namespace pre {
 
 
 
-        return std::pair<std::string, LineReference>(r, lineRef);
+        return r;
     }
 
 

@@ -43,8 +43,8 @@ int main(int argc, char* argv[]){
     //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
     // Preprocessing
     auto timeStartPre = std::chrono::high_resolution_clock::now();
-    std::pair<std::string, pre::LineReference> sourceCode = pre::loadSourceCode(options);
-    std::cout << pre::lineReferencedDataToString(sourceCode); //TODO make this a method of lineReferencedData
+    pre::LineReferencedSource sourceCode = pre::loadSourceCode(options);
+    std::cout << sourceCode.toString();
     std::chrono::duration<double> timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 
