@@ -46,9 +46,8 @@ namespace pre {
         //FIXME CHECK CIRCULAR DEPENDENCIES
         //FIXME SAFE INCLUDE STACK
 
-        SegmentedCleanSource r1 = startCleanupPhase(b, sourceFilePaths.size() - 1);
-        // SegmentedCleanSource r2 = startDirectivesPhase(r1, sourceFilePaths.size() - 1); //FIXME rename to startInclidePhase
-        SegmentedCleanSource r2 = r1; //FIXME replace with directive phase call
+        SegmentedCleanSource r1 = startCleanupPhase(b,  sourceFilePaths.size() - 1);
+        SegmentedCleanSource r2 = startIncludePhase(r1, sourceFilePaths.size() - 1);
         return r2;
     }
 

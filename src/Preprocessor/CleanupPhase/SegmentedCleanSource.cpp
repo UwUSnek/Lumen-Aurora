@@ -21,7 +21,7 @@ namespace pre {
 
                 // Open original file and jump to the segment's starting index
                 std::ifstream OG_f(sourceFilePaths[sgm[i].OG_fileIndex], std::ios::binary);
-                OG_f.seekg(sgm[i].start, std::ios::beg);
+                OG_f.seekg(sgm[i].OG_start, std::ios::beg);
 
                 // Print every character one by one
                 r << ansi::black;
