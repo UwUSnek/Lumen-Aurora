@@ -107,7 +107,7 @@ namespace pre {
 
 
 
-        ulong i = 0;                // Current index and line number relative to the raw data
+        ulong i = 0;                // Current index relative to the raw data
         ulong sgmStart = 0;         // The starting index of the last misc segment
         ulong curLine = 0;          // The current line number relative to the raw data
         ulong sgmStartLine = 0;     // The number of the line in which the last misc segment starts, relative to the raw data
@@ -149,8 +149,10 @@ namespace pre {
             // Normal characters
             else {
                 r.str += b[i];
-                ++i;
+                r.OG_i.push_back(i);
+                r.OG_l.push_back(curLine);
                 if(b[i] == '\n') ++curLine;
+                ++i;
             }
         }
 
