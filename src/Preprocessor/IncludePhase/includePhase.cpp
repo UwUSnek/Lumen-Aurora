@@ -28,7 +28,7 @@ namespace pre {
 
             // If an include directive is detected, replace it with the contents of the file
             std::smatch match;
-            if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include[ \t]*)"))) {
+            if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) {
                 ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i + match[0].length() - 1].i);
                 i += match[0].length(); //FIXME ^ pass the index to ElmCoords instead of the string value
 
