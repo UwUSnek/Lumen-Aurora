@@ -6,21 +6,31 @@
 
 
 
-namespace pre {
-    struct SourceSegment {
-        ulong OG_start, len;    // The start index and length of the segment, relative to the original file
-        ulong OG_lineNum;       // The number of the line in which the segment starts, relative to the original file
-        ulong OG_fileIndex;     // The index of the file path list in which the path to the original file is saved
-        bool isRemoved;         // Whether the segment was removed during the cleanup phase
 
-        SourceSegment(ulong _OG_start, ulong _len, ulong _OG_lineNum, ulong _OG_fileIndex, bool _isRemoved) :
-            OG_start(_OG_start),
-            len(_len),
-            OG_lineNum(_OG_lineNum),
-            OG_fileIndex(_OG_fileIndex),
-            isRemoved(_isRemoved) {
+
+
+
+namespace pre {
+    /**
+     * @brief A structure that contains informations about a single character
+     */
+    struct CleanSourceData {
+        // CleanSourceType type;  // The type of the segment the character is part of
+        ulong i;               // The original index of the character in the str buffer
+        ulong l;               // The original line number of the character in the str buffer
+        ulong f;               // The index of the original file of the character in the str buffer
+
+        CleanSourceData(ulong _i, ulong _l, ulong _f) :
+            i(_i),
+            l(_l),
+            f(_f) {
         }
     };
+
+
+
+
+
 
 
 
@@ -31,8 +41,8 @@ namespace pre {
      *      If the original file is available, it allows every character of the code to be traced back to its original position.
      */
     struct SegmentedCleanSource {
-        std::string str;
-        std::vector<SourceSegment> sgm;
+        std::string str;                    // The clean string value
+        std::vector<CleanSourceData> og;    // Informations about each character
 
         std::string toString();
     };

@@ -66,10 +66,6 @@ namespace pre {
 
             // Single character closing sequences (End of file or single line comments)
             else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
-                // if(b[i] == '\n') { //TODO remove this if the code works (this part was meant to count the \n at the end as comment)
-                //     ++h;
-                //     ++i;
-                // }
                 break;
             }
 
@@ -97,70 +93,39 @@ namespace pre {
 
 
 
-    //FIXME REMOVE INTERMEDIATE CODE FORMAT IF NOT NEEDED
-    //FIXME or recycle it for the tokenization phase
 
     //FIXME use a stream and process the steps concurrently
     SegmentedCleanSource startCleanupPhase(std::string b, ulong DBG_filePathIndex) {
         SegmentedCleanSource r;
 
 
-
-
-        ulong i = 0;                // Current index and line number relative to the raw data
-        ulong sgmStart = 0;         // The starting index of the last misc segment
+        ulong i = 0;                // Current index relative to the raw data
         ulong curLine = 0;          // The current line number relative to the raw data
-        ulong sgmStartLine = 0;     // The number of the line in which the last misc segment starts, relative to the raw data
         while(i < b.length()) {
 
-
-            // LCTs
+            // Skip LCTs
             ulong lct = checkLct(b, i);
             if(lct) {
-                // Push last segment and deleted segment
-                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, sgmStartLine, DBG_filePathIndex, false));
-                r.sgm.push_back(SourceSegment(i, lct, curLine, DBG_filePathIndex, true));
-
-                // Update indices
                 i += lct;
-                sgmStart = i;
                 ++curLine;
-                sgmStartLine = curLine;
                 continue;
             }
 
-
-            // Comments
+            // Skip comments
             std::pair<ulong, ulong> comment = countCommentCharacters(b, i, DBG_filePathIndex);
             if(comment.first > 0) {
-
-                // Push last segment and deleted segment
-                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, sgmStartLine, DBG_filePathIndex, false));
-                r.sgm.push_back(SourceSegment(i, comment.first, curLine, DBG_filePathIndex, true));
-
-                // Update indices
                 i += comment.first;
-                sgmStart = i;
                 curLine += comment.second;
-                sgmStartLine = curLine;
             }
 
-
-            // Normal characters
+            // Save normal characters
             else {
                 r.str += b[i];
-                ++i;
+                r.og.push_back(CleanSourceData(i, curLine, DBG_filePathIndex));
                 if(b[i] == '\n') ++curLine;
+                ++i;
             }
         }
-
-
-        // If present, push leftover characters as last segment
-        if(sgmStart < b.length()) {
-            r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, sgmStartLine, DBG_filePathIndex, false));
-        }
-
-
 
 
         return r;
