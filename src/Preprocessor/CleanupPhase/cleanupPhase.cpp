@@ -107,8 +107,10 @@ namespace pre {
 
 
 
-        ulong i = 0;         // Current index and line number relative to the raw data
-        ulong sgmStart = 0;  // The starting index of the last variable length segment
+        ulong i = 0;                // Current index and line number relative to the raw data
+        ulong sgmStart = 0;         // The starting index of the last misc segment
+        ulong curLine = 0;          // The current line number relative to the raw data
+        ulong sgmStartLine = 0;     // The number of the line in which the last misc segment starts, relative to the raw data
         while(i < b.length()) {
 
 
@@ -116,12 +118,14 @@ namespace pre {
             ulong lct = checkLct(b, i);
             if(lct) {
                 // Push last segment and deleted segment
-                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, DBG_filePathIndex, false));
-                r.sgm.push_back(SourceSegment(i, lct, DBG_filePathIndex, true));
+                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, sgmStartLine, DBG_filePathIndex, false));
+                r.sgm.push_back(SourceSegment(i, lct, curLine, DBG_filePathIndex, true));
 
                 // Update indices
                 i += lct;
                 sgmStart = i;
+                ++curLine;
+                sgmStartLine = curLine;
                 continue;
             }
 
@@ -131,12 +135,14 @@ namespace pre {
             if(comment.first > 0) {
 
                 // Push last segment and deleted segment
-                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart,  DBG_filePathIndex, false));
-                r.sgm.push_back(SourceSegment(i, comment.first, DBG_filePathIndex, true));
+                if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, sgmStartLine, DBG_filePathIndex, false));
+                r.sgm.push_back(SourceSegment(i, comment.first, curLine, DBG_filePathIndex, true));
 
                 // Update indices
                 i += comment.first;
                 sgmStart = i;
+                curLine += comment.second;
+                sgmStartLine = curLine;
             }
 
 
@@ -144,12 +150,15 @@ namespace pre {
             else {
                 r.str += b[i];
                 ++i;
+                if(b[i] == '\n') ++curLine;
             }
         }
 
 
         // If present, push leftover characters as last segment
-        if(sgmStart < i) r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart,  DBG_filePathIndex, false));
+        if(sgmStart < b.length()) {
+            r.sgm.push_back(SourceSegment(sgmStart, i - sgmStart, sgmStartLine, DBG_filePathIndex, false));
+        }
 
 
 

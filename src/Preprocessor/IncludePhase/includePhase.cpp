@@ -16,62 +16,50 @@
 
 //FIXME fix line references
 namespace pre {
-    //TODO SPLIT FUNCTION INTO MAYN MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MAYN MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MAYN MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MAYN MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MAYN MORE READABLE FUNCTIONS
+    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
+    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
+    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
+    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
+    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
     SegmentedCleanSource startIncludePhase(SegmentedCleanSource &b, ulong DBG_filePathIndex) {
         SegmentedCleanSource r;
 
 
 
 
-        // std::string& bStr = b.first;        // Alias
-        // SegmentedCleanSource& bRef = b.second;     // Alias
-        // ulong lastLineStart = 0;            // T.ODO comment //FIXME prob remove this variable
-        ulong i = 0, sgmi = 0, curLine = 0;           // The current index and line number relative to the current file //TODO update comment
-        // ulong sgmStart = 0; // The starting index of the current segment
+        ulong i = 0;                // The character index relative to the current file, not including included files
+        ulong sgmi = 0;             // The character index relative to the original version of the current file, not including included files
+        ulong OG_curLine = 0;       // The current line number relative to the original version of the current file, not including included files
         ulong OG_i = 0;
-        // ulong i2 = 0/*, curLine2 = 0*/;         // The current index and line number relative to the source code of the current file and all of the files included by it
         while(i < b.str.length()) {
 
-
             // Push precending deleted elements
-            while(b.sgm[sgmi].isRemoved) {      // For each preceding deleted element
+            while(sgmi < b.sgm.size() && b.sgm[sgmi].isRemoved) {      // For each preceding deleted element
                 r.sgm.push_back(b.sgm[sgmi]);       // Push it
                 OG_i += r.sgm[sgmi].len;            // Update original character index counter
                 ++sgmi;                             // Increase segment counter
             }
-            //FIXME go to next segment if reached
 
-
-            // // Find original line using the current index and current line
-            // while(i == bRef[curLine]) {  //TODO maybe make this loop into an actual function. there is one in the print function "SourceSegmentdDataToString" as well
-            //     // if(curLine) r += "\n";
-            //     ++curLine;
-            //     lineRef.push_back(i2);
-            //     // ++curLine2;
-            // }
-
+            //FIXME check if line number in errors at line 0 is correct
             // If an include directive is detected, replace it with the contents of the file
+            ulong includeLineNum = b.sgm[sgmi].OG_lineNum;
+            for(ulong j = OG_i; j > b.sgm[sgmi].OG_start; --j) if(b.str[j] == '\n') ++includeLineNum;
             std::smatch match;
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include[ \t]*)"))) {
-                ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], 0, i, i + match[0].length()); //FIXME set line number
-                i    += match[0].length();
+
+                ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], includeLineNum, OG_i, OG_i + match[0].length()); //FIXME set line numberF  //FIXME FIX ELEMENT WIDTH
+                i += match[0].length(); //FIXME ^ pass the index to ElmCoords instead of the string value
                 // i2 += match[0].length();
 
-                // Detect specified file path
-                std::smatch filePathMatch;
-                if(std::regex_search(b.str.cbegin() + i, b.str.cend(), filePathMatch, std::regex(R"(("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
-                //                                                                                  │ ╰────────────╯   │ │ ╰────────────╯   │
-                //                                                                                  ╰────── file ──────╯ ╰───── module ─────╯
-                    ElmCoords filePathCoords(sourceFilePaths[DBG_filePathIndex], 0, i, i + filePathMatch[0].length()); //FIXME set line number
-                    i    += filePathMatch[0].length();
+                // Detect specified file path                                                 //     ╭────── file ──────╮ ╭───── module ─────╮
+                std::smatch filePathMatch;                                                    //     │ ╭────────────╮   │ │ ╭────────────╮   │
+                if(std::regex_search(b.str.cbegin() + i, b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
+                    ElmCoords filePathCoords(sourceFilePaths[DBG_filePathIndex], includeLineNum, OG_i + match[0].length(), OG_i + match[0].length() + filePathMatch[0].length()); //FIXME set line number  //FIXME FIX ELEMENT WIDTH
+                    i += filePathMatch[0].length();
 
 
 
-
+                    // FIXME check if this actually works
                     // Catch up with the segment index of the current file
                     //! (If the include statament had comments or LCTs in it, OG_i and sgmi need to be updated to account for them)
                     //! At this stage, OG_i points to the first character of the include statement
@@ -82,7 +70,7 @@ namespace pre {
                     //     ╰──── 0 ────╯╰──── 1 ────╯╰─ 0 ─╯╰─ 0 ─╯╰─────── 1 ────────╯╰───── 0 ─────╯
                     //                  ╰─┬──╯╰──┬──╯              ╰─────┬────╯╰──┬───╯
                     //            lRemainder    lIncludeLen     rIncludeLen      rRemainder
-                    //!                                         ^ == includeLen after skipping middle segments
+                    //!                                         ▲  == includeLen after skipping middle segments
 
 
                     // Push left remainder if present
@@ -100,7 +88,7 @@ namespace pre {
                         ++sgmi;
 
                         // Skip middle segments without pushing them
-                        while(b.sgm[sgmi].len < includeLen) {
+                        while(sgmi < b.sgm.size() && b.sgm[sgmi].len < includeLen) {
                             if(!b.sgm[sgmi].isRemoved) {
                                 includeLen -= b.sgm[sgmi].len;
                             }
@@ -109,7 +97,7 @@ namespace pre {
                         }
 
                         // Skip right part if present (and check right remainder)
-                        if(includeLen > 0) {
+                        if(sgmi < b.sgm.size() && includeLen > 0) {
                             OG_i += includeLen;
 
                             // Push right remainder if present
@@ -122,7 +110,6 @@ namespace pre {
 
                     //! last segment is skipped regardless of the remainder length
                     ++sgmi;
-                    // i2 += filePathMatch[0].length();
 
 
 
@@ -185,20 +172,6 @@ namespace pre {
                             for(ulong j = 0; j < preprocessedCode.sgm.size(); ++j) {
                                 r.sgm.push_back(preprocessedCode.sgm[j]);
                             }
-
-                            // r.sgm //FIXME  split current segment by removing the central directive part and NOT pushing 0-length sides
-                            // std::string& ps = preprocessedCode.first;
-                            // for(ulong j = 0; j < ps.length(); ++j) {
-                            //     // while(i == bRef[curLine]) {  //TODO maybe make this loop into an actual function. there is one in the print function "SourceSegmentdDataToString" as well
-                            //         // if(curLine) r += "\n";
-                            //         // ++curLine;
-                            //         // ++curLine2;
-                            //     // }
-                            //     r.str += ps[j];
-                            //     ++i2;
-                            //     //FIXME push reference without changing it
-                            //     //FIXME it has already been calculated during the imported file's preprocessing phase
-                            // }
                         }
                     }
 
@@ -209,7 +182,7 @@ namespace pre {
                             relevantCoords,
                             filePathCoords,
                             "Empty file path in include statement.\n"
-                            "A file path must be specified"
+                            "A file path must be specified."
                         );
                         exit(1);
                     }
@@ -220,7 +193,7 @@ namespace pre {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
-                        ElmCoords(sourceFilePaths[DBG_filePathIndex], 0, i, i), //FIXME set line number
+                        ElmCoords(sourceFilePaths[DBG_filePathIndex], includeLineNum, i, i), //FIXME set line number
                         "Missing file path in include statement.\n"
                         "A valid string literal was expected, but could not be found."
                     );
@@ -249,220 +222,17 @@ namespace pre {
 
 
         // Push remaining deleted segments
-        while(b.sgm[sgmi].isRemoved) {
+        while(i < b.sgm.size() && b.sgm[sgmi].isRemoved) {
             r.sgm.push_back(b.sgm[sgmi]);
             //! No need to update OG_i as it is not used anymore
             ++sgmi;
         }
-        //sourceFilePaths.push_back(std::filesystem::canonical(options.sourceFile)); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
 
 
 
-
-
-        // ulong i = 0;
-        // while(i < b.elms.size()) {
-
-        //     // If the element is arbitrary code (the only type that can contain directives)
-        //     if(b[i].t == ICF_ElmType::OTHER) {
-
-        //         // If it contains a directive
-        //         std::smatch match;
-        //         if(std::regex_match(b[i].s, match, std::regex(R"(^(.*?)#([a-zA-Z_][a-zA-Z_0-9]*)(.*)$)"))) {
-        //             //                                          " ╰ 1 ╯ ╰────────── 2 ─────────╯╰3 ╯ "
-
-        //             // Find the directive value and preceding characters in both the raw and clean strings
-        //             std::smatch OG_match;
-        //             std::regex_match(b[i].OG_s, OG_match, std::regex(R"(^((?:.|\n)*?)#((?:\\\n)?[a-zA-Z_](?:[a-zA-Z_0-9]|\\\n)*)((.|\n)*)$)"));
-        //             //                                                   │╰──────╯  │ │╰──────╯          ╰───────────────────╯ │╰── 3 ──╯
-        //             //                                                 " ╰─── 1 ────╯ ╰────────────────── 2 ───────────────────╯          "
-
-        //             // Push preceding characters if present
-        //             if(match[1].length()) {
-        //                 r.elms.push_back(ICF_Elm(
-        //                     b[i].t,                                             // Copy old type
-        //                     match[1],                                           // Use the match as string value
-        //                     OG_match[1],                                        // Use the OG match as OG string value
-        //                     b[i].OG_lineNum,                                    // Copy old line number
-        //                     (OG_match[1].length() - match[1].length()) / 2,     // Calculate the height using the length difference between the two matches (each \n is 2 +length)
-        //                     b[i].OG_start                                       // Copy old starting index
-        //                 ));
-        //             }
-
-        //             // Parse directive and update counter
-        //             std::cout << "found " << match[2] << "\n";
-        //             if(match[2] == "include") {
-        //                 processInclude(r, b, i, match, OG_match, DBG_filePath);
-        //                 i += 2;
-        //             }
-        //             else if(match[2] == "define") {
-        //                 // processDefine();
-        //                 //FIXME increase i
-        //             }
-        //             else {
-        //                 // processMacroCall();
-        //                 //FIXME increase i
-        //                 //TODO check if ( is the next character or element
-        //                 //TODO     If not there, the directive name is unknown. if found, save it in the output value and leave it for the next phase
-        //                 //TODO     ^ specify that macro calls need parameters and that they are passed with () after its name
-        //             }
-        //         }
-
-
-        //         // If not
-        //         else {
-        //             // Push element as-is
-        //             r.elms.push_back(b[i]);
-        //             ++i;
-        //         }
-        //     }
-
-
-
-
-        //     // If not
-        //     else {
-        //         // Push element as-is
-        //         r.elms.push_back(b[i]);
-        //         ++i;
-        //     }
-        // }
 
         return r;
-        // return b;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // /**
-    //  * @brief Parses and processes an include statement, appending all the elements of the new file to <r>.
-    //  * @param r The output global buffer.
-    //  * @param b The buffer that contains the elements of the current file.
-    //  * @param i The index of the current element.
-    //  * @param match The match results of the current element.
-    //  * @param OG_match The match results of the raw value of the current element.
-    //  * @param DBG_filePath The path to the current file
-    //  * @return ulong The number of elements to skip, including the current one.
-    //  */
-    // //FIXME test all error output of this function extensively
-    // void processInclude(IntermediateCodeFormat &r, IntermediateCodeFormat &b, ulong i, std::smatch &match, std::smatch &OG_match, std::string DBG_filePath){
-
-    //     // Missing file path (junk after "#include")
-    //     if(match[3].length()) {
-    //         utils::printError(
-    //             utils::ErrType::PREPROCESSOR,
-    //             ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i].OG_start, b[i].OG_start + OG_match[1].length() + OG_match[2].length() + 1), //💀
-    //             "Missing file path in include statement.\n"
-    //             "A string literal was expected, but could not be found."
-    //         );
-    //         exit(1);
-    //     }
-
-
-    //     // Missing file path (no string literal element)
-    //     else if(b[++i].t != ICF_ElmType::STRING) {
-    //         utils::printError(
-    //             utils::ErrType::PREPROCESSOR,
-    //             ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i - 1].OG_start, b[i].OG_start + 1),
-    //             "Missing file path in include statement.\n"
-    //             "A string literal was expected, but could not be found."
-    //         );
-    //         exit(1);
-    //     }
-
-
-    //     // Missing file name (empty string)
-    //     else if(b[i].s.length() <= 2) {
-    //         utils::printError(
-    //             utils::ErrType::PREPROCESSOR,
-    //             ElmCoords(DBG_filePath, b[i].OG_lineNum, b[i - 1].OG_start + OG_match[1].length(), b[i].OG_start + 1),
-    //             "Empty file path in include statement.\n"
-    //             "A file path must be specified"
-    //         );
-    //         exit(1);
-    //     }
-
-
-    //     // File path and whitespace are present
-    //     //FIXME add glob patterns
-    //     //FIXME add standard module includes
-    //     else {
-    //         // Calculate the actual file path
-    //         std::string rawIncludeFilePath = b[i].s.substr(1, b[i].s.length() - 2);                                                         //! Include path as written in the source file
-    //         std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(DBG_filePath).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include statement was used in
-    //         std::string canonicalIncludeFilePath;                                                                                           //! Canonical version of the adjusted file path. No changes if file was not found
-    //         try { canonicalIncludeFilePath = std::filesystem::canonical(adjustedIncludeFilePath).string(); }
-    //         catch(std::filesystem::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
-    //         std::ifstream includeFile(canonicalIncludeFilePath);
-
-    //         // Print an error if the file cannot be opened
-    //         if(!includeFile) {
-    //             printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(DBG_filePath, b[i - 1].OG_lineNum, b[i].OG_start + OG_match[1].length(), b[i].OG_start + b[i].OG_s.length()),
-    //                 "Could not open file \"" + rawIncludeFilePath + "\": " + std::strerror(errno) + ".\n" +
-    //                 "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + ".\n" +
-    //                 "Make sure that the path is correct and the compiler has read access to the file."
-    //             );
-    //             exit(1);
-    //         }
-
-    //         // If it can be opened and read
-    //         else {
-    //             // Read all the lines and save them in a string
-    //             std::string l, includeFileStr;
-    //             while(getline(includeFile, l)) {
-    //                 includeFileStr += l;
-    //                 includeFileStr += '\n';
-    //             }
-
-    //             // Preprocess the string as a regular source file and add it to the output list (without actually compiling it)
-    //             IntermediateCodeFormat includeFileCode1 = startCleanupPhase(includeFileStr,      rawIncludeFilePath);
-    //             IntermediateCodeFormat includeFileCode2 = startDirectivesPhase(includeFileCode2, rawIncludeFilePath);
-    //             r.elms.insert(r.elms.end(), includeFileCode2.elms.begin(), includeFileCode2.elms.end());
-    //         }
-    //     }
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

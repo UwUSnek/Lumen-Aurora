@@ -15,14 +15,18 @@
         {
             "type": "shell",
             "label": "Run tests (no debug)",
-            "command": "bash",
+            "command": "./Build/out",
             "args": [
-                "-c",
-                "clear && ./Build/out ./Test/main.lum" ],
+                "./Test/main.lum"
+            ],
             "problemMatcher": [],
             "options": { "cwd": "${workspaceFolder}" },
             "group": "build",
-            "presentation": { "reveal": "always" }
+            "presentation": {
+                "reveal": "always",
+                "showReuseMessage": false,
+                "clear": true
+            }
         }
     ]
 }

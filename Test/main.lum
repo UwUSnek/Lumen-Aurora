@@ -1,32 +1,6 @@
-/*
-*/
-import <sys>
-import <sys>
-//test
-
-
-import <thread>
-/*test comment*/aa#inclu\
-de/*test*/"\
-"
-'"'//TODO write unit tests. test each error case indipendently. maybe automate input using strings and a single actual input file
-
-
-// test "comment"\""\
-    \""""a""'"'''""
-
-/* test "comment\""
-    "'""'''\"\" */
-
-import <math>
-#include "test\"\"/**///\/\""
-#define a
-#define test(first, second) \
-    first + second
+aaaaaa/*
 
 
 
-void main(){
-    io.print("h\"\
-    i");
-}
+*/#includ/**/e ""
+test

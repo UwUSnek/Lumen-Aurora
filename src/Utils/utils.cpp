@@ -16,7 +16,7 @@
 namespace utils {
     // Prints the formatted line indicator
     static inline void printLineNum(ulong n) {
-        std::cerr << ansi::reset << ansi::bold_black << "\n" << std::right << std::setw(8) << n << " │ " << ansi::black;
+        std::cerr << ansi::reset << ansi::bold_black << "\n" << std::right << std::setw(8) << n + 1 << " │ " << ansi::black;
     }
 
 
@@ -57,7 +57,9 @@ namespace utils {
 
 
 
-
+    //FIXME TRIM RELEVANT SECTION AND ERROR SECTION
+    //FIXME remove all tabs, newlines and whitespaces before and after both
+    //FIXME add a parameter to disable trimming
 
     /**
      * @brief Prints an error to stderr, specifying the error type.
@@ -104,8 +106,8 @@ namespace utils {
             if(errPos.filePath.length()) {
                 std::cerr << "    File │ " << ansi::reset << std::filesystem::canonical(errPos.filePath) << ansi::bold_red << "\n";
                 std::cerr << "    Line │ " << ansi::reset;
-                if(errHeight == 0) std::cerr << errPos.lineNum;
-                else               std::cerr << "From " << errPos.lineNum << " to " << errPos.lineNum + errHeight;
+                if(errHeight == 0) std::cerr << errPos.lineNum + 1;
+                else               std::cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;
             }
 
 
@@ -113,12 +115,12 @@ namespace utils {
             std::cerr << "\n";
             printLineNum(curLine);
             ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
-            ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight); //! No need to check useRelevant as its line is always 0 when unused
+            ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
             const char* lastColor;
             for(; s[i] != '\0'; ++i) {
 
                 // Calculate current color based on the current character index and print it if it differs form the last one
-                const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::cyan : ansi::reset)).c_str();
+                const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::black)).c_str();
                 if(curColor != lastColor) {
                     std::cerr << curColor;
                     lastColor = curColor;
