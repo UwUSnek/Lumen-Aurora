@@ -11,7 +11,8 @@ g++                                                            \
     ./src/Preprocessor/preprocessor.cpp                        \
     ./src/Preprocessor/IntermediateCodeFormat.cpp              \
     ./src/Preprocessor/CleanupPhase/cleanupPhase.cpp           \
-    ./src/Preprocessor/DirectivesPhase/directivesPhase.cpp     \
+    ./src/Preprocessor/IncludePhase/includePhase.cpp           \
+    ./src/Preprocessor/CleanupPhase/SegmentedCleanSource.cpp   \
 -std=c++20                                                     \
 -O0 -g                                                         \
 -I                                                             \
