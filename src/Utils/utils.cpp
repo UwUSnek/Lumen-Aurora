@@ -93,12 +93,11 @@ namespace utils {
             bool useRelevant = relPos.filePath.length();
             std::string s = readAndCheckFile(errPos.filePath);
             ulong curLine = useRelevant ? std::min(relPos.lineNum, errPos.lineNum) : errPos.lineNum;
+            curLine -= !!curLine;
             ulong i       = useRelevant ? std::min(relPos.start,     errPos.start) : errPos.start;
-            ulong startingLine = curLine - !!curLine;
-            do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1L) i = 0;
-            do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1L) i = 0;
-            if(startingLine > 0 && s[i] == '\n') ++i;
-            curLine = startingLine;
+            do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
+            do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
+            if(curLine > 0 && s[i] == '\n') ++i;
 
 
             // Print location

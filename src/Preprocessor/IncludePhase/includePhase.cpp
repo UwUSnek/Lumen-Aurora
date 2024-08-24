@@ -14,102 +14,29 @@
 
 
 
-//FIXME fix line references
 namespace pre {
-    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
-    //TODO SPLIT FUNCTION INTO MANY, MORE READABLE FUNCTIONS
     SegmentedCleanSource startIncludePhase(SegmentedCleanSource &b, ulong DBG_filePathIndex) {
         SegmentedCleanSource r;
 
 
 
 
-        ulong i = 0;                // The character index relative to the current file, not including included files
-        ulong sgmi = 0;             // The character index relative to the original version of the current file, not including included files
-        ulong OG_i = 0;
+        ulong i = 0;                // The character index relative to the                         current file, not including included files
+        ulong OG_i = 0;             // The character index relative to the original version of the current file, not including included files
         while(i < b.str.length()) {
 
-            // Push precending deleted elements
-            while(sgmi < b.sgm.size() && b.sgm[sgmi].isRemoved) {      // For each preceding deleted element
-                r.sgm.push_back(b.sgm[sgmi]);       // Push it
-                OG_i += r.sgm[sgmi].len;            // Update original character index counter
-                ++sgmi;                             // Increase segment counter
-            }
 
-            //FIXME check if line number in errors at line 0 is correct
             // If an include directive is detected, replace it with the contents of the file
             std::smatch match;
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include[ \t]*)"))) {
-                // ulong trueRelevantLen =  - ;
-
-
-                ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], b.OG_l[i], b.OG_i[i], b.OG_i[i + match[0].length() - 1]);
+                ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i + match[0].length() - 1].i);
                 i += match[0].length(); //FIXME ^ pass the index to ElmCoords instead of the string value
 
                 // Detect specified file path                                                 //     ╭────── file ──────╮ ╭───── module ─────╮
                 std::smatch filePathMatch;                                                    //     │ ╭────────────╮   │ │ ╭────────────╮   │
                 if(std::regex_search(b.str.cbegin() + i, b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
-                    ElmCoords filePathCoords(sourceFilePaths[DBG_filePathIndex], b.OG_l[i], b.OG_i[i], b.OG_i[i + filePathMatch[0].length() - 1]);
+                    ElmCoords filePathCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i + filePathMatch[0].length() - 1].i);
                     i += filePathMatch[0].length();
-
-
-
-                    // FIXME check if this actually works
-                    // Catch up with the segment index of the current file
-                    //! (If the include statament had comments or LCTs in it, OG_i and sgmi need to be updated to account for them)
-                    //! At this stage, OG_i points to the first character of the include statement
-                    //
-                    //            OG_start   OG_i
-                    //                  ▼     ▼
-                    //     /* comment */int n;#includ/*cmt*//*cmt*/e "file.lmn"int var;/* comment 2 */
-                    //     ╰──── 0 ────╯╰──── 1 ────╯╰─ 0 ─╯╰─ 0 ─╯╰─────── 1 ────────╯╰───── 0 ─────╯
-                    //                  ╰─┬──╯╰──┬──╯              ╰─────┬────╯╰──┬───╯
-                    //            lRemainder    lIncludeLen     rIncludeLen      rRemainder
-                    //!                                         ▲  == includeLen after skipping middle segments
-
-
-                    // Push left remainder if present
-                    ulong lRemainder = OG_i - b.sgm[sgmi].OG_start;
-                    if(lRemainder > 0) {
-                        //FIXME PUSH FIRST HALF
-                    }
-
-                    // Skip left part if present (and check the other parts)
-                    ulong includeLen = match[0].length() + filePathMatch[0].length();
-                    ulong lIncludeLen = b.sgm[sgmi].len - lRemainder;
-                    if(lIncludeLen > 0) {
-                        OG_i       += lIncludeLen;
-                        includeLen -= lIncludeLen;
-                        ++sgmi;
-
-                        // Skip middle segments without pushing them
-                        while(sgmi < b.sgm.size() && b.sgm[sgmi].len < includeLen) {
-                            if(!b.sgm[sgmi].isRemoved) {
-                                includeLen -= b.sgm[sgmi].len;
-                            }
-                            OG_i += b.sgm[sgmi].len;
-                            ++sgmi;
-                        }
-
-                        // Skip right part if present (and check right remainder)
-                        if(sgmi < b.sgm.size() && includeLen > 0) {
-                            OG_i += includeLen;
-
-                            // Push right remainder if present
-                            ulong rRemainder = b.sgm[sgmi].len - includeLen;
-                            if(rRemainder > 0) {
-                                //FIXME PUSH SECOND HALF
-                            }
-                        }
-                    }
-
-                    //! last segment is skipped regardless of the remainder length
-                    ++sgmi;
-
-
 
 
                     // File path is present
@@ -166,8 +93,8 @@ namespace pre {
                             r.str += preprocessedCode.str;
 
                             // Push all the segments from the included file
-                            for(ulong j = 0; j < preprocessedCode.sgm.size(); ++j) {
-                                r.sgm.push_back(preprocessedCode.sgm[j]);
+                            for(ulong j = 0; j < preprocessedCode.og.size(); ++j) {
+                                r.og.push_back(preprocessedCode.og[j]);
                             }
                         }
                     }
@@ -190,7 +117,7 @@ namespace pre {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
-                        ElmCoords(sourceFilePaths[DBG_filePathIndex], b.OG_l[i], b.OG_i[i], b.OG_i[i]),
+                        ElmCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i].i),
                         "Missing file path in include statement.\n"
                         "A valid string literal was expected, but could not be found."
                     );
@@ -203,26 +130,9 @@ namespace pre {
             // If not, copy normal characters and increse index counters
             else {
                 r.str += b.str[i];
+                r.og.push_back(b.og[i]);
                 ++i;
-                ++OG_i;
-
-                // If the next segment has been reached, push and update segment index
-                //! Deleted elements are pushed in the next iteration
-                if(OG_i >= b.sgm[sgmi].OG_start + b.sgm[sgmi].len) {
-                    r.sgm.push_back(b.sgm[sgmi]);
-                    ++sgmi;
-                }
             }
-        }
-
-
-
-
-        // Push remaining deleted segments
-        while(i < b.sgm.size() && b.sgm[sgmi].isRemoved) {
-            r.sgm.push_back(b.sgm[sgmi]);
-            //! No need to update OG_i as it is not used anymore
-            ++sgmi;
         }
 
 
