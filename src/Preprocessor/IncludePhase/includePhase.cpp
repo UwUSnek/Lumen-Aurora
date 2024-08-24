@@ -46,6 +46,8 @@ namespace pre {
             for(ulong j = OG_i; j > b.sgm[sgmi].OG_start; --j) if(b.str[j] == '\n') ++includeLineNum;
             std::smatch match;
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include[ \t]*)"))) {
+                // ulong trueRelevantLen = 0; //TODO
+
 
                 ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], includeLineNum, OG_i, OG_i + match[0].length()); //FIXME set line numberF  //FIXME FIX ELEMENT WIDTH
                 i += match[0].length(); //FIXME ^ pass the index to ElmCoords instead of the string value
