@@ -237,7 +237,6 @@ namespace pre {
     //                 ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
     //                 "String literal is missing a closing '\"' character."
     //             );
-    //             exit(1);
     //         }
     //         else if(b[i] == '\n') {
     //             utils::printError(
@@ -246,7 +245,6 @@ namespace pre {
     //                 "String literal is missing a closing '\"' character.\n"
     //                 "If you wish to include a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
     //             );
-    //             exit(1);
     //         }
 
     //         // Closing sequence
@@ -325,7 +323,6 @@ namespace pre {
     //                 ElmCoords(DBG_filePath, DBG_curLine + r.height, index, i),
     //                 "Char literal is missing a closing ' character."
     //             );
-    //             exit(1);
     //         }
     //         else if(b[i] == '\n') {
     //             utils::printError(
@@ -334,7 +331,6 @@ namespace pre {
     //                 "Char literal is missing a closing ' character.\n"
     //                 "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
     //             );
-    //             exit(1);
     //         }
 
     //         // Normal characters and escape sequences
@@ -357,7 +353,6 @@ namespace pre {
     //             "Char literal contains more than one byte. This is not allowed.\n"
     //             "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
     //         );
-    //         exit(1);
     //     }
     //     else if(r.finalValue.length() == 4) { //!  && r.finalValue[1] == '\\'
     //         //FIXME check valid escape sequences
@@ -370,7 +365,6 @@ namespace pre {
     //                 "Char literal is missing a closing ' character.\n"
     //                 "Did you mean " + ansi::bold_cyan + "'\\'" + ansi::reset + "?"
     //             );
-    //             exit(1);
     //         }
     //         //! Else return;
     //     }
@@ -380,7 +374,6 @@ namespace pre {
     //             ElmCoords(DBG_filePath, DBG_curLine, index, i),
     //             "Char literal cannot be empty."
     //         );
-    //         exit(1);
     //     }
 
 

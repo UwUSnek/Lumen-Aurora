@@ -67,8 +67,7 @@ namespace utils {
     //FIXME add a parameter to disable trimming
 
     /**
-     * @brief Prints an error to stderr, specifying the error type.
-     *      This function doesn't stop the program.
+     * @brief Stop the program and prints an error to stderr, specifying the error type.
      * @param errorType The type of the error.
      * @param relPos The relevant section of the code.
      * @param errPos The section of the code that caused the error.
@@ -143,6 +142,10 @@ namespace utils {
 
         // Print the actual error after indenting it by 4 spaces
         std::cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+
+
+        // Stop the program
+        exit(0);
     }
 
 
@@ -168,7 +171,6 @@ namespace utils {
                 "File path was interpreted as: " + ansi::white + "\"" + std::filesystem::canonical(fileName).string() + "\"" + ansi::reset + ".\n" +
                 "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
             );
-            exit(1);
         }
 
         // Create file stream and print an error if the file cannot be opened
@@ -180,7 +182,6 @@ namespace utils {
                 "Could not open file \"" + fileName + "\": " + std::strerror(errno) + ".\n" +
                 "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
             );
-            exit(1);
         }
 
 

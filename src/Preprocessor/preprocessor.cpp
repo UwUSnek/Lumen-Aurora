@@ -77,7 +77,6 @@ namespace pre {
     //             //         ElmCoords(e[i].meta),
     //             //         "Missing file path in include statement. A string literal was expected, but could not be found."
     //             //     );
-    //             //     exit(1);
     //             // }
     //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE
     //             // //FIXME MOVE THIS TO PARSING. PARSE THE STRING TOGETHER WITH THE DIRECTIVE

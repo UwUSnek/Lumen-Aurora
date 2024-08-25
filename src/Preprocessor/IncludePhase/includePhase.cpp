@@ -26,7 +26,7 @@ namespace pre {
         while(i < b.str.length()) {
 
 
-            // If an include directive is detected, replace it with the contents of the file
+            // If an include directive is detected, replace it with the preprocessed contents of the file
             std::smatch match;
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) {
                 ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i + match[0].length() - 1].i);
@@ -70,7 +70,6 @@ namespace pre {
                                     "Could not include the specified path: \"" + rawIncludeFilePath + "\" is a directory.\n" +
                                     "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + "."
                                 );
-                                exit(1);
                             }
 
                             // Print an error if the file cannot be opened
@@ -84,7 +83,6 @@ namespace pre {
                                     "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + ".\n" +
                                     "Make sure that the path is correct and the compiler has read access to the file."
                                 );
-                                exit(1);
                             }
 
                             // Copy file contents and segments
@@ -108,7 +106,6 @@ namespace pre {
                             "Empty file path in include statement.\n"
                             "A file path must be specified."
                         );
-                        exit(1);
                     }
                 }
 
@@ -121,13 +118,12 @@ namespace pre {
                         "Missing file path in include statement.\n"
                         "A valid string literal was expected, but could not be found."
                     );
-                    exit(1); //FIXME move this to the printError function itself
                 }
 
             }
 
 
-            // If not, copy normal characters and increse index counters
+            // If not, copy normal characters and increase index counter
             else {
                 r.str += b.str[i];
                 r.og.push_back(b.og[i]);
