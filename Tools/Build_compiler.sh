@@ -6,6 +6,8 @@ mkdir -p ./Build
 
 
 g++                                                            \
+    ./src/Preprocessor/CleanupPhase/UTF8_decoder.c             \
+    \
     ./src/Utils/utils.cpp                                      \
     ./src/main.cpp                                             \
     ./src/Preprocessor/preprocessor.cpp                        \

@@ -1,35 +1,36 @@
 #pragma once
 #include <string>
-#include <tuple>
 #include <vector>
 
 
 
 
-
-
-
-
 namespace pre {
-    /**
-     * @brief A structure that contains informations about a single character
-     */
-    struct CleanSourceData {
-        // CleanSourceType type;  // The type of the segment the character is part of
-        ulong i;               // The original index of the character in the str buffer
-        ulong l;               // The original line number of the character in the str buffer
-        ulong f;               // The index of the original file of the character in the str buffer
-
-        CleanSourceData(ulong _i, ulong _l, ulong _f) :
-            i(_i),
-            l(_l),
-            f(_f) {
-        }
+    enum class CleanSourceType {
+        MISC,
+        STRING,
+        CHAR
     };
 
 
 
 
+    /**
+     * @brief A structure that contains informations about a single character
+     */
+    struct CleanSourceData {
+        CleanSourceType type;  // The type of the segment the character is part of
+        ulong i;               // The original index of the character in the str buffer
+        ulong l;               // The original line number of the character in the str buffer
+        ulong f;               // The index of the original file of the character in the str buffer
+
+        CleanSourceData(CleanSourceType _type, ulong _i, ulong _l, ulong _f) :
+            type(_type),
+            i(_i),
+            l(_l),
+            f(_f) {
+        }
+    };
 
 
 
