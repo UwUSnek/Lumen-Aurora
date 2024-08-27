@@ -29,13 +29,13 @@ namespace pre {
             // If an include directive is detected, replace it with the preprocessed contents of the file
             std::smatch match;
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) {
-                ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i + match[0].length() - 1].i);
+                ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], b.meta[i].l, b.meta[i].i, b.meta[i + match[0].length() - 1].i);
                 i += match[0].length(); //FIXME ^ pass the index to ElmCoords instead of the string value
 
                 // Detect specified file path                                                 //     ╭────── file ──────╮ ╭───── module ─────╮
                 std::smatch filePathMatch;                                                    //     │ ╭────────────╮   │ │ ╭────────────╮   │
                 if(std::regex_search(b.str.cbegin() + i, b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
-                    ElmCoords filePathCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i + filePathMatch[0].length() - 1].i);
+                    ElmCoords filePathCoords(sourceFilePaths[DBG_filePathIndex], b.meta[i].l, b.meta[i].i, b.meta[i + filePathMatch[0].length() - 1].i);
                     i += filePathMatch[0].length();
 
 
@@ -91,8 +91,8 @@ namespace pre {
                             r.str += preprocessedCode.str;
 
                             // Push all the segments from the included file
-                            for(ulong j = 0; j < preprocessedCode.og.size(); ++j) {
-                                r.og.push_back(preprocessedCode.og[j]);
+                            for(ulong j = 0; j < preprocessedCode.meta.size(); ++j) {
+                                r.meta.push_back(preprocessedCode.meta[j]);
                             }
                         }
                     }
@@ -114,7 +114,7 @@ namespace pre {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
-                        ElmCoords(sourceFilePaths[DBG_filePathIndex], b.og[i].l, b.og[i].i, b.og[i].i),
+                        ElmCoords(sourceFilePaths[DBG_filePathIndex], b.meta[i].l, b.meta[i].i, b.meta[i].i),
                         "Missing file path in include statement.\n"
                         "A valid string literal was expected, but could not be found."
                     );
@@ -126,7 +126,7 @@ namespace pre {
             // If not, copy normal characters and increase index counter
             else {
                 r.str += b.str[i];
-                r.og.push_back(b.og[i]);
+                r.meta.push_back(b.meta[i]);
                 ++i;
             }
         }

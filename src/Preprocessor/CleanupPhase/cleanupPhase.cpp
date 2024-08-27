@@ -77,7 +77,7 @@ namespace pre {
 
                 // Save normal characters
                 r.str += b[i];
-                r.og.push_back(CleanSourceData(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
                 if(b[i] == '\n') ++curLine;
                 ++i;
             }
@@ -240,6 +240,8 @@ namespace pre {
      */
     std::pair<ulong, ulong> parseStrLiteral(std::string b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource& r) {
         if(b[index] != '"') return std::pair<ulong, ulong>(0, 0);
+        r.str += '"';
+        r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, index, DBG_curLine, DBG_filePathIndex));
         ulong i = index + 1, h = 0;
 
 
@@ -258,7 +260,7 @@ namespace pre {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, index, i - 1), //FIXME CHECK IF "" AT THE END OF THE FILE IS DETECTED AND SHOWN CORRECTLY
-                    ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, 1),
+                    ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, i),
                     "String literal is missing a closing '\"' character."
                 );
             }
@@ -266,7 +268,7 @@ namespace pre {
                 utils::printError(
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, index, i - 1), //FIXME CHECK IF "" AT THE END OF THE FILE IS DETECTED AND SHOWN CORRECTLY
-                    ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, 1),
+                    ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, i),
                     "String literal is missing a closing '\"' character.\n"
                     "If you wish to include a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
                 );
@@ -274,6 +276,8 @@ namespace pre {
 
             // Closing sequence
             else if(last != '\\' && b[i] == '"') {
+                r.str += '"';
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
                 ++i;
                 break;
             }
@@ -282,7 +286,7 @@ namespace pre {
             else {
                 last = b[i];
                 r.str += last;
-                r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
                 ++i;
             }
         }
@@ -308,6 +312,8 @@ namespace pre {
      */
     std::pair<ulong, ulong> parseCharLiteral(std::string b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource& r) {
         if(b[index] != '\'') return std::pair<ulong, ulong>(0, 0);
+        r.str += '\'';
+        r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, index, DBG_curLine, DBG_filePathIndex));
         ulong i = index + 1, h = 0;
 
 
@@ -358,8 +364,8 @@ namespace pre {
             // Normal characters and escape sequences
             else {
                 last = b[i];
-                r.str += last;
-                r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
+                // r.str += last; //TODO remove comment if unused
+                // r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
                 ++i;
                 ++finalLen;
             }
@@ -397,7 +403,18 @@ namespace pre {
             // Push plain characters
             if(finalLen == 3) {
                 r.str += b[index + 1];
-                r.og.push_back(CleanSourceData(CleanSourceType::STRING, index + 1, DBG_curLine + h, DBG_filePathIndex));
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, index + 1, DBG_curLine + h, DBG_filePathIndex));
+
+                // If other data is present after the escape sequence, print an error
+                if(b[i] != '\'') {
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, i - 1),
+                        ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, i, i),
+                        "Char literal contains more than one byte. This is not allowed.\n"
+                        "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
+                    );
+                }
             }
 
             // Detect non-escaped character sequences longer than 1 byte
@@ -422,6 +439,10 @@ namespace pre {
 
 
 
+
+        // Push terminator and return
+        r.str += '"';
+        r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
         return std::pair<ulong, ulong>(i - index, h);
     }
 
@@ -461,19 +482,20 @@ namespace pre {
 
         // If there is
         ulong i = index + 1, h = 0;
+        CleanSourceMeta outputCharData(CleanSourceType::STRING, index, DBG_curLine, DBG_filePathIndex);    // Create bogus character data. All the output characters will use a copy of this.
         switch(b[i]) {
 
             // Convert basic escapes
             //! Newlines (LCTs) that would be in this specific index are parsed out by the string parser before calling this function.
             //! No need to check for them.
-            case '\\': { r.str.push_back('\\'); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
-            case '0' : { r.str.push_back('\0'); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
-            case '\'': { r.str.push_back('\''); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
-            case '"' : { r.str.push_back('\"'); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
-            case 'n' : { r.str.push_back('\n'); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
-            case 'r' : { r.str.push_back('\r'); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
-            case 't' : { r.str.push_back('\t'); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
-            case 'v' : { r.str.push_back('\v'); r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine, DBG_filePathIndex)); break; }
+            case '\\': { r.str += '\\'; r.meta.push_back(outputCharData); break; }
+            case '0' : { r.str += '\0'; r.meta.push_back(outputCharData); break; }
+            case '\'': { r.str += '\''; r.meta.push_back(outputCharData); break; }
+            case '"' : { r.str += '\"'; r.meta.push_back(outputCharData); break; }
+            case 'n' : { r.str += '\n'; r.meta.push_back(outputCharData); break; }
+            case 'r' : { r.str += '\r'; r.meta.push_back(outputCharData); break; }
+            case 't' : { r.str += '\t'; r.meta.push_back(outputCharData); break; }
+            case 'v' : { r.str += '\v'; r.meta.push_back(outputCharData); break; }
 
 
             // Convert Unicode codepoint escapes
@@ -529,7 +551,7 @@ namespace pre {
                 // Push to buffer
                 for(ulong j = 0; dest[j] != '\0'; ++j){
                     r.str += dest[j];
-                    r.og.push_back(CleanSourceData(CleanSourceType::STRING, i + j, DBG_curLine + h, DBG_filePathIndex));
+                    r.meta.push_back(outputCharData);
                 }
             }
 
