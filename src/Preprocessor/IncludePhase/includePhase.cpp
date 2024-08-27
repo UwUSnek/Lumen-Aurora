@@ -21,8 +21,7 @@ namespace pre {
 
 
 
-        ulong i = 0;                // The character index relative to the                         current file, not including included files
-        ulong OG_i = 0;             // The character index relative to the original version of the current file, not including included files
+        ulong i = 0; // The character index relative to the current file, not including included files
         while(i < b.str.length()) {
 
 

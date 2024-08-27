@@ -8,6 +8,7 @@
 #include "preprocessor.hpp"
 #include "ElmCoords.hpp"
 #include "Utils/utils.hpp"
+#include "LCTsPhase/LCTsPhase.hpp"
 #include "CleanupPhase/cleanupPhase.hpp"
 #include "IncludePhase/includePhase.hpp"
 
@@ -46,8 +47,10 @@ namespace pre {
         //FIXME CHECK CIRCULAR DEPENDENCIES
         //FIXME SAFE INCLUDE STACK
 
-        SegmentedCleanSource r1 = startCleanupPhase(b,  sourceFilePaths.size() - 1);
-        SegmentedCleanSource r2 = startIncludePhase(r1, sourceFilePaths.size() - 1);
+        SegmentedCleanSource r1 = startLCTsPhase(b,     sourceFilePaths.size() - 1);
+        SegmentedCleanSource r2 = startCleanupPhase(r1, sourceFilePaths.size() - 1);
+        // SegmentedCleanSource r3 = startIncludePhase(r2, sourceFilePaths.size() - 1); //TODO
+        // return r3;
         return r2;
     }
 

@@ -12,9 +12,12 @@ g++                                                            \
     ./src/main.cpp                                             \
     ./src/Preprocessor/preprocessor.cpp                        \
     ./src/Preprocessor/IntermediateCodeFormat.cpp              \
+    ./src/Preprocessor/CleanupPhase/SegmentedCleanSource.cpp   \
+    \
+    ./src/Preprocessor/LCTsPhase/LCTsPhase.cpp                 \
     ./src/Preprocessor/CleanupPhase/cleanupPhase.cpp           \
     ./src/Preprocessor/IncludePhase/includePhase.cpp           \
-    ./src/Preprocessor/CleanupPhase/SegmentedCleanSource.cpp   \
+    \
 -std=c++20                                                     \
 -O0 -g                                                         \
 -I                                                             \

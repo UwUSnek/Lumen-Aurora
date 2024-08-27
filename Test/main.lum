@@ -1,9 +1,10 @@
 "test"
 
 LINE 1
-//START  #in/*
-//*/clud/*
-//
-//
-//*/e"test.lu/**/m"
+//START
+#in/*
+     */clud/*
+
+
+  */e"test.lu/**/m"
 LINE 2
