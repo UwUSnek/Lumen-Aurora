@@ -51,30 +51,34 @@
 
 namespace pre {
     //FIXME use a stream and process the steps concurrently
-    SegmentedCleanSource startCleanupPhase(SegmentedCleanSource &b, ulong DBG_filePathIndex) {
+    SegmentedCleanSource startCleanupPhase(SegmentedCleanSource &b) {
         SegmentedCleanSource r;
 
 
-        ulong i = 0;                // Current index relative to the raw data
-        ulong curLine = 0;          // The current line number relative to the raw data
+        ulong i = 0;  // Current index relative to the raw data
         while(i < b.str.length()) {
             // Skip comments
-            std::pair<ulong, ulong> comment = measureComment(b.str, i);
-            if(comment.first > 0) {
-                i += comment.first;
-                curLine += comment.second;
+            ulong commentLen = measureComment(b.str, i);
+            if(commentLen > 0) {
+                i += commentLen;
             }
 
 
-            if(i > 0 && b.str[i - 1] != '\\') { //FIXME ONLY CHECK THIS IF INSIDE A MACRO DEFINITION
-                // // Parse strings
-                // std::pair<ulong, ulong> strLiteral = parseStrLiteral(b, i, curLine, DBG_filePathIndex, r);
-                // if(strLiteral.first) {
-                //     i += strLiteral.first;
-                //     curLine += strLiteral.second;
-                    // continue;
-                // }
+            if(i == 0 || b.str[i - 1] != '\\') { //FIXME ONLY CHECK THIS IF INSIDE A MACRO DEFINITION
+                // Parse strings
+                //FIXME ADD ESCAPE SEQUENCE PARSING
+                //FIXME ADD ESCAPE SEQUENCE PARSING
+                //FIXME ADD ESCAPE SEQUENCE PARSING
+                ulong strLiteralLen = parseStrLiteral(b, i, r);
+                if(strLiteralLen) {
+                    i += strLiteralLen;
+                    continue;
+                }
 
+                //FIXME
+                //FIXME
+                //FIXME
+                //FIXME
                 // // Parse chars
                 // std::pair<ulong, ulong> charLiteral = parseCharLiteral(b, i, curLine, DBG_filePathIndex, r);
                 // if(charLiteral.first) {
@@ -88,7 +92,6 @@ namespace pre {
             r.str += b.str[i];
             // r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
             r.meta.push_back(b.meta[i]);
-            if(b.str[i] == '\n') ++curLine;
             ++i;
         }
 
@@ -179,16 +182,16 @@ namespace pre {
      * @param index The index at which the comment starts.
      * @param DBG_curLine The current line number in the original file at which the comment starts.
      * @param DBG_filePath The path to the file the buffer string was read from.
-     * @return A pair containing the length of the comment and the number of additional lines it occupies, including the length of the opening and closing character sequences (including \\n but excluding \0).
-     *     If the buffer doesn't contain a comment that starts at index <index>, (0, 0) is returned.
+     * @return The length of the comment, including the length of the opening and closing character sequences (not \0 or \n).
+     *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
      */
-    std::pair<ulong, ulong> measureComment(std::string &b, ulong index) {
-        if(b[index] != '/') return std::pair<ulong, ulong>(0, 0);
+    ulong measureComment(std::string &b, ulong index) {
+        if(b[index] != '/') return 0;
 
 
         char last = b[index];
         char commType = '\0'; // '\0' if unknow, '/' if single line, '*' if multiline
-        ulong i = index + 1, h = 0;
+        ulong i = index + 1;
         while(true) {
 
             // Starting sequence
@@ -198,7 +201,7 @@ namespace pre {
                     continue;
                 }
                 else {  //! Starting sequence not found (this includes \n and \0 cases)
-                    return std::pair<ulong, ulong>(0, 0);
+                    return 0;
                 }
             }
 
@@ -215,14 +218,13 @@ namespace pre {
 
             // Normal characters (part of the comment)
             else {
-                if(b[i] == '\n') ++h;
                 last = b[i];
                 ++i;
             }
         }
 
 
-        return std::pair<ulong, ulong>(i - index, h);
+        return i - index;
     }
 
 
@@ -232,70 +234,63 @@ namespace pre {
 
 
 
-    // /**
-    //  * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " character.
-    //  * @param b The string buffer that contains the string literal.
-    //  * @param index The index at which the string literal starts.
-    //  * @param DBG_curLine The current line number in the original file at which the string literal starts.
-    //  * @param DBG_filePath The path to the file the buffer string was read from.
-    //  * @param r The output buffer in which to save the characters that make up the literal. Opening and closing character sequences ar NOT pushed.
-    //  * @return A pair containing the length and height of the string literal. (0, 0) if none was found.
-    //  */
-    // std::pair<ulong, ulong> parseStrLiteral(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r) {
-    //     if(b[index] != '"') return std::pair<ulong, ulong>(0, 0);
-    //     r.str += '"';
-    //     r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, index, DBG_curLine, DBG_filePathIndex));
-    //     ulong i = index + 1, h = 0;
+    /**
+     * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " character.
+     * @param b The string buffer that contains the string literal.
+     * @param index The index at which the string literal starts.
+     * @param DBG_curLine The current line number in the original file at which the string literal starts.
+     * @param DBG_filePath The path to the file the buffer string was read from.
+     * @param r The output buffer in which to save the characters that make up the literal. Opening and closing character sequences ar NOT pushed.
+     * @return The length and height of the string literal. 0 if none was found.
+     */
+    ulong parseStrLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r) {
+        if(b.str[index] != '"') return 0;
+        r.str += '"';
+        r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, b.meta[index].i, b.meta[index].l, b.meta[index].f));
+        ulong i = index + 1;
 
 
-    //     char last = b[index];
-    //     while(true) {
+        char last = b.str[index];
+        while(true) {
 
-    //         // Check line continuation token
-    //         ulong lct = checkLct(b, i);
-    //         if(lct) {
-    //             ++h;
-    //             i += lct;
-    //         }
+            // Malformed strings
+            if(b.str[i] == '\0') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(sourceFilePaths[b.meta[index].f], b.meta[index].l, b.meta[index].i, b.meta[i - 1].i),
+                    ElmCoords(sourceFilePaths[b.meta[i - 1].f], b.meta[i - 1].l, b.meta[i - 1].i, b.meta[i - 1].i),
+                    "String literal is missing a closing '\"' character."
+                );
+            }
+            else if(b.str[i] == '\n') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(sourceFilePaths[b.meta[index].f], b.meta[index].l, b.meta[index].i, b.meta[i - 1].i),
+                    ElmCoords(sourceFilePaths[b.meta[i - 1].f], b.meta[i - 1].l, b.meta[i - 1].i, b.meta[i - 1].i),
+                    "String literal is missing a closing '\"' character.\n"
+                    "If you wish to include a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
+                );
+            }
 
-    //         // Malformed strings
-    //         else if(b[i] == '\0') {
-    //             utils::printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, index, i - 1), //FIXME CHECK IF "" AT THE END OF THE FILE IS DETECTED AND SHOWN CORRECTLY
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, i),
-    //                 "String literal is missing a closing '\"' character."
-    //             );
-    //         }
-    //         else if(b[i] == '\n') {
-    //             utils::printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, index, i - 1), //FIXME CHECK IF "" AT THE END OF THE FILE IS DETECTED AND SHOWN CORRECTLY
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, i),
-    //                 "String literal is missing a closing '\"' character.\n"
-    //                 "If you wish to include a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
-    //             );
-    //         }
+            // Closing sequence
+            else if(last != '\\' && b.str[i] == '"') {
+                r.str += '"';
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, b.meta[i].i, b.meta[i].l, b.meta[i].f));
+                ++i;
+                break;
+            }
 
-    //         // Closing sequence
-    //         else if(last != '\\' && b[i] == '"') {
-    //             r.str += '"';
-    //             r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
-    //             ++i;
-    //             break;
-    //         }
+            // Normal characters (part of the string)
+            else {
+                last = b.str[i];
+                r.str += last;
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, b.meta[i].i, b.meta[i].l, b.meta[i].f));
+                ++i;
+            }
+        }
 
-    //         // Normal characters (part of the string)
-    //         else {
-    //             last = b[i];
-    //             r.str += last;
-    //             r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
-    //             ++i;
-    //         }
-    //     }
-
-    //     return std::pair<ulong, ulong>(h, i - index);
-    // }
+        return i - index;
+    }
 
 
 

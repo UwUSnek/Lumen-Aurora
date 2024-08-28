@@ -46,6 +46,7 @@ namespace pre {
             else {
                 r.str += b[i];
                 r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
+                if(b[i] == '\n') ++curLine;
                 ++i;
             }
         }

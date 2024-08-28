@@ -7,11 +7,11 @@
 
 namespace pre {
     ulong checkLct(std::string b, ulong index);
-    SegmentedCleanSource startCleanupPhase(SegmentedCleanSource &b, ulong DBG_filePathIndex);
+    SegmentedCleanSource startCleanupPhase(SegmentedCleanSource &b);
 
     // WhitespaceInfo countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
-    std::pair<ulong, ulong>       measureComment(std::string &b, ulong index);
-    std::pair<ulong, ulong>      parseStrLiteral(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r);
-    std::pair<ulong, ulong>     parseCharLiteral(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r);
-    std::pair<ulong, ulong> decodeEscapeSequence(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r);
+    ulong       measureComment(std::string &b, ulong index);
+    ulong      parseStrLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r);
+    ulong     parseCharLiteral(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r);
+    ulong decodeEscapeSequence(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r);
 }

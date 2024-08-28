@@ -46,5 +46,6 @@ namespace pre {
         std::vector<CleanSourceMeta> meta;  // Informations about each character
 
         std::string toString();
+        std::string toStringVerbose();
     };
 }
