@@ -50,10 +50,6 @@ namespace pre {
         SegmentedCleanSource r1 = startLCTsPhase(b, sourceFilePaths.size() - 1);
         SegmentedCleanSource r2 = startCleanupPhase(r1);
         SegmentedCleanSource r3 = startIncludePhase(r2);
-        //FIXME ADD INCLUDE PHASE BACK
-        //FIXME ADD INCLUDE PHASE BACK
-        //FIXME ADD INCLUDE PHASE BACK
-        //FIXME ADD INCLUDE PHASE BACK
         return r3;
         // return r2;
     }

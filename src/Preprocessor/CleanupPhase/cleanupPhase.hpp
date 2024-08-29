@@ -11,7 +11,9 @@ namespace pre {
 
     // WhitespaceInfo countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);
     ulong       measureComment(std::string &b, ulong index);
-    ulong      parseStrLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r);
-    ulong     parseCharLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r);
-    ulong decodeEscapeSequence(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r, CleanSourceType literalType);
+    ulong       saveLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r);
+
+    // ulong      parseStrLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r);
+    // ulong     parseCharLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r);
+    // ulong decodeEscapeSequence(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r, CleanSourceType literalType);
 }

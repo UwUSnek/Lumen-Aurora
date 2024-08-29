@@ -18,11 +18,25 @@
         },
         {
             "type": "shell",
-            "label": "Run tests (no debug)",
+            "label": "Run test (no debug)",
             "command": "./Build/out",
             "args": [
                 "./Test/main.lum"
             ],
+            "problemMatcher": [],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "showReuseMessage": false
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Run unit tests",
+            "command": "./Tests/tests.out",
+            "args": [],
             "problemMatcher": [],
             "options": { "cwd": "${workspaceFolder}" },
             "group": "build",
