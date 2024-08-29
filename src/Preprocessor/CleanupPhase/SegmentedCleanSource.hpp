@@ -30,6 +30,13 @@ namespace pre {
             l(_l),
             f(_f) {
         }
+
+        CleanSourceMeta(CleanSourceType _type, CleanSourceMeta &meta) :
+            type(_type),
+            i(meta.i),
+            l(meta.l),
+            f(meta.f) {
+        }
     };
 
 

@@ -6,6 +6,7 @@
 
 
 namespace pre {
+    //FIXME pass multi-byte characters whole to allow the console to actually display them
     std::string SegmentedCleanSource::toString() {
         std::stringstream r;
 
@@ -21,6 +22,7 @@ namespace pre {
 
 
 
+    //FIXME pass multi-byte characters whole to allow the console to actually display them
     std::string SegmentedCleanSource::toStringVerbose() {
         std::stringstream r;
 

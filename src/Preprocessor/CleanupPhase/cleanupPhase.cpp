@@ -55,8 +55,9 @@ namespace pre {
         SegmentedCleanSource r;
 
 
-        ulong i = 0;  // Current index relative to the raw data
+        ulong i = 0;
         while(i < b.str.length()) {
+
             // Skip comments
             ulong commentLen = measureComment(b.str, i);
             if(commentLen > 0) {
@@ -75,17 +76,12 @@ namespace pre {
                     continue;
                 }
 
-                //FIXME
-                //FIXME
-                //FIXME
-                //FIXME
-                // // Parse chars
-                // std::pair<ulong, ulong> charLiteral = parseCharLiteral(b, i, curLine, DBG_filePathIndex, r);
-                // if(charLiteral.first) {
-                //     i += charLiteral.first;
-                //     curLine += charLiteral.second;
-                //     continue;
-                // }
+                // Parse chars
+                ulong charLiteralLen = parseCharLiteral(b, i, r);
+                if(charLiteralLen) {
+                    i += charLiteralLen;
+                    continue;
+                }
             }
 
             // Save normal characters
@@ -180,8 +176,6 @@ namespace pre {
      * @brief Calculates the length of the comment that strarts at index <index> and ends at the first newline character or at the end of the file.
      * @param b The string buffer that contains the comment.
      * @param index The index at which the comment starts.
-     * @param DBG_curLine The current line number in the original file at which the comment starts.
-     * @param DBG_filePath The path to the file the buffer string was read from.
      * @return The length of the comment, including the length of the opening and closing character sequences (not \0 or \n).
      *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
      */
@@ -238,56 +232,63 @@ namespace pre {
      * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " character.
      * @param b The string buffer that contains the string literal.
      * @param index The index at which the string literal starts.
-     * @param DBG_curLine The current line number in the original file at which the string literal starts.
-     * @param DBG_filePath The path to the file the buffer string was read from.
      * @param r The output buffer in which to save the characters that make up the literal. Opening and closing character sequences ar NOT pushed.
-     * @return The length and height of the string literal. 0 if none was found.
+     * @return The length of the string literal. 0 if none was found.
      */
     ulong parseStrLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r) {
         if(b.str[index] != '"') return 0;
         r.str += '"';
         r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, b.meta[index].i, b.meta[index].l, b.meta[index].f));
+
+
+
+
         ulong i = index + 1;
-
-
-        char last = b.str[index];
         while(true) {
 
-            // Malformed strings
-            if(b.str[i] == '\0') {
-                utils::printError(
-                    utils::ErrType::PREPROCESSOR,
-                    ElmCoords(sourceFilePaths[b.meta[index].f], b.meta[index].l, b.meta[index].i, b.meta[i - 1].i),
-                    ElmCoords(sourceFilePaths[b.meta[i - 1].f], b.meta[i - 1].l, b.meta[i - 1].i, b.meta[i - 1].i),
-                    "String literal is missing a closing '\"' character."
-                );
-            }
-            else if(b.str[i] == '\n') {
-                utils::printError(
-                    utils::ErrType::PREPROCESSOR,
-                    ElmCoords(sourceFilePaths[b.meta[index].f], b.meta[index].l, b.meta[index].i, b.meta[i - 1].i),
-                    ElmCoords(sourceFilePaths[b.meta[i - 1].f], b.meta[i - 1].l, b.meta[i - 1].i, b.meta[i - 1].i),
-                    "String literal is missing a closing '\"' character.\n"
-                    "If you wish to include a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
-                );
+            // Escape sequences
+            ulong escapeLen = decodeEscapeSequence(b, i, r, CleanSourceType::STRING);
+            if(escapeLen) {
+                i += escapeLen;
             }
 
-            // Closing sequence
-            else if(last != '\\' && b.str[i] == '"') {
+            // Closing sequence (escaped closing sequences are parsed by the previous step)
+            else if(b.str[i] == '"') {
                 r.str += '"';
                 r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, b.meta[i].i, b.meta[i].l, b.meta[i].f));
                 ++i;
                 break;
             }
 
+            // Malformed strings
+            else if(b.str[i] == '\0') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(b, index, i - 1),
+                    ElmCoords(b, i - 1, i - 1),
+                    "String literal is missing a closing '\"' character."
+                );
+            }
+            else if(b.str[i] == '\n') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(b, index, i - 1),
+                    ElmCoords(b, i - 1, i - 1),
+                    "String literal is missing a closing '\"' character.\n"
+                    "If you wish to include a newline character in the string, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
+                );
+            }
+
             // Normal characters (part of the string)
             else {
-                last = b.str[i];
-                r.str += last;
+                r.str += b.str[i];
                 r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, b.meta[i].i, b.meta[i].l, b.meta[i].f));
                 ++i;
             }
         }
+
+
+
 
         return i - index;
     }
@@ -299,150 +300,119 @@ namespace pre {
 
 
 
-    // /**
-    //  * @brief Parses the char literal that starts at index <index> and checks if it contains a single 8-bit character (or a valid escape sequence).
-    //  * @param b The string buffer that contains the char literal.
-    //  * @param index The index at which the char literal starts.
-    //  * @param DBG_curLine The current line number in the original file at which the char literal starts.
-    //  * @param DBG_filePath The path to the file the buffer string was read from.
-    //  * @param r The buffer in which to push the characters that make up the literal. Opening and closing character sequences ar NOT pushed.
-    //  * @return A pair containing the length and height of the char literal. (0, 0) if none was found.
-    //  */
-    // std::pair<ulong, ulong> parseCharLiteral(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r) {
-    //     if(b[index] != '\'') return std::pair<ulong, ulong>(0, 0);
-    //     r.str += '\'';
-    //     r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, index, DBG_curLine, DBG_filePathIndex));
-    //     ulong i = index + 1, h = 0;
-
-
-    //     // Check for empty char literals or unescaped ' characters
-
-    //     //TODO check if the actual character is valid. \n \0 and others are not valid. they need to be escaped
-    //     //TODO Print a special error if they are actually used raw. tell the user to escape them
-    //     //TODO
-
-
-
-    //     char last = b[index];
-    //     ulong finalLen = 1;  //! Starts from 1 to account for the starting ' character
-    //     while(true) {
-    //         // Check line continuation token
-    //         ulong lct = checkLct(b, i);
-    //         if(lct) {
-    //             ++h;
-    //             i += lct;
-    //         }
-
-    //         // Closing sequence
-    //         else if(last != '\\' && b[i] == '\'') {
-    //             ++i;
-    //             ++finalLen;
-    //             break;
-    //         }
-
-    //         // Missing closing sequence
-    //         else if(b[i] == '\0') {
-    //             utils::printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, i),
-    //                 "Char literal is missing a closing ' character."
-    //             );
-    //         }
-    //         else if(b[i] == '\n') {
-    //             utils::printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine + h, i, i),
-    //                 "Char literal is missing a closing ' character.\n"
-    //                 "If you wish to use a newline character in the char literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
-    //             );
-    //         }
-
-    //         // Normal characters and escape sequences
-    //         else {
-    //             last = b[i];
-    //             // r.str += last; //TODO remove comment if unused
-    //             // r.og.push_back(CleanSourceData(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
-    //             ++i;
-    //             ++finalLen;
-    //         }
-    //     }
-    //     //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
-    //     //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
-    //     //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
-    //     //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
-    //     //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
-    //     //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
-
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
-    //     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
+    /**
+     * @brief Parses the char literal that starts at index <index> and checks if it contains a single 8-bit character (or a valid escape sequence).
+     * @param b The string buffer that contains the char literal.
+     * @param index The index at which the char literal starts.
+     * @param r The buffer in which to push the characters that make up the literal. Opening and closing character sequences ar NOT pushed.
+     * @return The length of the char literal. 0 if none was found.
+     */
+    ulong parseCharLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r) {
+        if(b.str[index] != '\'') return 0;
+        r.str += '\'';
+        r.meta.push_back(CleanSourceMeta(CleanSourceType::CHAR, b.meta[index].i, b.meta[index].l, b.meta[index].f));
 
 
 
 
-    //     // If the character is expressed as an escape sequence, push its decoded characters
-    //     std::pair<ulong, ulong> escapeRes = decodeEscapeSequence(b, index + 1, DBG_curLine + h, DBG_filePathIndex, r);
-    //     if(escapeRes.first > 0) {
-    //         i += escapeRes.first;
-    //         h += escapeRes.second;
-    //     }
+        ulong i = index + 1;
+        ulong finalLen = 1;  //! Starts from 1 to account for the skipped starting ' character
+        while(true) {
+
+            // Escape sequences
+            ulong oldRLen = r.str.length();
+            ulong raw_escapeLen = decodeEscapeSequence(b, i, r, CleanSourceType::CHAR); // The length of the scape sequence as written in the source code
+            ulong utf_escapeLen = r.str.length() - oldRLen;                             // The length of the UTF-8 representation of the escape sequence
+            if(raw_escapeLen) {
+                i += raw_escapeLen;
+                finalLen += utf_escapeLen;
+            }
+
+            // Closing sequence (escaped closing sequences are parsed by the previous step)
+            else if(b.str[i] == '\'') {
+                r.str += '\'';
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::CHAR, b.meta[i].f, b.meta[i].l, b.meta[i].i));
+                ++i;
+                ++finalLen;
+                break;
+            }
+
+            // Missing closing sequence
+            else if(b.str[i] == '\0') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(b, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
+                    ElmCoords(b, i - 1, i - 1),
+                    "Char literal is missing a closing ' character."
+                );
+            }
+            else if(b.str[i] == '\n') {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(b, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
+                    ElmCoords(b, i - 1, i - 1),
+                    "Char literal is missing a closing ' character.\n"
+                    "If you wish to include a newline character in the char literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
+                );
+            }
 
 
-    //     // If not
-    //     else {
-
-    //         // Push plain characters
-    //         if(finalLen == 3) {
-    //             r.str += b[index + 1];
-    //             r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, index + 1, DBG_curLine + h, DBG_filePathIndex));
-
-    //             // If other data is present after the escape sequence, print an error
-    //             if(b[i] != '\'') {
-    //                 utils::printError(
-    //                     utils::ErrType::PREPROCESSOR,
-    //                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, i - 1),
-    //                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, i, i),
-    //                     "Char literal contains more than one byte. This is not allowed.\n"
-    //                     "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
-    //                 );
-    //             }
-    //         }
-
-    //         // Detect non-escaped character sequences longer than 1 byte
-    //         else if(finalLen > 3) {
-    //             utils::printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, i - 1),
-    //                 "Char literal contains more than one byte. This is not allowed.\n"
-    //                 "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
-    //             );
-    //         }
-
-    //         // Detect empty literals
-    //         else if(finalLen == 2) {
-    //             utils::printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, i - 1),
-    //                 "Char literal cannot be empty."
-    //             );
-    //         }
-    //     }
+            // Normal characters
+            else {
+                r.str += b.str[i];
+                r.meta.push_back(CleanSourceMeta(CleanSourceType::CHAR, b.meta[i].f, b.meta[i].l, b.meta[i].i));
+                ++i;
+                ++finalLen;
+            }
+        }
+        //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
+        //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
 
 
 
 
-    //     // Push terminator and return
-    //     r.str += '"';
-    //     r.meta.push_back(CleanSourceMeta(CleanSourceType::STRING, i, DBG_curLine + h, DBG_filePathIndex));
-    //     return std::pair<ulong, ulong>(i - index, h);
-    // }
+        // // Push plain characters
+        // if(finalLen == 3) {
+        //     r.str += b.str[index + 1];
+        //     r.meta.push_back(CleanSourceMeta(CleanSourceType::CHAR, b.meta[index + 1].i, b.meta[index + 1].l, b.meta[index + 1].f));
+
+        //     // If other data is present after the escape sequence, print an error
+        //     if(b[i] != '\'') {
+        //         utils::printError(
+        //             utils::ErrType::PREPROCESSOR,
+        //             ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, i - 1),
+        //             ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, i, i),
+        //             "Char literal contains more than one byte. This is not allowed.\n"
+        //             "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
+        //         );
+        //     }
+        // }
+
+        // Detect non-escaped character sequences longer than 1 byte
+        if(finalLen > 3) {
+            utils::printError(
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(b, index, i - 1),
+                ElmCoords(b, index + 1, i - 2),
+                "Char literal contains more than one byte. This is not allowed.\n"
+                "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
+            );
+        }
+
+        // Detect empty literals
+        if(finalLen == 2) {
+            utils::printError(
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(b, index, i - 1),
+                "Char literal cannot be empty."
+            );
+        }
+
+
+
+
+        return i - index;
+    }
 
 
 
@@ -451,122 +421,110 @@ namespace pre {
 
 
 
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //FIXME CHECKS IF THIS NEEDS TO CONSIDER LCTs. FIX IT IF IT DOES
-    // //TODO PUT THIS IN THE DOCUMENTATION. these are usable in strings and chars, but longer sequences produce errors when used inside of chars
-    // /**
-    //  * @brief Parses the escape sequence that starts at index <index> and prints an error if it is invalid.
-    //  * @param b The string buffer that contains the escape sequence.
-    //  * @param index The index at which the escape sequence starts.
-    //  * @param DBG_curLine The current line number in the original file at which the char literal starts.
-    //  * @param DBG_filePath The path to the file the buffer string was read from.
-    //  * @param r The buffer in which to push the decoded UTF-8 bytes.
-    //  * @return A pair containing the length and height of the escape sequence, or (0, 0) if none was found.
-    //  */
-    // std::pair<ulong, ulong> decodeEscapeSequence(SegmentedCleanSource &b, ulong index, ulong DBG_curLine, ulong DBG_filePathIndex, SegmentedCleanSource &r) {
+    //TODO PUT THIS IN THE DOCUMENTATION. these are usable in strings and chars, but longer sequences produce errors when used inside of chars
+    /**
+     * @brief Parses the escape sequence that starts at index <index> and prints an error if it is invalid.
+     * @param b The string buffer that contains the escape sequence.
+     * @param index The index at which the escape sequence starts.
+     * @param r The buffer in which to push the decoded UTF-8 bytes.
+     * @param literalType The type to use when pushing characters to <r>.
+     * @return A pair containing the length and height of the escape sequence, or (0, 0) if none was found.
+     */
+    ulong decodeEscapeSequence(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r, CleanSourceType literalType) {
 
-    //     // Return if there is no escape sequence
-    //     if(b[index] != '\\') return std::pair<ulong, ulong>(0, 0);
+        // Return if there is no escape sequence
+        if(b.str[index] != '\\') return 0;
 
 
-    //     // If there is
-    //     ulong i = index + 1, h = 0;
-    //     CleanSourceMeta outputCharData(CleanSourceType::STRING, index, DBG_curLine, DBG_filePathIndex);    // Create bogus character data. All the output characters will use a copy of this.
-    //     switch(b[i]) {
+        // If there is
+        ulong i = index + 1, h = 0;
+        CleanSourceMeta outputCharData(literalType, b.meta[index].i, b.meta[index].l, b.meta[index].f);
+        //!  ^ Create bogus character data. All the output characters will use a copy of this.
+        switch(b.str[i]) {
 
-    //         // Convert basic escapes
-    //         //! Newlines (LCTs) that would be in this specific index are parsed out by the string parser before calling this function.
-    //         //! No need to check for them.
-    //         case '\\': { r.str += '\\'; r.meta.push_back(outputCharData); break; }
-    //         case '0' : { r.str += '\0'; r.meta.push_back(outputCharData); break; }
-    //         case '\'': { r.str += '\''; r.meta.push_back(outputCharData); break; }
-    //         case '"' : { r.str += '\"'; r.meta.push_back(outputCharData); break; }
-    //         case 'n' : { r.str += '\n'; r.meta.push_back(outputCharData); break; }
-    //         case 'r' : { r.str += '\r'; r.meta.push_back(outputCharData); break; }
-    //         case 't' : { r.str += '\t'; r.meta.push_back(outputCharData); break; }
-    //         case 'v' : { r.str += '\v'; r.meta.push_back(outputCharData); break; }
-
-
-    //         // Convert Unicode codepoint escapes
-    //         case 'u': case 'U': {
-
-    //             // Parse the codepoint
-    //             ulong expectedDigits = b[i] == 'U' ? 8 : 4;
-    //             ++i; //! Skip u character
-    //             std::string codepoint;
-    //             for(ulong j = 0; j < expectedDigits && i + j < b.length();) {
-    //                 ulong lct = checkLct(b, i + j);
-    //                 if(lct) {
-    //                     i += lct;
-    //                     ++h;
-    //                 }
-    //                 else {
-    //                     char c = b[j];
-    //                     if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c >= 'a' && c <= 'f') {
-    //                         codepoint += c;
-    //                         ++j;
-    //                     }
-    //                     else break;
-    //                 }
-    //             }
-    //             i += codepoint.length();
-
-    //             // Check bad length
-    //             if(codepoint.empty()) {
-    //                 utils::printError(
-    //                     utils::ErrType::PREPROCESSOR,
-    //                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, index + 1),
-    //                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index + 2, i), //FIXME check if this is visible and works well when at the end of the file
-    //                     "Missing hexadecimal digits after Unicode codepoint escape sequence.\n"   //FIXME ^ debug it and check that the idices don't segfault
-    //                     "Exacly " + std::to_string(expectedDigits) + " digits are required."
-    //                 );
-    //             }
-    //             else if(codepoint.length() < expectedDigits) {
-    //                 utils::printError(
-    //                     utils::ErrType::PREPROCESSOR,
-    //                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, index + 1),
-    //                     ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index + 2, i), //FIXME CHECK IF THIS WORKS IF AT THE END OF THE FILE (it should)
-    //                     "Missing hexadecimal digits in Unicode codepoint escape sequence.\n" +    //FIXME ^ debug it and check that the idices don't segfault
-    //                     std::to_string(expectedDigits) + " were expected, but only " + std::to_string(codepoint.length()) + " could be found."
-    //                 );
-    //             }
-
-    //             // Convert the codepoint
-    //             unsigned char dest[5];
-    //             //TODO check errors from the function
-    //             //TODO modify decoder to remove unnecessary checks already performed by the parser
-    //             utf8decode((const utf8chr_t*)(codepoint.c_str()), dest);
-
-    //             // Push to buffer
-    //             for(ulong j = 0; dest[j] != '\0'; ++j){
-    //                 r.str += dest[j];
-    //                 r.meta.push_back(outputCharData);
-    //             }
-    //         }
+            // Convert basic escapes
+            case '\\': { r.str += '\\'; r.meta.push_back(outputCharData); return 2; }
+            case '0' : { r.str += '\0'; r.meta.push_back(outputCharData); return 2; }
+            case '\'': { r.str += '\''; r.meta.push_back(outputCharData); return 2; }
+            case '"' : { r.str += '\"'; r.meta.push_back(outputCharData); return 2; }
+            case 'n' : { r.str += '\n'; r.meta.push_back(outputCharData); return 2; }
+            case 'r' : { r.str += '\r'; r.meta.push_back(outputCharData); return 2; }
+            case 't' : { r.str += '\t'; r.meta.push_back(outputCharData); return 2; }
+            case 'v' : { r.str += '\v'; r.meta.push_back(outputCharData); return 2; }
 
 
-    //         // Print an error for invalid sequences
-    //         default: {
-    //             utils::printError(
-    //                 utils::ErrType::PREPROCESSOR,
-    //                 ElmCoords(sourceFilePaths[DBG_filePathIndex], DBG_curLine, index, i),
-    //                 "Invalid escape sequence \"" + ansi::white + "\\" + b[i] + ansi::reset + "\"."
-    //             );
-    //         }
-    //     }
+            // Convert Unicode codepoint escapes
+            case 'u': case 'U': {
 
-    //     return std::pair<ulong, ulong>(i - index, h);
-    // }
-    //TODO WRITE TESTS FOR EACH OF THESE CASES
-    //TODO WRITE TESTS FOR EACH OF THESE CASES
-    //TODO WRITE TESTS FOR EACH OF THESE CASES
+                // Calculate expected digits and skip the u character
+                ulong expectedDigits = b.str[i] == 'U' ? 8 : 4;
+                ++i;
+
+                // Parse the codepoint
+                std::string codepoint;
+                for(ulong j = 0; j < expectedDigits && i + j < b.str.length();) {
+                    char c = b.str[i + j];
+                    if(c >= '0' && c <= '9' || c >= 'A' && c <= 'F' || c >= 'a' && c <= 'f') {
+                        codepoint += c;
+                        ++j;
+                    }
+                    else break;
+                }
+                i += codepoint.length();
+
+
+                // Check bad length
+                if(codepoint.empty()) {
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        ElmCoords(b, index, index + 1),
+                        ElmCoords(b, index + 2, i - 1), //FIXME check if this is visible and works well when at the end of the file
+                        "Missing hexadecimal digits after Unicode codepoint escape sequence.\n"   //FIXME ^ debug it and check that the idices don't segfault
+                        "Exacly " + std::to_string(expectedDigits) + " digits are required."
+                    );
+                }
+                else if(codepoint.length() < expectedDigits) {
+                    utils::printError(
+                        utils::ErrType::PREPROCESSOR,
+                        ElmCoords(b, index, index + 1),
+                        ElmCoords(b, index + 2, i - 1), //FIXME CHECK IF THIS WORKS IF AT THE END OF THE FILE (it should)
+                        "Missing hexadecimal digits in Unicode codepoint escape sequence.\n" +    //FIXME ^ debug it and check that the idices don't segfault
+                        std::to_string(expectedDigits) + " were expected, but only " + std::to_string(codepoint.length()) + " could be found."
+                    );
+                }
+
+                // Convert the codepoint
+                unsigned char utfValue[5];
+                //TODO check errors from the function
+                //TODO modify decoder to remove unnecessary checks already performed by the parser
+                utf8decode((const utf8chr_t*)(codepoint.c_str()), utfValue);
+
+                // Push to buffer
+                for(ulong j = 0; utfValue[j] != '\0'; ++j){
+                    r.str += utfValue[j];
+                    r.meta.push_back(outputCharData);
+                }
+
+                // Return length
+                return i - index;
+            }
+
+
+            // Print an error for invalid sequences
+            default: {
+                utils::printError(
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(b, index, i - 1),
+                    "Invalid escape sequence \"" + ansi::white + "\\" + b.str[i] + ansi::reset + "\"."
+                );
+
+                //! return is never executed. printError() stops the program
+                //! Its only here so GCC doesn't cry about it
+                return 0;
+            }
+        }
+    }
+    // TODO WRITE TESTS FOR EACH OF THESE CASES
+    // TODO WRITE TESTS FOR EACH OF THESE CASES
+    // TODO WRITE TESTS FOR EACH OF THESE CASES
 }

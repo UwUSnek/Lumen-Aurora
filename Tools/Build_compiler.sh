@@ -13,6 +13,7 @@ g++                                                            \
     ./src/Preprocessor/preprocessor.cpp                        \
     ./src/Preprocessor/IntermediateCodeFormat.cpp              \
     ./src/Preprocessor/CleanupPhase/SegmentedCleanSource.cpp   \
+    ./src/Preprocessor/ElmCoords.cpp                           \
     \
     ./src/Preprocessor/LCTsPhase/LCTsPhase.cpp                 \
     ./src/Preprocessor/CleanupPhase/cleanupPhase.cpp           \

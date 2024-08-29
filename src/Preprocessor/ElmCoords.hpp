@@ -3,7 +3,7 @@
 
 
 namespace pre {
-    struct SourceElmMeta;
+    struct SegmentedCleanSource;
 }
 struct ElmCoords {
     std::string filePath;
@@ -24,4 +24,6 @@ struct ElmCoords {
         start(_start),
         end(_end) {
     }
+
+    ElmCoords(pre::SegmentedCleanSource source, ulong _start, ulong _end);
 };
