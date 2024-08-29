@@ -15,7 +15,7 @@
 
 
 namespace pre {
-    SegmentedCleanSource startIncludePhase(SegmentedCleanSource &b, ulong DBG_filePathIndex) {
+    SegmentedCleanSource startIncludePhase(SegmentedCleanSource &b) {
         SegmentedCleanSource r;
 
 
@@ -28,13 +28,13 @@ namespace pre {
             // If an include directive is detected, replace it with the preprocessed contents of the file
             std::smatch match;
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) {
-                ElmCoords relevantCoords(sourceFilePaths[DBG_filePathIndex], b.meta[i].l, b.meta[i].i, b.meta[i + match[0].length() - 1].i);
-                i += match[0].length(); //FIXME ^ pass the index to ElmCoords instead of the string value
+                ElmCoords relevantCoords(b, i, i + match[0].length() - 1);
+                i += match[0].length();
 
                 // Detect specified file path                                                 //     ╭────── file ──────╮ ╭───── module ─────╮
                 std::smatch filePathMatch;                                                    //     │ ╭────────────╮   │ │ ╭────────────╮   │
                 if(std::regex_search(b.str.cbegin() + i, b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
-                    ElmCoords filePathCoords(sourceFilePaths[DBG_filePathIndex], b.meta[i].l, b.meta[i].i, b.meta[i + filePathMatch[0].length() - 1].i);
+                    ElmCoords filePathCoords(b, i, i + filePathMatch[0].length() - 1);
                     i += filePathMatch[0].length();
 
 
@@ -55,7 +55,7 @@ namespace pre {
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             // Calculate the actual file path
-                            std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(sourceFilePaths[DBG_filePathIndex]).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include statement was used in
+                            std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(sourceFilePaths[b.meta[i].f]).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include statement was used in
                             std::string canonicalIncludeFilePath;                                                                                           //! Canonical version of the adjusted file path. No changes if file was not found
                             try { canonicalIncludeFilePath = std::filesystem::canonical(adjustedIncludeFilePath).string(); }
                             catch(std::filesystem::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
@@ -113,7 +113,7 @@ namespace pre {
                     utils::printError(
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
-                        ElmCoords(sourceFilePaths[DBG_filePathIndex], b.meta[i].l, b.meta[i].i, b.meta[i].i),
+                        b.str[i] == '\0' ? relevantCoords : ElmCoords(b, i, i),
                         "Missing file path in include statement.\n"
                         "A valid string literal was expected, but could not be found."
                     );
