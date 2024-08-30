@@ -63,6 +63,7 @@ namespace pre {
                             // Print an error if the file is a directory
                             if(std::filesystem::is_directory(canonicalIncludeFilePath)) {
                                 printError(
+                                    ErrorCode::ERROR_INCLUDE_PATH_IS_DIRECTORY,
                                     utils::ErrType::PREPROCESSOR,
                                     relevantCoords,
                                     filePathCoords,
@@ -75,6 +76,7 @@ namespace pre {
                             std::ifstream includeFile(canonicalIncludeFilePath);
                             if(!includeFile) {
                                 printError(
+                                    ErrorCode::ERROR_INCLUDE_PATH_CANNOT_OPEN,
                                     utils::ErrType::PREPROCESSOR,
                                     relevantCoords,
                                     filePathCoords,
@@ -99,6 +101,7 @@ namespace pre {
                     // Empty string
                     else {
                         utils::printError(
+                            ErrorCode::ERROR_INCLUDE_PATH_EMPTY,
                             utils::ErrType::PREPROCESSOR,
                             relevantCoords,
                             filePathCoords,
@@ -111,6 +114,7 @@ namespace pre {
                 // String literal not found
                 else {
                     utils::printError(
+                        ErrorCode::ERROR_INCLUDE_PATH_MISSING,
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
                         b.str[i] == '\0' ? relevantCoords : ElmCoords(b, i, i),

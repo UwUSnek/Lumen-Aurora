@@ -53,8 +53,8 @@ namespace utils {
      * @param message The error message. This can contain multiple lines.
      *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
      */
-    void printError(ErrType errType, ElmCoords errPos, std::string message) {
-        printError(errType, ElmCoords(), errPos, message);
+    void printError(ErrorCode errorCode, ErrType errType, ElmCoords errPos, std::string message) {
+        printError(errorCode, errType, ElmCoords(), errPos, message);
     }
 
 
@@ -107,7 +107,7 @@ namespace utils {
      * @param message The error message. This can contain multiple lines.
      *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
      */
-    void printError(ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message) {
+    void printError(ErrorCode errorCode, ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message) {
         std::cerr << ansi::bold_red;
         if(errType == ErrType::COMMAND) {
 
@@ -178,7 +178,7 @@ namespace utils {
 
 
         // Stop the program
-        exit(0);
+        exit(errorCode);
     }
 
 
@@ -198,6 +198,7 @@ namespace utils {
         // Print an error if the file is a directory
         if(std::filesystem::is_directory(fileName)) {
             printError(
+                ErrorCode::ERROR_PATH_IS_DIRECTORY,
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(),
                 "Could not open the specified file: \"" + fileName + "\": is a directory.\n" +
@@ -210,6 +211,7 @@ namespace utils {
         std::ifstream f(fileName, std::ios::binary);
         if(!f) {
             printError(
+                ErrorCode::ERROR_PATH_CANNOT_OPEN,
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(),
                 "Could not open file \"" + fileName + "\": " + std::strerror(errno) + ".\n" +

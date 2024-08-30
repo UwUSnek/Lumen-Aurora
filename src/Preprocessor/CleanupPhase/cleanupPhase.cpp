@@ -253,6 +253,7 @@ namespace pre {
             // Missing closing sequence
             else if(b.str[i] == '\0') {
                 utils::printError(
+                    literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_0 : ErrorCode::ERROR_CHAR_INCOMPLETE_0,
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(b, index, i - 1),
                     ElmCoords(b, i - 1, i - 1),
@@ -261,6 +262,7 @@ namespace pre {
             }
             else if(b.str[i] == '\n') {
                 utils::printError(
+                    literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_n : ErrorCode::ERROR_CHAR_INCOMPLETE_n,
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(b, index, i - 1),
                     ElmCoords(b, i - 1, i - 1),
