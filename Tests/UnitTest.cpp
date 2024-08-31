@@ -54,15 +54,27 @@ void UnitTest::startTest() {
     writeTmpFile(code);
 }
 
+
 static void printSeparator(){
-    std::cout << "\n\n" << "----" << "\n\n";
+    int width = utils::getConsoleWidth();
+    std::cout << "\n\n" << ansi::bold_red;
+    if(width != -1) {
+        for(int i = 0; i < width; ++i) {
+            std::cout << "─";
+        }
+    }
+    else {
+        std::cout << "────────";
+    }
+    std::cout << ansi::reset << "\n\n";
 }
+
 
 void UnitTest::checkResult() {
     if(result.peek() != std::stringstream::traits_type::eof()) {
-        if(!testIndex) printSeparator();
+        if(!failedTests) printSeparator();
         ++failedTests;
-        std::cout << ansi::bold_red << "\nTest #" << testIndex << " \"" << ansi::reset << name << ansi::bold_red << "\" failed:\n";
+        std::cout << ansi::bold_red << "Test #" << testIndex << " \"" << ansi::reset << name << ansi::bold_red << "\" failed:\n";
         std::cout << result.str();
         printSeparator();
     }

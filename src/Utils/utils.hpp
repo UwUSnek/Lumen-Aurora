@@ -15,6 +15,9 @@ namespace utils {
         COMPILER
     };
 
+
+    int getConsoleWidth();
+
     std::string formatChar(char c, bool useColor = false);
 
     void printError(ErrorCode errorCode, ErrType errType,                   ElmCoords errPos, std::string message);

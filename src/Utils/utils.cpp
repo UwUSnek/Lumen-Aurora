@@ -4,6 +4,8 @@
 #include <fstream>
 #include <cstring>
 #include <filesystem>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 #include "utils.hpp"
 #include "Preprocessor/ElmCoords.hpp"
@@ -14,6 +16,20 @@
 
 
 namespace utils {
+    /**
+     * @brief Tries to retrieve the width of the output console.
+     * @return The width in characters, or -1 if the it cannot be determined.
+     */
+    int getConsoleWidth() {
+        struct winsize w;
+        if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
+            return w.ws_col;
+        }
+        return -1;
+    }
+
+
+
     /**
      * @brief Prints a formatted line indicator and colors it black.
      *      The color is NOT reset after. The caller function will have to manually change it back.
