@@ -10,7 +10,8 @@
 
 std::string compilerLocation = "./Build/out";
 std::string tmpDirLocation   = "/tmp/Lumina-Aurora_UnitTests";
-std::string tmpFileLocatiton = tmpDirLocation + "/tmp";
+std::string tmpFileLocatiton = tmpDirLocation + "/src";
+std::string tmpOutputLocatiton = tmpDirLocation + "/out";
 
 ulong totalTests; // Calculated after all tests are added to the vector
 ulong passedTests = 0;
@@ -110,16 +111,26 @@ void TestPreprocessorOutput::startTest() {
         result << ansi::bold_red << "    Compilation stopped with exit code " << exitValue << ".";
     }
     else {
-        std::ifstream f(tmpFileLocatiton);
-        std::string outputCode = utils::readFile(f);
-        if(outputCode != expected) {
-            result << ansi::bold_red << "    Output code doesn't match.\n    " << ansi::reset;
-            for(int i = 0; i < outputCode.length(); ++i) {
-                result << utils::formatChar(outputCode[i], true);
-                if(outputCode[i] == '\n' && i < outputCode.length() - 1) result << "\n    ";
+        //FIXME ADD OUTPUT OPTION TO COMPILER
+        //FIXME ADD OUTPUT OPTION TO COMPILER
+        //FIXME ADD OUTPUT OPTION TO COMPILER
+        //FIXME ADD OUTPUT OPTION TO COMPILER
+        //FIXME ADD OUTPUT OPTION TO COMPILER
+        std::ifstream f(tmpOutputLocatiton);
+        if(f.is_open()) {
+            std::string outputCode = utils::readFile(f);
+            if(outputCode != expected) {
+                result << ansi::bold_red << "    Output code doesn't match.\n    " << ansi::reset;
+                for(int i = 0; i < outputCode.length(); ++i) {
+                    result << utils::formatChar(outputCode[i], true);
+                    if(outputCode[i] == '\n' && i < outputCode.length() - 1) result << "\n    ";
+                }
             }
+            f.close();
         }
-        f.close();
+        else {
+            result << ansi::bold_red << "    Output file not found.";
+        }
     }
 
     UnitTest::checkResult();

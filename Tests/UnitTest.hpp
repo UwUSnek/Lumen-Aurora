@@ -8,6 +8,7 @@
 extern std::string compilerLocation;
 extern std::string tmpDirLocation;
 extern std::string tmpFileLocatiton;
+extern std::string tmpOutputLocatiton;
 
 extern ulong totalTests;
 extern ulong passedTests;
