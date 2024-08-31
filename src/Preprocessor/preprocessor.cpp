@@ -20,14 +20,11 @@ namespace pre {
 
 
 
-    /**
-     * @brief Loads the source file, including all of the files included by it and processes any preprocessor directives.
-     * @param options The options.
-     * @return The contents of the source file as a SegmentedCleanSource. //FIXME fix all comments that reference StructuredSource s
-     */
-    SegmentedCleanSource loadSourceCode(cmd::Options& options) {
-        std::string s = utils::readAndCheckFile(options.sourceFile);
-        return loadSourceCode(s, options.sourceFile);
+
+
+    SegmentedCleanSource loadSourceCode(std::string filePath) {
+        std::string s = utils::readAndCheckFile(filePath);
+        return loadSourceCode(s, filePath);
     }
 
 
@@ -39,7 +36,7 @@ namespace pre {
      * @param filePath The path of the original source code file.
      * @return The contents of the source file as a SegmentedCleanSource.
      */
-    SegmentedCleanSource loadSourceCode(std::string b, std::string filePath) {
+    SegmentedCleanSource loadSourceCode(std::string s, std::string filePath) {
         sourceFilePaths.push_back(std::filesystem::canonical(filePath)); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
         //FIXME ^automatically fish up cached files if found. loop through them (for now)
         //FIXME                                               ^ use a hash map to save the paths of the preprocessed files
@@ -47,7 +44,7 @@ namespace pre {
         //FIXME CHECK CIRCULAR DEPENDENCIES
         //FIXME SAFE INCLUDE STACK
 
-        SegmentedCleanSource r1 = startLCTsPhase(b, sourceFilePaths.size() - 1);
+        SegmentedCleanSource r1 = startLCTsPhase(s, sourceFilePaths.size() - 1);
         SegmentedCleanSource r2 = startCleanupPhase(r1);
         SegmentedCleanSource r3 = startIncludePhase(r2);
         return r3;

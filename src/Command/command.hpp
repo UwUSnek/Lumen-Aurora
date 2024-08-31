@@ -3,8 +3,13 @@
 
 
 
+
+
+
 namespace cmd {
-    Options parseOptions(int argc, char* argv[]);
+    extern cmd::Options options;
+
+    void parseOptions(int argc, char* argv[]);
     void printHelp();
     void printVersion();
 }

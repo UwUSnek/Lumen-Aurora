@@ -21,7 +21,8 @@
             "label": "Run test (no debug)",
             "command": "./Build/out",
             "args": [
-                "./Test/main.lum"
+                "./Test/main.lum",
+                "-x", "./Test/out"
             ],
             "problemMatcher": [],
             "options": { "cwd": "${workspaceFolder}" },

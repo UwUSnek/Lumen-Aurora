@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <chrono>
+#include <filesystem>
 
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
@@ -33,7 +34,17 @@
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-
+void writeOutputFile(std::string code) {
+    std::filesystem::create_directories(cmd::options.outputFile);
+    std::ofstream f(cmd::options.outputFile);
+    if(f.is_open()) {
+        f << code;
+        f.close();
+    }
+    else {
+        //TODO print error if output file cannot be opened
+    }
+}
 
 
 
@@ -43,15 +54,22 @@
 
 //TODO run all passes concurrently. make the next pass wait for the previous one when it reached it and make them read from streams
 int main(int argc, char* argv[]){
-    cmd::Options options = cmd::parseOptions(argc, argv);
-    if(options.isHelp) {
+    cmd::parseOptions(argc, argv);
+    if(cmd::options.isHelp) {
         cmd::printHelp();
         exit(0);
     }
-    if(options.isVersion) {
+    if(cmd::options.isVersion) {
         cmd::printVersion();
         exit(0);
     }
+
+
+    // Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
+    std::chrono::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
+    std::chrono::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
+    std::chrono::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
+    std::chrono::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
 
@@ -63,38 +81,48 @@ int main(int argc, char* argv[]){
 
     //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
     // Preprocessing
-    auto timeStartPre = std::chrono::high_resolution_clock::now();
-    pre::SegmentedCleanSource sourceCode = pre::loadSourceCode(options);
-    // std::cout << sourceCode.toStringVerbose() << "\n";
-    std::cout << sourceCode.toString() << "\n";
-    std::chrono::duration<double> timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
+    timeStartPre = std::chrono::high_resolution_clock::now();
+    pre::SegmentedCleanSource sourceCode = pre::loadSourceCode(cmd::options.sourceFile);
+    timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 
 
 
-    //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
-    // Compilation
-    auto timeStartComp = std::chrono::high_resolution_clock::now();
-    //TODO
-    std::chrono::duration<double> timeComp = std::chrono::high_resolution_clock::now() - timeStartComp;
+    if(cmd::options.outputType == 'p') {
+        writeOutputFile(sourceCode.str);
+        //TODO write source informations if requested
+    }
+    else {
+        //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
+        // Compilation
+        timeStartComp = std::chrono::high_resolution_clock::now();
+        //TODO actually compile the code
+        timeComp = std::chrono::high_resolution_clock::now() - timeStartComp;
 
 
 
 
-    //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
-    // Optimization
-    auto timeStartOpt = std::chrono::high_resolution_clock::now();
-    //TODO actually optimize the code
-    std::chrono::duration<double> timeOpt = std::chrono::high_resolution_clock::now() - timeStartOpt;
+        //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
+        // Optimization
+        timeStartOpt = std::chrono::high_resolution_clock::now();
+        //TODO actually optimize the code
+        timeOpt = std::chrono::high_resolution_clock::now() - timeStartOpt;
 
 
 
 
-    //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
-    // Conversion
-    auto timeStartConv = std::chrono::high_resolution_clock::now();
-    //TODO actually optimize the code
-    std::chrono::duration<double> timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
+        if(cmd::options.outputType == 'm') {
+            // writeOutputFile(sourceCode.str); //TODO write precompiled module
+            //TODO write source informations if requested
+        }
+        else {
+            //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
+            // Conversion
+            timeStartConv = std::chrono::high_resolution_clock::now();
+            //TODO actually convert the code
+            timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
+        }
+    }
 
 
 
