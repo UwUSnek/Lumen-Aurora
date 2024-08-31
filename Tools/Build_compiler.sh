@@ -7,9 +7,11 @@ mkdir -p ./Build
 
 g++                                                            \
     ./src/Preprocessor/CleanupPhase/UTF8_decoder.c             \
-    \
     ./src/Utils/utils.cpp                                      \
     ./src/main.cpp                                             \
+    \
+    ./src/Command/command.cpp                                   \
+    \
     ./src/Preprocessor/preprocessor.cpp                        \
     ./src/Preprocessor/IntermediateCodeFormat.cpp              \
     ./src/Preprocessor/CleanupPhase/SegmentedCleanSource.cpp   \

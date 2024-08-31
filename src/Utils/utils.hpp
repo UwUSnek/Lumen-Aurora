@@ -2,6 +2,8 @@
 #include <string>
 #include "ansi.hpp"
 #include "ErrorCode.hpp"
+#include "Command/CommandCoords.hpp"
+#include "Preprocessor/ElmCoords.hpp"
 
 
 
@@ -10,7 +12,6 @@
 struct ElmCoords;
 namespace utils {
     enum class ErrType:int {
-        COMMAND,
         PREPROCESSOR,
         COMPILER
     };
@@ -20,6 +21,7 @@ namespace utils {
 
     std::string formatChar(char c, bool useColor = false);
 
+    void printErrorCL(ErrorCode errorCode, cmd::CommandCoords relPos, cmd::CommandCoords errPos, std::string message, std::string fullCommand);
     void printError(ErrorCode errorCode, ErrType errType,                   ElmCoords errPos, std::string message);
     void printError(ErrorCode errorCode, ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message);
 

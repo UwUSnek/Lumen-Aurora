@@ -25,7 +25,7 @@ namespace pre {
      * @param options The options.
      * @return The contents of the source file as a SegmentedCleanSource. //FIXME fix all comments that reference StructuredSource s
      */
-    SegmentedCleanSource loadSourceCode(Options& options) {
+    SegmentedCleanSource loadSourceCode(cmd::Options& options) {
         std::string s = utils::readAndCheckFile(options.sourceFile);
         return loadSourceCode(s, options.sourceFile);
     }

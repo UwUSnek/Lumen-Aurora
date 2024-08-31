@@ -4,7 +4,7 @@
 #include <fstream>
 #include <chrono>
 
-#include "Options.hpp"
+#include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
 
@@ -14,14 +14,6 @@
 
 
 
-
-Options parseOptions(int argc, char* argv[]){
-    Options r;
-    for(int i = 1; i < argc; ++i) {
-        r.sourceFile = std::string(argv[i]);
-    }
-    return r;
-}
 
 
 
@@ -51,7 +43,17 @@ Options parseOptions(int argc, char* argv[]){
 
 //TODO run all passes concurrently. make the next pass wait for the previous one when it reached it and make them read from streams
 int main(int argc, char* argv[]){
-    Options options = parseOptions(argc, argv);
+    cmd::Options options = cmd::parseOptions(argc, argv);
+    if(options.isHelp) {
+        cmd::printHelp();
+        exit(0);
+    }
+    if(options.isVersion) {
+        cmd::printVersion();
+        exit(0);
+    }
+
+
 
 
     //TODO add an option to suppress fancy real-time output
