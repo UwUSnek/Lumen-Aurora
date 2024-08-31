@@ -3,11 +3,11 @@
 
 
 namespace cmd {
-    struct CommandCoords {
+    struct ElmCoordsCL {
         ulong start;
         ulong end;
 
-        CommandCoords(ulong _start, ulong _end) :
+        ElmCoordsCL(ulong _start, ulong _end) :
             start(_start),
             end(_end) {
         }

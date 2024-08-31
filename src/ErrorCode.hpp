@@ -34,8 +34,8 @@ enum ErrorCode : int {
 
 
 
-    ERROR_INCLUDE_PATH_MISSING,     // Path is missing
-    ERROR_INCLUDE_PATH_EMPTY,     // Path is empty
-    ERROR_INCLUDE_PATH_IS_DIRECTORY,   // Path is a directory
-    ERROR_INCLUDE_PATH_CANNOT_OPEN,     // File cannot be opened (either missing or no permissions)
+    ERROR_PRE_NO_PATH,     // Path is missing
+    ERROR_PRE_EMPTY_PATH,     // Path is empty
+    ERROR_PRE_PATH_IS_DIRECTORY,   // Path is a directory
+    ERROR_PRE_PATH_CANNOT_OPEN,     // File cannot be opened (either missing or no permissions)
 };

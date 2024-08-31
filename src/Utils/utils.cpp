@@ -84,7 +84,7 @@ namespace utils {
 
 
 
-    void printErrorCL(ErrorCode errorCode, cmd::CommandCoords relPos, cmd::CommandCoords errPos, std::string message, std::string fullCommand) {
+    void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL relPos, cmd::ElmCoordsCL errPos, std::string message, std::string fullCommand) {
         std::cerr << ansi::bold_red;
     }
 

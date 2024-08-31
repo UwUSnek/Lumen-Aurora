@@ -14,7 +14,11 @@ namespace cmd {
         // 'p' = preprocess source file
         // 'm' = precompile module
         // 'x' = compile executable
-        char outputType;
+        char outputType = '0';
+
+        // 'l' = linux
+        // 'w' = windows
+        char targetPlatform = '0';
     };
 }
 
