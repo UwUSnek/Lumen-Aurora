@@ -90,7 +90,10 @@ void UnitTest::checkResult() {
 
 void TestExitValue::startTest() {
     UnitTest::startTest();
-    int exitValue = compile(options);
+    //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
+    //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
+    //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
+    int exitValue = compile(options + "-p " + tmpOutputLocatiton);
 
     if(exitValue != expected) {
         result << ansi::bold_red << "    Expected exit code │ " << ansi::reset << expected << "\n";
@@ -105,17 +108,12 @@ void TestExitValue::startTest() {
 
 void TestPreprocessorOutput::startTest() {
     UnitTest::startTest();
-    int exitValue = compile(options);
+    int exitValue = compile(options + "-p " + tmpOutputLocatiton);
 
     if(exitValue) {
         result << ansi::bold_red << "    Compilation stopped with exit code " << exitValue << ".";
     }
     else {
-        //FIXME ADD OUTPUT OPTION TO COMPILER
-        //FIXME ADD OUTPUT OPTION TO COMPILER
-        //FIXME ADD OUTPUT OPTION TO COMPILER
-        //FIXME ADD OUTPUT OPTION TO COMPILER
-        //FIXME ADD OUTPUT OPTION TO COMPILER
         std::ifstream f(tmpOutputLocatiton);
         if(f.is_open()) {
             std::string outputCode = utils::readFile(f);
