@@ -51,17 +51,17 @@ int main(){
 
     tests.push_back(new TestPreprocessorOutput(
         "comment removal 1",
-        "abc/*comment/*abc//test",
+        "abc/*comment*/abc//test",
         "abcabc"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "comment removal 2",
-        "abc/*comment/*abc//test\n",
+        "abc/*comment*/abc//test\n",
         "abcabc\n"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "comment removal 3",
-        "abc/*com\n\nm\ne\\\nnt/*/*t//est*/abc",
+        "abc/*com\n\nm\ne\\\nnt*//*t//est*/abc",
         "abcabc"
     ));
 

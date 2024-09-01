@@ -26,16 +26,16 @@ std::vector<UnitTest*> tests;
 
 
 
-int compile(std::string options) {
-    return WEXITSTATUS(system((compilerLocation + " " + tmpFileLocatiton + " " + options + " > /dev/null 2> /dev/null").c_str()));
+int compile(std::string options, ulong testIndex) {
+    return WEXITSTATUS(system((compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options + " > /dev/null 2> /dev/null").c_str()));
     //TODO update command after implementing real options
 }
 
 
 
 
-void writeTmpFile(std::string code) {
-    std::ofstream f(tmpFileLocatiton);
+void writeTmpFile(std::string code, ulong testIndex) {
+    std::ofstream f(tmpFileLocatiton + std::to_string(testIndex));
     if(!f.is_open()) {
         std::cout << "Temporary file could not be opened";
         exit(1);
@@ -52,7 +52,7 @@ void writeTmpFile(std::string code) {
 
 void UnitTest::startTest() {
     ++activeTests;
-    writeTmpFile(code);
+    writeTmpFile(code, testIndex);
 }
 
 
@@ -93,7 +93,7 @@ void TestExitValue::startTest() {
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
-    int exitValue = compile(options + "-p " + tmpOutputLocatiton);
+    int exitValue = compile(options + "-p " + tmpOutputLocatiton, testIndex);
 
     if(exitValue != expected) {
         result << ansi::bold_red << "    Expected exit code │ " << ansi::reset << expected << "\n";
@@ -108,20 +108,32 @@ void TestExitValue::startTest() {
 
 void TestPreprocessorOutput::startTest() {
     UnitTest::startTest();
-    int exitValue = compile(options + "-p " + tmpOutputLocatiton);
+    int exitValue = compile(options + "-p " + tmpOutputLocatiton + std::to_string(testIndex), testIndex);
 
     if(exitValue) {
         result << ansi::bold_red << "    Compilation stopped with exit code " << exitValue << ".";
     }
     else {
-        std::ifstream f(tmpOutputLocatiton);
+        std::ifstream f(tmpOutputLocatiton + std::to_string(testIndex));
         if(f.is_open()) {
+
+            // Read output file and compare it to the expected output
             std::string outputCode = utils::readFile(f);
             if(outputCode != expected) {
-                result << ansi::bold_red << "    Output code doesn't match.\n    " << ansi::reset;
+                result << ansi::bold_red << "    Output code doesn't match expected value.\n" << ansi::reset;
+
+                // Print formatted input code
+                result << ansi::bold_red << "    Used input:\n        " << ansi::reset;
+                for(int i = 0; i < code.length(); ++i) {
+                    result << utils::formatChar(code[i], true);
+                    if(code[i] == '\n' && i < code.length() - 1) result << "\n        ";
+                }
+
+                // Print formatted output code
+                result << ansi::bold_red << "\n    Generated output:\n        " << ansi::reset;
                 for(int i = 0; i < outputCode.length(); ++i) {
                     result << utils::formatChar(outputCode[i], true);
-                    if(outputCode[i] == '\n' && i < outputCode.length() - 1) result << "\n    ";
+                    if(outputCode[i] == '\n' && i < outputCode.length() - 1) result << "\n        ";
                 }
             }
             f.close();
