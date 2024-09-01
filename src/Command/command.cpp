@@ -197,7 +197,7 @@ namespace cmd {
             ansi::bold_magenta << "          --help │ " << ansi::reset << "Print this message and ignore any other option but --no-color                          " << none______ << ansi::bright_black << "\n" <<
             ansi::bold_magenta << "       --version │ " << ansi::reset << "Print the version and ignore any other option but --no-color or --help                 " << none______ << ansi::bright_black << "\n" <<
             ansi::bold_magenta << "                 │ " << ansi::reset << "                                                                                       " << none______ << ansi::bright_black << "\n" <<
-            ansi::bold_magenta << "      --no-color │ " << ansi::reset << "Disable colors in the compiler's output                                                " << none______ << ansi::bright_black << "\n" <<
+            ansi::bold_magenta << "      --no-color │ " << ansi::reset << "Disable colors and styling in the compiler's output                                    " << none______ << ansi::bright_black << "\n" <<
             ansi::bold_magenta << "    --no-display │ " << ansi::reset << "Disable source code display in error messages                                          " << none______ << ansi::bright_black << "\n" <<
             ansi::bold_magenta << "     --no-errors │ " << ansi::reset << "Don't print error messages (doesn't affect exit code)                                  " << none______ << ansi::bright_black << "\n" <<
             ansi::bold_magenta << "     --no-status │ " << ansi::reset << "Disable real-time status and progress bar in the compiler's output                     " << none______ << ansi::bright_black << "\n" <<

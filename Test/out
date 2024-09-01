@@ -1,0 +1,11 @@
+"test\U0001f600aa"
+"test😀aa"
+"\u0041"
+"TEST_\u0041_TEST"
+
+
+void f(){
+    io.print("test file here");
+}
+
+'\u0042''\n'

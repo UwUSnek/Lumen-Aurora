@@ -66,6 +66,62 @@ namespace utils {
     //FIXME    maybe even write a raw version of the lines on the left and a replaced version of them on the right
 
 
+
+
+
+
+
+    void printErrorGeneric(ErrorCode errorCode, std::string message) {
+        std::cerr << ansi::bold_red;
+        std::cerr << "Error:";
+
+        // Print the actual error after indenting it by 4 spaces
+        std::cerr << ansi::bold_red << "\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+
+        // Stop the program
+        exit(errorCode);
+    }
+
+
+
+
+
+
+
+    void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL relPos, cmd::ElmCoordsCL errPos, std::string message, std::string fullCommand) {
+        std::cerr << ansi::bold_red;
+        std::cerr << "Could not parse command:\n";
+
+
+        // Print full command and highlight relevant section and error
+        const char* lastColor;
+        for(ulong i = 0; i < fullCommand.length(); ++i) {
+
+            // Calculate current color based on the current character index and print it if it differs form the last one
+            const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
+            if(curColor != lastColor) {
+                std::cerr << curColor;
+                lastColor = curColor;
+            }
+
+            // Actually print the formatted character
+            std::cerr << utils::formatChar(fullCommand[i]);
+        }
+
+
+        // Print the actual error after indenting it by 4 spaces
+        std::cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+
+
+        // Stop the program
+        exit(errorCode);
+    }
+
+
+
+
+
+
     /**
      * @brief Prints an error to stderr, specifying the error type.
      *      This function doesn't stop the program.
@@ -80,23 +136,6 @@ namespace utils {
 
 
 
-
-
-
-
-    void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL relPos, cmd::ElmCoordsCL errPos, std::string message, std::string fullCommand) {
-        std::cerr << ansi::bold_red;
-    }
-
-
-
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 //FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 //FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <chrono>
 #include <filesystem>
+#include <cstring>
 
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
@@ -36,8 +37,8 @@
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 void writeOutputFile(std::string code) {
     // Create directories
-    // std::filesystem::create_directories(std::filesystem::path(cmd::options.outputFile).parent_path());
-    std::filesystem::create_directories(cmd::options.outputFile);
+    std::filesystem::create_directories(std::filesystem::path(cmd::options.outputFile).parent_path());
+
 
     // Write the file and print an error if it cannot be created
     std::ofstream f(cmd::options.outputFile);
@@ -46,7 +47,11 @@ void writeOutputFile(std::string code) {
         f.close();
     }
     else {
-        //TODO print error if output file cannot be opened
+        utils::printErrorGeneric(
+            ErrorCode::ERROR_OUTPUT_CANNOT_CREATE,
+            "Could not write output file \"" + cmd::options.outputFile + "\".\n" +
+            "Output path was interpreted as: \"" + ansi::white + std::filesystem::canonical(cmd::options.outputFile).string() + ansi::reset + "\".\n"
+        );
     }
 }
 
@@ -146,11 +151,11 @@ int main(int argc, char* argv[]){
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
     // Successful command output
-    std::cout << ansi::bold_green << fullCommand << ansi::reset << "completed successfully.";
+    std::cout << ansi::bold_green << fullCommand << ansi::reset << " completed successfully.";
     std::cout << ansi::bold_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds.";
     std::cout << ansi::bold_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
     std::cout << ansi::bold_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
     std::cout << ansi::bold_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
-    std::cout << ansi::bold_green << "\n\n    Output written to \"" << ansi::reset << std::filesystem::canonical(cmd::options.outputFile) << ansi::bold_green << "\".";
+    std::cout << ansi::bold_green << "\n\n    Output written to \"" << ansi::reset << std::filesystem::canonical(cmd::options.outputFile).string() << ansi::bold_green << "\".";
     std::cout << "\n\n";
 }

@@ -4,11 +4,12 @@
 
 enum ErrorCode : int {
     SUCCESS = 0,
+    ERROR_OUTPUT_CANNOT_CREATE, // Output file cannot be created
 
-    ERROR_CMD_NO_SOURCE_FILE,
-    ERROR_CMD_NO_OUTPUT_FILE,
-    ERROR_CMD_UNKNOWN_OPTION,
-    ERROR_CMD_INCOMPATIBLE_OPTIONS,
+    ERROR_CMD_NO_SOURCE_FILE, // No source path specified in command
+    ERROR_CMD_NO_OUTPUT_FILE, // No output path specified after output type option
+    ERROR_CMD_UNKNOWN_OPTION, // Option not recognized
+    ERROR_CMD_INCOMPATIBLE_OPTIONS, // 2 incompatible options are used together
 
 
 
@@ -34,8 +35,8 @@ enum ErrorCode : int {
 
 
 
-    ERROR_PRE_NO_PATH,     // Path is missing
-    ERROR_PRE_EMPTY_PATH,     // Path is empty
-    ERROR_PRE_PATH_IS_DIRECTORY,   // Path is a directory
-    ERROR_PRE_PATH_CANNOT_OPEN,     // File cannot be opened (either missing or no permissions)
+    ERROR_PRE_NO_PATH,     // Include path is missing
+    ERROR_PRE_EMPTY_PATH,     // Include path is empty
+    ERROR_PRE_PATH_IS_DIRECTORY,   // Include path is a directory
+    ERROR_PRE_PATH_CANNOT_OPEN,     // Included file cannot be opened (either missing or no permissions)
 };
