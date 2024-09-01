@@ -58,7 +58,7 @@ void UnitTest::startTest() {
 
 static void printSeparator(){
     int width = utils::getConsoleWidth();
-    std::cout << "\n\n" << ansi::bold_red;
+    std::cout << "\n\n" << ansi::bright_black;
     if(width != -1) {
         for(int i = 0; i < width; ++i) {
             std::cout << "─";

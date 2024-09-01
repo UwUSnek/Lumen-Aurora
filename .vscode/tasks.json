@@ -22,7 +22,7 @@
             "command": "./Build/out",
             "args": [
                 "./Test/main.lum",
-                "-x", "./Test/out"
+                "-p", "./Test/out"
             ],
             "problemMatcher": [],
             "options": { "cwd": "${workspaceFolder}" },

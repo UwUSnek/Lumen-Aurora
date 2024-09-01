@@ -48,8 +48,8 @@ namespace utils {
      * @return The formatted character.
      */
     std::string formatChar(char c, bool useColor) {
-        /**/ if(c ==  ' ') return useColor ? ansi::black + "·" + ansi::reset : "·";
-        else if(c == '\n') return useColor ? ansi::black + "↓" + ansi::reset : "↓";
+        /**/ if(c ==  ' ') return useColor ? ansi::bright_black + "·" + ansi::reset : "·";
+        else if(c == '\n') return useColor ? ansi::bright_black + "↓" + ansi::reset : "↓";
         else return std::string(1, c);
     }
 
@@ -152,7 +152,7 @@ namespace utils {
         for(; s[i] != '\0'; ++i) {
 
             // Calculate current color based on the current character index and print it if it differs form the last one
-            const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::black)).c_str();
+            const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
             if(curColor != lastColor) {
                 std::cerr << curColor;
                 lastColor = curColor;

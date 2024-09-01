@@ -84,13 +84,13 @@ namespace pre {
 
                 // Clean value
                 r += "| ";
-                r += std::regex_replace(elm.s, std::regex(" "), ansi::black + "·" + ansi::reset);
+                r += std::regex_replace(elm.s, std::regex(" "), ansi::bright_black + "·" + ansi::reset);
                 r.append(std::max(1l, (long)lineValueMaxSpace - (long)elm.s.length()), ' ');
 
 
                 // Raw value
                 r += "| ";
-                r += std::regex_replace(std::regex_replace(elm.OG_s, std::regex("\n"), ansi::black + "\\n" + ansi::reset), std::regex(" "), ansi::black + "·" + ansi::reset);
+                r += std::regex_replace(std::regex_replace(elm.OG_s, std::regex("\n"), ansi::bright_black + "\\n" + ansi::reset), std::regex(" "), ansi::bright_black + "·" + ansi::reset);
                 r += "\n";
             }
             return r;

@@ -35,7 +35,11 @@
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 void writeOutputFile(std::string code) {
+    // Create directories
+    // std::filesystem::create_directories(std::filesystem::path(cmd::options.outputFile).parent_path());
     std::filesystem::create_directories(cmd::options.outputFile);
+
+    // Write the file and print an error if it cannot be created
     std::ofstream f(cmd::options.outputFile);
     if(f.is_open()) {
         f << code;
@@ -54,7 +58,17 @@ void writeOutputFile(std::string code) {
 
 //TODO run all passes concurrently. make the next pass wait for the previous one when it reached it and make them read from streams
 int main(int argc, char* argv[]){
-    cmd::parseOptions(argc, argv);
+
+    // Recreate full command
+    std::string fullCommand;
+    for(int i = 0; i < argc; ++i) {
+        if(i) fullCommand += " ";
+        fullCommand += std::string(argv[i]);
+    }
+
+
+    // Parse command line options
+    cmd::parseOptions(argc, argv, fullCommand);
     if(cmd::options.isHelp) {
         cmd::printHelp();
         exit(0);
@@ -66,10 +80,10 @@ int main(int argc, char* argv[]){
 
 
     // Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
-    std::chrono::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
-    std::chrono::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
-    std::chrono::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
-    std::chrono::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
+    std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
+    std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
+    std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
+    std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
 
@@ -117,10 +131,12 @@ int main(int argc, char* argv[]){
         }
         else {
             //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
-            // Conversion
+            // Conversion to C and gcc compilation
             timeStartConv = std::chrono::high_resolution_clock::now();
             //TODO actually convert the code
             timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
+
+            // writeOutputFile(sourceCode.str); //TODO use the output from the conversion phase
         }
     }
 
@@ -130,12 +146,11 @@ int main(int argc, char* argv[]){
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
     // Successful command output
-    std::string fullCommand; for(int i = 0; i < argc; ++i) fullCommand += std::string(argv[i]) + ' ';
     std::cout << ansi::bold_green << fullCommand << ansi::reset << "completed successfully.";
-    std::cout << ansi::bold_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) << timePre.count()  << " seconds.";
+    std::cout << ansi::bold_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds.";
     std::cout << ansi::bold_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
-    std::cout << ansi::bold_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) << timeOpt.count()  << " seconds.";
+    std::cout << ansi::bold_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
     std::cout << ansi::bold_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
-    // std::cout << "\n    Output written to \"\""; //TODO
+    std::cout << ansi::bold_green << "\n\n    Output written to \"" << ansi::reset << std::filesystem::canonical(cmd::options.outputFile) << ansi::bold_green << "\".";
     std::cout << "\n\n";
 }
