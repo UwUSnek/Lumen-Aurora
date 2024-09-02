@@ -13,7 +13,8 @@
 
 
 
-
+//BUG DETECT ABSOLUTE PATHS
+//BUG don't try to make them relative to the current path. treat them as absolute
 namespace pre {
     SegmentedCleanSource startIncludePhase(SegmentedCleanSource &b) {
         SegmentedCleanSource r;
@@ -23,24 +24,25 @@ namespace pre {
 
         ulong i = 0; // The character index relative to the current file, not including included files
         while(i < b.str.length()) {
+            std::smatch match;
+            std::smatch filePathMatch;
 
 
             // If an include directive is detected, replace it with the preprocessed contents of the file
-            std::smatch match;
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) {
                 ElmCoords relevantCoords(b, i, i + match[0].length() - 1);
-                i += match[0].length();
-
-                // Detect specified file path                                                 //     ╭────── file ──────╮ ╭───── module ─────╮
-                std::smatch filePathMatch;                                                    //     │ ╭────────────╮   │ │ ╭────────────╮   │
-                if(std::regex_search(b.str.cbegin() + i, b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
-                    ElmCoords filePathCoords(b, i, i + filePathMatch[0].length() - 1);
-                    i += filePathMatch[0].length();
+                // i += match[0].length();
+                                                                                              //     ╭────── file ──────╮ ╭───── module ─────╮
+                // Detect specified file path                                                 //     │ ╭────────────╮   │ │ ╭────────────╮   │
+                if(std::regex_search(b.str.cbegin() + i + match[0].length(), b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
+                    ElmCoords filePathCoords(b, i + match[0].length(), i + match[0].length() + filePathMatch[0].length() - 1);
+                    // i += filePathMatch[0].length();
 
 
                     // File path is present
                     if(filePathMatch[0].length() > 2) {
-                        std::string rawIncludeFilePath = filePathMatch[0].str().substr(1, filePathMatch[0].length() - 2);  //! Include path as written in the source file
+                        //! Include path as written in the source file
+                        std::string rawIncludeFilePath = filePathMatch[0].str().substr(1, filePathMatch[0].length() - 2);
 
                         // If the included file is a standard module
                         if(filePathMatch[0].str()[0] == '<') {
@@ -55,10 +57,21 @@ namespace pre {
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             // Calculate the actual file path
-                            std::filesystem::path adjustedIncludeFilePath = std::filesystem::canonical(sourceFilePaths[b.meta[i].f]).parent_path() / rawIncludeFilePath;    //! Include path relative to the file the include statement was used in
-                            std::string canonicalIncludeFilePath;                                                                                           //! Canonical version of the adjusted file path. No changes if file was not found
+
+                            //! Include path relative to the file the include statement was used in. No changes if the raw path is an absolute path
+                            std::filesystem::path adjustedIncludeFilePath;
+                            if(rawIncludeFilePath[0] == '/') adjustedIncludeFilePath = rawIncludeFilePath;
+                            else adjustedIncludeFilePath = std::filesystem::canonical(sourceFilePaths[b.meta[i].f]).parent_path() / rawIncludeFilePath;
+
+                            // //  = std::filesystem::canonical(sourceFilePaths[b.meta[i].f]).parent_path();
+                            // if(rawIncludeFilePath[0] != '/') adjustedIncludeFilePath /= rawIncludeFilePath;
+                            // adjustedIncludeFilePath /= rawIncludeFilePath;
+
+                            //! Canonical version of the adjusted file path. No changes if file was not found
+                            std::string canonicalIncludeFilePath;
                             try { canonicalIncludeFilePath = std::filesystem::canonical(adjustedIncludeFilePath).string(); }
                             catch(std::filesystem::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
+
 
                             // Print an error if the file is a directory
                             if(std::filesystem::is_directory(canonicalIncludeFilePath)) {
@@ -68,9 +81,10 @@ namespace pre {
                                     relevantCoords,
                                     filePathCoords,
                                     "Could not include the specified path: \"" + rawIncludeFilePath + "\" is a directory.\n" +
-                                    "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + "."
+                                    "File path was interpreted as: \"" + ansi::white + canonicalIncludeFilePath + ansi::reset + "\"."
                                 );
                             }
+
 
                             // Print an error if the file cannot be opened
                             std::ifstream includeFile(canonicalIncludeFilePath);
@@ -81,10 +95,11 @@ namespace pre {
                                     relevantCoords,
                                     filePathCoords,
                                     "Could not open file \"" + rawIncludeFilePath + "\": " + std::strerror(errno) + ".\n" +
-                                    "File path was interpreted as: " + ansi::white + "\"" + canonicalIncludeFilePath + "\"" + ansi::reset + ".\n" +
+                                    "File path was interpreted as: \"" + ansi::white + canonicalIncludeFilePath + ansi::reset + "\".\n" +
                                     "Make sure that the path is correct and the compiler has read access to the file."
                                 );
                             }
+
 
                             // Copy file contents and segments
                             std::string fileContents = utils::readFile(includeFile);
@@ -98,6 +113,7 @@ namespace pre {
                         }
                     }
 
+
                     // Empty string
                     else {
                         utils::printError(
@@ -109,17 +125,21 @@ namespace pre {
                             "A file path must be specified."
                         );
                     }
+
+
+                    // Increase index (skip include and file path)
+                    i += match[0].length() + filePathMatch[0].length();
                 }
 
-                // String literal not found
+                // File path not found
                 else {
                     utils::printError(
                         ErrorCode::ERROR_PRE_NO_PATH,
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
-                        b.str[i] == '\0' ? relevantCoords : ElmCoords(b, i, i),
+                        b.str[i + match[0].length() + filePathMatch[0].length()] == '\0' ? relevantCoords : ElmCoords(b, i, i),
                         "Missing file path in include statement.\n"
-                        "A valid string literal was expected, but could not be found."
+                        "A valid file path was expected, but could not be found."
                     );
                 }
 

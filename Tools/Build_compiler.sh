@@ -8,9 +8,10 @@ mkdir -p ./Build
 g++                                                            \
     ./src/Preprocessor/CleanupPhase/UTF8_decoder.c             \
     ./src/Utils/utils.cpp                                      \
+    ./src/Utils/DynamicProgressBar.cpp                         \
     ./src/main.cpp                                             \
     \
-    ./src/Command/command.cpp                                   \
+    ./src/Command/command.cpp                                  \
     \
     ./src/Preprocessor/preprocessor.cpp                        \
     ./src/Preprocessor/IntermediateCodeFormat.cpp              \

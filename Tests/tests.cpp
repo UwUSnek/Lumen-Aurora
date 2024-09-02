@@ -32,6 +32,8 @@ int main(){
     tests.push_back(new TestExitValue("char \\n",   "'test\n'",   ErrorCode::ERROR_CHAR_INCOMPLETE_n));
 
 
+
+
     tests.push_back(new TestPreprocessorOutput(
         "empty output",
         "",
@@ -49,6 +51,8 @@ int main(){
     ));
 
 
+
+
     tests.push_back(new TestPreprocessorOutput(
         "comment removal 1",
         "abc/*comment*/abc//test",
@@ -63,6 +67,30 @@ int main(){
         "comment removal 3",
         "abc/*com\n\nm\ne\\\nnt*//*t//est*/abc",
         "abcabc"
+    ));
+
+
+
+
+    tests.push_back(new TestPreprocessorOutput(
+        "include accuracy 1",
+        "A#include  \t\"Includes/basic.lum\"B",
+        "AtestB"
+    ));
+    tests.push_back(new TestPreprocessorOutput(
+        "include accuracy 2",
+        "A#include  \t\"Includes/inception2.lum\"B",
+        "AtestB"
+    ));
+    tests.push_back(new TestPreprocessorOutput(
+        "include accuracy - comment only",
+        "A#include  \t\"Includes/commentOnly.lum\"B",
+        "AB"
+    ));
+    tests.push_back(new TestPreprocessorOutput(
+        "include accuracy - comment boundaries",
+        "A#include  \t\"Includes/commentBoundaries.lum\"B",
+        "AtestB"
     ));
 
 
