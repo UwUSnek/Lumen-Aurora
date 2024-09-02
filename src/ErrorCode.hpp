@@ -6,10 +6,23 @@ enum ErrorCode : int {
     SUCCESS = 0,
     ERROR_OUTPUT_CANNOT_CREATE, // Output file cannot be created
 
-    ERROR_CMD_NO_SOURCE_FILE, // No source path specified in command
-    ERROR_CMD_NO_OUTPUT_FILE, // No output path specified after output type option
+    ERROR_CMD_SOURCE_MISSING,   // No source path specified in command
+    ERROR_CMD_SOURCE_INVALID, // Source path could not be found
+    ERROR_CMD_SOURCE_IS_DIRECTORY, // Source path is a directory
+    ERROR_CMD_MULTIPLE_SOURCES, // More than one source path specified
+
+    ERROR_CMD_NO_OUTPUT_FILE,   // No output path specified after output type option
+
     ERROR_CMD_UNKNOWN_OPTION, // Option not recognized
     ERROR_CMD_INCOMPATIBLE_OPTIONS, // 2 incompatible options are used together
+
+    ERROR_CMD_INCLUDE_PATH_MISSING,
+    ERROR_CMD_INCLUDE_PATH_INVALID,
+    ERROR_CMD_INCLUDE_PATH_IS_FILE,
+
+    ERROR_CMD_IMPORT_PATH_MISSING,
+    ERROR_CMD_IMPORT_PATH_INVALID,
+    ERROR_CMD_IMPORT_PATH_IS_FILE,
 
 
 

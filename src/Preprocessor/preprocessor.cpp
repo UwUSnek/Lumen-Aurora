@@ -15,6 +15,11 @@
 
 
 namespace pre {
+    /**
+     * @brief The list of included source files in the order in which they were discovered.
+     *      The source file passed through the command line is identified by the first element.
+     *      All the paths saved in this vector are canonical paths.
+     */
     std::vector<std::string> sourceFilePaths;
 
 
@@ -37,7 +42,7 @@ namespace pre {
      * @return The contents of the source file as a SegmentedCleanSource.
      */
     SegmentedCleanSource loadSourceCode(std::string s, std::string filePath) {
-        sourceFilePaths.push_back(std::filesystem::canonical(filePath)); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
+        sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
         //FIXME ^automatically fish up cached files if found. loop through them (for now)
         //FIXME                                               ^ use a hash map to save the paths of the preprocessed files
 

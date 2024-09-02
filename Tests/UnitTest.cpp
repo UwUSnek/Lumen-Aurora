@@ -27,8 +27,11 @@ std::vector<UnitTest*> tests;
 
 
 int compile(std::string options, ulong testIndex) {
-    return WEXITSTATUS(system((compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options + " > /dev/null 2> /dev/null").c_str()));
-    //TODO update command after implementing real options
+    return WEXITSTATUS(system((
+        compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options +
+        "-I ./Tests"
+        " > /dev/null 2> /dev/null"
+    ).c_str()));
 }
 
 

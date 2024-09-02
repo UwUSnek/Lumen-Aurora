@@ -18,6 +18,7 @@ namespace utils {
 
 
     int getConsoleWidth();
+    bool isDir(std::string path);
 
     std::string formatChar(char c, bool useColor = false);
 

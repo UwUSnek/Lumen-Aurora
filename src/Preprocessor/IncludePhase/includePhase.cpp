@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstring>
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #include "Preprocessor/preprocessor.hpp"
 #include "includePhase.hpp"
@@ -59,22 +60,19 @@ namespace pre {
                             // Calculate the actual file path
 
                             //! Include path relative to the file the include statement was used in. No changes if the raw path is an absolute path
-                            std::filesystem::path adjustedIncludeFilePath;
+                            fs::path adjustedIncludeFilePath;
                             if(rawIncludeFilePath[0] == '/') adjustedIncludeFilePath = rawIncludeFilePath;
-                            else adjustedIncludeFilePath = std::filesystem::canonical(sourceFilePaths[b.meta[i].f]).parent_path() / rawIncludeFilePath;
+                            else adjustedIncludeFilePath = fs::path(sourceFilePaths[b.meta[i].f]).parent_path() / rawIncludeFilePath;
 
-                            // //  = std::filesystem::canonical(sourceFilePaths[b.meta[i].f]).parent_path();
-                            // if(rawIncludeFilePath[0] != '/') adjustedIncludeFilePath /= rawIncludeFilePath;
-                            // adjustedIncludeFilePath /= rawIncludeFilePath;
 
                             //! Canonical version of the adjusted file path. No changes if file was not found
                             std::string canonicalIncludeFilePath;
-                            try { canonicalIncludeFilePath = std::filesystem::canonical(adjustedIncludeFilePath).string(); }
-                            catch(std::filesystem::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
+                            try { canonicalIncludeFilePath = fs::canonical(adjustedIncludeFilePath).string(); }
+                            catch(fs::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
 
 
                             // Print an error if the file is a directory
-                            if(std::filesystem::is_directory(canonicalIncludeFilePath)) {
+                            if(utils::isDir(canonicalIncludeFilePath)) {
                                 printError(
                                     ErrorCode::ERROR_PRE_PATH_IS_DIRECTORY,
                                     utils::ErrType::PREPROCESSOR,

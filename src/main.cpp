@@ -5,6 +5,8 @@
 #include <chrono>
 #include <filesystem>
 #include <cstring>
+namespace fs = std::filesystem;
+
 
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
@@ -37,7 +39,7 @@
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 void writeOutputFile(std::string code) {
     // Create directories
-    std::filesystem::create_directories(std::filesystem::path(cmd::options.outputFile).parent_path());
+    fs::create_directories(fs::path(cmd::options.outputFile).parent_path());
 
 
     // Write the file and print an error if it cannot be created
@@ -50,7 +52,7 @@ void writeOutputFile(std::string code) {
         utils::printErrorGeneric(
             ErrorCode::ERROR_OUTPUT_CANNOT_CREATE,
             "Could not write output file \"" + cmd::options.outputFile + "\".\n" +
-            "Output path was interpreted as: \"" + ansi::white + std::filesystem::canonical(cmd::options.outputFile).string() + ansi::reset + "\".\n"
+            "Output path was interpreted as: \"" + ansi::white + fs::canonical(cmd::options.outputFile).string() + ansi::reset + "\".\n"
         );
     }
 }
@@ -156,6 +158,6 @@ int main(int argc, char* argv[]){
     std::cout << ansi::bold_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
     std::cout << ansi::bold_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
     std::cout << ansi::bold_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
-    std::cout << ansi::bold_green << "\n\n    Output written to \"" << ansi::reset << std::filesystem::canonical(cmd::options.outputFile).string() << ansi::bold_green << "\".";
+    std::cout << ansi::bold_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_green << "\".";
     std::cout << "\n\n";
 }

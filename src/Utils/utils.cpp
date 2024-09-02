@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <sys/ioctl.h>
 #include <unistd.h>
+namespace fs = std::filesystem;
 
 #include "utils.hpp"
 #include "Preprocessor/ElmCoords.hpp"
@@ -27,6 +28,18 @@ namespace utils {
         }
         return -1;
     }
+
+
+
+
+    /**
+     * @brief Checks if a file path is a directory.
+     * @return true if the path is a directory or a file that points to a directory, false if not.
+     */
+    bool isDir(std::string path) {
+        return fs::is_directory(fs::is_symlink(path) ? fs::read_symlink(path).string() : path);
+    }
+
 
 
 
@@ -95,6 +108,7 @@ namespace utils {
 
         // Print full command and highlight relevant section and error
         const char* lastColor;
+        std::cerr << "    ";
         for(ulong i = 0; i < fullCommand.length(); ++i) {
 
             // Calculate current color based on the current character index and print it if it differs form the last one
@@ -175,7 +189,7 @@ namespace utils {
         // Print location
         ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
         if(errPos.filePath.length()) {
-            std::cerr << "    File │ " << ansi::reset << std::filesystem::canonical(errPos.filePath) << ansi::bold_red << "\n";
+            std::cerr << "    File │ " << ansi::reset << fs::canonical(errPos.filePath) << ansi::bold_red << "\n";
             std::cerr << "    Line │ " << ansi::reset;
             if(errHeight == 0) std::cerr << errPos.lineNum + 1;
             else               std::cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;
@@ -227,6 +241,10 @@ namespace utils {
 
 
 
+    //FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
+    //FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
+    //FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
+    //FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
     /**
      * @brief Reads a single source file and returns its contents as a string.
      *     Prints an error message if the file cannot be opened or doesn't exist.
@@ -235,14 +253,14 @@ namespace utils {
      */
     std::string readAndCheckFile(std::string fileName) {
         // Print an error if the file is a directory
-        if(std::filesystem::is_directory(fileName)) {
+        if(fs::is_directory(fileName)) {
             printError(
                 ErrorCode::ERROR_PATH_IS_DIRECTORY,
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(),
                 "Could not open the specified file: \"" + fileName + "\": is a directory.\n" +
-                "File path was interpreted as: " + ansi::white + "\"" + std::filesystem::canonical(fileName).string() + "\"" + ansi::reset + ".\n" +
-                "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
+                "File path was interpreted as: " + ansi::white + "\"" + fs::canonical(fileName).string() + "\"" + ansi::reset + ".\n" +
+                "Current working directory is: " + std::string(fs::current_path()) + "."
             );
         }
 
@@ -254,7 +272,7 @@ namespace utils {
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(),
                 "Could not open file \"" + fileName + "\": " + std::strerror(errno) + ".\n" +
-                "Current working directory is: " + std::string(std::filesystem::current_path()) + "."
+                "Current working directory is: " + std::string(fs::current_path()) + "."
             );
         }
 

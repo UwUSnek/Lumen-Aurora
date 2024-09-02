@@ -1,8 +1,9 @@
 #include <iostream>
 #include <cstring>
+#include <filesystem>
 #include "command.hpp"
 #include "Utils/utils.hpp"
-
+namespace fs = std::filesystem;
 
 
 
@@ -26,6 +27,7 @@ namespace cmd {
         ulong optionPosition = 0;  // The character index of the current option relative to the full command string
         ElmCoordsCL lastOutputTypeCoords(0, 0);
         ElmCoordsCL lastTargetPlatformCoords(0, 0);
+        ElmCoordsCL lastSourceCoords(0, 0);
         for(int i = 1; i < argc; ++i) {
             std::string o(argv[i]);
 
@@ -42,7 +44,7 @@ namespace cmd {
                         ElmCoordsCL currentOutputTypeCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
                         if(lastOutputTypeCoords.end) {
                             utils::printErrorCL(
-                                ErrorCode::ERROR_CMD_INCOMPATIBLE_OPTIONS,
+                                ERROR_CMD_INCOMPATIBLE_OPTIONS,
                                 lastOutputTypeCoords,
                                 currentOutputTypeCoords,
                                 "Incompatible options: " +
@@ -55,17 +57,11 @@ namespace cmd {
                         lastOutputTypeCoords = currentOutputTypeCoords;
 
 
-                        // Valid option
-                        if(i < argc - 1) {
-                            options.outputFile = argv[i + 1];
-                            ++i;
-                            optionPosition += strlen(argv[i]);
-                        }
-
                         // Missing output path
-                        else {
+                        ++i;
+                        if(i >= argc) {
                             utils::printErrorCL(
-                                ErrorCode::ERROR_CMD_NO_OUTPUT_FILE,
+                                ERROR_CMD_NO_OUTPUT_FILE,
                                 ElmCoordsCL(optionPosition, optionPosition + o.length()),
                                 ElmCoordsCL(optionPosition, optionPosition + o.length()),
                                 "Missing output path after " + o + " option.\n" +
@@ -73,6 +69,10 @@ namespace cmd {
                                 DBG_fullCommand
                             );
                         }
+
+                        // Valid option
+                        options.outputFile = argv[i];
+                        optionPosition += strlen(argv[i]) + 1;
 
                         break;
                     }
@@ -85,7 +85,7 @@ namespace cmd {
                         ElmCoordsCL currentTargetPlatformCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
                         if(lastTargetPlatformCoords.end) {
                             utils::printErrorCL(
-                                ErrorCode::ERROR_CMD_INCOMPATIBLE_OPTIONS,
+                                ERROR_CMD_INCOMPATIBLE_OPTIONS,
                                 lastTargetPlatformCoords,
                                 currentTargetPlatformCoords,
                                 "Incompatible options: " +
@@ -96,19 +96,107 @@ namespace cmd {
                         }
                         options.outputType = c;
                         lastTargetPlatformCoords = currentTargetPlatformCoords;
+
+                        break;
+                    }
+
+
+                    // Parse include and import paths
+                    for(char c : "iI") if(o[1] == c) {
+                        std::string w = c == 'I' ? "nclude" : "mport";
+                        cmd::ElmCoordsCL optionCoords(optionPosition, optionPosition + o.length());
+                        ulong pathPosition = optionPosition + o.length() + 1;
+
+                        ++i;
+                        if(i >= argc) {
+                            utils::printErrorCL(
+                                c == 'I' ? ERROR_CMD_INCLUDE_PATH_MISSING : ERROR_CMD_IMPORT_PATH_MISSING,
+                                optionCoords,
+                                optionCoords,
+                                "Missing i" + w + "path after " + o + " option.\n"
+                                "A path to a directory must be specified.",
+                                DBG_fullCommand
+                            );
+                        }
+
+                        // If path exists, calculate its canonical path
+                        std::string path(argv[i]);
+                        std::string canonicalPath;
+                        try { canonicalPath = fs::canonical(path); }
+                        // If not, print an error
+                        catch(fs::filesystem_error e) {
+                            utils::printErrorCL(
+                                c == 'I' ? ERROR_CMD_INCLUDE_PATH_INVALID : ERROR_CMD_IMPORT_PATH_INVALID,
+                                optionCoords,
+                                cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
+                                "Could not find directory \"" + path + "\".\n" +
+                               "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                                DBG_fullCommand
+                            );
+                        }
+
+                        // If it is a directory, print an error
+                        if(!utils::isDir(canonicalPath)) {
+                            utils::printErrorCL(
+                                c == 'I' ? ERROR_CMD_INCLUDE_PATH_IS_FILE : ERROR_CMD_IMPORT_PATH_IS_FILE,
+                                optionCoords,
+                                cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
+                                "The specified i" + w + " path \"" + path + "\" is not a directory.\n" +
+                                "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                                DBG_fullCommand
+                            );
+                        }
+
+                        // Push canonical path to the list and adju the option position
+                        (c == 'I' ? options.includePaths : options.importPaths).push_back(canonicalPath);
+                        optionPosition += path.length() + 1;
+
+                        break;
                     }
                 }
+                //TODO CHECK THIS TOO IN THE INCLUDE STUFF but the other way around
+                //TODO                         if(!fs::is_directory(fs::is_symlink(canonicalPath) ? fs::read_symlink(canonicalPath).string() : canonicalPath)) {
+
+
+
+
                 else if(o == "--help") {
                     options.isHelp = true;
                 }
                 else if(o == "--version") {
                     options.isVersion = true;
                 }
+
+
+
+
+                else if(o == "--no-color") {
+                    options.printColor = false;
+                }
+                else if(o == "--no-display") {
+                    options.printDisplay = false;
+                }
+                else if(o == "--no-errors") {
+                    options.printErrors = false;
+                }
+                else if(o == "--no-status") {
+                    options.printStatus = false;
+                }
+                else if(o == "--silent") {
+                    options.silent = true;
+                    options.printStatus = false;
+                }
+
+
+
+
                 else {
+                    //TODO look for similar existing options and suggest them
+                    //TODO add a list of possible intended options that aren't necessarily close by value
                     utils::printErrorCL(
-                        ErrorCode::ERROR_CMD_UNKNOWN_OPTION,
-                        cmd::ElmCoordsCL(0, 0),
-                        cmd::ElmCoordsCL(0, 0),
+                        ERROR_CMD_UNKNOWN_OPTION,
+                        cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
+                        cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
                         "Unknown command line option \"" + ansi::white + o + ansi::reset + "\".",
                         DBG_fullCommand
                     );
@@ -118,10 +206,53 @@ namespace cmd {
 
             // Source file
             else {
-                options.sourceFile = o;
+
+                // Print error if multiple sources are specified
+                cmd::ElmCoordsCL currentSourceCoords(optionPosition, optionPosition + o.length());
+                if(lastSourceCoords.end > 0) {
+                    utils::printErrorCL(
+                        ERROR_CMD_MULTIPLE_SOURCES,
+                        lastSourceCoords,
+                        currentSourceCoords,
+                        "Multiple source files specified.\n"
+                        "Only one at a time is allowed.",
+                        DBG_fullCommand
+                    );
+                    lastSourceCoords = currentSourceCoords;
+                }
+
+                // If path exists, calculate canonical path
+                std::string canonicalPath;
+                try { canonicalPath = fs::canonical(o); }
+                // If not, print an error
+                catch(fs::filesystem_error e) {
+                    utils::printErrorCL(
+                        ERROR_CMD_SOURCE_INVALID,
+                        currentSourceCoords,
+                        currentSourceCoords,
+                        "Could not find source file \"" + o + "\".\n" +
+                        "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                        DBG_fullCommand
+                    );
+                }
+
+                // If it is a directory, print an error
+                if(utils::isDir(canonicalPath)) {
+                    utils::printErrorCL(
+                        ERROR_CMD_INCLUDE_PATH_IS_FILE,
+                        currentSourceCoords,
+                        currentSourceCoords,
+                        "The specified source file path \"" + o + "\" is a directory.\n" +
+                        "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                        DBG_fullCommand
+                    );
+                }
+
+                options.sourceFile = canonicalPath;
             }
 
 
+            // Adjust option position index (additional paths or values are skipped in their respective sections)
             optionPosition += o.length() + 1;
         }
 
@@ -131,7 +262,7 @@ namespace cmd {
         // Print error if no source file is specified
         if(options.sourceFile.empty()) {
             utils::printErrorCL(
-                ErrorCode::ERROR_CMD_NO_SOURCE_FILE,
+                ERROR_CMD_SOURCE_MISSING,
                 ElmCoordsCL(optionPosition - 1, optionPosition - 1),
                 ElmCoordsCL(optionPosition - 1, optionPosition - 1),
                 "Source code path is missing.\n"
@@ -159,16 +290,6 @@ namespace cmd {
         }
     }
 
-
-
-    //FIXME parse --no-color
-    //FIXME parse --no-display
-    //FIXME parse --no-error
-    //FIXME parse --no-status
-    //FIXME parse --silent
-
-    //FIXME parse -i
-    //FIXME parse -I
 
     //FIXME parse --o-none
     //FIXME parse --o-unused
