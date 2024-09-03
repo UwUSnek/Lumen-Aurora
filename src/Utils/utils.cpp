@@ -69,6 +69,49 @@ namespace utils {
 
 
 
+    /**
+     * @brief //TODO
+     *
+     */
+    std::string shortenInteger(ulong n) {
+        return std::to_string(n); //BUG remove this
+        static const ulong k = 1000;
+        static const ulong m = 1000000;
+        static const ulong b = 1000000000;
+
+        std::stringstream r;
+        std::string suffix;
+
+
+        if (n >= b) {
+            double value = static_cast<double>(n) / b;
+            r << std::fixed << std::setprecision(1) << value;
+            suffix = "b";
+        }
+        else if (n >= m) {
+            double value = static_cast<double>(n) / m;
+            r << std::fixed << std::setprecision(1) << value;
+            suffix = "m";
+        }
+        else if (n >= k) {
+            double value = static_cast<double>(n) / k;
+            r << std::fixed << std::setprecision(1) << value;
+            suffix = "k";
+        }
+        else {
+            // Less than 1000
+            r << n;
+        }
+
+
+        // Return the final value + suffix
+        // truncate the number if is more than 999 and exceeds 3 characters and remove any stray trailing periods
+        std::string r2 = r.str();
+        return r2.substr(0, 2 + (r2[2] != '.') + suffix.empty()) + suffix;
+    }
+
+
+
 
 
 

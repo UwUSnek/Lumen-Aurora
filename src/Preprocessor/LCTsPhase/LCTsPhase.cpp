@@ -1,4 +1,5 @@
 #include "LCTsPhase.hpp"
+#include "Preprocessor/preprocessor.hpp"
 
 
 
@@ -28,6 +29,8 @@ namespace pre {
 
 
     SegmentedCleanSource startLCTsPhase(std::string b, ulong DBG_filePathIndex) {
+        pre::initPhaseThread();
+        pre::totalProgress.increaseTot(b.length());
         SegmentedCleanSource r;
 
 
@@ -39,6 +42,7 @@ namespace pre {
             ulong lct = checkLct(b, i);
             if(lct) {
                 i += lct;
+                pre::increaseLocalProgress(lct);
                 ++curLine;
             }
 
@@ -48,6 +52,7 @@ namespace pre {
                 r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
                 if(b[i] == '\n') ++curLine;
                 ++i;
+                pre::increaseLocalProgress(1);
             }
         }
 

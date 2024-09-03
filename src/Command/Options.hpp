@@ -22,7 +22,7 @@ namespace cmd {
         // 'x' = compile executable
         char outputType = '\0';
 
-        //TODO implement this options
+        //TODO implement this option
         // 'l' = linux
         // 'w' = windows
         char targetPlatform = '\0';
@@ -37,7 +37,8 @@ namespace cmd {
         bool printStatus = true;
         bool silent = false;
 
-        //TODO optimization options
+        //TODO implement these options
+        //TODO add optimization options
     };
 }
 

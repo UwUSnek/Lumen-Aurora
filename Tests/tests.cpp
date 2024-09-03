@@ -104,7 +104,7 @@ int main(){
 
 
     std::cout << "\n\n";
-    std::cout << (passedTests == totalTests ? ansi::bold_green : ansi::reset) << "Passed: " << passedTests << "/" << totalTests << "\n";
+    std::cout << (passedTests == totalTests ? ansi::bold_bright_green : ansi::reset) << "Passed: " << passedTests << "/" << totalTests << "\n";
     std::cout << (failedTests > 0           ? ansi::bold_red   : ansi::reset) << "Failed: " << failedTests << "/" << totalTests << "\n";
     std::cout << ansi::reset;
     return 0;

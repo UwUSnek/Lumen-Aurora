@@ -21,6 +21,7 @@ namespace utils {
     bool isDir(std::string path);
 
     std::string formatChar(char c, bool useColor = false);
+    std::string shortenInteger(ulong n);
 
     void printErrorGeneric(ErrorCode errorCode, std::string message);
     void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL relPos, cmd::ElmCoordsCL errPos, std::string message, std::string fullCommand);

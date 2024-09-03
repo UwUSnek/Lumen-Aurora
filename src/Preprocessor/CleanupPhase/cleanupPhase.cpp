@@ -18,6 +18,8 @@
 namespace pre {
     //FIXME use a stream and process the steps concurrently
     SegmentedCleanSource startCleanupPhase(SegmentedCleanSource &b) {
+        pre::initPhaseThread();
+        pre::totalProgress.increaseTot(b.str.length());
         SegmentedCleanSource r;
 
 
@@ -28,6 +30,7 @@ namespace pre {
             ulong commentLen = measureComment(b.str, i);
             if(commentLen) {
                 i += commentLen;
+                pre::increaseLocalProgress(commentLen);
                 continue;
             }
 
@@ -35,6 +38,7 @@ namespace pre {
             ulong literalLen = saveLiteral(b, i, r);
             if(literalLen) {
                 i += literalLen;
+                pre::increaseLocalProgress(literalLen);
                 continue;
             }
 
@@ -68,6 +72,7 @@ namespace pre {
             r.str += b.str[i];
             r.meta.push_back(b.meta[i]);
             ++i;
+            pre::increaseLocalProgress(1);
         }
 
 

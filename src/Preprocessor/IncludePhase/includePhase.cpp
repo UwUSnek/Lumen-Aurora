@@ -14,10 +14,10 @@ namespace fs = std::filesystem;
 
 
 
-//BUG DETECT ABSOLUTE PATHS
-//BUG don't try to make them relative to the current path. treat them as absolute
 namespace pre {
     SegmentedCleanSource startIncludePhase(SegmentedCleanSource &b) {
+        pre::initPhaseThread();
+        pre::totalProgress.increaseTot(b.str.length());
         SegmentedCleanSource r;
 
 
@@ -32,12 +32,10 @@ namespace pre {
             // If an include directive is detected, replace it with the preprocessed contents of the file
             if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) {
                 ElmCoords relevantCoords(b, i, i + match[0].length() - 1);
-                // i += match[0].length();
                                                                                               //     ╭────── file ──────╮ ╭───── module ─────╮
                 // Detect specified file path                                                 //     │ ╭────────────╮   │ │ ╭────────────╮   │
                 if(std::regex_search(b.str.cbegin() + i + match[0].length(), b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) {
                     ElmCoords filePathCoords(b, i + match[0].length(), i + match[0].length() + filePathMatch[0].length() - 1);
-                    // i += filePathMatch[0].length();
 
 
                     // File path is present
@@ -126,7 +124,9 @@ namespace pre {
 
 
                     // Increase index (skip include and file path)
-                    i += match[0].length() + filePathMatch[0].length();
+                    ulong fullLen = match[0].length() + filePathMatch[0].length();
+                    i += fullLen;
+                    pre::increaseLocalProgress(fullLen);
                 }
 
                 // File path not found
@@ -149,6 +149,7 @@ namespace pre {
                 r.str += b.str[i];
                 r.meta.push_back(b.meta[i]);
                 ++i;
+                pre::increaseLocalProgress(1);
             }
         }
 

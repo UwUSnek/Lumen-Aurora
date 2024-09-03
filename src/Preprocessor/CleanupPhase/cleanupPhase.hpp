@@ -6,7 +6,6 @@
 
 
 namespace pre {
-    ulong checkLct(std::string b, ulong index);
     SegmentedCleanSource startCleanupPhase(SegmentedCleanSource &b);
 
     // WhitespaceInfo countWhitespaceCharacters(std::string b, ulong index, ulong DEBUG_curLine, std::string DEBUG_filePath);

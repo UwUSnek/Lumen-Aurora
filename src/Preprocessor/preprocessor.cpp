@@ -16,11 +16,59 @@
 
 namespace pre {
     /**
+     * @brief The progress bar that shows up in the output
+     *      totalProgress is the actual progress bar object. It is managed by an external thread
+     */
+    DynamicProgressBar totalProgress(0, ansi::bright_green, ansi::bright_black);
+    std::vector<std::atomic<ulong>*> localProgress;       // Per-thread progress
+    std::mutex localProgressLock;                         // A mutex for adding elements to localProgress
+    thread_local ulong threadId = -1;                     // The index of the local progress element that is managed by the current thread
+    //!                            ^ -1 is exclusively used to easily identify bugs. The value is initialized by pre::startPhaseThread
+
+
+    /**
      * @brief The list of included source files in the order in which they were discovered.
      *      The source file passed through the command line is identified by the first element.
      *      All the paths saved in this vector are canonical paths.
      */
     std::vector<std::string> sourceFilePaths;
+
+
+
+
+
+
+
+    /**
+     * @brief Creates a new element in the local progress list and sets the threadId to its index.
+     *      This function MUST be called ONCE at the start of each phase by its own worker thread.
+     *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
+     */
+    void initPhaseThread() {
+        pre::localProgressLock.lock();
+        pre::localProgress.push_back(new std::atomic<ulong>(0));
+        pre::localProgressLock.unlock();
+
+        pre::threadId = pre::localProgress.size() - 1;
+    }
+
+
+
+
+    /**
+     * @brief Increases the local progress value owned by this thread.
+     *      This function can only be called by a phase thread.
+     * @param n The amount of progress steps to add.
+     */
+    void increaseLocalProgress(ulong n) {
+        pre::localProgress[pre::threadId]->fetch_add(n);
+    }
+
+
+
+
+
+
 
 
 

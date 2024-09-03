@@ -5,6 +5,8 @@
 #include <chrono>
 #include <filesystem>
 #include <cstring>
+#include <thread>
+#include <cmath>
 namespace fs = std::filesystem;
 
 
@@ -12,15 +14,58 @@ namespace fs = std::filesystem;
 #include "Preprocessor/preprocessor.hpp"
 #include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
 
+//FIXME detect all the files before processing them to make progress more reliable
+// Becomes true after the output file gets written and closed
+std::atomic<bool> isComplete(false);
+
+
+
+
+void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth)
+{
+    // Print progress
+    std::cout << "\033[s";             // Save cursor position
+    std::cout << std::string(7, '\n'); // Push entire output 7 lines up (make space for the status UI)
+    std::cout << "\033[999;999H";      // Move cursor to bottom-left corner
+    std::cout << "\033[7A";            // Move cursor 7 lines up
+    std::cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::white << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
+    std::cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    Preprocessing │ " << ansi::reset;
+    pre::totalProgress.render(progressBarWidth);
+    std::cout << ansi::bold_bright_black << "\n    Compilation   │ " << ansi::reset;
+    std::cout << ansi::bold_bright_black << "\n    Optimization  │ " << ansi::reset;
+    std::cout << ansi::bold_bright_black << "\n    Conversion    │ " << ansi::reset;
+    std::cout << "\n\n";
+    std::cout << "\033[u"; // Restore cursor position
+}
 
 
 
 
 
+void startMonitorThread(std::string fullCommand){
+    ulong delay = 100;
 
 
+    for(ulong loop = 0; !isComplete.load(); ++loop) {
+        // if(loop > 1000 / delay) loop = 0;
+
+        // Collect local progresses and update the progress bar
+        for(ulong i = 0; i < pre::localProgress.size(); ++i) {
+            pre::totalProgress.increase(pre::localProgress[i]->exchange(0));
+        }
 
 
+        // Calculate progress bar width
+        static const int nameWidth = 20;  //! 20 is the maximum width of the phase name
+        const int progressBarWidth = utils::getConsoleWidth() - nameWidth;
+
+        // Print status UI
+        printStatusUI(fullCommand, loop, progressBarWidth);
+
+        // Limit output refresh rate to 10fps
+        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+    }
+}
 
 //TODO real time progress bares for each phase, all visible at once
 //TODO real time progress bares for each phase, all visible at once
@@ -95,6 +140,13 @@ int main(int argc, char* argv[]){
 
 
 
+
+
+    // Start monitor thread
+    std::thread monitorThread(startMonitorThread, fullCommand);
+
+
+
     //TODO add an option to suppress fancy real-time output
 
     //FIXME write info and estimated percentage progress instead of the time spent after the name of the phase.
@@ -152,12 +204,16 @@ int main(int argc, char* argv[]){
 
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
+    // Join monitor thread
+    isComplete.store(true);
+    monitorThread.join();
+
     // Successful command output
-    std::cout << ansi::bold_green << fullCommand << ansi::reset << " completed successfully.";
-    std::cout << ansi::bold_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds.";
-    std::cout << ansi::bold_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
-    std::cout << ansi::bold_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
-    std::cout << ansi::bold_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
-    std::cout << ansi::bold_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_green << "\".";
+    std::cout << ansi::bold_bright_green << fullCommand << ansi::reset << " completed successfully.";
+    std::cout << ansi::bold_bright_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds.";
+    std::cout << ansi::bold_bright_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
+    std::cout << ansi::bold_bright_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
+    std::cout << ansi::bold_bright_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
+    std::cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".";
     std::cout << "\n\n";
 }
