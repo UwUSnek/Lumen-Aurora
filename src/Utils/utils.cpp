@@ -74,7 +74,6 @@ namespace utils {
      *
      */
     std::string shortenInteger(ulong n) {
-        return std::to_string(n); //BUG remove this
         static const ulong k = 1000;
         static const ulong m = 1000000;
         static const ulong b = 1000000000;

@@ -17,7 +17,7 @@ void DynamicProgressBar::render(int consoleWidth) {
 
 
     // Calculate actual progress bar width
-    static const int valueWidth = 6; //! e.g. 430k
+    static const int valueWidth = 4; //! e.g. 430k
     consoleWidth -= (1 + valueWidth + 1 + valueWidth + 1);
 
 
@@ -36,7 +36,7 @@ void DynamicProgressBar::render(int consoleWidth) {
     // Reset colors and print value
     std::cout << ansi::reset <<
         " " <<
-        std::left << std::setw(valueWidth) << utils::shortenInteger(_progress) <<
+        std::right << std::setw(valueWidth) << utils::shortenInteger(_progress) <<
         "/" <<
         std::left << std::setw(valueWidth) << utils::shortenInteger(_total) <<
         " "

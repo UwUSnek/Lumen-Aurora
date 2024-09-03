@@ -19,24 +19,66 @@ namespace fs = std::filesystem;
 std::atomic<bool> isComplete(false);
 
 
+// Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
+std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
+std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
+std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
+std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
-void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth)
-{
-    // Print progress
+
+
+
+
+
+
+
+void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth, bool _isComplete) {
+
+    // Adjust position and print command
     std::cout << "\033[s";             // Save cursor position
-    std::cout << std::string(7, '\n'); // Push entire output 7 lines up (make space for the status UI)
+    std::cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI)
     std::cout << "\033[999;999H";      // Move cursor to bottom-left corner
-    std::cout << "\033[7A";            // Move cursor 7 lines up
-    std::cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::white << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
-    std::cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    Preprocessing │ " << ansi::reset;
-    pre::totalProgress.render(progressBarWidth);
-    std::cout << ansi::bold_bright_black << "\n    Compilation   │ " << ansi::reset;
-    std::cout << ansi::bold_bright_black << "\n    Optimization  │ " << ansi::reset;
-    std::cout << ansi::bold_bright_black << "\n    Conversion    │ " << ansi::reset;
-    std::cout << "\n\n";
-    std::cout << "\033[u"; // Restore cursor position
+    std::cout << "\033[8A";            // Move cursor 8 lines up
+    if(_isComplete) std::cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << " completed successfully.";
+    else            std::cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
+
+
+    // Print preprocessor status
+    std::cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n\033[K    Preprocessing │ " << ansi::reset;
+    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << pre::totalProgress.total.load() << " steps.";
+    else pre::totalProgress.render(progressBarWidth);
+
+
+    // Print compilation status
+    std::cout << ansi::bold_bright_black << "\n\033[K    Compilation   │ " << ansi::reset;
+    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
+    else 0; //TODO
+
+    // Print optimization status
+    std::cout << ansi::bold_bright_black << "\n\033[K    Optimization  │ " << ansi::reset;
+    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
+    else 0; //TODO
+
+
+    // Print conversion status
+    std::cout << ansi::bold_bright_black << "\n\033[K    Conversion    │ " << ansi::reset;
+    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
+    else 0; //TODO
+
+
+    if(_isComplete) std::cout << ansi::bold_bright_green << "\n\n\033[K    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
+    else std::cout << "\033[K\n\n\n"; //FIXME maybe add current file path here
+
+
+
+    // Restore cursor position
+    std::cout << "\033[u";
 }
+
+
+
+
 
 
 
@@ -46,8 +88,11 @@ void startMonitorThread(std::string fullCommand){
     ulong delay = 100;
 
 
-    for(ulong loop = 0; !isComplete.load(); ++loop) {
-        // if(loop > 1000 / delay) loop = 0;
+    ulong loop = 0;
+    int progressBarWidth;
+    bool delayedIsCompleted;
+    do {
+        delayedIsCompleted = isComplete.load();
 
         // Collect local progresses and update the progress bar
         for(ulong i = 0; i < pre::localProgress.size(); ++i) {
@@ -57,15 +102,30 @@ void startMonitorThread(std::string fullCommand){
 
         // Calculate progress bar width
         static const int nameWidth = 20;  //! 20 is the maximum width of the phase name
-        const int progressBarWidth = utils::getConsoleWidth() - nameWidth;
+        progressBarWidth = utils::getConsoleWidth() - nameWidth;
 
         // Print status UI
-        printStatusUI(fullCommand, loop, progressBarWidth);
+        printStatusUI(fullCommand, loop, progressBarWidth, delayedIsCompleted);
 
         // Limit output refresh rate to 10fps
         std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-    }
+
+        ++loop;
+
+    } while(!delayedIsCompleted);
+
+
+    // // Print final update before joining main thread
+    // printStatusUI(fullCommand, loop, progressBarWidth, true);
 }
+
+
+
+
+
+
+
+
 
 //TODO real time progress bares for each phase, all visible at once
 //TODO real time progress bares for each phase, all visible at once
@@ -129,13 +189,6 @@ int main(int argc, char* argv[]){
         cmd::printVersion();
         exit(0);
     }
-
-
-    // Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
-    std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
-    std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
-    std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
-    std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
 
@@ -208,12 +261,12 @@ int main(int argc, char* argv[]){
     isComplete.store(true);
     monitorThread.join();
 
-    // Successful command output
-    std::cout << ansi::bold_bright_green << fullCommand << ansi::reset << " completed successfully.";
-    std::cout << ansi::bold_bright_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds.";
-    std::cout << ansi::bold_bright_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
-    std::cout << ansi::bold_bright_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
-    std::cout << ansi::bold_bright_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
-    std::cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".";
-    std::cout << "\n\n";
+    // // Successful command output
+    // std::cout << ansi::bold_bright_green << fullCommand << ansi::reset << " completed successfully.";
+    // std::cout << ansi::bold_bright_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds.";
+    // std::cout << ansi::bold_bright_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
+    // std::cout << ansi::bold_bright_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
+    // std::cout << ansi::bold_bright_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
+    // std::cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".";
+    // std::cout << "\n\n";
 }
