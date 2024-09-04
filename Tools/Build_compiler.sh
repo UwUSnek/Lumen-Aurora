@@ -9,6 +9,7 @@ g++                                                            \
     ./src/Preprocessor/CleanupPhase/UTF8_decoder.c             \
     ./src/Utils/utils.cpp                                      \
     ./src/Utils/DynamicProgressBar.cpp                         \
+    ./src/Utils/StringPipe.cpp                                 \
     ./src/main.cpp                                             \
     \
     ./src/Command/command.cpp                                  \

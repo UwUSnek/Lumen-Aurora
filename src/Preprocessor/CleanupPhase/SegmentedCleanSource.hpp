@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+#include "Utils/StringPipe.hpp"
+
 
 
 
@@ -49,7 +51,7 @@ namespace pre {
      *      If the original file is available, it allows every character of the code to be traced back to its original position.
      */
     struct SegmentedCleanSource {
-        std::string str;                    // The clean string value
+        StringPipe str;                     // The clean string value
         std::vector<CleanSourceMeta> meta;  // Informations about each character
 
         std::string toString();

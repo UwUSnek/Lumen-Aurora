@@ -15,7 +15,7 @@ namespace pre {
      * @param index The index to check.
      * @return The number of characters the LCT occupies, or 0 if one was not found.
      */
-    ulong checkLct(std::string b, ulong index) {
+    ulong checkLct(std::string &b, ulong index) {
         if(b[index] == '\\' && b[index + 1] == '\n') return 2;
         if(b[index] == '\0') return 1;
         return 0;
@@ -28,18 +28,17 @@ namespace pre {
 
 
 
-    SegmentedCleanSource startLCTsPhase(std::string b, ulong DBG_filePathIndex) {
+    void startLCTsPhase(std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
         pre::initPhaseThread();
-        pre::totalProgress.increaseTot(b.length());
-        SegmentedCleanSource r;
+        pre::totalProgress.increaseTot(b->length());
 
 
         ulong i = 0;                // Current index relative to the raw data
         ulong curLine = 0;          // The current line number relative to the raw data
-        while(i < b.length()) {
+        while(i < b->length()) {
 
             // Skip LCTs
-            ulong lct = checkLct(b, i);
+            ulong lct = checkLct(*b, i);
             if(lct) {
                 i += lct;
                 pre::increaseLocalProgress(lct);
@@ -48,15 +47,16 @@ namespace pre {
 
             // Push normal characters
             else {
-                r.str += b[i];
-                r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
-                if(b[i] == '\n') ++curLine;
+                r->str += b[i];
+                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
+                if(b->at(i) == '\n') ++curLine;
                 ++i;
                 pre::increaseLocalProgress(1);
             }
         }
 
 
-        return r;
+        // return r;
+        r->str.closePipe();
     }
 }

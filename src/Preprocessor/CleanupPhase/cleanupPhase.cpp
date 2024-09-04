@@ -17,24 +17,24 @@
 
 namespace pre {
     //FIXME use a stream and process the steps concurrently
-    SegmentedCleanSource startCleanupPhase(SegmentedCleanSource &b) {
+    void startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
         pre::initPhaseThread();
-        pre::totalProgress.increaseTot(b.str.length());
-        SegmentedCleanSource r;
+        // pre::totalProgress.increaseTot(b.str.cpp_str()->length());
+        //BUG PREDICT PROGRESS or don't count this phase
 
 
         ulong i = 0;
-        while(i < b.str.length()) {
+        while(b->str[i] != '\0') {
 
             // Skip comments
-            ulong commentLen = measureComment(b.str, i);
+            ulong commentLen = measureComment(b->str, i);
             if(commentLen) {
                 i += commentLen;
                 pre::increaseLocalProgress(commentLen);
                 continue;
             }
 
-            // Skip literals
+            // Skip (and preserve) literals
             ulong literalLen = saveLiteral(b, i, r);
             if(literalLen) {
                 i += literalLen;
@@ -69,14 +69,15 @@ namespace pre {
             // }
 
             // Save normal characters
-            r.str += b.str[i];
-            r.meta.push_back(b.meta[i]);
+            r->str += b->str[i];
+            r->meta.push_back(b->meta[i]);
             ++i;
             pre::increaseLocalProgress(1);
         }
 
 
-        return r;
+        // return r;
+        r->str.closePipe();
     }
 
 
@@ -158,13 +159,13 @@ namespace pre {
 
     /**
      * @brief Calculates the length of the comment that strarts at index <index> and ends at the first newline character or at the end of the file.
-     * @param b The string buffer that contains the comment.
+     * @param b The string pipe that contains the comment.
      * @param index The index at which the comment starts.
      * @return The length of the comment, including the length of the opening and closing character sequences (not \0 or \n).
      *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
      */
-    ulong measureComment(std::string &b, ulong index) {
-        if(b[index] != '/') return 0;
+    ulong measureComment(StringPipe &b, ulong index) {
+        if(b[index] != '/') return 0; //TODO
 
 
         char last = b[index];
@@ -184,6 +185,7 @@ namespace pre {
             }
 
             // Single character closing sequences (End of file or single line comments)
+            // else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
             else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
                 break;
             }
@@ -222,23 +224,24 @@ namespace pre {
      //FIXME add saveMacroDef function
      //FIXME add saveMacroCall function
      */
-    ulong saveLiteral(SegmentedCleanSource &b, ulong index, SegmentedCleanSource &r) {
-        if(b.str[index] != '"' && b.str[index] != '\'') return 0;
-        r.str += b.str[index];
-        r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b.meta[index]));
+    ulong saveLiteral(SegmentedCleanSource *b, ulong index, SegmentedCleanSource *r) {
+        if(b->str[index] != '"' && b->str[index] != '\'') return 0;
+        r->str += b->str[index];
+        r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[index]));
 
 
-        char literalType = b.str[index];
+        char literalType = b->str[index];
         ulong i = index + 1;
         while(true) {
 
             // Escape sequences
-            if(b.str[i] == '\\') {
-                r.str += b.str[i];
-                r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b.meta[i]));
-                if(b.str[i + 1] != '\0') {
-                    r.str += b.str[i + 1];
-                    r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b.meta[i + 1]));
+            if(b->str[i] == '\\') {
+                r->str += b->str[i];
+                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
+                // if(b->str[i + 1] != '\0') {
+                if(b->str[i] != '\0') {
+                    r->str += b->str[i + 1];
+                    r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i + 1]));
                 }
                 // i += 1 + (b.str[i + 1] != '\0'); //TODO remove if not needed
                 // //! ^ Only add 1 if the \ is the last character of the file. //TODO remove if not needed
@@ -248,15 +251,16 @@ namespace pre {
 
             // Closing sequence
             //! Macro definitions are skipped by the startCleanupPhase() function. No need to check
-            if(b.str[i] == literalType) {
-                r.str += b.str[i];
-                r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b.meta[i]));
+            if(b->str[i] == literalType) {
+                r->str += b->str[i];
+                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
                 ++i;
                 break;
             }
 
             // Missing closing sequence
-            else if(b.str[i] == '\0') {
+            // else if(b->str[i] == '\0') {
+            else if(b->str[i] != '\0') {
                 utils::printError(
                     literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_0 : ErrorCode::ERROR_CHAR_INCOMPLETE_0,
                     utils::ErrType::PREPROCESSOR,
@@ -265,7 +269,7 @@ namespace pre {
                     std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing ' character."
                 );
             }
-            else if(b.str[i] == '\n') {
+            else if(b->str[i] == '\n') {
                 utils::printError(
                     literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_n : ErrorCode::ERROR_CHAR_INCOMPLETE_n,
                     utils::ErrType::PREPROCESSOR,
@@ -278,8 +282,8 @@ namespace pre {
 
             // Normal characters
             else {
-                r.str += b.str[i];
-                r.meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b.meta[i]));
+                r->str += b->str[i];
+                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
                 ++i;
             }
         }

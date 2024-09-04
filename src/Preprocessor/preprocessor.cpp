@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <cerrno>
 #include <cstring>
-#include <tuple>
+#include <thread>
 
 #include "preprocessor.hpp"
 #include "ElmCoords.hpp"
@@ -75,7 +75,7 @@ namespace pre {
 
 
 
-    SegmentedCleanSource loadSourceCode(std::string filePath) {
+    SegmentedCleanSource& loadSourceCode(std::string &filePath) {
         std::string s = utils::readAndCheckFile(filePath);
         return loadSourceCode(s, filePath);
     }
@@ -89,18 +89,32 @@ namespace pre {
      * @param filePath The path of the original source code file.
      * @return The contents of the source file as a SegmentedCleanSource.
      */
-    SegmentedCleanSource loadSourceCode(std::string s, std::string filePath) {
+    SegmentedCleanSource& loadSourceCode(std::string s, std::string &filePath) {
         sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
+
+
         //FIXME ^automatically fish up cached files if found. loop through them (for now)
         //FIXME                                               ^ use a hash map to save the paths of the preprocessed files
 
         //FIXME CHECK CIRCULAR DEPENDENCIES
         //FIXME SAFE INCLUDE STACK
 
-        SegmentedCleanSource r1 = startLCTsPhase(s, sourceFilePaths.size() - 1);
-        SegmentedCleanSource r2 = startCleanupPhase(r1);
-        SegmentedCleanSource r3 = startIncludePhase(r2);
-        return r3;
+        SegmentedCleanSource r1;
+        SegmentedCleanSource r2;
+        SegmentedCleanSource *r3 = new SegmentedCleanSource();
+
+        std::thread t1(startLCTsPhase,    &s, sourceFilePaths.size() - 1, &r1);
+        std::thread t2(startCleanupPhase, &r1,                            &r2);
+        std::thread t3(startIncludePhase, &r2,                             r3);
+
+        t1.join();
+        t2.join();
+        t3.join();
+
+        // SegmentedCleanSource r1 = startLCTsPhase(s, sourceFilePaths.size() - 1);
+        // SegmentedCleanSource r2 = startCleanupPhase(r1);
+        // SegmentedCleanSource r3 = startIncludePhase(r2);
+        return *r3;
     }
 
 

@@ -5,5 +5,5 @@
 
 
 namespace pre {
-    SegmentedCleanSource startIncludePhase(SegmentedCleanSource &b);
+    void startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r);
 }

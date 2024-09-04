@@ -25,5 +25,5 @@ struct ElmCoords {
         end(_end) {
     }
 
-    ElmCoords(pre::SegmentedCleanSource source, ulong _start, ulong _end);
+    ElmCoords(pre::SegmentedCleanSource *source, ulong _start, ulong _end);
 };

@@ -68,7 +68,7 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
 
     if(_isComplete) std::cout << ansi::bold_bright_green << "\n\n\033[K    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
-    else std::cout << "\033[K\n\n\n"; //FIXME maybe add current file path here
+    else std::cout << "\033[K\n\n\n"; //FIXME WRITE NUMBER OF ACTIVE THREADS, OPENED FILES, LOADED MODULES
 
 
 
@@ -85,14 +85,14 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
 
 void startMonitorThread(std::string fullCommand){
-    ulong delay = 100;
+    ulong interval = 100;
 
 
     ulong loop = 0;
     int progressBarWidth;
     bool delayedIsCompleted;
     do {
-        delayedIsCompleted = isComplete.load();
+        delayedIsCompleted = isComplete.load(); //! Delay completion detection by 1 iteration to allow the last frame to be fully printed before returning
 
         // Collect local progresses and update the progress bar
         for(ulong i = 0; i < pre::localProgress.size(); ++i) {
@@ -108,7 +108,7 @@ void startMonitorThread(std::string fullCommand){
         printStatusUI(fullCommand, loop, progressBarWidth, delayedIsCompleted);
 
         // Limit output refresh rate to 10fps
-        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
 
         ++loop;
 
@@ -142,7 +142,7 @@ void startMonitorThread(std::string fullCommand){
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 //TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-void writeOutputFile(std::string code) {
+void writeOutputFile(std::string &code) {
     // Create directories
     fs::create_directories(fs::path(cmd::options.outputFile).parent_path());
 
@@ -208,14 +208,14 @@ int main(int argc, char* argv[]){
     //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
     // Preprocessing
     timeStartPre = std::chrono::high_resolution_clock::now();
-    pre::SegmentedCleanSource sourceCode = pre::loadSourceCode(cmd::options.sourceFile);
+    pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(cmd::options.sourceFile);
     timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 
 
 
     if(cmd::options.outputType == 'p') {
-        writeOutputFile(sourceCode.str);
+        writeOutputFile(*sourceCode.str.cpp_str());
         //TODO write source informations if requested
     }
     else {
