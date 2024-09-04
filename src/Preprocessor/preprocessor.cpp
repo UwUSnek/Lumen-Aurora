@@ -15,6 +15,7 @@
 
 
 namespace pre {
+
     /**
      * @brief The progress bar that shows up in the output
      *      totalProgress is the actual progress bar object. It is managed by an external thread
@@ -122,9 +123,9 @@ namespace pre {
         std::thread t2(startCleanupPhase, &r1,           &r2);
         std::thread t3(startIncludePhase, &r2,            r3);
 
-        t1.join();
-        t2.join();
-        t3.join();
+        t1.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
+        t2.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
+        t3.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
 
         // SegmentedCleanSource r1 = startLCTsPhase(s, sourceFilePaths.size() - 1);
         // SegmentedCleanSource r2 = startCleanupPhase(r1);

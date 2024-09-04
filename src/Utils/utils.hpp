@@ -11,6 +11,9 @@
 
 struct ElmCoords;
 namespace utils {
+    extern std::mutex consoleLock;
+
+
     enum class ErrType:int {
         PREPROCESSOR,
         COMPILER

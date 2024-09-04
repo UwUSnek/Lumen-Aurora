@@ -18,6 +18,12 @@ namespace fs = std::filesystem;
 
 
 namespace utils {
+
+    // A mutex that controls the console output.
+    // This allows multiple threads to write multiple messages at once without being interrupted.
+    std::mutex consoleLock;
+
+
     /**
      * @brief Tries to retrieve the width of the output console.
      * @return The width in characters, or -1 if the it cannot be determined.

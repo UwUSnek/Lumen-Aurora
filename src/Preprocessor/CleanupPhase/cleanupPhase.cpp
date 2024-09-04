@@ -39,7 +39,7 @@ namespace pre {
             ulong literalLen = saveLiteral(b, i, r);
             if(literalLen) {
                 i += literalLen;
-                pre::increaseLocalProgress(literalLen);
+                // pre::increaseLocalProgress(literalLen);
                 continue;
             }
 
@@ -78,7 +78,7 @@ namespace pre {
             r->str += b->str[i];
             r->meta.push_back(b->meta[i]);
             ++i;
-            pre::increaseLocalProgress(1);
+            // pre::increaseLocalProgress(1);
         }
 
 

@@ -51,7 +51,7 @@ namespace pre {
                 r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
                 if(b->at(i) == '\n') ++curLine;
                 ++i;
-                pre::increaseLocalProgress(1);
+                // pre::increaseLocalProgress(1);
             }
         }
 
