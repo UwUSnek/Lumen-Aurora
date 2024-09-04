@@ -35,9 +35,9 @@ public:
     }
 
 
-    void    increase(ulong n) { progress += n; }
-    void increaseTot(ulong n) {    total += n; }
+    void    increase(ulong n) { progress.fetch_add(n); }
+    void increaseTot(ulong n) {    total.fetch_add(n); }
 
     void render(int terminalWidth);
-    bool isComplete(){ return progress.load() == total.load(); }
+    bool isComplete(){ return progress.load() >= total.load(); }
 };

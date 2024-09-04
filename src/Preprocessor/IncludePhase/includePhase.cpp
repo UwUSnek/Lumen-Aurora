@@ -18,7 +18,7 @@ namespace pre {
     void startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
         pre::initPhaseThread();
         // pre::totalProgress.increaseTot(b.str.length());
-        //BUG PREDICT PROGRESS or don't count this phase
+        //FIXME count progress of deleted characters + all characters of last phase
 
 
 
@@ -40,75 +40,22 @@ namespace pre {
                 continue;
             }
 
+            // Skip (and preserve) macro definitions and calls
+            // FIXME
+            // FIXME
+            // FIXME
+
 
             // If an include directive is detected, replace it with the preprocessed contents of the file
             // if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) { //TODO REMOVE
-            { //! Manual regex because std doesn't support my custom pipe. Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on str + i
-                std::string tmp;
-                ulong j = i + sizeof("#include");
-                if(b->str[j] != '\0') tmp += "#include";
-                else goto continue1;
-
-                while(true) {
-                    char c = b->str[j];
-                    if(std::isdigit(c) || std::isalpha(c) || c == '_') {
-                        tmp += c;
-                        ++j;
-                    }
-                    else goto continue1;
-                }
-
-                while(true) {
-                    char c = b->str[j];
-                    if(c == ' ' || c == '\t') {
-                        tmp += c;
-                        ++j;
-                    }
-                    else goto continue1;
-                }
-
-                match = tmp;
-            }
-            continue1:
-
+            parseIncludeStatementName(i, b, match);
             if(!match.empty()) {
                 ElmCoords relevantCoords(b, i, i + match.length() - 1);
                                                                                               //     ╭────── file ──────╮ ╭───── module ─────╮
                 // Detect specified file path                                                 //     │ ╭────────────╮   │ │ ╭────────────╮   │
                 // if(std::regex_search(b.str.cbegin() + i + match[0].length(), b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) { //TODO REMOVE
-                { //! Manual regex because std doesn't support my custom pipe. Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on str + i
-                    std::string tmp;
-                    ulong j = i + match.length();
 
-                    char type;
-                    if(b->str[j] != '\0') {
-                        type = b->str[j];
-                        if(type == '<' || type == '"') {
-                            tmp += type;
-                            ++j;
-                        }
-                        else goto continue2;
-                    }
-
-                    char last = type;
-                    while(true) {
-                        char c = b->str[j];
-                        if(c == '\n' || c == '\0') goto continue2; //TODO maybe write an error
-                        else if(last != '\\' && c == (type == '<' ? '>' : '"')) {
-                            tmp += c;
-                            filePathMatch = tmp;
-                            goto continue2;
-                        }
-                        else {
-                            tmp += c;
-                            ++j;
-                            last = c;
-                        }
-                    }
-                }
-                continue2:
-
-
+                parseIncludeStatementPath(i + match.length(), b, filePathMatch);
                 if(!filePathMatch.empty()) {
                     ElmCoords filePathCoords(b, i + match.length(), i + match.length() + filePathMatch.length() - 1);
 
@@ -135,7 +82,11 @@ namespace pre {
                             //! Include path relative to the file the include statement was used in. No changes if the raw path is an absolute path
                             fs::path adjustedIncludeFilePath;
                             if(rawIncludeFilePath[0] == '/') adjustedIncludeFilePath = rawIncludeFilePath;
-                            else adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i].f]).parent_path() / rawIncludeFilePath;
+                            else {
+                                sourceFilePathsLock.lock();
+                                adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i].f]).parent_path() / rawIncludeFilePath;
+                                sourceFilePathsLock.unlock();
+                            }
 
 
                             //! Canonical version of the adjusted file path. No changes if file was not found
@@ -233,5 +184,85 @@ namespace pre {
 
         // return r;
         r->str.closePipe();
+    }
+
+
+
+
+
+
+
+
+    //! Manual regex because std doesn't support my custom pipe.
+    //! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b->str[i:]
+    void parseIncludeStatementName(ulong i, pre::SegmentedCleanSource *b, std::string &match) {
+        std::string tmp;
+        ulong nameLen = sizeof("#include") - 1;
+        ulong j = i + nameLen;
+        if(b->str[j] != '\0') {
+            if(!strncmp(b->str.cpp_str()->c_str() + i, "#include", nameLen)) {
+                tmp += "#include";
+            }
+            else return;
+        }
+        else return;
+        match = tmp;
+
+        while(true) {
+            char c = b->str[j];
+            if(std::isdigit(c) || std::isalpha(c) || c == '_') {
+                match += c;
+                ++j;
+            }
+            else break;
+        }
+
+        while(true) {
+            char c = b->str[j];
+            if(c == ' ' || c == '\t') {
+                match += c;
+                ++j;
+            }
+            else break;
+        }
+    }
+
+
+
+
+
+
+
+
+    //! Manual regex because std doesn't support my custom pipe.
+    //! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b->str[i:]
+    void parseIncludeStatementPath(ulong i, pre::SegmentedCleanSource *b, std::string &filePathMatch) {
+        std::string tmp;
+
+        char type;
+        if(b->str[i] != '\0') {
+            type = b->str[i];
+            if(type == '<' || type == '"') {
+                tmp += type;
+                ++i;
+            }
+            else return;
+        }
+
+        char last = type;
+        while(true) {
+            char c = b->str[i];
+            if(c == '\n' || c == '\0') return; // TODO maybe write a more detailed error
+            else if(last != '\\' && c == (type == '<' ? '>' : '"')) {
+                tmp += c;
+                filePathMatch = tmp;
+                return;
+            }
+            else {
+                tmp += c;
+                ++i;
+                last = c;
+            }
+        }
     }
 }

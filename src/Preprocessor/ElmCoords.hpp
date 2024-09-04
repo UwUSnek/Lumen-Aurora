@@ -6,20 +6,20 @@ namespace pre {
     struct SegmentedCleanSource;
 }
 struct ElmCoords {
-    std::string filePath;
+    ulong filePathIndex;
     ulong lineNum;
     ulong start;
     ulong end;
 
     ElmCoords() :
-        filePath(""),
+        filePathIndex(-1),
         lineNum(0),
         start(0),
         end(0) {
     }
 
-    ElmCoords(std::string _fileName, ulong _lineNum, ulong _start, ulong _end) :
-        filePath(_fileName),
+    ElmCoords(ulong _filePathIndex, ulong _lineNum, ulong _start, ulong _end) :
+        filePathIndex(_filePathIndex),
         lineNum(_lineNum),
         start(_start),
         end(_end) {

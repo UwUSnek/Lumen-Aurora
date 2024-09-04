@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 
 #include "utils.hpp"
 #include "Preprocessor/ElmCoords.hpp"
+#include "Preprocessor/preprocessor.hpp"
 
 
 
@@ -209,6 +210,12 @@ namespace utils {
      *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
      */
     void printError(ErrorCode errorCode, ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message) {
+        pre::sourceFilePathsLock.lock();
+        std::string relFilePath = pre::sourceFilePaths[relPos.filePathIndex];
+        std::string errFilePath = pre::sourceFilePaths[errPos.filePathIndex];
+        pre::sourceFilePathsLock.unlock();
+
+
         std::cerr << ansi::bold_red;
 
         // Print error type and location
@@ -218,8 +225,8 @@ namespace utils {
 
 
         // Find the line in the original file and calculate the starting index of the preceding line
-        bool useRelevant = relPos.filePath.length();
-        std::string s = readAndCheckFile(errPos.filePath);
+        bool useRelevant = relFilePath.length();
+        std::string s = readAndCheckFile(errFilePath);
         ulong curLine = useRelevant ? std::min(relPos.lineNum, errPos.lineNum) : errPos.lineNum;
         curLine -= !!curLine;
         ulong i       = useRelevant ? std::min(relPos.start,     errPos.start) : errPos.start;
@@ -230,8 +237,8 @@ namespace utils {
 
         // Print location
         ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
-        if(errPos.filePath.length()) {
-            std::cerr << "    File │ " << ansi::reset << fs::canonical(errPos.filePath) << ansi::bold_red << "\n";
+        if(errFilePath.length()) {
+            std::cerr << "    File │ " << ansi::reset << fs::canonical(errFilePath) << ansi::bold_red << "\n";
             std::cerr << "    Line │ " << ansi::reset;
             if(errHeight == 0) std::cerr << errPos.lineNum + 1;
             else               std::cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;

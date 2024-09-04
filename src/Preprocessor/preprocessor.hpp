@@ -13,10 +13,12 @@
 
 
 namespace pre {
-    extern DynamicProgressBar totalProgress;
-    extern std::vector<std::atomic<ulong>*> localProgress;
-    extern std::mutex localProgressLock;
-    extern thread_local ulong threadId;
+    extern DynamicProgressBar               totalProgress;
+    extern std::vector<std::atomic<ulong>*> localProgressArray;
+    extern std::mutex                       localProgressArrayLock;
+    extern thread_local std::atomic<ulong>* localProgress;
+
+    // extern thread_local ulong threadId;
 
     void initPhaseThread();
     void increaseLocalProgress(ulong n);
@@ -24,6 +26,8 @@ namespace pre {
 
 
     extern std::vector<std::string> sourceFilePaths;
+    extern std::mutex sourceFilePathsLock;
+
 
     SegmentedCleanSource& loadSourceCode(std::string s, std::string &filePath);
     SegmentedCleanSource& loadSourceCode(std::string &filePath);

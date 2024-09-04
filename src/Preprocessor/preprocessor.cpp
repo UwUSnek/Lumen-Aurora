@@ -20,10 +20,17 @@ namespace pre {
      *      totalProgress is the actual progress bar object. It is managed by an external thread
      */
     DynamicProgressBar totalProgress(0, ansi::bright_green, ansi::bright_black);
-    std::vector<std::atomic<ulong>*> localProgress;       // Per-thread progress
-    std::mutex localProgressLock;                         // A mutex for adding elements to localProgress
-    thread_local ulong threadId = -1;                     // The index of the local progress element that is managed by the current thread
-    //!                            ^ -1 is exclusively used to easily identify bugs. The value is initialized by pre::startPhaseThread
+
+
+    // Local progress data
+    //! To store local progress, use *localProgress. Accessing the array requires the locking of localProgressArrayLock.
+    std::vector<std::atomic<ulong>*> localProgressArray;      // Per-thread progress
+    std::mutex                       localProgressArrayLock;  // A mutex for adding elements to localProgress
+    thread_local std::atomic<ulong>* localProgress;           // A pointer to the local progress element associated to this thread
+
+
+    // thread_local ulong threadId = -1;                     // The index of the local progress element that is managed by the current thread
+    // //!                            ^ -1 is exclusively used to easily identify bugs. The value is initialized by pre::startPhaseThread
 
 
     /**
@@ -32,6 +39,7 @@ namespace pre {
      *      All the paths saved in this vector are canonical paths.
      */
     std::vector<std::string> sourceFilePaths;
+    std::mutex sourceFilePathsLock;
 
 
 
@@ -45,11 +53,13 @@ namespace pre {
      *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
      */
     void initPhaseThread() {
-        pre::localProgressLock.lock();
-        pre::localProgress.push_back(new std::atomic<ulong>(0));
-        pre::localProgressLock.unlock();
+        pre::localProgress = new std::atomic<ulong>(0);
 
-        pre::threadId = pre::localProgress.size() - 1;
+        pre::localProgressArrayLock.lock();
+        pre::localProgressArray.push_back(localProgress);
+        pre::localProgressArrayLock.unlock();
+
+        // pre::threadId = pre::localProgress.size() - 1;
     }
 
 
@@ -61,7 +71,7 @@ namespace pre {
      * @param n The amount of progress steps to add.
      */
     void increaseLocalProgress(ulong n) {
-        pre::localProgress[pre::threadId]->fetch_add(n);
+        pre::localProgress->fetch_add(n);
     }
 
 
@@ -90,7 +100,9 @@ namespace pre {
      * @return The contents of the source file as a SegmentedCleanSource.
      */
     SegmentedCleanSource& loadSourceCode(std::string s, std::string &filePath) {
+        sourceFilePathsLock.lock();
         sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
+        sourceFilePathsLock.unlock();
 
 
         //FIXME ^automatically fish up cached files if found. loop through them (for now)
@@ -103,9 +115,12 @@ namespace pre {
         SegmentedCleanSource r2;
         SegmentedCleanSource *r3 = new SegmentedCleanSource();
 
-        std::thread t1(startLCTsPhase,    &s, sourceFilePaths.size() - 1, &r1);
-        std::thread t2(startCleanupPhase, &r1,                            &r2);
-        std::thread t3(startIncludePhase, &r2,                             r3);
+        sourceFilePathsLock.lock();
+        ulong pathIndex = sourceFilePaths.size() - 1;
+        sourceFilePathsLock.unlock();
+        std::thread t1(startLCTsPhase,    &s, pathIndex, &r1);
+        std::thread t2(startCleanupPhase, &r1,           &r2);
+        std::thread t3(startIncludePhase, &r2,            r3);
 
         t1.join();
         t2.join();

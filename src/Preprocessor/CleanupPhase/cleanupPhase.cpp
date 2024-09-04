@@ -20,7 +20,8 @@ namespace pre {
     void startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
         pre::initPhaseThread();
         // pre::totalProgress.increaseTot(b.str.cpp_str()->length());
-        //BUG PREDICT PROGRESS or don't count this phase
+        //FIXME count progress of deleted characters + all characters of last phase
+
 
 
         ulong i = 0;
@@ -41,6 +42,11 @@ namespace pre {
                 pre::increaseLocalProgress(literalLen);
                 continue;
             }
+
+            // Skip (and preserve) macro definitions and calls
+            // FIXME
+            // FIXME
+            // FIXME
 
 
             //FIXME MOVE TO TOKENIZER
@@ -260,13 +266,13 @@ namespace pre {
 
             // Missing closing sequence
             // else if(b->str[i] == '\0') {
-            else if(b->str[i] != '\0') {
+            else if(b->str[i] == '\0') {
                 utils::printError(
                     literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_0 : ErrorCode::ERROR_CHAR_INCOMPLETE_0,
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(b, index, i - 1),
                     ElmCoords(b, i - 1, i - 1),
-                    std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing ' character."
+                    std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing " + (literalType == '"' ? "\"" : "'") + " character."
                 );
             }
             else if(b->str[i] == '\n') {
@@ -275,7 +281,7 @@ namespace pre {
                     utils::ErrType::PREPROCESSOR,
                     ElmCoords(b, index, i - 1),
                     ElmCoords(b, i - 1, i - 1),
-                    std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing ' character.\n" +
+                    std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing " + (literalType == '"' ? "\"" : "'") + " character.\n" +
                     "If you wish to include a newline character in the literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
                 );
             }

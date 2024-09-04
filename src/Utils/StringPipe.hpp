@@ -31,16 +31,16 @@
 struct StringPipe { // could be the name of an instrument
 private:
     std::string s;
-    std::atomic<ulong> len;
+    std::atomic<ulong> len = 0;
     std::mutex sReallocLock;
-    std::atomic<bool> _isOpen = false;
+    std::atomic<bool> _isOpen = true;
     // void wait(ulong i);
 
 
 
 
 public:
-    StringPipe() : len(0) {}
+    StringPipe() {}
 
     void operator+=(std::string &_s);
     void operator+=(char _s);

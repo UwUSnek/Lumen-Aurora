@@ -34,6 +34,7 @@ std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration
 
 
 void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth, bool _isComplete) {
+    std::cout << "\n" << _isComplete;
 
     // Adjust position and print command
     std::cout << "\033[s";             // Save cursor position
@@ -52,18 +53,18 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
     // Print compilation status
     std::cout << ansi::bold_bright_black << "\n\033[K    Compilation   │ " << ansi::reset;
-    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
+    if(true) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
     else 0; //TODO
 
     // Print optimization status
     std::cout << ansi::bold_bright_black << "\n\033[K    Optimization  │ " << ansi::reset;
-    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
+    if(true) std::cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
     else 0; //TODO
 
 
     // Print conversion status
     std::cout << ansi::bold_bright_black << "\n\033[K    Conversion    │ " << ansi::reset;
-    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
+    if(true) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
     else 0; //TODO
 
 
@@ -95,9 +96,11 @@ void startMonitorThread(std::string fullCommand){
         delayedIsCompleted = isComplete.load(); //! Delay completion detection by 1 iteration to allow the last frame to be fully printed before returning
 
         // Collect local progresses and update the progress bar
-        for(ulong i = 0; i < pre::localProgress.size(); ++i) {
-            pre::totalProgress.increase(pre::localProgress[i]->exchange(0));
+        pre::localProgressArrayLock.lock();
+        for(ulong i = 0; i < pre::localProgressArray.size(); ++i) {
+            pre::totalProgress.increase(pre::localProgressArray[i]->exchange(0));
         }
+        pre::localProgressArrayLock.unlock();
 
 
         // Calculate progress bar width
