@@ -11,7 +11,7 @@
                 "./Test/main.lum",
                 "-p", "./Test/out"
             ],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
@@ -27,7 +27,7 @@
             "logging": {
                 "engineLogging": false
             },
-            "internalConsoleOptions": "openOnSessionStart"
+            // "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

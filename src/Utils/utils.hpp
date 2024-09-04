@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <mutex>
 #include "ansi.hpp"
 #include "ErrorCode.hpp"
 #include "Command/CommandCoords.hpp"

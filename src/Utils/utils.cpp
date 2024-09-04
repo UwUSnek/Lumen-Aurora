@@ -53,6 +53,7 @@ namespace utils {
     /**
      * @brief Prints a formatted line indicator and colors it black.
      *      The color is NOT reset after. The caller function will have to manually change it back.
+    *      This function is NOT thread safe. Use a mutex to ensure other threads don't print at the same time.
      * @param n The number of the line. They start from 0, but the shown number is automatically increased by 1 to make it consistent with text exitors.
      */
     static inline void printLineNum(ulong n) {
@@ -134,6 +135,8 @@ namespace utils {
 
 
     void printErrorGeneric(ErrorCode errorCode, std::string message) {
+        consoleLock.lock();
+
         std::cerr << ansi::bold_red;
         std::cerr << "Error:";
 
@@ -141,6 +144,7 @@ namespace utils {
         std::cerr << ansi::bold_red << "\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
 
         // Stop the program
+        consoleLock.unlock();
         exit(errorCode);
     }
 
@@ -151,6 +155,8 @@ namespace utils {
 
 
     void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL relPos, cmd::ElmCoordsCL errPos, std::string message, std::string fullCommand) {
+        consoleLock.lock();
+
         std::cerr << ansi::bold_red;
         std::cerr << "Could not parse command:\n";
 
@@ -177,6 +183,7 @@ namespace utils {
 
 
         // Stop the program
+        consoleLock.unlock();
         exit(errorCode);
     }
 
@@ -221,7 +228,7 @@ namespace utils {
         std::string errFilePath = pre::sourceFilePaths[errPos.filePathIndex];
         pre::sourceFilePathsLock.unlock();
 
-
+        consoleLock.lock();
         std::cerr << ansi::bold_red;
 
         // Print error type and location
@@ -286,6 +293,7 @@ namespace utils {
 
 
         // Stop the program
+        consoleLock.unlock();
         exit(errorCode);
     }
 

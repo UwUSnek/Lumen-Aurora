@@ -34,7 +34,7 @@ std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration
 
 
 void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth, bool _isComplete) {
-    std::cout << "\n" << _isComplete;
+    utils::consoleLock.lock();
 
     // Adjust position and print command
     std::cout << "\033[s";             // Save cursor position
@@ -75,6 +75,8 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
     // Restore cursor position
     std::cout << "\033[u";
+
+    utils::consoleLock.unlock();
 }
 
 
@@ -263,13 +265,4 @@ int main(int argc, char* argv[]){
     // Join monitor thread
     isComplete.store(true);
     monitorThread.join();
-
-    // // Successful command output
-    // std::cout << ansi::bold_bright_green << fullCommand << ansi::reset << " completed successfully.";
-    // std::cout << ansi::bold_bright_green << "\n    Preprocessing │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds.";
-    // std::cout << ansi::bold_bright_green << "\n    Compilation   │ " << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds.";
-    // std::cout << ansi::bold_bright_green << "\n    Optimization  │ " << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds.";
-    // std::cout << ansi::bold_bright_green << "\n    Conversion    │ " << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds.";
-    // std::cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".";
-    // std::cout << "\n\n";
 }
