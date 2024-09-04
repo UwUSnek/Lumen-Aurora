@@ -24,7 +24,7 @@ namespace pre {
 
 
         ulong i = 0; // The character index relative to the current file, not including included files
-        while(b->str[i] != '\0') {
+        while(b->str[i].has_value()) {
             // std::smatch match;           //TODO REMOVE
             // std::smatch filePathMatch;   //TODO REMOVE
             std::string match;
@@ -126,7 +126,7 @@ namespace pre {
                             // Copy file contents and segments
                             std::string fileContents = utils::readFile(includeFile);
                             SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath); //FIXME run concurrently
-                            r->str += *preprocessedCode.str.cpp_str();
+                            r->str += *preprocessedCode.str.cpp();
 
                             // Push all the segments from the included file
                             for(ulong j = 0; j < preprocessedCode.meta.size(); ++j) {
@@ -161,7 +161,7 @@ namespace pre {
                         ErrorCode::ERROR_PRE_NO_PATH,
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
-                        (b->str[i + match.length()] == '\0') ? relevantCoords : ElmCoords(b, i + match.length(), i + match.length()),
+                        (!b->str[i + match.length()].has_value()) ? relevantCoords : ElmCoords(b, i + match.length(), i + match.length()),
                         "Missing file path in include statement.\n"
                         "A valid file path was expected, but could not be found."
                     );
@@ -172,7 +172,7 @@ namespace pre {
 
             // If not, copy normal characters and increase index counter
             else {
-                r->str += b->str[i];
+                r->str += *b->str[i];
                 r->meta.push_back(b->meta[i]);
                 ++i;
                 pre::increaseLocalProgress(1);
@@ -199,8 +199,8 @@ namespace pre {
         std::string tmp;
         ulong nameLen = sizeof("#include") - 1;
         ulong j = i + nameLen;
-        if(b->str[j] != '\0') {
-            if(!strncmp(b->str.cpp_str()->c_str() + i, "#include", nameLen)) {
+        if(b->str[j].has_value()) {
+            if(!strncmp(b->str.cpp()->c_str() + i, "#include", nameLen)) {
                 tmp += "#include";
             }
             else return;
@@ -209,7 +209,7 @@ namespace pre {
         match = tmp;
 
         while(true) {
-            char c = b->str[j];
+            char c = *b->str[j];
             if(std::isdigit(c) || std::isalpha(c) || c == '_') {
                 match += c;
                 ++j;
@@ -218,7 +218,7 @@ namespace pre {
         }
 
         while(true) {
-            char c = b->str[j];
+            char c = *b->str[j];
             if(c == ' ' || c == '\t') {
                 match += c;
                 ++j;
@@ -240,8 +240,8 @@ namespace pre {
         std::string tmp;
 
         char type;
-        if(b->str[i] != '\0') {
-            type = b->str[i];
+        if(b->str[i].has_value()) {
+            type = *b->str[i];
             if(type == '<' || type == '"') {
                 tmp += type;
                 ++i;
@@ -251,7 +251,7 @@ namespace pre {
 
         char last = type;
         while(true) {
-            char c = b->str[i];
+            char c = *b->str[i];
             if(c == '\n' || c == '\0') return; // TODO maybe write a more detailed error
             else if(last != '\\' && c == (type == '<' ? '>' : '"')) {
                 tmp += c;

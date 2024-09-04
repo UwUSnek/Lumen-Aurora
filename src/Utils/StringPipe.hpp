@@ -3,11 +3,12 @@
 #include <atomic>
 #include <string>
 
+#include "BasePipe.hpp"
 
 
 
 
- //*      Once the server thead has finished building the string, it MUST call .closePipe() to notify the other threads.
+
 
 
 
@@ -24,33 +25,19 @@
  *      Accessing characters from the server thread is allowed, as long as the requested characters have been written.
  *      Use .isOpen() to check if the pipe is still being written to.
  *      Retrieving a '\0' means that the pipe was closed before reaching that index.
+ *      Once the server thead has finished building the string, it MUST call .closePipe() to notify the other threads.
  *
  *      .cpp_str() returns a pointer to the raw std::string value.
  *      This method doesn't wait for the server thread to finish.
  */
-struct StringPipe { // could be the name of an instrument
-private:
-    std::string s;
-    std::atomic<ulong> len = 0;
-    std::mutex sReallocLock;
-    std::atomic<bool> _isOpen = true;
-    // void wait(ulong i);
-
-
+struct StringPipe : public BasePipe<std::string, char> { // could be the name of an instrument
+protected:
+    ulong __internal_get_len(const std::string &_t) override { return _t.length(); }
+    void   __internal_append(const std::string &_t) override { s.append(_t); }
+    void   __internal_append(const char &_t)        override { s.push_back(_t); }
 
 
 public:
     StringPipe() {}
-
-    void operator+=(std::string &_s);
-    void operator+=(char _s);
-    void closePipe();
-
-    bool isOpen();
-    ulong length();
-    // bool exists(ulong i);
-
-    char operator[](ulong i);
-    std::string substr(ulong i, ulong len);
-    std::string* cpp_str();
+    std::optional<std::string> substr(ulong i, ulong len);
 };

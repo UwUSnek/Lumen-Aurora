@@ -43,7 +43,7 @@ namespace utils {
      * @brief Checks if a file path is a directory.
      * @return true if the path is a directory or a file that points to a directory, false if not.
      */
-    bool isDir(std::string path) {
+    bool isDir(std::string const &path) {
         return fs::is_directory(fs::is_symlink(path) ? fs::read_symlink(path).string() : path);
     }
 
@@ -134,7 +134,7 @@ namespace utils {
 
 
 
-    void printErrorGeneric(ErrorCode errorCode, std::string message) {
+    void printErrorGeneric(ErrorCode errorCode, std::string const &message) {
         consoleLock.lock();
 
         std::cerr << ansi::bold_red;
@@ -154,7 +154,7 @@ namespace utils {
 
 
 
-    void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL relPos, cmd::ElmCoordsCL errPos, std::string message, std::string fullCommand) {
+    void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &relPos, cmd::ElmCoordsCL const &errPos, std::string const &message, std::string const &fullCommand) {
         consoleLock.lock();
 
         std::cerr << ansi::bold_red;
@@ -200,7 +200,7 @@ namespace utils {
      * @param message The error message. This can contain multiple lines.
      *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
      */
-    void printError(ErrorCode errorCode, ErrType errType, ElmCoords errPos, std::string message) {
+    void printError(ErrorCode errorCode, ErrType errType, ElmCoords const &errPos, std::string const &message) {
         printError(errorCode, errType, ElmCoords(), errPos, message);
     }
 
@@ -222,7 +222,7 @@ namespace utils {
      * @param message The error message. This can contain multiple lines.
      *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
      */
-    void printError(ErrorCode errorCode, ErrType errType, ElmCoords relPos, ElmCoords errPos, std::string message) {
+    void printError(ErrorCode errorCode, ErrType errType, ElmCoords const &relPos, ElmCoords const &errPos, std::string const &message) {
         pre::sourceFilePathsLock.lock();
         std::string relFilePath = pre::sourceFilePaths[relPos.filePathIndex];
         std::string errFilePath = pre::sourceFilePaths[errPos.filePathIndex];
@@ -314,7 +314,7 @@ namespace utils {
      * @param fileName The path to the file.
      * @return The contents of the file as a string.
      */
-    std::string readAndCheckFile(std::string fileName) {
+    std::string readAndCheckFile(std::string const &fileName) {
         // Print an error if the file is a directory
         if(fs::is_directory(fileName)) {
             printError(

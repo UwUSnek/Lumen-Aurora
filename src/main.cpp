@@ -220,7 +220,7 @@ int main(int argc, char* argv[]){
 
 
     if(cmd::options.outputType == 'p') {
-        writeOutputFile(*sourceCode.str.cpp_str());
+        writeOutputFile(*sourceCode.str.cpp());
         //TODO write source informations if requested
     }
     else {

@@ -25,7 +25,7 @@ namespace pre {
 
 
         ulong i = 0;
-        while(b->str[i] != '\0') {
+        while(b->str[i].has_value()) {
 
             // Skip comments
             ulong commentLen = measureComment(b->str, i);
@@ -75,7 +75,7 @@ namespace pre {
             // }
 
             // Save normal characters
-            r->str += b->str[i];
+            r->str += *b->str[i];
             r->meta.push_back(b->meta[i]);
             ++i;
             // pre::increaseLocalProgress(1);
@@ -174,7 +174,7 @@ namespace pre {
         if(b[index] != '/') return 0; //TODO
 
 
-        char last = b[index];
+        char last = *b[index];
         char commType = '\0'; // '\0' if unknow, '/' if single line, '*' if multiline
         ulong i = index + 1;
         while(true) {
@@ -182,7 +182,7 @@ namespace pre {
             // Starting sequence
             if(commType == '\0') {
                 if(b[i] == '/' || b[i] == '*') {
-                    commType = b[i];
+                    commType = *b[i];
                     continue;
                 }
                 else {  //! Starting sequence not found (this includes \n and \0 cases)
@@ -192,7 +192,7 @@ namespace pre {
 
             // Single character closing sequences (End of file or single line comments)
             // else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
-            else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
+            else if(!b[i].has_value() || commType == '/' && b[i] == '\n') {
                 break;
             }
 
@@ -204,7 +204,7 @@ namespace pre {
 
             // Normal characters (part of the comment)
             else {
-                last = b[i];
+                last = *b[i];
                 ++i;
             }
         }
@@ -232,21 +232,21 @@ namespace pre {
      */
     ulong saveLiteral(SegmentedCleanSource *b, ulong index, SegmentedCleanSource *r) {
         if(b->str[index] != '"' && b->str[index] != '\'') return 0;
-        r->str += b->str[index];
+        r->str += *b->str[index];
         r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[index]));
 
 
-        char literalType = b->str[index];
+        char literalType = *b->str[index];
         ulong i = index + 1;
         while(true) {
 
             // Escape sequences
             if(b->str[i] == '\\') {
-                r->str += b->str[i];
+                r->str += *b->str[i];
                 r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
                 // if(b->str[i + 1] != '\0') {
-                if(b->str[i] != '\0') {
-                    r->str += b->str[i + 1];
+                if(b->str[i].has_value()) {
+                    r->str += *b->str[i + 1];
                     r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i + 1]));
                 }
                 // i += 1 + (b.str[i + 1] != '\0'); //TODO remove if not needed
@@ -258,7 +258,7 @@ namespace pre {
             // Closing sequence
             //! Macro definitions are skipped by the startCleanupPhase() function. No need to check
             if(b->str[i] == literalType) {
-                r->str += b->str[i];
+                r->str += *b->str[i];
                 r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
                 ++i;
                 break;
@@ -266,7 +266,7 @@ namespace pre {
 
             // Missing closing sequence
             // else if(b->str[i] == '\0') {
-            else if(b->str[i] == '\0') {
+            else if(!b->str[i].has_value()) {
                 utils::printError(
                     literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_0 : ErrorCode::ERROR_CHAR_INCOMPLETE_0,
                     utils::ErrType::PREPROCESSOR,
@@ -288,7 +288,7 @@ namespace pre {
 
             // Normal characters
             else {
-                r->str += b->str[i];
+                r->str += *b->str[i];
                 r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
                 ++i;
             }
