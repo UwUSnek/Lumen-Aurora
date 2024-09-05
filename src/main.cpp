@@ -10,9 +10,30 @@
 namespace fs = std::filesystem;
 
 
+#include "main.hpp"
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
+
+
+
+
+
+
+std::vector<std::thread> threads;
+std::mutex threadsLock;
+
+std::vector<pre::SegmentedCleanSource*> pipes;
+std::mutex pipesLock;
+
+
+
+
+
+
+
+
+
 
 //FIXME detect all the files before processing them to make progress more reliable
 // Becomes true after the output file gets written and closed

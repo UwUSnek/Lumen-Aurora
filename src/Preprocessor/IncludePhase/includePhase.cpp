@@ -84,7 +84,7 @@ namespace pre {
                             if(rawIncludeFilePath[0] == '/') adjustedIncludeFilePath = rawIncludeFilePath;
                             else {
                                 sourceFilePathsLock.lock();
-                                adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i].f]).parent_path() / rawIncludeFilePath;
+                                adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i]->f]).parent_path() / rawIncludeFilePath;
                                 sourceFilePathsLock.unlock();
                             }
 
@@ -123,15 +123,16 @@ namespace pre {
                             }
 
 
-                            // Copy file contents and segments
+                            // Copy file contents and metadata
                             std::string fileContents = utils::readFile(includeFile);
                             SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath); //FIXME run concurrently
-                            r->str += *preprocessedCode.str.cpp();
+                            r->str  += *preprocessedCode.str.cpp();
+                            r->meta += *preprocessedCode.meta.cpp();
 
-                            // Push all the segments from the included file
-                            for(ulong j = 0; j < preprocessedCode.meta.size(); ++j) {
-                                r->meta.push_back(preprocessedCode.meta[j]);
-                            }
+                            // // Push all the segments from the included file
+                            // for(ulong j = 0; j < preprocessedCode.meta.length(); ++j) {
+                            //     r->meta += *preprocessedCode.meta[j];
+                            // }
                         }
                     }
 
@@ -172,8 +173,8 @@ namespace pre {
 
             // If not, copy normal characters and increase index counter
             else {
-                r->str += *b->str[i];
-                r->meta.push_back(b->meta[i]);
+                r->str  += *b->str[i];
+                r->meta += *b->meta[i];
                 ++i;
                 pre::increaseLocalProgress(1);
             }

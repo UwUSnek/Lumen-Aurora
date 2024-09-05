@@ -7,7 +7,7 @@
 #include "ErrorCode.hpp"
 #include "Utils/ansi.hpp"
 #include "UnitTest.hpp"
-
+namespace fs = std::filesystem;
 
 // void testFileOutput()
 

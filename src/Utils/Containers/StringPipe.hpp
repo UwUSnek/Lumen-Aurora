@@ -32,9 +32,9 @@
  */
 struct StringPipe : public BasePipe<std::string, char> { // could be the name of an instrument
 protected:
-    ulong __internal_get_len(const std::string &_t) override { return _t.length(); }
-    void   __internal_append(const std::string &_t) override { s.append(_t); }
-    void   __internal_append(const char &_t)        override { s.push_back(_t); }
+    ulong __internal_get_len(const std::string &e) override { return e.length(); }
+    void   __internal_append(const std::string &e) override { s.append(e); }
+    void   __internal_append(const char &e)        override { s.push_back(e); }
 
 
 public:

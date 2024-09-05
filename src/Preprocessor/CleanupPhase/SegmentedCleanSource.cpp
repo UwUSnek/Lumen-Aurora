@@ -34,7 +34,7 @@ namespace pre {
             if(c == '\n' || i == str.length() - 1) {
                 r << "\n";
                 for(ulong j = lineStart; j <= i; ++j) {
-                    switch(meta[j].type) {
+                    switch(meta[j]->type) {
                         case CleanSourceType::MISC:   { r << 'm'; continue; }
                         case CleanSourceType::STRING: { r << 's'; continue; }
                         case CleanSourceType::CHAR:   { r << 'c'; continue; }

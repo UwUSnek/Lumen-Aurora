@@ -47,8 +47,8 @@ namespace pre {
 
             // Push normal characters
             else {
-                r->str += (*b)[i];
-                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex));
+                r->str  += (*b)[i];
+                r->meta += CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex);
                 if(b->at(i) == '\n') ++curLine;
                 ++i;
                 // pre::increaseLocalProgress(1);

@@ -75,8 +75,8 @@ namespace pre {
             // }
 
             // Save normal characters
-            r->str += *b->str[i];
-            r->meta.push_back(b->meta[i]);
+            r->str  += *b->str[i];
+            r->meta += *b->meta[i];
             ++i;
             // pre::increaseLocalProgress(1);
         }
@@ -232,8 +232,8 @@ namespace pre {
      */
     ulong saveLiteral(SegmentedCleanSource *b, ulong index, SegmentedCleanSource *r) {
         if(b->str[index] != '"' && b->str[index] != '\'') return 0;
-        r->str += *b->str[index];
-        r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[index]));
+        r->str  += *b->str[index];
+        r->meta += *b->meta[index];
 
 
         char literalType = *b->str[index];
@@ -242,12 +242,12 @@ namespace pre {
 
             // Escape sequences
             if(b->str[i] == '\\') {
-                r->str += *b->str[i];
-                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
+                r->str  += *b->str[i];
+                r->meta += *b->meta[i];
                 // if(b->str[i + 1] != '\0') {
                 if(b->str[i].has_value()) {
-                    r->str += *b->str[i + 1];
-                    r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i + 1]));
+                    r->str  += *b->str[i + 1];
+                    r->meta += *b->meta[i + 1];
                 }
                 // i += 1 + (b.str[i + 1] != '\0'); //TODO remove if not needed
                 // //! ^ Only add 1 if the \ is the last character of the file. //TODO remove if not needed
@@ -258,8 +258,8 @@ namespace pre {
             // Closing sequence
             //! Macro definitions are skipped by the startCleanupPhase() function. No need to check
             if(b->str[i] == literalType) {
-                r->str += *b->str[i];
-                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
+                r->str  += *b->str[i];
+                r->meta += *b->meta[i];
                 ++i;
                 break;
             }
@@ -288,8 +288,8 @@ namespace pre {
 
             // Normal characters
             else {
-                r->str += *b->str[i];
-                r->meta.push_back(CleanSourceMeta(CleanSourceType::MISC, b->meta[i]));
+                r->str  += *b->str[i];
+                r->meta += *b->meta[i];
                 ++i;
             }
         }

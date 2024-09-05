@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "preprocessor.hpp"
+#include "main.hpp"
 #include "ElmCoords.hpp"
 #include "Utils/utils.hpp"
 #include "LCTsPhase/LCTsPhase.hpp"
@@ -103,6 +104,7 @@ namespace pre {
     SegmentedCleanSource& loadSourceCode(std::string s, std::string &filePath) {
         sourceFilePathsLock.lock();
         sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
+        ulong pathIndex = sourceFilePaths.size() - 1;
         sourceFilePathsLock.unlock();
 
 
@@ -116,16 +118,13 @@ namespace pre {
         SegmentedCleanSource r2;
         SegmentedCleanSource *r3 = new SegmentedCleanSource();
 
-        sourceFilePathsLock.lock();
-        ulong pathIndex = sourceFilePaths.size() - 1;
-        sourceFilePathsLock.unlock();
         std::thread t1(startLCTsPhase,    &s, pathIndex, &r1);
         std::thread t2(startCleanupPhase, &r1,           &r2);
         std::thread t3(startIncludePhase, &r2,            r3);
 
-        t1.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
-        t2.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
-        t3.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
+        // t1.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
+        // t2.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
+        // t3.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
 
         // SegmentedCleanSource r1 = startLCTsPhase(s, sourceFilePaths.size() - 1);
         // SegmentedCleanSource r2 = startCleanupPhase(r1);

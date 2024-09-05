@@ -22,9 +22,9 @@ private:
 protected:
     std::mutex sReallocLock;
     t s;
-    virtual ulong __internal_get_len(t    const &_t) = 0;
-    virtual void   __internal_append(t    const &_t) = 0;
-    virtual void   __internal_append(elmt const &_t) = 0;
+    virtual ulong __internal_get_len(t    const &e) = 0;
+    virtual void   __internal_append(t    const &e) = 0;
+    virtual void   __internal_append(elmt const &e) = 0;
 
 
 

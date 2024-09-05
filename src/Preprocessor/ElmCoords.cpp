@@ -15,8 +15,8 @@
 
 
 ElmCoords::ElmCoords(pre::SegmentedCleanSource *source, ulong _start, ulong _end) :
-    filePathIndex(source->meta[_start].f),
-    lineNum(source->meta[_start].l),
-    start(source->meta[_start].i),
-    end(source->meta[_end].i) {
+    filePathIndex(source->meta[_start]->f),
+          lineNum(source->meta[_start]->l),
+            start(source->meta[_start]->i),
+              end(source->meta[_end  ]->i) {
 }

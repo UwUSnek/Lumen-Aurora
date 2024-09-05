@@ -2,7 +2,8 @@
 #include <string>
 #include <vector>
 
-#include "Utils/StringPipe.hpp"
+#include "Utils/Containers/StringPipe.hpp"
+#include "Utils/Containers/VectorPipe.hpp"
 
 
 
@@ -33,7 +34,7 @@ namespace pre {
             f(_f) {
         }
 
-        CleanSourceMeta(CleanSourceType _type, CleanSourceMeta &meta) :
+        CleanSourceMeta(CleanSourceType _type, CleanSourceMeta const &meta) :
             type(_type),
             i(meta.i),
             l(meta.l),
@@ -52,7 +53,7 @@ namespace pre {
      */
     struct SegmentedCleanSource {
         StringPipe str;                     // The clean string value
-        std::vector<CleanSourceMeta> meta;  // Informations about each character
+        VectorPipe<CleanSourceMeta> meta;   // Informations about each character
 
         std::string toString();
         std::string toStringVerbose();
