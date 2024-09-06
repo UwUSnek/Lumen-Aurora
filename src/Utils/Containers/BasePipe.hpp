@@ -100,8 +100,16 @@ public:
      * @brief Checks if the pipe is still open
      * @return true if the pipe is open, false otherwise
      */
-    bool isOpen() {
-        return _isOpen;
+    inline bool isOpen() {
+        return _isOpen.load();
+    }
+
+
+    /**
+     * @brief Makes the thread sleep until the pipe closes.
+     */
+    void awaitClose() {
+        while(isOpen()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
 

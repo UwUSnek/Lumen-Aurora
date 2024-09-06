@@ -19,12 +19,16 @@ namespace fs = std::filesystem;
 
 
 
+// A mutex that controls the console output.
+// This allows multiple threads to write multiple messages at once without being interrupted.
+std::mutex consoleLock;
+
 
 std::vector<std::thread> threads;
 std::mutex threadsLock;
+std::atomic<ulong> activeThreads = 0;
 
-std::vector<pre::SegmentedCleanSource*> pipes;
-std::mutex pipesLock;
+// std::map<std::string, std::string*> fileContentCache;
 
 
 
@@ -55,7 +59,7 @@ std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration
 
 
 void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth, bool _isComplete) {
-    utils::consoleLock.lock();
+    consoleLock.lock();
 
     // Adjust position and print command
     std::cout << "\033[s";             // Save cursor position
@@ -90,14 +94,19 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
 
     if(_isComplete) std::cout << ansi::bold_bright_green << "\n\n\033[K    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
-    else std::cout << "\033[K\n\n\n"; //FIXME WRITE NUMBER OF ACTIVE THREADS, OPENED FILES, LOADED MODULES
+    // else std::cout << "\033[K\n\n\n"; //FIXME WRITE NUMBER OF ACTIVE THREADS, OPENED FILES, LOADED MODULES
+    else {
+        std::cout << "\033[K\n\n    ";
+        std::cout << "t:" << activeThreads.load();
+        std::cout << "\n";
+    }
 
 
 
     // Restore cursor position
     std::cout << "\033[u";
 
-    utils::consoleLock.unlock();
+    consoleLock.unlock();
 }
 
 
@@ -216,6 +225,10 @@ int main(int argc, char* argv[]){
         exit(0);
     }
 
+    // bool preprocessOnly = cmd::options.outputType == 'p';
+    bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
+    bool compileExec    = cmd::options.outputType == 'x';
+
 
 
 
@@ -234,17 +247,18 @@ int main(int argc, char* argv[]){
     //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
     // Preprocessing
     timeStartPre = std::chrono::high_resolution_clock::now();
-    pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(cmd::options.sourceFile);
+    std::string s = utils::readAndCheckFile(cmd::options.sourceFile);
+    pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
     timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 
 
 
-    if(cmd::options.outputType == 'p') {
+    // if(cmd::options.outputType == 'p') {
         writeOutputFile(*sourceCode.str.cpp());
         //TODO write source informations if requested
-    }
-    else {
+    // }
+    if(compileModule) {
         //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
         // Compilation
         timeStartComp = std::chrono::high_resolution_clock::now();
@@ -259,23 +273,18 @@ int main(int argc, char* argv[]){
         timeStartOpt = std::chrono::high_resolution_clock::now();
         //TODO actually optimize the code
         timeOpt = std::chrono::high_resolution_clock::now() - timeStartOpt;
+    }
 
 
 
+    if(compileExec) {
+        //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
+        // Conversion to C and gcc compilation
+        timeStartConv = std::chrono::high_resolution_clock::now();
+        //TODO actually convert the code
+        timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
 
-        if(cmd::options.outputType == 'm') {
-            // writeOutputFile(sourceCode.str); //TODO write precompiled module
-            //TODO write source informations if requested
-        }
-        else {
-            //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
-            // Conversion to C and gcc compilation
-            timeStartConv = std::chrono::high_resolution_clock::now();
-            //TODO actually convert the code
-            timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
-
-            // writeOutputFile(sourceCode.str); //TODO use the output from the conversion phase
-        }
+        // writeOutputFile(sourceCode.str); //TODO use the output from the conversion phase
     }
 
 
@@ -283,6 +292,27 @@ int main(int argc, char* argv[]){
 
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
+    // Join subphase threads
+    while(activeThreads.load()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    threadsLock.lock();
+    for(auto &t : threads) t.join();
+    threadsLock.unlock();
+
+
+
+    // Write output file
+    if(compileExec) {
+        //TODO write exec
+    }
+    else if(compileModule) {
+        //TODO write module
+    }
+    else {
+        writeOutputFile(*sourceCode.str.cpp());
+    }
+
+
+
     // Join monitor thread
     isComplete.store(true);
     monitorThread.join();

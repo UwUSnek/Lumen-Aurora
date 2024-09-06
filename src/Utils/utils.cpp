@@ -8,6 +8,7 @@
 #include <unistd.h>
 namespace fs = std::filesystem;
 
+#include "main.hpp"
 #include "utils.hpp"
 #include "Preprocessor/ElmCoords.hpp"
 #include "Preprocessor/preprocessor.hpp"
@@ -18,10 +19,6 @@ namespace fs = std::filesystem;
 
 
 namespace utils {
-
-    // A mutex that controls the console output.
-    // This allows multiple threads to write multiple messages at once without being interrupted.
-    std::mutex consoleLock;
 
 
     /**

@@ -6,5 +6,5 @@
 
 
 namespace pre {
-    void startLCTsPhase(std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r);
+    void startLCTsPhase(std::string const *b, ulong DBG_filePathIndex, SegmentedCleanSource *r);
 }

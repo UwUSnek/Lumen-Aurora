@@ -15,9 +15,9 @@ namespace pre {
      * @param index The index to check.
      * @return The number of characters the LCT occupies, or 0 if one was not found.
      */
-    ulong checkLct(std::string &b, ulong index) {
-        if(b[index] == '\\' && b[index + 1] == '\n') return 2;
-        if(b[index] == '\0') return 1;
+    ulong checkLct(std::string const *b, ulong index) {
+        if((*b)[index] == '\\' && (*b)[index + 1] == '\n') return 2;
+        if((*b)[index] == '\0') return 1;
         return 0;
     }
 
@@ -28,7 +28,7 @@ namespace pre {
 
 
 
-    void startLCTsPhase(std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
+    void startLCTsPhase(std::string const *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
         pre::initPhaseThread();
         pre::totalProgress.increaseTot(b->length());
 
@@ -38,7 +38,7 @@ namespace pre {
         while(i < b->length()) {
 
             // Skip LCTs
-            ulong lct = checkLct(*b, i);
+            ulong lct = checkLct(b, i);
             if(lct) {
                 i += lct;
                 pre::increaseLocalProgress(lct);
@@ -58,5 +58,7 @@ namespace pre {
 
         // return r;
         r->str.closePipe();
+        r->meta.closePipe();
+        pre::stopPhaseThread();
     }
 }

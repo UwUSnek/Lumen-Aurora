@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cstring>
 #include <filesystem>
-#include "command.hpp"
-#include "Utils/utils.hpp"
 namespace fs = std::filesystem;
+
+#include "command.hpp"
+#include "main.hpp"
+#include "Utils/utils.hpp"
 
 
 
@@ -311,7 +313,7 @@ namespace cmd {
         std::string default__________ = ansi::reset + ansi::fill_magenta + " DEFAULT " + ansi::reset + " ";
 
 
-        utils::consoleLock.lock();
+        consoleLock.lock();
         std::cout <<
             ansi::bold_magenta << "Command syntax: " << ansi::reset << "alc <source> <options...>\n" <<
             ansi::bold_magenta << "          source │ " << ansi::reset << "The path to the file containing the source code                                        " << none______ << ansi::bright_black << "\n" <<
@@ -341,7 +343,7 @@ namespace cmd {
             ansi::bold_magenta << "      --o-thread │ " << ansi::reset << "Use thread pool                                                                         " << default1_ << ansi::bright_black << "incompatible with --o-none\n" << ansi::reset <<
             ansi::bold_magenta << "      --o-memory │ " << ansi::reset << "Use memory pool                                                                         " << default1_ << ansi::bright_black << "incompatible with --o-none\n" << ansi::reset <<
         "";
-        utils::consoleLock.unlock();
+        consoleLock.unlock();
     }
 
 
@@ -352,12 +354,12 @@ namespace cmd {
 
 
     void printVersion() {
-        utils::consoleLock.lock();
+        consoleLock.lock();
         //FIXME print version. get version number dynamically
         std::cout << ansi::bold_magenta << "ALC" << ansi::reset << " (Aurora/Lumen Compiler)\n";
         std::cout << ansi::bold_magenta << "Version:" << ansi::reset << " L-0.1.0";
         // std::cout ansi::bold_magenta << << "Version:" << ansi::reset << " W-0.1.0"; //TODO windows build
         // std::cout ansi::bold_magenta << << "Version:" << ansi::reset << " X-0.1.0"; //TODO mac build (prob not gonna happen)
-        utils::consoleLock.unlock();
+        consoleLock.unlock();
     }
 }

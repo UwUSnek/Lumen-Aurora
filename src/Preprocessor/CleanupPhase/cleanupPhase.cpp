@@ -84,6 +84,8 @@ namespace pre {
 
         // return r;
         r->str.closePipe();
+        r->meta.closePipe();
+        pre::stopPhaseThread();
     }
 
 

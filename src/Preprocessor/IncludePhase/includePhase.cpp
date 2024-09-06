@@ -124,8 +124,10 @@ namespace pre {
 
 
                             // Copy file contents and metadata
-                            std::string fileContents = utils::readFile(includeFile);
+                            std::string* fileContents = new std::string(utils::readFile(includeFile)); //FIXME add a function that read a file and saves it in a global array so they don't go out of scope
                             SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath); //FIXME run concurrently
+                            preprocessedCode.str.awaitClose();
+                            preprocessedCode.meta.awaitClose();
                             r->str  += *preprocessedCode.str.cpp();
                             r->meta += *preprocessedCode.meta.cpp();
 
@@ -185,6 +187,8 @@ namespace pre {
 
         // return r;
         r->str.closePipe();
+        r->meta.closePipe();
+        pre::stopPhaseThread();
     }
 
 

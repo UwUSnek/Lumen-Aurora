@@ -55,6 +55,8 @@ namespace pre {
      *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
      */
     void initPhaseThread() {
+        activeThreads.fetch_add(1);
+
         pre::localProgress = new std::atomic<ulong>(0);
 
         pre::localProgressArrayLock.lock();
@@ -62,6 +64,20 @@ namespace pre {
         pre::localProgressArrayLock.unlock();
 
         // pre::threadId = pre::localProgress.size() - 1;
+    }
+
+
+
+
+
+
+    /**
+     * @brief Creates a new element in the local progress list and sets the threadId to its index.
+     *      This function MUST be called ONCE at the start of each phase by its own worker thread.
+     *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
+     */
+    void stopPhaseThread() {
+        activeThreads.fetch_sub(1);
     }
 
 
@@ -87,10 +103,10 @@ namespace pre {
 
 
 
-    SegmentedCleanSource& loadSourceCode(std::string &filePath) {
-        std::string s = utils::readAndCheckFile(filePath);
-        return loadSourceCode(s, filePath);
-    }
+    // SegmentedCleanSource& loadSourceCode(std::string &filePath) {
+    //     std::string s = utils::readAndCheckFile(filePath);
+    //     return loadSourceCode(s, filePath);
+    // }
 
 
 
@@ -101,7 +117,7 @@ namespace pre {
      * @param filePath The path of the original source code file.
      * @return The contents of the source file as a SegmentedCleanSource.
      */
-    SegmentedCleanSource& loadSourceCode(std::string s, std::string &filePath) {
+    SegmentedCleanSource& loadSourceCode(std::string const *s, std::string const &filePath) {
         sourceFilePathsLock.lock();
         sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to chec for them before starting the preprocessor
         ulong pathIndex = sourceFilePaths.size() - 1;
@@ -114,21 +130,20 @@ namespace pre {
         //FIXME CHECK CIRCULAR DEPENDENCIES
         //FIXME SAFE INCLUDE STACK
 
-        SegmentedCleanSource r1;
-        SegmentedCleanSource r2;
+
+        //TODO check if these can be moved to a global array
+        //! ^ they are not 1-to-1. subphase threads can create new threads and start other phases,
+        //!   which are separate from the main processing cluster
+        SegmentedCleanSource *r1 = new SegmentedCleanSource();
+        SegmentedCleanSource *r2 = new SegmentedCleanSource();
         SegmentedCleanSource *r3 = new SegmentedCleanSource();
 
-        std::thread t1(startLCTsPhase,    &s, pathIndex, &r1);
-        std::thread t2(startCleanupPhase, &r1,           &r2);
-        std::thread t3(startIncludePhase, &r2,            r3);
+        threadsLock.lock();
+        threads.emplace_back(std::thread(startLCTsPhase,     s, pathIndex, r1));
+        threads.emplace_back(std::thread(startCleanupPhase, r1,            r2));
+        threads.emplace_back(std::thread(startIncludePhase, r2,            r3));
+        threadsLock.unlock();
 
-        // t1.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
-        // t2.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
-        // t3.join(); //FIXME put threads in a global array and make the main thread join all of them after starting the phases
-
-        // SegmentedCleanSource r1 = startLCTsPhase(s, sourceFilePaths.size() - 1);
-        // SegmentedCleanSource r2 = startCleanupPhase(r1);
-        // SegmentedCleanSource r3 = startIncludePhase(r2);
         return *r3;
     }
 
