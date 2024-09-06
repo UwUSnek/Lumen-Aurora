@@ -259,7 +259,7 @@ namespace pre {
 
             // Closing sequence
             //! Macro definitions are skipped by the startCleanupPhase() function. No need to check
-            if(b->str[i] == literalType) {
+            else if(b->str[i] == literalType) {
                 r->str  += *b->str[i];
                 r->meta += *b->meta[i];
                 ++i;
@@ -269,20 +269,22 @@ namespace pre {
             // Missing closing sequence
             // else if(b->str[i] == '\0') {
             else if(!b->str[i].has_value()) {
+                ulong lastI = std::min(i - 1, b->str.length() - 1);
                 utils::printError(
                     literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_0 : ErrorCode::ERROR_CHAR_INCOMPLETE_0,
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(b, index, i - 1),
-                    ElmCoords(b, i - 1, i - 1),
+                    ElmCoords(b, index, lastI),
+                    ElmCoords(b, lastI, lastI),
                     std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing " + (literalType == '"' ? "\"" : "'") + " character."
                 );
             }
             else if(b->str[i] == '\n') {
+                ulong lastI = std::min(i - 1, b->str.length() - 1);
                 utils::printError(
                     literalType == '"' ? ErrorCode::ERROR_STRING_INCOMPLETE_n : ErrorCode::ERROR_CHAR_INCOMPLETE_n,
                     utils::ErrType::PREPROCESSOR,
-                    ElmCoords(b, index, i - 1),
-                    ElmCoords(b, i - 1, i - 1),
+                    ElmCoords(b, index, lastI),
+                    ElmCoords(b, lastI, lastI),
                     std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing " + (literalType == '"' ? "\"" : "'") + " character.\n" +
                     "If you wish to include a newline character in the literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
                 );

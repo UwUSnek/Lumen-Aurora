@@ -26,8 +26,6 @@ namespace pre {
 
         ulong i = 0; // The character index relative to the current file, not including included files
         while(b->str[i].has_value()) {
-            // std::smatch match;           //TODO REMOVE
-            // std::smatch filePathMatch;   //TODO REMOVE
             std::string match;
             std::string filePathMatch;
 
@@ -48,14 +46,11 @@ namespace pre {
 
 
             // If an include directive is detected, replace it with the preprocessed contents of the file
-            // if(std::regex_search(b.str.cbegin() + i, b.str.cend(), match, std::regex(R"(^#include(?![a-zA-Z0-9_])[ \t]*)"))) { //TODO REMOVE
             parseIncludeStatementName(i, b, match);
             if(!match.empty()) {
                 ElmCoords relevantCoords(b, i, i + match.length() - 1);
-                                                                                              //     ╭────── file ──────╮ ╭───── module ─────╮
-                // Detect specified file path                                                 //     │ ╭────────────╮   │ │ ╭────────────╮   │
-                // if(std::regex_search(b.str.cbegin() + i + match[0].length(), b.str.cend(), filePathMatch, std::regex(R"(^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>))"))) { //TODO REMOVE
 
+                // Detect specified file path
                 parseIncludeStatementPath(i + match.length(), b, filePathMatch);
                 if(!filePathMatch.empty()) {
                     ElmCoords filePathCoords(b, i + match.length(), i + match.length() + filePathMatch.length() - 1);
@@ -88,7 +83,6 @@ namespace pre {
                                 adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i]->f]).parent_path() / rawIncludeFilePath;
                                 sourceFilePathsLock.unlock();
                             }
-
 
                             //! Canonical version of the adjusted file path. No changes if file was not found
                             std::string canonicalIncludeFilePath;
@@ -132,11 +126,6 @@ namespace pre {
                             preprocessedCode.meta.awaitClose();
                             r->str  += *preprocessedCode.str.cpp();
                             r->meta += *preprocessedCode.meta.cpp();
-
-                            // // Push all the segments from the included file
-                            // for(ulong j = 0; j < preprocessedCode.meta.length(); ++j) {
-                            //     r->meta += *preprocessedCode.meta[j];
-                            // }
                         }
                     }
 

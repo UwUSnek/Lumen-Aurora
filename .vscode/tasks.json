@@ -4,7 +4,7 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Build compiler",
+            "label": "COMP | Build compiler",
             "command": "./Tools/Build_compiler.sh",
             "args": [],
             "problemMatcher": [ "$gcc" ],
@@ -18,7 +18,7 @@
         },
         {
             "type": "shell",
-            "label": "Run test (no debug)",
+            "label": "TEST | Run manual testing",
             "command": "./Build/out",
             "args": [
                 "./Test/main.lum",
@@ -35,7 +35,7 @@
         },
         {
             "type": "shell",
-            "label": "Build and run unit tests",
+            "label": "TEST | Build and run unit tests",
             "command": "./Tests/Build_tests.sh && ./Tests/tests.out",
             "args": [],
             "problemMatcher": [],
