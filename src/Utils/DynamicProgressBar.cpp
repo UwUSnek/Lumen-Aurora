@@ -1,4 +1,4 @@
-#include <iostream>
+#include "ALC.hpp"
 #include <iomanip>
 
 #include "Utils/utils.hpp"
@@ -34,12 +34,12 @@ void DynamicProgressBar::render(int consoleWidth) {
 
     // For each step
     for(float i = 0; i < 0.9999f; i += stepSize) {
-        std::cout << (i < normProgress ? progressColor : missingColor) << "━";
+        cout << (i < normProgress ? progressColor : missingColor) << "━";
     }
 
 
     // Reset colors and print value
-    std::cout << ansi::reset <<
+    cout << ansi::reset <<
         " " <<
         std::right << std::setw(valueWidth) << utils::shortenInteger(_progress) <<
         "/" <<

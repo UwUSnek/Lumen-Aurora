@@ -1,5 +1,5 @@
 #include <string>
-#include <iostream>
+#include "ALC.hpp"
 #include <regex>
 #include <fstream>
 #include <cstring>
@@ -69,7 +69,7 @@ namespace utils {
      * @param n The number of the line. They start from 0, but the shown number is automatically increased by 1 to make it consistent with text exitors.
      */
     static inline void printLineNum(ulong n) {
-        std::cerr << ansi::reset << ansi::bold_black << "\n" << std::right << std::setw(8) << n + 1 << " │ ";
+        cerr << ansi::reset << ansi::bold_black << "\n" << std::right << std::setw(8) << n + 1 << " │ ";
     }
 
 
@@ -149,11 +149,11 @@ namespace utils {
     void printErrorGeneric(ErrorCode errorCode, std::string const &message) {
         consoleLock.lock();
 
-        std::cerr << ansi::bold_red;
-        std::cerr << "Error:";
+        cerr << ansi::bold_red;
+        cerr << "Error:";
 
         // Print the actual error after indenting it by 4 spaces
-        std::cerr << ansi::bold_red << "\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+        cerr << ansi::bold_red << "\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
 
         // Stop the program
         consoleLock.unlock();
@@ -169,29 +169,29 @@ namespace utils {
     void printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &relPos, cmd::ElmCoordsCL const &errPos, std::string const &message, std::string const &fullCommand) {
         consoleLock.lock();
 
-        std::cerr << ansi::bold_red;
-        std::cerr << "Could not parse command:\n";
+        cerr << ansi::bold_red;
+        cerr << "Could not parse command:\n";
 
 
         // Print full command and highlight relevant section and error
         const char* lastColor;
-        std::cerr << "    ";
+        cerr << "    ";
         for(ulong i = 0; i < fullCommand.length(); ++i) {
 
             // Calculate current color based on the current character index and print it if it differs form the last one
             const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
             if(curColor != lastColor) {
-                std::cerr << curColor;
+                cerr << curColor;
                 lastColor = curColor;
             }
 
             // Actually print the formatted character
-            std::cerr << utils::formatChar(fullCommand[i]);
+            cerr << utils::formatChar(fullCommand[i]);
         }
 
 
         // Print the actual error after indenting it by 4 spaces
-        std::cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+        cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
 
 
         // Stop the program
@@ -241,12 +241,12 @@ namespace utils {
         pre::sourceFilePathsLock.unlock();
 
         consoleLock.lock();
-        std::cerr << ansi::bold_red;
+        cerr << ansi::bold_red;
 
         // Print error type and location
-        if(errType == ErrType::PREPROCESSOR) std::cerr << "Preprocessor";
-        if(errType == ErrType::COMPILER)     std::cerr << "Compilation";
-        std::cerr << " error:\n";
+        if(errType == ErrType::PREPROCESSOR) cerr << "Preprocessor";
+        if(errType == ErrType::COMPILER)     cerr << "Compilation";
+        cerr << " error:\n";
 
 
         // Find the line in the original file and calculate the starting index of the preceding line
@@ -263,15 +263,15 @@ namespace utils {
         // Print location
         ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
         if(errFilePath.length()) {
-            std::cerr << "    File │ " << ansi::reset << fs::canonical(errFilePath) << ansi::bold_red << "\n";
-            std::cerr << "    Line │ " << ansi::reset;
-            if(errHeight == 0) std::cerr << errPos.lineNum + 1;
-            else               std::cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;
+            cerr << "    File │ " << ansi::reset << fs::canonical(errFilePath) << ansi::bold_red << "\n";
+            cerr << "    Line │ " << ansi::reset;
+            if(errHeight == 0) cerr << errPos.lineNum + 1;
+            else               cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;
         }
 
 
         // Print all the interested lines and change color according to the indices of the relevant and offending sections
-        std::cerr << "\n";
+        cerr << "\n";
         printLineNum(curLine);
         ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
         ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
@@ -281,19 +281,19 @@ namespace utils {
             // Calculate current color based on the current character index and print it if it differs form the last one
             const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
             if(curColor != lastColor) {
-                std::cerr << curColor;
+                cerr << curColor;
                 lastColor = curColor;
             }
 
             // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
-            std::cerr << formatChar(s[i]);
+            cerr << formatChar(s[i]);
             if(s[i] == '\n') {
                 ++curLine;
                 if(curLine > targetLineNum) {
                     break;
                 }
                 printLineNum(curLine);
-                std::cerr << lastColor;
+                cerr << lastColor;
             }
         }
 
@@ -301,7 +301,7 @@ namespace utils {
 
 
         // Print the actual error after indenting it by 4 spaces
-        std::cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+        cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
 
 
         // Stop the program

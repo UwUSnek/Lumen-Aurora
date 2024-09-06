@@ -1,5 +1,5 @@
 #include <fstream>
-#include <iostream>
+#include "ALC.hpp"
 #include <regex>
 
 #include "UnitTest.hpp"
@@ -28,7 +28,7 @@ std::vector<UnitTest*> tests;
 
 int compile(std::string options, ulong testIndex) {
     std::string fullCommand = compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options + " -I ./Tests";
-    std::cout << "Running " << fullCommand << "\n";
+    cout << "Running " << fullCommand << "\n";
     return WEXITSTATUS(system((fullCommand + " > /dev/null 2> /dev/null").c_str()));
 }
 
@@ -38,7 +38,7 @@ int compile(std::string options, ulong testIndex) {
 void writeTmpFile(std::string code, ulong testIndex) {
     std::ofstream f(tmpFileLocatiton + std::to_string(testIndex));
     if(!f.is_open()) {
-        std::cout << "Temporary file could not be opened";
+        cout << "Temporary file could not be opened";
         exit(1);
     }
     else {
@@ -59,16 +59,16 @@ void UnitTest::startTest() {
 
 static void printSeparator(){
     int width = utils::getConsoleWidth();
-    std::cout << "\n\n" << ansi::bright_black;
+    cout << "\n\n" << ansi::bright_black;
     if(width != -1) {
         for(int i = 0; i < width; ++i) {
-            std::cout << "─";
+            cout << "─";
         }
     }
     else {
-        std::cout << "────────";
+        cout << "────────";
     }
-    std::cout << ansi::reset << "\n\n";
+    cout << ansi::reset << "\n\n";
 }
 
 
@@ -76,8 +76,8 @@ void UnitTest::checkResult() {
     if(result.peek() != std::stringstream::traits_type::eof()) {
         if(!failedTests) printSeparator();
         ++failedTests;
-        std::cout << ansi::bold_red << "Test #" << testIndex << " \"" << ansi::reset << name << ansi::bold_red << "\" failed:\n";
-        std::cout << result.str();
+        cout << ansi::bold_red << "Test #" << testIndex << " \"" << ansi::reset << name << ansi::bold_red << "\" failed:\n";
+        cout << result.str();
         printSeparator();
     }
     else {

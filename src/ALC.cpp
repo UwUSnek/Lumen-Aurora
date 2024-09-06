@@ -1,3 +1,8 @@
+#include <iostream>
+#include <streambuf>
+#include <string>
+#include <mutex>
+
 #include "ALC.hpp"
 
 
@@ -29,6 +34,11 @@ std::atomic<ulong> totalModules = 0;
 
 
 
+// Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
+std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
+std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
+std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
+std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
 
@@ -38,11 +48,38 @@ std::atomic<ulong> totalModules = 0;
 std::atomic<bool> isComplete(false);
 
 
-// Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
-std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
-std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
-std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
-std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
 
+
+
+
+
+
+int __internal_cout_stream_t::overflow(int c) {
+    if (c != EOF) {
+        output_mutex.lock();
+        if (c == '\n') std::cout << "\033[K";
+        std::cout.put(c);
+        output_mutex.unlock();
+    }
+    return c;
+}
+__internal_cout_stream_t __internal_cout_streambuff;
+std::ostream cout(&__internal_cout_streambuff);
+
+
+
+
+
+int __internal_cerr_stream_t::overflow(int c) {
+    if (c != EOF) {
+        output_mutex.lock();
+        if (c == '\n') std::cerr << "\033[K";
+        std::cerr.put(c);
+        output_mutex.unlock();
+    }
+    return c;
+}
+__internal_cerr_stream_t __internal_cerr_streambuff;
+std::ostream cerr(&__internal_cerr_streambuff);

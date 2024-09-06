@@ -1,4 +1,4 @@
-#include <iostream>
+#include "ALC.hpp"
 #include <cstring>
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -314,7 +314,7 @@ namespace cmd {
 
 
         consoleLock.lock();
-        std::cout <<
+        cout <<
             ansi::bold_magenta << "Command syntax: " << ansi::reset << "alc <source> <options...>\n" <<
             ansi::bold_magenta << "          source │ " << ansi::reset << "The path to the file containing the source code                                        " << none______ << ansi::bright_black << "\n" <<
             ansi::bold_magenta << "                 │ " << ansi::reset << "                                                                                       " << none______ << ansi::bright_black << "\n" <<
@@ -356,10 +356,10 @@ namespace cmd {
     void printVersion() {
         consoleLock.lock();
         //FIXME print version. get version number dynamically
-        std::cout << ansi::bold_magenta << "ALC" << ansi::reset << " (Aurora/Lumen Compiler)\n";
-        std::cout << ansi::bold_magenta << "Version:" << ansi::reset << " L-0.1.0";
-        // std::cout ansi::bold_magenta << << "Version:" << ansi::reset << " W-0.1.0"; //TODO windows build
-        // std::cout ansi::bold_magenta << << "Version:" << ansi::reset << " X-0.1.0"; //TODO mac build (prob not gonna happen)
+        cout << ansi::bold_magenta << "ALC" << ansi::reset << " (Aurora/Lumen Compiler)\n";
+        cout << ansi::bold_magenta << "Version:" << ansi::reset << " L-0.1.0";
+        // cout ansi::bold_magenta << << "Version:" << ansi::reset << " W-0.1.0"; //TODO windows build
+        // cout ansi::bold_magenta << << "Version:" << ansi::reset << " X-0.1.0"; //TODO mac build (prob not gonna happen)
         consoleLock.unlock();
     }
 }

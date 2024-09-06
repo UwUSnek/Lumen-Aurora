@@ -1,6 +1,6 @@
 #include <string>
 #include <vector>
-#include <iostream>
+#include "ALC.hpp"
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 int main(){
 
     fs::create_directory(tmpDirLocation);
-    std::cout << "Running tests...\n\n";
+    cout << "Running tests...\n\n";
 
 
 
@@ -103,9 +103,9 @@ int main(){
 
 
 
-    std::cout << "\n\n";
-    std::cout << (passedTests == totalTests ? ansi::bold_bright_green : ansi::reset) << "Passed: " << passedTests << "/" << totalTests << "\n";
-    std::cout << (failedTests > 0           ? ansi::bold_red   : ansi::reset) << "Failed: " << failedTests << "/" << totalTests << "\n";
-    std::cout << ansi::reset;
+    cout << "\n\n";
+    cout << (passedTests == totalTests ? ansi::bold_bright_green : ansi::reset) << "Passed: " << passedTests << "/" << totalTests << "\n";
+    cout << (failedTests > 0           ? ansi::bold_red   : ansi::reset) << "Failed: " << failedTests << "/" << totalTests << "\n";
+    cout << ansi::reset;
     return 0;
 }

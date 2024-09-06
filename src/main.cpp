@@ -1,4 +1,4 @@
-#include <iostream>
+#include "ALC.hpp"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -29,50 +29,50 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
     consoleLock.lock();
 
     // Adjust position and print command
-    std::cout << "\033[s";             // Save cursor position
-    std::cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI)
-    std::cout << "\033[999;999H";      // Move cursor to bottom-left corner
-    std::cout << "\033[8A";            // Move cursor 8 lines up
-    if(_isComplete) std::cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << " completed successfully.";
-    else            std::cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
+    cout << "\033[s";             // Save cursor position
+    cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI)
+    cout << "\033[999;999H";      // Move cursor to bottom-left corner
+    cout << "\033[8A";            // Move cursor 8 lines up
+    if(_isComplete) cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << " completed successfully.";
+    else            cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
 
 
     // Print preprocessor status
-    std::cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n\033[K    Preprocessing │ " << ansi::reset;
-    if(pre::totalProgress.isComplete()) std::cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << pre::totalProgress.total.load() << " steps.";
+    cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n\033[K    Preprocessing │ " << ansi::reset;
+    if(pre::totalProgress.isComplete()) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << pre::totalProgress.total.load() << " steps.";
     else pre::totalProgress.render(progressBarWidth);
 
 
     // Print compilation status
-    std::cout << ansi::bold_bright_black << "\n\033[K    Compilation   │ " << ansi::reset;
-    if(true) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
+    cout << ansi::bold_bright_black << "\n\033[K    Compilation   │ " << ansi::reset;
+    if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
     else 0; //TODO
 
     // Print optimization status
-    std::cout << ansi::bold_bright_black << "\n\033[K    Optimization  │ " << ansi::reset;
-    if(true) std::cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
+    cout << ansi::bold_bright_black << "\n\033[K    Optimization  │ " << ansi::reset;
+    if(true) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
     else 0; //TODO
 
 
     // Print conversion status
-    std::cout << ansi::bold_bright_black << "\n\033[K    Conversion    │ " << ansi::reset;
-    if(true) std::cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
+    cout << ansi::bold_bright_black << "\n\033[K    Conversion    │ " << ansi::reset;
+    if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
     else 0; //TODO
 
 
-    if(_isComplete) std::cout << ansi::bold_bright_green << "\n\n\033[K    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
+    if(_isComplete) cout << ansi::bold_bright_green << "\n\n\033[K    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
     else {
-        std::cout << "\033[K\n\n    ";
-        std::cout << ansi::bold_bright_green << "t: " << ansi::reset << activeThreads.load() << "/" << totalThreads.load() << "  |  ";
-        std::cout << ansi::bold_bright_green << "f: " << ansi::reset << totalFiles.load() << "  |  ";
-        std::cout << ansi::bold_bright_green << "m: " << ansi::reset << totalModules.load();
-        std::cout << "\n";
+        cout << "\033[K\n\n    ";
+        cout << ansi::bold_bright_green << "t: " << ansi::reset << activeThreads.load() << "/" << totalThreads.load() << "  |  ";
+        cout << ansi::bold_bright_green << "f: " << ansi::reset << totalFiles.load() << "  |  ";
+        cout << ansi::bold_bright_green << "m: " << ansi::reset << totalModules.load();
+        cout << "\n";
     }
 
 
 
     // Restore cursor position
-    std::cout << "\033[u";
+    cout << "\033[u";
 
     consoleLock.unlock();
 }

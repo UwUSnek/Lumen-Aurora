@@ -1,3 +1,6 @@
+#pragma once
+
+#include <iostream>
 #include <thread>
 #include <vector>
 #include <mutex>
@@ -34,6 +37,44 @@ extern std::chrono::_V2::system_clock::time_point timeStartOpt;   extern std::ch
 extern std::chrono::_V2::system_clock::time_point timeStartConv;  extern std::chrono::duration<double> timeConv;
 
 // extern std::map<std::string, std::string*> fileContentCache;
+
+
+extern std::atomic<bool> isComplete;
+
+
+
+
+
+
+
+
+class __internal_cout_stream_t : public std::streambuf {
+private:
+    std::mutex output_mutex;
+
+protected:
+    virtual int overflow(int c) override;
+};
+extern __internal_cout_stream_t __internal_cout_streambuff;
+extern std::ostream cout;
+
+
+
+
+
+class __internal_cerr_stream_t : public std::streambuf {
+private:
+    std::mutex output_mutex;
+
+protected:
+    virtual int overflow(int c) override;
+};
+extern __internal_cerr_stream_t __internal_cerr_streambuff;
+extern std::ostream cerr;
+
+
+
+
 
 
 

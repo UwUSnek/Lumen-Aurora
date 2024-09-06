@@ -1,6 +1,6 @@
 #include <tuple>
 #include <regex>
-#include <iostream>
+#include "ALC.hpp"
 
 #include "cleanupPhase.hpp"
 #include "Preprocessor/ElmCoords.hpp"
