@@ -28,6 +28,13 @@ extern std::atomic<ulong> totalFiles;
 extern std::atomic<ulong> totalModules;
 
 
+enum class ThreadType : ulong {
+    MAIN        = 0,
+    SUBPHASE    = 0xC0FFEE,
+    UNKNOWN     = 0xDEADBEEF,
+};
+extern thread_local ThreadType threadType;
+
 
 //TODO replace with a more automated system
 
@@ -79,6 +86,7 @@ extern std::ostream cerr;
 
 
 template<class func_t, class... args_t> void __internal_phase_exec(func_t &&f, args_t &&...args) {
+    threadType = ThreadType::SUBPHASE;
     activeThreads.fetch_add(1);
     totalThreads.fetch_add(1);
     std::forward<func_t>(f)(std::forward<args_t>(args)...);

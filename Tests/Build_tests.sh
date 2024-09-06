@@ -13,6 +13,7 @@ g++                                         \
     ./src/Utils/utils.cpp                   \
     ./src/ALC.cpp                           \
 -std=c++20                                  \
+-O0 -g                                                         \
 -I                                          \
     ./src                                   \
 -o                                          \

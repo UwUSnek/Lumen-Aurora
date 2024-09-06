@@ -94,7 +94,7 @@ void TestExitValue::startTest() {
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
-    int exitValue = compile(options + "-p " + tmpOutputLocatiton, testIndex);
+    int exitValue = compile(options + "-p " + tmpOutputLocatiton + std::to_string(testIndex), testIndex);
 
     if(exitValue != expected) {
         result << ansi::bold_red << "    Expected exit code │ " << ansi::reset << expected << "\n";

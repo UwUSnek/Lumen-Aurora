@@ -28,7 +28,7 @@ std::atomic<ulong> totalFiles = 0;
 std::atomic<ulong> totalModules = 0;
 
 // std::map<std::string, std::string*> fileContentCache;
-
+thread_local ThreadType threadType = ThreadType::UNKNOWN;
 
 
 

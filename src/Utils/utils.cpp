@@ -27,10 +27,14 @@ namespace utils {
      * @brief Stops the current thread and makes the main thread exit.
      *      This function does NOT prevent other threads from printing to the console while it is being executed.
      *      External synchronization is required.
+     *      If the current thread is the main thread, this is equivalent to calling exit()
      */
     void exitMain(int exitCode) {
-        exitMainRequest.store(exitCode);
-        while(true) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        if(threadType == ThreadType::MAIN) exit(exitCode);
+        else {
+            exitMainRequest.store(exitCode);
+            while(true) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
     }
 
 
