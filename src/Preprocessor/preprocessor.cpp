@@ -55,8 +55,6 @@ namespace pre {
      *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
      */
     void initPhaseThread() {
-        activeThreads.fetch_add(1);
-
         pre::localProgress = new std::atomic<ulong>(0);
 
         pre::localProgressArrayLock.lock();
@@ -71,14 +69,13 @@ namespace pre {
 
 
 
-    /**
-     * @brief Creates a new element in the local progress list and sets the threadId to its index.
-     *      This function MUST be called ONCE at the start of each phase by its own worker thread.
-     *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
-     */
-    void stopPhaseThread() {
-        activeThreads.fetch_sub(1);
-    }
+    // /**
+    //  * @brief Creates a new element in the local progress list and sets the threadId to its index.
+    //  *      This function MUST be called ONCE at the start of each phase by its own worker thread.
+    //  *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
+    //  */
+    // void stopPhaseThread() {
+    // }
 
 
 
@@ -109,7 +106,7 @@ namespace pre {
     // }
 
 
-
+    static void _test(int n) {}
 
     /**
      * @brief Load the source code, including all of the files included by it and processes any preprocessor directives.
@@ -138,11 +135,14 @@ namespace pre {
         SegmentedCleanSource *r2 = new SegmentedCleanSource();
         SegmentedCleanSource *r3 = new SegmentedCleanSource();
 
-        threadsLock.lock();
-        threads.emplace_back(std::thread(startLCTsPhase,     s, pathIndex, r1));
-        threads.emplace_back(std::thread(startCleanupPhase, r1,            r2));
-        threads.emplace_back(std::thread(startIncludePhase, r2,            r3));
-        threadsLock.unlock();
+        // threadsLock.lock();
+        // threads.emplace_back(std::thread(startLCTsPhase,     s, pathIndex, r1));
+        // threads.emplace_back(std::thread(startCleanupPhase, r1,            r2));
+        // threads.emplace_back(std::thread(startIncludePhase, r2,            r3));
+        // threadsLock.unlock();
+        startPhaseAsync(startLCTsPhase,     s, pathIndex, r1);
+        startPhaseAsync(startCleanupPhase, r1,            r2);
+        startPhaseAsync(startIncludePhase, r2,            r3);
 
         return *r3;
     }

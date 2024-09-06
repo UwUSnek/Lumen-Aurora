@@ -1,5 +1,6 @@
 #include <tuple>
 #include <regex>
+#include <iostream>
 
 #include "cleanupPhase.hpp"
 #include "Preprocessor/ElmCoords.hpp"
@@ -85,7 +86,6 @@ namespace pre {
         // return r;
         r->str.closePipe();
         r->meta.closePipe();
-        pre::stopPhaseThread();
     }
 
 

@@ -24,9 +24,12 @@ namespace fs = std::filesystem;
 std::mutex consoleLock;
 
 
-std::vector<std::thread> threads;
-std::mutex threadsLock;
+// std::vector<std::thread> threads;
+// std::mutex threadsLock;
 std::atomic<ulong> activeThreads = 0;
+std::atomic<ulong> totalThreads = 0;
+std::atomic<ulong> totalFiles = 0;
+std::atomic<ulong> totalModules = 0;
 
 // std::map<std::string, std::string*> fileContentCache;
 
@@ -49,6 +52,13 @@ std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration
 std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
 std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
 std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
+
+
+
+
+
+
+
 
 
 
@@ -97,7 +107,9 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
     // else std::cout << "\033[K\n\n\n"; //FIXME WRITE NUMBER OF ACTIVE THREADS, OPENED FILES, LOADED MODULES
     else {
         std::cout << "\033[K\n\n    ";
-        std::cout << "t:" << activeThreads.load();
+        std::cout << ansi::bold_bright_green << "t: " << ansi::reset << activeThreads.load() << "/" << totalThreads.load() << "  |  ";
+        std::cout << ansi::bold_bright_green << "f: " << ansi::reset << totalFiles.load() << "  |  ";
+        std::cout << ansi::bold_bright_green << "m: " << ansi::reset << totalModules.load();
         std::cout << "\n";
     }
 
@@ -248,6 +260,7 @@ int main(int argc, char* argv[]){
     // Preprocessing
     timeStartPre = std::chrono::high_resolution_clock::now();
     std::string s = utils::readAndCheckFile(cmd::options.sourceFile);
+    totalFiles.fetch_add(1);
     pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
     timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
@@ -293,10 +306,16 @@ int main(int argc, char* argv[]){
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
     // Join subphase threads
-    while(activeThreads.load()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    threadsLock.lock();
-    for(auto &t : threads) t.join();
-    threadsLock.unlock();
+    while(activeThreads.load()) {
+        int exitCode = utils::exitMainRequest.load();
+        if(exitCode) {
+            std::exit(exitCode);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    // threadsLock.lock();
+    // for(auto &t : threads) t.join();
+    // threadsLock.unlock();
 
 
 

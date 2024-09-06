@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <mutex>
+#include <atomic>
 
 #include "ansi.hpp"
 #include "ErrorCode.hpp"
@@ -19,6 +20,10 @@ namespace utils {
         PREPROCESSOR,
         COMPILER
     };
+
+
+    extern std::atomic<int> exitMainRequest;
+    void exitMain(int exitCode);
 
 
     int getConsoleWidth();

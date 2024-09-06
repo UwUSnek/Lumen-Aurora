@@ -5,6 +5,7 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#include "main.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "includePhase.hpp"
 #include "Preprocessor/ElmCoords.hpp"
@@ -125,6 +126,7 @@ namespace pre {
 
                             // Copy file contents and metadata
                             std::string* fileContents = new std::string(utils::readFile(includeFile)); //FIXME add a function that read a file and saves it in a global array so they don't go out of scope
+                            totalFiles.fetch_add(1);
                             SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath); //FIXME run concurrently
                             preprocessedCode.str.awaitClose();
                             preprocessedCode.meta.awaitClose();
@@ -188,7 +190,6 @@ namespace pre {
         // return r;
         r->str.closePipe();
         r->meta.closePipe();
-        pre::stopPhaseThread();
     }
 
 

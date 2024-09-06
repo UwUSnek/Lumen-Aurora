@@ -21,7 +21,7 @@ namespace pre {
     // extern thread_local ulong threadId;
 
     void initPhaseThread();
-    void stopPhaseThread();
+    // void stopPhaseThread();
     void increaseLocalProgress(ulong n);
 
 

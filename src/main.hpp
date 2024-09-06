@@ -3,6 +3,7 @@
 #include <mutex>
 #include <map>
 #include <atomic>
+#include <functional>
 
 #include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
 #include "Utils/utils.hpp"
@@ -16,13 +17,32 @@
 extern std::mutex consoleLock;
 
 
-extern std::vector<std::thread> threads;
-extern std::mutex threadsLock;
+// extern std::vector<std::thread> threads;
+// extern std::mutex threadsLock;
 extern std::atomic<ulong> activeThreads;
+extern std::atomic<ulong> totalThreads;
+extern std::atomic<ulong> totalFiles;
+extern std::atomic<ulong> totalModules;
 
 // extern std::map<std::string, std::string*> fileContentCache;
 
 
+
+template<class func_t, class... args_t> void __internal_phase_exec(func_t &&f, args_t &&...args) {
+    activeThreads.fetch_add(1);
+    totalThreads.fetch_add(1);
+    std::forward<func_t>(f)(std::forward<args_t>(args)...);
+    activeThreads.fetch_sub(1);
+}
+
+
+template<class func_t, class... args_t> void startPhaseAsync(func_t &&f, args_t &&...args) {
+    std::thread(
+        [lambda = std::forward<func_t>(f), ...lambda_args = std::forward<args_t>(args)]() mutable {
+            __internal_phase_exec(std::move(lambda), std::move(lambda_args)...);
+        }
+    ).detach();
+}
 
 
 // struct PhaseData {

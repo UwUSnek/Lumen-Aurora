@@ -19,6 +19,21 @@ namespace fs = std::filesystem;
 
 
 namespace utils {
+    // The exit value specified by the thread that requested an exit. //! 0 means no threads exited yet.
+    std::atomic<int> exitMainRequest = 0;
+
+
+    /**
+     * @brief Stops the current thread and makes the main thread exit.
+     *      This function does NOT prevent other threads from printing to the console while it is being executed.
+     *      External synchronization is required.
+     */
+    void exitMain(int exitCode) {
+        exitMainRequest.store(exitCode);
+        while(true) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+
 
 
     /**
@@ -142,7 +157,7 @@ namespace utils {
 
         // Stop the program
         consoleLock.unlock();
-        exit(errorCode);
+        exitMain(errorCode);
     }
 
 
@@ -181,7 +196,7 @@ namespace utils {
 
         // Stop the program
         consoleLock.unlock();
-        exit(errorCode);
+        exitMain(errorCode);
     }
 
 
@@ -291,7 +306,7 @@ namespace utils {
 
         // Stop the program
         consoleLock.unlock();
-        exit(errorCode);
+        exitMain(errorCode);
     }
 
 
