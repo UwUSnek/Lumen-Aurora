@@ -35,8 +35,8 @@
         },
         {
             "type": "shell",
-            "label": "Run unit tests",
-            "command": "./Tests/tests.out",
+            "label": "Build and run unit tests",
+            "command": "./Tests/Build_tests.sh && ./Tests/tests.out",
             "args": [],
             "problemMatcher": [],
             "options": { "cwd": "${workspaceFolder}" },

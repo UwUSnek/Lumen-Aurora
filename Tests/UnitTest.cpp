@@ -27,11 +27,9 @@ std::vector<UnitTest*> tests;
 
 
 int compile(std::string options, ulong testIndex) {
-    return WEXITSTATUS(system((
-        compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options +
-        "-I ./Tests"
-        " > /dev/null 2> /dev/null"
-    ).c_str()));
+    std::string fullCommand = compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options + " -I ./Tests";
+    std::cout << "Running " << fullCommand << "\n";
+    return WEXITSTATUS(system((fullCommand + " > /dev/null 2> /dev/null").c_str()));
 }
 
 

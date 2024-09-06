@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "preprocessor.hpp"
-#include "main.hpp"
+#include "ALC.hpp"
 #include "ElmCoords.hpp"
 #include "Utils/utils.hpp"
 #include "LCTsPhase/LCTsPhase.hpp"

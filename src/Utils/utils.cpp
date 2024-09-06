@@ -8,7 +8,7 @@
 #include <unistd.h>
 namespace fs = std::filesystem;
 
-#include "main.hpp"
+#include "ALC.hpp"
 #include "utils.hpp"
 #include "Preprocessor/ElmCoords.hpp"
 #include "Preprocessor/preprocessor.hpp"

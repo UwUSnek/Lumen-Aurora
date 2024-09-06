@@ -1,13 +1,12 @@
-// g++ -std=c++20 -I ./src ./Tests/tests.cpp ./Tests/UnitTest.cpp ./src/Utils/utils.cpp -o ./Tests/tests.out
-
 #include <string>
 #include <vector>
 #include <iostream>
 #include <filesystem>
+namespace fs = std::filesystem;
+
 #include "ErrorCode.hpp"
 #include "Utils/ansi.hpp"
 #include "UnitTest.hpp"
-namespace fs = std::filesystem;
 
 // void testFileOutput()
 
@@ -92,6 +91,7 @@ int main(){
         "A#include  \t\"Includes/commentBoundaries.lum\"B",
         "AtestB"
     ));
+
 
 
     totalTests = tests.size();

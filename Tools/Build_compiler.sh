@@ -10,6 +10,7 @@ g++                                                            \
     ./src/Utils/utils.cpp                                      \
     ./src/Utils/DynamicProgressBar.cpp                         \
     ./src/Utils/Containers/StringPipe.cpp                      \
+    ./src/ALC.cpp                                              \
     ./src/main.cpp                                             \
     \
     ./src/Command/command.cpp                                  \

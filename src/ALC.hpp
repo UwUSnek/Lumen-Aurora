@@ -24,6 +24,15 @@ extern std::atomic<ulong> totalThreads;
 extern std::atomic<ulong> totalFiles;
 extern std::atomic<ulong> totalModules;
 
+
+
+//TODO replace with a more automated system
+
+extern std::chrono::_V2::system_clock::time_point timeStartPre;   extern std::chrono::duration<double> timePre;
+extern std::chrono::_V2::system_clock::time_point timeStartComp;  extern std::chrono::duration<double> timeComp;
+extern std::chrono::_V2::system_clock::time_point timeStartOpt;   extern std::chrono::duration<double> timeOpt;
+extern std::chrono::_V2::system_clock::time_point timeStartConv;  extern std::chrono::duration<double> timeConv;
+
 // extern std::map<std::string, std::string*> fileContentCache;
 
 

@@ -5,7 +5,7 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#include "main.hpp"
+#include "ALC.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "includePhase.hpp"
 #include "Preprocessor/ElmCoords.hpp"
