@@ -128,5 +128,5 @@ void increaseLocalProgress(ulong n) {
  * @param n The amount of progress steps to add.
  */
 void increaseMaxProgress(ulong n) {
-    maxProgress->increaseTot(n);
+    maxProgress->increaseMax(n);
 };

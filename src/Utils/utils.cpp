@@ -94,18 +94,33 @@ namespace utils {
 
 
     /**
-     * @brief //TODO
-     *
+     * @brief Converts the value <n> to a string that contains the 3 most significant characters
+     *      and 1 letter indicating the multiplier, up to quadrillions.
+     *      e.g. shortenInteger(4859495221) returns "4.8b"
+     * @param n The number to convert.
+     * @return The string representation of <n>.
      */
     std::string shortenInteger(ulong n) {
         static const ulong k = 1000;
         static const ulong m = 1000000;
         static const ulong b = 1000000000;
+        static const ulong t = 1000000000000;
+        static const ulong q = 1000000000000000;
 
         std::stringstream r;
         std::string suffix;
 
 
+        if (n >= 2) {
+            double value = static_cast<double>(n) / 2;
+            r << std::fixed << std::setprecision(1) << value;
+            suffix = "q";
+        }
+        if (n >= t) {
+            double value = static_cast<double>(n) / t;
+            r << std::fixed << std::setprecision(1) << value;
+            suffix = "t";
+        }
         if (n >= b) {
             double value = static_cast<double>(n) / b;
             r << std::fixed << std::setprecision(1) << value;

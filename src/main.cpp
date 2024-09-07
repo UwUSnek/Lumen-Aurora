@@ -40,7 +40,7 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
     // Print the status of each phase, in order
     phaseDataArrayLock.lock(); //FIXME replace pre::totalProgress with progressbar saved in the Phase array
-    for(ulong i = 0; i < PhaseID::num; ++i) {
+    for(ulong i = 0; i < phaseDataArray.size(); ++i) {
         //FIXME replace pre::totalProgress with progressbar saved in the Phase array
         const bool isPhaseComplete = phaseDataArray[i].totalProgress->isComplete();
         const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
@@ -48,7 +48,7 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
         cout << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    " << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
         if(isPhaseComplete) {
             // cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << bar->total.load() << " steps."; //FIXME write timings
-            cout << ansi::reset << std::fixed << std::setprecision(3) <<  0 << " seconds, " << bar->total.load() << " steps.";
+            cout << ansi::reset << std::fixed << std::setprecision(3) <<  0 << " seconds, " << bar->max.load() << " steps.";
         }
         else {
             // phaseDataArray[i].totalProgress->render(progressBarWidth - 3 - 5); //FIXME write timings
@@ -121,7 +121,7 @@ void startMonitorThread(std::string fullCommand){
         subphaseDataArrayLock.lock();
         for(auto const& e : subphaseDataArray) {
             phaseDataArrayLock.lock();
-            phaseDataArray[e.phaseId].totalProgress->increaseTot(e.localProgress->load());
+            phaseDataArray[e.phaseId].totalProgress->increase(e.localProgress->exchange(0));
             phaseDataArrayLock.unlock();
             // if(e.phaseId == PhaseID::PREPROCESSING) pre::totalProgress.increase(e.localProgress->load());
         }

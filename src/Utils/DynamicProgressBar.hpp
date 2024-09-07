@@ -20,24 +20,24 @@ struct DynamicProgressBar {
     std::string missingColor;
 
     std::atomic<ulong> progress;     // The current progress in units
-    std::atomic<ulong> total;        // The total units of progress required to reach 100%
+    std::atomic<ulong> max;          // The total units of progress required to reach 100%
 
 
 
 
 public:
     DynamicProgressBar() = delete;
-    DynamicProgressBar(ulong total, std::string _progressColor, std::string _missingColor) :
+    DynamicProgressBar(ulong _max, std::string _progressColor, std::string _missingColor) :
         progress(0),
-        total(total),
+        max(_max),
         progressColor(_progressColor),
         missingColor(_missingColor) {
     }
 
 
     void    increase(ulong n) { progress.fetch_add(n); }
-    void increaseTot(ulong n) {    total.fetch_add(n); }
+    void increaseMax(ulong n) {      max.fetch_add(n); }
 
     void render(int terminalWidth) const;
-    bool isComplete() const { return progress.load() >= total.load(); }
+    bool isComplete() const { return progress.load() >= max.load(); }
 };

@@ -162,13 +162,6 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     totalThreads.fetch_add(1);
 
 
-    // Init subphase data (not ordered)
-    localProgress = new std::atomic<ulong>(0);
-    subphaseDataArrayLock.lock();
-    subphaseDataArray.push_back(SubphaseData(phaseId, localProgress));
-    subphaseDataArrayLock.unlock();
-
-
     // If needed, init phase data (ordered)
     phaseDataArrayLock.lock();
     if(phaseDataArray.size() <= phaseId) {
@@ -184,6 +177,13 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     }
     maxProgress = phaseDataArray[phaseId].totalProgress;
     phaseDataArrayLock.unlock();
+
+
+    // Init subphase data (not ordered)
+    localProgress = new std::atomic<ulong>(0);
+    subphaseDataArrayLock.lock();
+    subphaseDataArray.push_back(SubphaseData(phaseId, localProgress));
+    subphaseDataArrayLock.unlock();
 
 
     // Start the actual function

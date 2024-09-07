@@ -18,7 +18,7 @@
  */
 void DynamicProgressBar::render(int consoleWidth) const {
     ulong _progress = progress.load();
-    ulong _total = total.load();
+    ulong _max = max.load();
 
 
     // Calculate actual progress bar width
@@ -27,7 +27,7 @@ void DynamicProgressBar::render(int consoleWidth) const {
 
 
     // Calculate the normalized progress. Goes from 0 to 1 instead of from 0 to total
-    float normProgress = (float)_progress / (float)_total;
+    float normProgress = (float)_progress / (float)_max;
     // Calculate the amount of normalized progress each 1-character step is worth (depends on the width of the progress bar)
     float stepSize = 1.0f / (float)consoleWidth;
 
@@ -43,7 +43,7 @@ void DynamicProgressBar::render(int consoleWidth) const {
         " " <<
         std::right << std::setw(valueWidth) << utils::shortenInteger(_progress) <<
         "/" <<
-        std::left << std::setw(valueWidth) << utils::shortenInteger(_total) <<
+        std::left << std::setw(valueWidth) << utils::shortenInteger(_max) <<
         " "
     ;
 }

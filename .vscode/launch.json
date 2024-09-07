@@ -6,11 +6,11 @@
             "name": "Debug compiler",
             "type": "cppdbg",
             "request": "launch",
-            // "program": "${workspaceFolder}/Build/out",
-            "program": "${workspaceFolder}/./Tests/tests.out",
+            "program": "${workspaceFolder}/Build/out",
+            // "program": "${workspaceFolder}/./Tests/tests.out",
             "args": [
-                // "./Test/main.lum",
-                // "-p", "./Test/out"
+                "./Test/main.lum",
+                "-p", "./Test/out"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
