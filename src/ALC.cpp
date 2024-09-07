@@ -34,11 +34,11 @@ thread_local ThreadType threadType = ThreadType::UNKNOWN;
 
 
 
-// Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
-std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
-std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
-std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
-std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
+// // Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
+// std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
+// std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
+// std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
+// std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
 
@@ -83,3 +83,50 @@ int __internal_cerr_stream_t::overflow(int c) {
 }
 __internal_cerr_stream_t __internal_cerr_streambuff;
 std::ostream cerr(&__internal_cerr_streambuff);
+
+
+
+
+
+
+
+
+
+std::string phaseIdTotring(PhaseID phaseId) {
+    static const char* names[] = {
+        "Preprocessing",
+        "Compilation",
+        "Optimization",
+        "Conversion",
+    };
+    return names[phaseId];
+}
+
+
+std::vector<PhaseData> phaseDataArray;
+std::mutex             phaseDataArrayLock;
+
+std::vector<SubphaseData> subphaseDataArray;
+std::mutex                subphaseDataArrayLock;
+
+thread_local std::atomic<ulong>* localProgress = nullptr;
+thread_local DynamicProgressBar*   maxProgress = nullptr;
+
+
+/**
+ * @brief Increases the local progress value owned by this thread.
+ *      This function can only be called by a phase thread.
+ * @param n The amount of progress steps to add.
+ */
+void increaseLocalProgress(ulong n) {
+    localProgress->fetch_add(n);
+};
+
+/**
+ * @brief Increases the max progress value of the associated phase.
+ *      This function can only be called by a phase thread.
+ * @param n The amount of progress steps to add.
+ */
+void increaseMaxProgress(ulong n) {
+    maxProgress->increaseTot(n);
+};

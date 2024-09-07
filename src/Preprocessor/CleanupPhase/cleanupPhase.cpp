@@ -19,7 +19,6 @@
 namespace pre {
     //FIXME use a stream and process the steps concurrently
     void startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
-        pre::initPhaseThread();
         // pre::totalProgress.increaseTot(b.str.cpp_str()->length());
         //FIXME count progress of deleted characters + all characters of last phase
 
@@ -32,7 +31,7 @@ namespace pre {
             ulong commentLen = measureComment(b->str, i);
             if(commentLen) {
                 i += commentLen;
-                pre::increaseLocalProgress(commentLen);
+                increaseLocalProgress(commentLen);
                 continue;
             }
 

@@ -38,10 +38,10 @@ extern thread_local ThreadType threadType;
 
 //TODO replace with a more automated system
 
-extern std::chrono::_V2::system_clock::time_point timeStartPre;   extern std::chrono::duration<double> timePre;
-extern std::chrono::_V2::system_clock::time_point timeStartComp;  extern std::chrono::duration<double> timeComp;
-extern std::chrono::_V2::system_clock::time_point timeStartOpt;   extern std::chrono::duration<double> timeOpt;
-extern std::chrono::_V2::system_clock::time_point timeStartConv;  extern std::chrono::duration<double> timeConv;
+// extern std::chrono::_V2::system_clock::time_point timeStartPre;   extern std::chrono::duration<double> timePre;
+// extern std::chrono::_V2::system_clock::time_point timeStartComp;  extern std::chrono::duration<double> timeComp;
+// extern std::chrono::_V2::system_clock::time_point timeStartOpt;   extern std::chrono::duration<double> timeOpt;
+// extern std::chrono::_V2::system_clock::time_point timeStartConv;  extern std::chrono::duration<double> timeConv;
 
 // extern std::map<std::string, std::string*> fileContentCache;
 
@@ -84,20 +84,123 @@ extern std::ostream cerr;
 
 
 
+//TODO make this more readable, maybe group stuff in namespaces
 
-template<class func_t, class... args_t> void __internal_phase_exec(func_t &&f, args_t &&...args) {
+// Identifies the phases of the compilation progress
+// Phases must be declared in order. Update phaseIdToString after changing this enum.
+enum PhaseID : ulong {
+    PREPROCESSING = 0,
+    COMPILATION,
+    OPTIMIZATION,
+    CONVERSION,
+    num // The number of phases, not including this enum value.
+    //TODO add other phases
+};
+std::string phaseIdTotring(PhaseID phaseId);
+
+
+struct PhaseData {
+    DynamicProgressBar* totalProgress;
+    // std::chrono::_V2::system_clock::time_point  timeStart;
+    std::atomic<long>* timeStart;
+    // std::chrono::duration<double>               timeDuration;
+    std::atomic<long>* timeEnd;
+
+    PhaseData(std::atomic<long>* _timeStart, std::atomic<long>* _timeEnd) :
+        totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
+        timeStart(_timeStart),
+        timeEnd(_timeEnd) {
+    }
+};
+
+// Data read by the display thread
+extern std::vector<PhaseData> phaseDataArray;
+extern std::mutex             phaseDataArrayLock;
+
+
+
+
+
+
+struct SubphaseData {
+    PhaseID phaseId;
+
+    //TODO add something that points to the main phase this subphase is part of
+    //! pointers avoid having to lock and unlock every time an element is accessed by a subphase thread
+    std::atomic<ulong>*                         localProgress;
+
+    SubphaseData(PhaseID _phaseId, std::atomic<ulong>* _localProgress) :
+        phaseId(_phaseId),
+        localProgress(_localProgress) {
+    }
+};
+
+// Data read by the display thread
+extern std::vector<SubphaseData> subphaseDataArray;
+extern std::mutex                subphaseDataArrayLock;
+
+// Per-thread data
+extern thread_local std::atomic<ulong>* localProgress;
+void increaseLocalProgress(ulong n);
+extern thread_local DynamicProgressBar* maxProgress;
+void increaseMaxProgress(ulong n);
+
+
+
+
+
+
+
+
+
+
+template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, func_t &&f, args_t &&...args) {
+
+    // Init thread data and counters
     threadType = ThreadType::SUBPHASE;
     activeThreads.fetch_add(1);
     totalThreads.fetch_add(1);
+
+
+    // Init subphase data (not ordered)
+    localProgress = new std::atomic<ulong>(0);
+    subphaseDataArrayLock.lock();
+    subphaseDataArray.push_back(SubphaseData(phaseId, localProgress));
+    subphaseDataArrayLock.unlock();
+
+
+    // If needed, init phase data (ordered)
+    phaseDataArrayLock.lock();
+    if(phaseDataArray.size() <= phaseId) {
+        phaseDataArray.push_back(PhaseData(
+            new std::atomic<long>(
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch()
+                ).count()
+            ),
+            new std::atomic<long>(0)
+        ));
+        //TODO understand where to calculate the time duration and actually set its value from there
+    }
+    maxProgress = phaseDataArray[phaseId].totalProgress;
+    phaseDataArrayLock.unlock();
+
+
+    // Start the actual function
     std::forward<func_t>(f)(std::forward<args_t>(args)...);
+
+
+    // Update thread counter
     activeThreads.fetch_sub(1);
 }
 
 
-template<class func_t, class... args_t> void startPhaseAsync(func_t &&f, args_t &&...args) {
+
+
+template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, func_t &&f, args_t &&...args) {
     std::thread(
-        [lambda = std::forward<func_t>(f), ...lambda_args = std::forward<args_t>(args)]() mutable {
-            __internal_phase_exec(std::move(lambda), std::move(lambda_args)...);
+        [lambda_phaseId = phaseId, lambda = std::forward<func_t>(f), ...lambda_args = std::forward<args_t>(args)]() mutable {
+            __internal_subphase_exec(lambda_phaseId, std::move(lambda), std::move(lambda_args)...);
         }
     ).detach();
 }

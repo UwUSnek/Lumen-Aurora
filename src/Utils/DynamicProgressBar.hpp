@@ -38,6 +38,6 @@ public:
     void    increase(ulong n) { progress.fetch_add(n); }
     void increaseTot(ulong n) {    total.fetch_add(n); }
 
-    void render(int terminalWidth);
-    bool isComplete(){ return progress.load() >= total.load(); }
+    void render(int terminalWidth) const;
+    bool isComplete() const { return progress.load() >= total.load(); }
 };

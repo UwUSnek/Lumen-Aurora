@@ -16,7 +16,7 @@
  *      This function is NOT thread safe. Use a mutex to ensure other threads don't print during rendering.
  * @param consoleWidth The number of spaces dedicated to the progress bar.
  */
-void DynamicProgressBar::render(int consoleWidth) {
+void DynamicProgressBar::render(int consoleWidth) const {
     ulong _progress = progress.load();
     ulong _total = total.load();
 

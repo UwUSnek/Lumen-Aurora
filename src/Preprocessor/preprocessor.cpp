@@ -17,18 +17,6 @@
 
 namespace pre {
 
-    /**
-     * @brief The progress bar that shows up in the output
-     *      totalProgress is the actual progress bar object. It is managed by an external thread
-     */
-    DynamicProgressBar totalProgress(0, ansi::bright_green, ansi::bright_black);
-
-
-    // Local progress data
-    //! To store local progress, use *localProgress. Accessing the array requires the locking of localProgressArrayLock.
-    std::vector<std::atomic<ulong>*> localProgressArray;      // Per-thread progress
-    std::mutex                       localProgressArrayLock;  // A mutex for adding elements to localProgress
-    thread_local std::atomic<ulong>* localProgress;           // A pointer to the local progress element associated to this thread
 
 
     // thread_local ulong threadId = -1;                     // The index of the local progress element that is managed by the current thread
@@ -49,20 +37,20 @@ namespace pre {
 
 
 
-    /**
-     * @brief Creates a new element in the local progress list and sets the threadId to its index.
-     *      This function MUST be called ONCE at the start of each phase by its own worker thread.
-     *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
-     */
-    void initPhaseThread() {
-        pre::localProgress = new std::atomic<ulong>(0);
+    // /**
+    //  * @brief Creates a new element in the local progress list and sets the threadId to its index.
+    //  *      This function MUST be called ONCE at the start of each phase by its own worker thread.
+    //  *      Calling it from other threads, more than once or after starting the phase, WILL break progress detection.
+    //  */
+    // void initPhaseThread() {
+    //     localProgress = new std::atomic<ulong>(0);
 
-        pre::localProgressArrayLock.lock();
-        pre::localProgressArray.push_back(localProgress);
-        pre::localProgressArrayLock.unlock();
+    //     localProgressArrayLock.lock();
+    //     localProgressArray.push_back(localProgress);
+    //     localProgressArrayLock.unlock();
 
-        // pre::threadId = pre::localProgress.size() - 1;
-    }
+    //     // pre::threadId = localProgress.size() - 1;
+    // }
 
 
 
@@ -80,14 +68,6 @@ namespace pre {
 
 
 
-    /**
-     * @brief Increases the local progress value owned by this thread.
-     *      This function can only be called by a phase thread.
-     * @param n The amount of progress steps to add.
-     */
-    void increaseLocalProgress(ulong n) {
-        pre::localProgress->fetch_add(n);
-    }
 
 
 
@@ -131,18 +111,18 @@ namespace pre {
         //TODO check if these can be moved to a global array
         //! ^ they are not 1-to-1. subphase threads can create new threads and start other phases,
         //!   which are separate from the main processing cluster
-        SegmentedCleanSource *r1 = new SegmentedCleanSource();
-        SegmentedCleanSource *r2 = new SegmentedCleanSource();
-        SegmentedCleanSource *r3 = new SegmentedCleanSource();
+        SegmentedCleanSource *r1 = new SegmentedCleanSource(); //FIXME MOVE TO SUBPHASE DATA? maybe? idk
+        SegmentedCleanSource *r2 = new SegmentedCleanSource(); //FIXME MOVE TO SUBPHASE DATA? maybe? idk
+        SegmentedCleanSource *r3 = new SegmentedCleanSource(); //FIXME MOVE TO SUBPHASE DATA? maybe? idk
 
         // threadsLock.lock();
         // threads.emplace_back(std::thread(startLCTsPhase,     s, pathIndex, r1));
         // threads.emplace_back(std::thread(startCleanupPhase, r1,            r2));
         // threads.emplace_back(std::thread(startIncludePhase, r2,            r3));
         // threadsLock.unlock();
-        startPhaseAsync(startLCTsPhase,     s, pathIndex, r1);
-        startPhaseAsync(startCleanupPhase, r1,            r2);
-        startPhaseAsync(startIncludePhase, r2,            r3);
+        startSubphaseAsync(PhaseID::PREPROCESSING, startLCTsPhase,     s, pathIndex, r1);
+        startSubphaseAsync(PhaseID::PREPROCESSING, startCleanupPhase, r1,            r2);
+        startSubphaseAsync(PhaseID::PREPROCESSING, startIncludePhase, r2,            r3);
 
         return *r3;
     }

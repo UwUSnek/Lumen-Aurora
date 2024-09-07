@@ -30,39 +30,60 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
     // Adjust position and print command
     cout << "\033[s";             // Save cursor position
-    cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI)
+    cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI) //FIXME understand why this is not working
     cout << "\033[999;999H";      // Move cursor to bottom-left corner
     cout << "\033[8A";            // Move cursor 8 lines up
-    if(_isComplete) cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << " completed successfully.";
-    else            cout << ansi::bold_bright_green << "\n\033[K" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
+    if(_isComplete) cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
+    else            cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
 
 
-    // Print preprocessor status
-    cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n\033[K    Preprocessing │ " << ansi::reset;
-    if(pre::totalProgress.isComplete()) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << pre::totalProgress.total.load() << " steps.";
-    else pre::totalProgress.render(progressBarWidth);
+
+    // Print the status of each phase, in order
+    phaseDataArrayLock.lock(); //FIXME replace pre::totalProgress with progressbar saved in the Phase array
+    for(ulong i = 0; i < PhaseID::num; ++i) {
+        //FIXME replace pre::totalProgress with progressbar saved in the Phase array
+        const bool isPhaseComplete = phaseDataArray[i].totalProgress->isComplete();
+        const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
+
+        cout << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    " << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
+        if(isPhaseComplete) {
+            // cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << bar->total.load() << " steps."; //FIXME write timings
+            cout << ansi::reset << std::fixed << std::setprecision(3) <<  0 << " seconds, " << bar->total.load() << " steps.";
+        }
+        else {
+            // phaseDataArray[i].totalProgress->render(progressBarWidth - 3 - 5); //FIXME write timings
+           bar->render(progressBarWidth);
+        }
+    }
+    phaseDataArrayLock.unlock(); //FIXME replace pre::totalProgress with progressbar saved in the Phase array
 
 
-    // Print compilation status
-    cout << ansi::bold_bright_black << "\n\033[K    Compilation   │ " << ansi::reset;
-    if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
-    else 0; //TODO
-
-    // Print optimization status
-    cout << ansi::bold_bright_black << "\n\033[K    Optimization  │ " << ansi::reset;
-    if(true) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
-    else 0; //TODO
+    // // Print preprocessor status
+    // cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n\033[K    Preprocessing │ " << ansi::reset;
+    // if(pre::totalProgress.isComplete()) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << pre::totalProgress.total.load() << " steps.";
+    // else pre::totalProgress.render(progressBarWidth);
 
 
-    // Print conversion status
-    cout << ansi::bold_bright_black << "\n\033[K    Conversion    │ " << ansi::reset;
-    if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
-    else 0; //TODO
+    // // Print compilation status
+    // cout << ansi::bold_bright_black << "\n\033[K    Compilation   │ " << ansi::reset;
+    // if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
+    // else 0; //TODO
+
+    // // Print optimization status
+    // cout << ansi::bold_bright_black << "\n\033[K    Optimization  │ " << ansi::reset;
+    // if(true) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
+    // else 0; //TODO
 
 
-    if(_isComplete) cout << ansi::bold_bright_green << "\n\n\033[K    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
+    // // Print conversion status
+    // cout << ansi::bold_bright_black << "\n\033[K    Conversion    │ " << ansi::reset;
+    // if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
+    // else 0; //TODO
+
+
+    if(_isComplete) cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
     else {
-        cout << "\033[K\n\n    ";
+        cout << "\n\n    ";
         cout << ansi::bold_bright_green << "t: " << ansi::reset << activeThreads.load() << "/" << totalThreads.load() << "  |  ";
         cout << ansi::bold_bright_green << "f: " << ansi::reset << totalFiles.load() << "  |  ";
         cout << ansi::bold_bright_green << "m: " << ansi::reset << totalModules.load();
@@ -95,24 +116,35 @@ void startMonitorThread(std::string fullCommand){
     do {
         delayedIsCompleted = isComplete.load(); //! Delay completion detection by 1 iteration to allow the last frame to be fully printed before returning
 
+
         // Collect local progresses and update the progress bar
-        pre::localProgressArrayLock.lock();
-        for(ulong i = 0; i < pre::localProgressArray.size(); ++i) {
-            pre::totalProgress.increase(pre::localProgressArray[i]->exchange(0));
+        subphaseDataArrayLock.lock();
+        for(auto const& e : subphaseDataArray) {
+            phaseDataArrayLock.lock();
+            phaseDataArray[e.phaseId].totalProgress->increaseTot(e.localProgress->load());
+            phaseDataArrayLock.unlock();
+            // if(e.phaseId == PhaseID::PREPROCESSING) pre::totalProgress.increase(e.localProgress->load());
         }
-        pre::localProgressArrayLock.unlock();
+        subphaseDataArrayLock.unlock();
+        // localProgressArrayLock.lock();
+        // for(ulong i = 0; i < localProgressArray.size(); ++i) {
+            // pre::totalProgress.increase(localProgressArray[i]->exchange(0));
+        // }
+        // localProgressArrayLock.unlock();
+
 
 
         // Calculate progress bar width
         static const int nameWidth = 20;  //! 20 is the maximum width of the phase name
         progressBarWidth = utils::getConsoleWidth() - nameWidth;
 
+
         // Print status UI
         printStatusUI(fullCommand, loop, progressBarWidth, delayedIsCompleted);
 
+
         // Limit output refresh rate to 10fps
         std::this_thread::sleep_for(std::chrono::milliseconds(interval));
-
         ++loop;
 
     } while(!delayedIsCompleted);
@@ -216,34 +248,34 @@ int main(int argc, char* argv[]){
 
     //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
     // Preprocessing
-    timeStartPre = std::chrono::high_resolution_clock::now();
+    // timeStartPre = std::chrono::high_resolution_clock::now();
     std::string s = utils::readAndCheckFile(cmd::options.sourceFile);
     totalFiles.fetch_add(1);
     pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
-    timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
+    // timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 
 
 
     // if(cmd::options.outputType == 'p') {
-        writeOutputFile(*sourceCode.str.cpp());
+        // writeOutputFile(*sourceCode.str.cpp());
         //TODO write source informations if requested
     // }
     if(compileModule) {
         //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
         // Compilation
-        timeStartComp = std::chrono::high_resolution_clock::now();
+        // timeStartComp = std::chrono::high_resolution_clock::now();
         //TODO actually compile the code
-        timeComp = std::chrono::high_resolution_clock::now() - timeStartComp;
+        // timeComp = std::chrono::high_resolution_clock::now() - timeStartComp;
 
 
 
 
         //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
         // Optimization
-        timeStartOpt = std::chrono::high_resolution_clock::now();
+        // timeStartOpt = std::chrono::high_resolution_clock::now();
         //TODO actually optimize the code
-        timeOpt = std::chrono::high_resolution_clock::now() - timeStartOpt;
+        // timeOpt = std::chrono::high_resolution_clock::now() - timeStartOpt;
     }
 
 
@@ -251,9 +283,9 @@ int main(int argc, char* argv[]){
     if(compileExec) {
         //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
         // Conversion to C and gcc compilation
-        timeStartConv = std::chrono::high_resolution_clock::now();
+        // timeStartConv = std::chrono::high_resolution_clock::now();
         //TODO actually convert the code
-        timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
+        // timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
 
         // writeOutputFile(sourceCode.str); //TODO use the output from the conversion phase
     }

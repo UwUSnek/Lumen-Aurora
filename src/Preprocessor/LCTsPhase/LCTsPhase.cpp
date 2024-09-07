@@ -1,3 +1,4 @@
+#include "ALC.hpp"
 #include "LCTsPhase.hpp"
 #include "Preprocessor/preprocessor.hpp"
 
@@ -29,8 +30,7 @@ namespace pre {
 
 
     void startLCTsPhase(std::string const *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
-        pre::initPhaseThread();
-        pre::totalProgress.increaseTot(b->length());
+        increaseMaxProgress(b->length());
 
 
         ulong i = 0;                // Current index relative to the raw data
@@ -41,7 +41,7 @@ namespace pre {
             ulong lct = checkLct(b, i);
             if(lct) {
                 i += lct;
-                pre::increaseLocalProgress(lct);
+                increaseLocalProgress(lct);
                 ++curLine;
             }
 

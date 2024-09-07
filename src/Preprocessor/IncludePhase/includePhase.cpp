@@ -17,7 +17,6 @@ namespace fs = std::filesystem;
 
 namespace pre {
     void startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
-        pre::initPhaseThread();
         // pre::totalProgress.increaseTot(b.str.length());
         //FIXME count progress of deleted characters + all characters of last phase
 
@@ -35,7 +34,7 @@ namespace pre {
             ulong literalLen = saveLiteral(b, i, r);
             if(literalLen) {
                 i += literalLen;
-                pre::increaseLocalProgress(literalLen);
+                increaseLocalProgress(literalLen);
                 continue;
             }
 
@@ -146,7 +145,7 @@ namespace pre {
                     // Increase index (skip include and file path)
                     ulong fullLen = match.length() + filePathMatch.length();
                     i += fullLen;
-                    pre::increaseLocalProgress(fullLen);
+                    increaseLocalProgress(fullLen);
                 }
 
                 // File path not found
@@ -169,7 +168,7 @@ namespace pre {
                 r->str  += *b->str[i];
                 r->meta += *b->meta[i];
                 ++i;
-                pre::increaseLocalProgress(1);
+                increaseLocalProgress(1);
             }
         }
 

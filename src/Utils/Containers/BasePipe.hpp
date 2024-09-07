@@ -45,18 +45,10 @@ public:
      * @param _s The container to append.
      */
     void operator+=(t const &_s) {
-        // if(s.length() + _s.length() >= s.capacity()) {
-        ulong data_len = __internal_get_len(_s);
-        if(len.load() + data_len >= s.capacity()) {
-            sReallocLock.lock();
-            __internal_append(_s);
-            len.fetch_add(data_len);
-            sReallocLock.unlock();
-        }
-        else {
-            __internal_append(_s);
-            len.fetch_add(data_len);
-        }
+        sReallocLock.lock();
+        __internal_append(_s);
+        len.fetch_add(__internal_get_len(_s));
+        sReallocLock.unlock();
     }
 
 
@@ -67,16 +59,10 @@ public:
      * @param c The value to add.
      */
     void operator+=(elmt const &c) {
-        if(len.load() + 1 >= s.capacity()) {
-            sReallocLock.lock();
-            __internal_append(c);
-            len.fetch_add(1);
-            sReallocLock.unlock();
-        }
-        else {
-            __internal_append(c);
-            len.fetch_add(1);
-        }
+        sReallocLock.lock();
+        __internal_append(c);
+        len.fetch_add(1);
+        sReallocLock.unlock();
     }
 
 

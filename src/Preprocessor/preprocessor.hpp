@@ -13,16 +13,12 @@
 
 
 namespace pre {
-    extern DynamicProgressBar               totalProgress;
-    extern std::vector<std::atomic<ulong>*> localProgressArray;
-    extern std::mutex                       localProgressArrayLock;
-    extern thread_local std::atomic<ulong>* localProgress;
+    // extern DynamicProgressBar               totalProgress; //FIXME MOVE TO PHASE ARRAY
 
     // extern thread_local ulong threadId;
 
-    void initPhaseThread();
+    // void initPhaseThread();
     // void stopPhaseThread();
-    void increaseLocalProgress(ulong n);
 
 
 
