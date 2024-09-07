@@ -24,6 +24,7 @@ void DynamicProgressBar::render(int consoleWidth) const {
     // Calculate actual progress bar width
     static const int valueWidth = 4; //! e.g. 430k
     consoleWidth -= (1 + valueWidth + 1 + valueWidth + 1);
+    if(consoleWidth < 0) consoleWidth = 0;
 
 
     // Calculate the normalized progress. Goes from 0 to 1 instead of from 0 to total

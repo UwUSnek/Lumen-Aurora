@@ -20,7 +20,6 @@ private:
 
 
 protected:
-    std::mutex sReallocLock;
     t s;
     virtual ulong __internal_get_len(t    const &e) = 0;
     virtual void   __internal_append(t    const &e) = 0;
@@ -34,6 +33,9 @@ protected:
 
 
 public:
+    std::mutex sReallocLock;
+
+
     BasePipe() {}
 
 

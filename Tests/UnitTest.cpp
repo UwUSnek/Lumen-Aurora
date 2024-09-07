@@ -27,9 +27,23 @@ std::vector<UnitTest*> tests;
 
 
 int compile(std::string options, ulong testIndex) {
+
+    // Calculate full command and print "running" message
     std::string fullCommand = compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options + " -I ./Tests";
     cout << "Running " << fullCommand << "\n";
-    return WEXITSTATUS(system((fullCommand + " > /dev/null 2> /dev/null").c_str()));
+
+    // Start subprocess
+    FILE* pipe = popen((fullCommand + " > /dev/null 2>&1").c_str(), "r");
+    if(!pipe) {
+        perror("popen failed"); //FIXME replace with an actual error or test failure
+    }
+
+    // Empty output buffer and discard its contents
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr);
+
+    // Return the exit code
+    return pclose(pipe);
 }
 
 

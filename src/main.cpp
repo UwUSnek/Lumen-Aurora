@@ -136,7 +136,9 @@ void startMonitorThread(std::string fullCommand){
 
         // Calculate progress bar width
         static const int nameWidth = 20;  //! 20 is the maximum width of the phase name
-        progressBarWidth = utils::getConsoleWidth() - nameWidth;
+        progressBarWidth = utils::getConsoleWidth();
+        if(progressBarWidth == -1) progressBarWidth = nameWidth + 16; //! Totally arbitrary value
+        progressBarWidth -= nameWidth;
 
 
         // Print status UI
@@ -317,7 +319,9 @@ int main(int argc, char* argv[]){
         //TODO write module
     }
     else {
+        sourceCode.str.sReallocLock.lock();
         writeOutputFile(*sourceCode.str.cpp());
+        sourceCode.str.sReallocLock.unlock();
     }
 
 
