@@ -22,6 +22,13 @@ namespace utils {
     };
 
 
+
+    static inline long getEpochMs() {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    }
+
+
+
     extern std::atomic<int> exitMainRequest;
     void exitMain(int exitCode);
 
@@ -31,6 +38,7 @@ namespace utils {
 
     std::string formatChar(char c, bool useColor = false);
     std::string shortenInteger(ulong n);
+    std::string formatMilliseconds(long n);
 
     void printErrorGeneric(ErrorCode errorCode,                                                                                  std::string const &message);
     void      printErrorCL(ErrorCode errorCode,                  cmd::ElmCoordsCL const &relPos, cmd::ElmCoordsCL const &errPos, std::string const &message, std::string const &fullCommand);

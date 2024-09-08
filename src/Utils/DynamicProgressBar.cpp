@@ -15,6 +15,7 @@
  * @brief Renders the progress bar to stdout.
  *      This function is NOT thread safe. Use a mutex to ensure other threads don't print during rendering.
  * @param consoleWidth The number of spaces dedicated to the progress bar.
+ *      Values lower than 0 are considered 0.
  */
 void DynamicProgressBar::render(int consoleWidth) const {
     ulong _progress = progress.load();

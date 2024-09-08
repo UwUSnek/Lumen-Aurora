@@ -93,6 +93,10 @@ namespace utils {
 
 
 
+
+
+
+
     /**
      * @brief Converts the value <n> to a string that contains the 3 most significant characters
      *      and 1 letter indicating the multiplier, up to quadrillions.
@@ -147,6 +151,51 @@ namespace utils {
         std::string r2 = r.str();
         return r2.substr(0, 2 + (r2[2] != '.') + suffix.empty()) + suffix;
     }
+
+
+
+
+
+
+
+
+    /**
+     * @brief Creates a string with the format <minutes>:<seconds>.<milliseconds> using <n> as the total number of milliseconds.
+     *      If the duration is more than 59:59.999 (3599999ms), the format changes to <hours>hrs, expressing the number of hours using 1 decimal digit.
+     *      If the duration is less than 0ms, the output strings will contain "    0.000"
+     *      Unnecessary leading zeroes and separators are replaced by space characters.
+     * @param milliseconds The number of milliseconds.
+     * @return The string representation of <n>.
+     *      The maximum length of the returned string is 9 characters.
+     */
+std::string formatMilliseconds(long _ms) {
+    std::ostringstream r;
+    if(_ms < 0) _ms = 0;
+
+
+    if(_ms > 3599999) {
+        //TODO test if this format actually works
+        float hrs = (float)_ms / 3600000.0f;
+        r << std::setprecision(1) << hrs << " hrs";
+    }
+    else {
+        long min = _ms / 60000;
+        long sec = _ms / 1000 % 60;
+        long ms = _ms % 1000;
+
+        if (min > 0) {
+            r << min << ":";
+            r << std::right << std::setw(2) << std::setfill('0') << sec;
+        }
+        else {
+            r << sec;
+        }
+        r << "." << std::right << std::setw(3) << std::setfill('0') << ms;
+    }
+
+
+    return r.str();
+}
 
 
 

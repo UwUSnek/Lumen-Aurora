@@ -100,16 +100,16 @@ std::string phaseIdTotring(PhaseID phaseId);
 
 
 struct PhaseData {
-    DynamicProgressBar* totalProgress;
-    // std::chrono::_V2::system_clock::time_point  timeStart;
-    std::atomic<long>* timeStart;
-    // std::chrono::duration<double>               timeDuration;
-    std::atomic<long>* timeEnd;
+    DynamicProgressBar *totalProgress;
+    std::atomic<ulong> *activeSubphases;
+    std::atomic<long>  *timeStart;
+    std::atomic<long>  *timeEnd;
 
-    PhaseData(std::atomic<long>* _timeStart, std::atomic<long>* _timeEnd) :
+    PhaseData(long _timeStart) :
         totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
-        timeStart(_timeStart),
-        timeEnd(_timeEnd) {
+        activeSubphases(new std::atomic<ulong>(0)),
+        timeStart      (new std::atomic<long>(_timeStart)),
+        timeEnd        (new std::atomic<long>(0)) {
     }
 };
 
@@ -162,20 +162,13 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     totalThreads.fetch_add(1);
 
 
-    // If needed, init phase data (ordered)
+    // If needed, create new phase data (ordered), then increase its active subphases count
     phaseDataArrayLock.lock();
     if(phaseDataArray.size() <= phaseId) {
-        phaseDataArray.push_back(PhaseData(
-            new std::atomic<long>(
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::system_clock::now().time_since_epoch()
-                ).count()
-            ),
-            new std::atomic<long>(0)
-        ));
-        //TODO understand where to calculate the time duration and actually set its value from there
+        phaseDataArray.push_back(PhaseData(utils::getEpochMs()));
     }
     maxProgress = phaseDataArray[phaseId].totalProgress;
+    phaseDataArray[phaseId].activeSubphases->fetch_add(1);
     phaseDataArrayLock.unlock();
 
 
@@ -190,6 +183,15 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     std::forward<func_t>(f)(std::forward<args_t>(args)...);
 
 
+    // Decrease active subphases count and set the end time if needed
+    phaseDataArrayLock.lock();
+    phaseDataArray[phaseId].activeSubphases->fetch_sub(1);
+    if(phaseDataArray[phaseId].activeSubphases->load() == 0) {
+        phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
+    }
+    phaseDataArrayLock.unlock();
+
+
     // Update thread counter
     activeThreads.fetch_sub(1);
 }
@@ -199,8 +201,8 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
 template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, func_t &&f, args_t &&...args) {
     std::thread(
-        [lambda_phaseId = phaseId, lambda = std::forward<func_t>(f), ...lambda_args = std::forward<args_t>(args)]() mutable {
-            __internal_subphase_exec(lambda_phaseId, std::move(lambda), std::move(lambda_args)...);
+        [lambda_phaseId = phaseId, lambda_f = std::forward<func_t>(f), ...lambda_args = std::forward<args_t>(args)]() mutable {
+            __internal_subphase_exec(lambda_phaseId, std::move(lambda_f), std::move(lambda_args)...);
         }
     ).detach();
 }

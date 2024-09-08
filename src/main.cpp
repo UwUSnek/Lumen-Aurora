@@ -47,40 +47,27 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
         cout << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    " << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
         if(isPhaseComplete) {
-            // cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << bar->total.load() << " steps."; //FIXME write timings
-            cout << ansi::reset << std::fixed << std::setprecision(3) <<  0 << " seconds, " << bar->max.load() << " steps.";
+            cout
+                << bar->max.load() << " steps"
+                << " | "
+                << utils::formatMilliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) << " time elapsed"
+            ;
         }
         else {
-            // phaseDataArray[i].totalProgress->render(progressBarWidth - 3 - 5); //FIXME write timings
-           bar->render(progressBarWidth);
+            bar->render(progressBarWidth - 3 - 9);
+            cout
+                << "| "
+                << std::left << std::setw(9) << utils::formatMilliseconds(utils::getEpochMs() - phaseDataArray[i].timeStart->load())
+                << " "
+            ;
         }
     }
     phaseDataArrayLock.unlock(); //FIXME replace pre::totalProgress with progressbar saved in the Phase array
 
 
-    // // Print preprocessor status
-    // cout << (pre::totalProgress.isComplete() ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n\033[K    Preprocessing │ " << ansi::reset;
-    // if(pre::totalProgress.isComplete()) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timePre.count() << " seconds, " << pre::totalProgress.total.load() << " steps.";
-    // else pre::totalProgress.render(progressBarWidth);
 
 
-    // // Print compilation status
-    // cout << ansi::bold_bright_black << "\n\033[K    Compilation   │ " << ansi::reset;
-    // if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeComp.count() << " seconds."; //TODO
-    // else 0; //TODO
-
-    // // Print optimization status
-    // cout << ansi::bold_bright_black << "\n\033[K    Optimization  │ " << ansi::reset;
-    // if(true) cout << ansi::reset << std::fixed << std::setprecision(3) <<  timeOpt.count() << " seconds."; //TODO
-    // else 0; //TODO
-
-
-    // // Print conversion status
-    // cout << ansi::bold_bright_black << "\n\033[K    Conversion    │ " << ansi::reset;
-    // if(true) cout << ansi::reset << std::fixed << std::setprecision(3) << timeConv.count() << " seconds."; //TODO
-    // else 0; //TODO
-
-
+    // Print info line
     if(_isComplete) cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options.outputFile).string() << ansi::bold_bright_green << "\".\n";
     else {
         cout << "\n\n    ";
@@ -89,6 +76,7 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
         cout << ansi::bold_bright_green << "m: " << ansi::reset << totalModules.load();
         cout << "\n";
     }
+
 
 
 
