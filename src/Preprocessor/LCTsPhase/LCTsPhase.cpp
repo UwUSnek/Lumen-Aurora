@@ -17,8 +17,11 @@ namespace pre {
      * @return The number of characters the LCT occupies, or 0 if one was not found.
      */
     ulong checkLct(std::string const *b, ulong index) {
-        if((*b)[index] == '\\' && (*b)[index + 1] == '\n') return 2;
-        if((*b)[index] == '\0') return 1;
+
+        if((*b)[index] == '\\') {
+            if(b->length() - 1 <= index) return 1;
+            if((*b)[index + 1] == '\n') return 2;
+        }
         return 0;
     }
 

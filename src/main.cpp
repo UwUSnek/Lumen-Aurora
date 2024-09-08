@@ -307,6 +307,7 @@ int main(int argc, char* argv[]){
         //TODO write module
     }
     else {
+        sourceCode.str.awaitClose();
         sourceCode.str.sReallocLock.lock();
         writeOutputFile(*sourceCode.str.cpp());
         sourceCode.str.sReallocLock.unlock();
