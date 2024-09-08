@@ -10,5 +10,5 @@
 
 '\u0042'\
 '\n'
-#include "../Tests/HugeSource/huge.lum"
-"aa"
+//#include "../Tests/HugeSource/huge.lum"
+"aa"\

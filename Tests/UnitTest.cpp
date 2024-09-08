@@ -43,7 +43,7 @@ int compile(std::string options, ulong testIndex) {
     while (fgets(buffer, sizeof(buffer), pipe) != nullptr);
 
     // Return the exit code
-    return pclose(pipe);
+    return WEXITSTATUS(pclose(pipe));
 }
 
 
