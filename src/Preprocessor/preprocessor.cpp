@@ -23,15 +23,6 @@ namespace pre {
     // //!                            ^ -1 is exclusively used to easily identify bugs. The value is initialized by pre::startPhaseThread
 
 
-    /**
-     * @brief The list of included source files in the order in which they were discovered.
-     *      The source file passed through the command line is identified by the first element.
-     *      All the paths saved in this vector are canonical paths.
-     */
-    std::vector<std::string> sourceFilePaths;
-    std::mutex sourceFilePathsLock;
-
-
 
 
 

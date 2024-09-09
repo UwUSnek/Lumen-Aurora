@@ -33,14 +33,15 @@ int compile(std::string options, ulong testIndex) {
     cout << "Running " << fullCommand << "\n";
 
     // Start subprocess
-    FILE* pipe = popen((fullCommand + " > /dev/null 2>&1").c_str(), "r");
+    FILE* pipe = popen(fullCommand.c_str(), "r");
     if(!pipe) {
         perror("popen failed"); //FIXME replace with an actual error or test failure
     }
 
     // Empty output buffer and discard its contents
     char buffer[128];
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr);
+    // while(fgets(buffer, sizeof(buffer), pipe) != nullptr) std::cout << buffer;
+    while(fgets(buffer, sizeof(buffer), pipe) != nullptr);
 
     // Return the exit code
     return WEXITSTATUS(pclose(pipe));
@@ -108,7 +109,7 @@ void TestExitValue::startTest() {
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
     //FIXME USE FULL COMPILATION WHEN AVAILABLE INSTEAD OF JUST -p OR -m
-    int exitValue = compile(options + "-p " + tmpOutputLocatiton + std::to_string(testIndex), testIndex);
+    int exitValue = compile(options + " -p " + tmpOutputLocatiton + std::to_string(testIndex), testIndex);
 
     if(exitValue != expected) {
         result << ansi::bold_red << "    Expected exit code │ " << ansi::reset << expected << "\n";

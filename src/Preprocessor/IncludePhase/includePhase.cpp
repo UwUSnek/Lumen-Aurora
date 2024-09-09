@@ -76,12 +76,14 @@ namespace pre {
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             // Calculate the actual file path
-                            std::ifstream actualFile;
-                            std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[b->meta[i]->f], relevantCoords, filePathCoords, actualFile);
+                            std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[b->meta[i]->f], relevantCoords, filePathCoords);
 
 
                             // Copy file contents and metadata
+                            std::ifstream actualFile(actualFilePath);
                             std::string* fileContents = new std::string(utils::readFile(actualFile)); //FIXME add a function that read a file and saves it in a global array so they don't go out of scope
+                            actualFile.close();
+
                             totalFiles.fetch_add(1);
                             SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, actualFilePath); //FIXME run concurrently
                             preprocessedCode.str.awaitClose();
@@ -236,10 +238,9 @@ namespace pre {
      * @param curFilePatht The path of the file that is currently being preprocessed.
      * @param relevantCoords The position of the relevant section.
      * @param filePathCoords The position of the section containing the include file path.
-     * @param foundFile Where to save the ifstream of the specified file.
      * @return The canonical path of the specified file.
      */
-    std::string resolveFilePath(std::string const &rawFilePath, std::string const &curFilePath, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords, std::ifstream &foundFile) {
+    std::string resolveFilePath(std::string const &rawFilePath, std::string const &curFilePath, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords) {
 
         // If the path is an absolute path
         if(rawFilePath[0] == '/') {
@@ -258,7 +259,7 @@ namespace pre {
             std::vector<std::pair<std::string, utils::PathCheckResult>> invalidPaths;
 
             // Check current path
-            std::string const &fullPath = curFilePath + "/" + rawFilePath;
+            std::string const &fullPath = fs::path(curFilePath).parent_path() / rawFilePath;
             utils::PathCheckResult &&result = utils::checkPath(fullPath);
             (result.exists ? validPaths : invalidPaths).push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
 
@@ -274,7 +275,7 @@ namespace pre {
             if(validPaths.empty()) {
                 std::string invalidPathsList = ansi::reset;
                 for(ulong i = 0; i < invalidPaths.size(); ++i) {
-                    invalidPathsList += "\n    \"" + ansi::white + invalidPaths[i].first + ansi::reset + "\"";
+                    invalidPathsList += "\n    " + std::to_string(i + 1) + ". \"" + ansi::white + invalidPaths[i].first + ansi::reset + "\"";
                 }
                 printError(
                     ErrorCode::ERROR_PRE_PATH_NOT_FOUND,
@@ -290,7 +291,7 @@ namespace pre {
             if(validPaths.size() > 1) {
                 std::string validPathsList = ansi::reset;
                 for(ulong i = 0; i < validPaths.size(); ++i) {
-                    validPathsList += "\n    \"" + ansi::white + fs::canonical(validPaths[i].first).string() + ansi::reset + "\"";
+                    validPathsList += "\n    " + std::to_string(i + 1) + ". \"" + ansi::white + fs::canonical(validPaths[i].first).string() + ansi::reset + "\"";
                 }
                 printError(
                     ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,

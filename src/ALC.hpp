@@ -16,6 +16,11 @@
 
 
 
+extern std::vector<std::string> sourceFilePaths;
+extern std::mutex sourceFilePathsLock;
+
+
+
 
 extern std::mutex consoleLock;
 

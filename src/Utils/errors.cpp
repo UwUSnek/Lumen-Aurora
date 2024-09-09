@@ -118,10 +118,10 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &er
  *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
  */
 void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &relPos, ElmCoords const &errPos, std::string const &message) {
-    pre::sourceFilePathsLock.lock();
-    std::string relFilePath = pre::sourceFilePaths[relPos.filePathIndex];
-    std::string errFilePath = pre::sourceFilePaths[errPos.filePathIndex];
-    pre::sourceFilePathsLock.unlock();
+    sourceFilePathsLock.lock();
+    std::string relFilePath = sourceFilePaths[relPos.filePathIndex];
+    std::string errFilePath = sourceFilePaths[errPos.filePathIndex];
+    sourceFilePathsLock.unlock();
 
     consoleLock.lock();
     cerr << ansi::bold_red;

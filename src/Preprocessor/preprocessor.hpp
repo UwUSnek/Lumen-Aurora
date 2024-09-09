@@ -22,10 +22,6 @@ namespace pre {
 
 
 
-    extern std::vector<std::string> sourceFilePaths;
-    extern std::mutex sourceFilePathsLock;
-
-
     SegmentedCleanSource& loadSourceCode(std::string const *s, std::string const &filePath);
     // SegmentedCleanSource& loadSourceCode(std::string &filePath);
 

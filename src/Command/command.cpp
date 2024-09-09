@@ -27,7 +27,7 @@ namespace cmd {
     void parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
 
         // Loop the options and parse them
-        ulong optionPosition = 0;  // The character index of the current option relative to the full command string
+        ulong optionPosition = strlen(argv[0]) + 1;  // The character index of the current option relative to the full command string
         ElmCoordsCL lastOutputTypeCoords(0, 0);
         ElmCoordsCL lastTargetPlatformCoords(0, 0);
         ElmCoordsCL lastSourceCoords(0, 0);
@@ -162,7 +162,7 @@ namespace cmd {
                         }
 
 
-                        // Push canonical path to the list and adju the option position
+                        // Push canonical path to the list and adjust the option position
                         (c == 'I' ? options.includePaths : options.importPaths).push_back(canonicalPath);
                         optionPosition += path.length() + 1;
 

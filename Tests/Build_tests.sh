@@ -5,6 +5,7 @@
 g++                                         \
     ./src/Preprocessor/ElmCoords.cpp     \
     ./src/Utils/utils.cpp                   \
+    ./src/Utils/errors.cpp                   \
     ./src/ALC.cpp                           \
     \
     ./Tests/tests.cpp                       \

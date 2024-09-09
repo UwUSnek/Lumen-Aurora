@@ -7,7 +7,6 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Build/out",
-            // "program": "${workspaceFolder}/./Tests/tests.out",
             "args": [
                 "./Test/main.lum",
                 "-p", "./Test/out"
@@ -28,7 +27,30 @@
             "logging": {
                 "engineLogging": false
             },
-            // "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Debug unit tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/./Tests/tests.out",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb",
+            "logging": {
+                "engineLogging": false
+            },
         }
     ]
 }

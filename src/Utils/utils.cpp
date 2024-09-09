@@ -274,11 +274,11 @@ std::string utils::readFile(std::ifstream &f) {
  */
 utils::PathCheckResult utils::checkPath(std::string const &path) {
     PathCheckResult r;
-    if(access(path.c_str(), F_OK)) {
+    if(access(path.c_str(), F_OK) == 0) {
         r.exists = true;
-        r.canRead  = access(path.c_str(), R_OK);
-        r.canWrite = access(path.c_str(), W_OK);
-        r.canExec  = access(path.c_str(), X_OK);
+        r.canRead  = access(path.c_str(), R_OK) == 0;
+        r.canWrite = access(path.c_str(), W_OK) == 0;
+        r.canExec  = access(path.c_str(), X_OK) == 0;
         r.isDir = fs::is_directory(path);
     }
     return r;
