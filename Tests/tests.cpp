@@ -74,22 +74,35 @@ int main(){
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy 1",
         "A#include  \t\"Includes/basic.lum\"B",
-        "AtestB"
+        "AtestB",
+        "-I Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy 2",
         "A#include  \t\"Includes/inception2.lum\"B",
-        "AtestB"
+        "AtestB",
+        "-I Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy - comment only",
         "A#include  \t\"Includes/commentOnly.lum\"B",
-        "AB"
+        "AB",
+        "-I Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy - comment boundaries",
         "A#include  \t\"Includes/commentBoundaries.lum\"B",
-        "AtestB"
+        "AtestB",
+        "-I Accuracy"
+    ));
+
+
+
+    tests.push_back(new TestPreprocessorOutput(
+        "include conflict",
+        "A#include  \t\"Includes/commentBoundaries.lum\"B",
+        "AtestB",
+        "-I Conflict1 -I Conflict2"
     ));
 
 

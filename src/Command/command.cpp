@@ -6,6 +6,7 @@ namespace fs = std::filesystem;
 #include "command.hpp"
 #include "ALC.hpp"
 #include "Utils/utils.hpp"
+#include "Utils/errors.hpp"
 
 
 
@@ -121,24 +122,23 @@ namespace cmd {
                             );
                         }
 
-                        // If path exists, calculate its canonical path
+                        // If path doesn't exist, print an error
                         std::string path(argv[i]);
-                        std::string canonicalPath;
-                        try { canonicalPath = fs::canonical(path); }
-                        // If not, print an error
-                        catch(fs::filesystem_error e) {
+                        utils::PathCheckResult result = utils::checkPath(argv[i]);
+                        if(!result.exists) {
                             utils::printErrorCL(
-                                c == 'I' ? ERROR_CMD_INCLUDE_PATH_INVALID : ERROR_CMD_IMPORT_PATH_INVALID,
+                                c == 'I' ? ERROR_CMD_INCLUDE_PATH_NOT_FOUND : ERROR_CMD_IMPORT_PATH_NOT_FOUND,
                                 optionCoords,
                                 cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                                 "Could not find directory \"" + path + "\".\n" +
-                               "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                                "Current working directory is: \"" + ansi::white + fs::current_path().string() + ansi::reset + "\".",
                                 DBG_fullCommand
                             );
                         }
 
                         // If it is a directory, print an error
-                        if(!utils::isDir(canonicalPath)) {
+                        std::string canonicalPath = fs::canonical(path);
+                        if(!result.isDir) {
                             utils::printErrorCL(
                                 c == 'I' ? ERROR_CMD_INCLUDE_PATH_IS_FILE : ERROR_CMD_IMPORT_PATH_IS_FILE,
                                 optionCoords,
@@ -148,6 +148,19 @@ namespace cmd {
                                 DBG_fullCommand
                             );
                         }
+
+                        // If it has no read permission, print an error
+                        if(!result.canRead) {
+                            utils::printErrorCL(
+                                c == 'I' ? ERROR_CMD_INCLUDE_PATH_NO_PERMISSION : ERROR_CMD_IMPORT_PATH_NO_PERMISSION,
+                                optionCoords,
+                                cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
+                                "The specified i" + w + " directory \"" + path + "\" cannot be used: no read permission.\n" +
+                                "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                                DBG_fullCommand
+                            );
+                        }
+
 
                         // Push canonical path to the list and adju the option position
                         (c == 'I' ? options.includePaths : options.importPaths).push_back(canonicalPath);
@@ -223,28 +236,39 @@ namespace cmd {
                     lastSourceCoords = currentSourceCoords;
                 }
 
-                // If path exists, calculate canonical path
-                std::string canonicalPath;
-                try { canonicalPath = fs::canonical(o); }
-                // If not, print an error
-                catch(fs::filesystem_error e) {
+                // Print error if the source doesnt exist
+                utils::PathCheckResult result = utils::checkPath(o);
+                if(!result.exists) {
                     utils::printErrorCL(
                         ERROR_CMD_SOURCE_INVALID,
                         currentSourceCoords,
                         currentSourceCoords,
                         "Could not find source file \"" + o + "\".\n" +
-                        "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                        "Current working directory is: \"" + ansi::white + fs::current_path().string() + ansi::reset + "\".",
                         DBG_fullCommand
                     );
                 }
 
                 // If it is a directory, print an error
-                if(utils::isDir(canonicalPath)) {
+                std::string canonicalPath = fs::canonical(o);
+                if(result.isDir) {
                     utils::printErrorCL(
                         ERROR_CMD_INCLUDE_PATH_IS_FILE,
                         currentSourceCoords,
                         currentSourceCoords,
                         "The specified source file path \"" + o + "\" is a directory.\n" +
+                        "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                        DBG_fullCommand
+                    );
+                }
+
+                // Print error if the source doesnt have read permission
+                if(!result.canRead) {
+                    utils::printErrorCL(
+                        ERROR_CMD_SOURCE_INVALID,
+                        currentSourceCoords,
+                        currentSourceCoords,
+                        "Could not open source file \"" + o + "\": no read permission.\n" +
                         "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
                         DBG_fullCommand
                     );

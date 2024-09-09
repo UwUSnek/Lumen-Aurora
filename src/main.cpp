@@ -1,4 +1,3 @@
-#include "ALC.hpp"
 #include <vector>
 #include <string>
 #include <fstream>
@@ -10,6 +9,8 @@
 namespace fs = std::filesystem;
 
 
+#include "ALC.hpp"
+#include "Utils/errors.hpp"
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"

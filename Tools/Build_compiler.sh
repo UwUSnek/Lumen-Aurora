@@ -8,6 +8,7 @@ mkdir -p ./Build
 g++                                                            \
     ./src/Preprocessor/CleanupPhase/UTF8_decoder.c             \
     ./src/Utils/utils.cpp                                      \
+    ./src/Utils/errors.cpp                                     \
     ./src/Utils/DynamicProgressBar.cpp                         \
     ./src/Utils/Containers/StringPipe.cpp                      \
     ./src/ALC.cpp                                              \

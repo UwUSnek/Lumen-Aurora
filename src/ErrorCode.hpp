@@ -17,11 +17,13 @@ enum ErrorCode : int {
     ERROR_CMD_INCOMPATIBLE_OPTIONS, // 2 incompatible options are used together
 
     ERROR_CMD_INCLUDE_PATH_MISSING,
-    ERROR_CMD_INCLUDE_PATH_INVALID,
+    ERROR_CMD_INCLUDE_PATH_NOT_FOUND,
+    ERROR_CMD_INCLUDE_PATH_NO_PERMISSION,
     ERROR_CMD_INCLUDE_PATH_IS_FILE,
 
     ERROR_CMD_IMPORT_PATH_MISSING,
-    ERROR_CMD_IMPORT_PATH_INVALID,
+    ERROR_CMD_IMPORT_PATH_NOT_FOUND,
+    ERROR_CMD_IMPORT_PATH_NO_PERMISSION,
     ERROR_CMD_IMPORT_PATH_IS_FILE,
 
 
@@ -51,5 +53,7 @@ enum ErrorCode : int {
     ERROR_PRE_NO_PATH,     // Include path is missing
     ERROR_PRE_EMPTY_PATH,     // Include path is empty
     ERROR_PRE_PATH_IS_DIRECTORY,   // Include path is a directory
-    ERROR_PRE_PATH_CANNOT_OPEN,     // Included file cannot be opened (either missing or no permissions)
+    ERROR_PRE_PATH_NOT_FOUND,     // Included file doesn't exist
+    ERROR_PRE_PATH_NO_PERMISSION,     // Included file has no read permission
+    ERROR_PRE_PATH_AMBIGUOUS,     // Included path can point to multiple files in different include paths
 };

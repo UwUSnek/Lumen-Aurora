@@ -4,24 +4,12 @@
 #include <atomic>
 
 #include "ansi.hpp"
-#include "ErrorCode.hpp"
-#include "Command/CommandCoords.hpp"
-#include "Preprocessor/ElmCoords.hpp"
 
 
 
 
 
-struct ElmCoords;
 namespace utils {
-
-
-    enum class ErrType:int {
-        PREPROCESSOR,
-        COMPILER
-    };
-
-
 
     static inline long getEpochMs() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -34,17 +22,24 @@ namespace utils {
 
 
     int getConsoleWidth();
-    bool isDir(std::string const &path);
+    // bool isDir(std::string const &path);
 
     std::string formatChar(char c, ulong i, bool useColor = false);
     std::string shortenInteger(ulong n);
     std::string formatMilliseconds(long n);
 
-    void printErrorGeneric(ErrorCode errorCode,                                                                                  std::string const &message);
-    void      printErrorCL(ErrorCode errorCode,                  cmd::ElmCoordsCL const &relPos, cmd::ElmCoordsCL const &errPos, std::string const &message, std::string const &fullCommand);
-    void        printError(ErrorCode errorCode, ErrType errType,                                        ElmCoords const &errPos, std::string const &message);
-    void        printError(ErrorCode errorCode, ErrType errType,        ElmCoords const &relPos,        ElmCoords const &errPos, std::string const &message);
-
     std::string readAndCheckFile(std::string const &fileName);
     std::string readFile(std::ifstream &f);
+
+
+
+
+    struct PathCheckResult {
+        bool exists   = false;
+        bool isDir    = false;
+        bool canRead  = false;
+        bool canWrite = false;
+        bool canExec  = false;
+    };
+    PathCheckResult checkPath(std::string const &path);
 }

@@ -6,6 +6,9 @@
 namespace fs = std::filesystem;
 
 #include "ALC.hpp"
+#include "Command/command.hpp"
+#include "Utils/utils.hpp"
+#include "Utils/errors.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "includePhase.hpp"
 #include "Preprocessor/ElmCoords.hpp"
@@ -74,7 +77,7 @@ namespace pre {
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             // Calculate the actual file path
                             std::ifstream actualFile;
-                            std::string actualFilePath = resolveFilePath(rawIncludeFilePath, actualFile);
+                            std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[b->meta[i]->f], relevantCoords, filePathCoords, actualFile);
 
 
                             // Copy file contents and metadata
@@ -219,7 +222,6 @@ namespace pre {
             }
         }
     }
-}
 
 
 
@@ -228,53 +230,145 @@ namespace pre {
 
 
 
-/**
- * @brief //TODO
- * @param rawFilePath The path that was found in the include directive, without any modification.
- * @param foundFile Where to save the ifstream of the specified file.
- * @return The canonical path of the specified file.
- */
-std::string resolveFilePath(std::string rawFilePath, std::ifstream &foundFile) {
+    /**
+     * @brief //TODO
+     * @param rawFilePath The path that was found in the include directive, without any modification.
+     * @param curFilePatht The path of the file that is currently being preprocessed.
+     * @param relevantCoords The position of the relevant section.
+     * @param filePathCoords The position of the section containing the include file path.
+     * @param foundFile Where to save the ifstream of the specified file.
+     * @return The canonical path of the specified file.
+     */
+    std::string resolveFilePath(std::string const &rawFilePath, std::string const &curFilePath, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords, std::ifstream &foundFile) {
 
-    //! Include path relative to the file the include statement was used in. No changes if the raw path is an absolute path
-    fs::path adjustedIncludeFilePath;
-    if(rawIncludeFilePath[0] == '/') adjustedIncludeFilePath = rawIncludeFilePath;
-    else {
-        sourceFilePathsLock.lock();
-        adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i]->f]).parent_path() / rawIncludeFilePath;
-        sourceFilePathsLock.unlock();
+        // If the path is an absolute path
+        if(rawFilePath[0] == '/') {
+
+            // Validate it and return its canonical version
+            utils::PathCheckResult const &result = utils::checkPath(rawFilePath);
+            return validateSelectedIncludePath(rawFilePath, result, relevantCoords, filePathCoords);
+        }
+
+
+
+
+        // If it is a relative path
+        else {
+            std::vector<std::pair<std::string, utils::PathCheckResult>> validPaths;
+            std::vector<std::pair<std::string, utils::PathCheckResult>> invalidPaths;
+
+            // Check current path
+            std::string const &fullPath = curFilePath + "/" + rawFilePath;
+            utils::PathCheckResult &&result = utils::checkPath(fullPath);
+            (result.exists ? validPaths : invalidPaths).push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
+
+            // Check and categorize each include path
+            for(std::string const &dir : cmd::options.includePaths) {
+                std::string const &fullPath = dir + "/" + rawFilePath;
+                utils::PathCheckResult const &result = utils::checkPath(fullPath);
+                (result.exists ? validPaths : invalidPaths).push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
+            }
+
+
+            // Print an error if no valid file path was found, listing all the paths that were tried
+            if(validPaths.empty()) {
+                std::string invalidPathsList = ansi::reset;
+                for(ulong i = 0; i < invalidPaths.size(); ++i) {
+                    invalidPathsList += "\n    \"" + ansi::white + invalidPaths[i].first + ansi::reset + "\"";
+                }
+                printError(
+                    ErrorCode::ERROR_PRE_PATH_NOT_FOUND,
+                    utils::ErrType::PREPROCESSOR,
+                    relevantCoords,
+                    filePathCoords,
+                    "Could not open file \"" + rawFilePath + "\": no such file or directory.\n" +
+                    "These paths were tried: " + invalidPathsList
+                );
+            }
+
+            // Print an error if more than one valid file path was found
+            if(validPaths.size() > 1) {
+                std::string validPathsList = ansi::reset;
+                for(ulong i = 0; i < validPaths.size(); ++i) {
+                    validPathsList += "\n    \"" + ansi::white + fs::canonical(validPaths[i].first).string() + ansi::reset + "\"";
+                }
+                printError(
+                    ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,
+                    utils::ErrType::PREPROCESSOR,
+                    relevantCoords,
+                    filePathCoords,
+                    "Ambiguous file path \"" + rawFilePath + "\" in include directory.\n" +
+                    "Multiple valid files were found: " + validPathsList
+                );
+            }
+
+
+            // If only one valid file path was found
+            else {
+                return validateSelectedIncludePath(validPaths[0].first, validPaths[0].second, relevantCoords, filePathCoords);
+            }
+        }
+
+
+        //! Bogus return statement so GCC doesn't cry about it
+        return "";
     }
 
-    //! Canonical version of the adjusted file path. No changes if file was not found
-    std::string canonicalIncludeFilePath;
-    try { canonicalIncludeFilePath = fs::canonical(adjustedIncludeFilePath).string(); }
-    catch(fs::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
 
 
-    // Print an error if the file is a directory
-    if(utils::isDir(canonicalIncludeFilePath)) {
-        printError(
-            ErrorCode::ERROR_PRE_PATH_IS_DIRECTORY,
-            utils::ErrType::PREPROCESSOR,
-            relevantCoords,
-            filePathCoords,
-            "Could not include the specified path: \"" + rawIncludeFilePath + "\" is a directory.\n" +
-            "File path was interpreted as: \"" + ansi::white + canonicalIncludeFilePath + ansi::reset + "\"."
-        );
-    }
 
 
-    // Print an error if the file cannot be opened
-    std::ifstream includeFile(actualFilePath);
-    if(!includeFile) {
-        printError(
-            ErrorCode::ERROR_PRE_PATH_CANNOT_OPEN,
-            utils::ErrType::PREPROCESSOR,
-            relevantCoords,
-            filePathCoords,
-            "Could not open file \"" + rawIncludeFilePath + "\": " + std::strerror(errno) + ".\n" +
-            "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\".\n" +
-            "Make sure that the path is correct and the compiler has read access to the file."
-        );
+
+
+    /**
+     * @brief Prints an error if the path cannot be opened, is a directory or the compiler doesn't have read permissions on it.
+     * @param filePath The path of the file.
+     * @param checkResult The result of the check performed on the file.
+     * @param relevantCoords The position of the relevant section.
+     * @param filePathCoords The position of the section containing the include file path.
+     * @return The canonical path of the file at <filePath>.
+     */
+    std::string validateSelectedIncludePath(std::string const &filePath, utils::PathCheckResult const &checkResult, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords) {
+
+        // Print an error if the file doesn't exist
+        if(!checkResult.exists) {
+            printError(
+                ErrorCode::ERROR_PRE_PATH_NOT_FOUND,
+                utils::ErrType::PREPROCESSOR,
+                relevantCoords,
+                filePathCoords,
+                "Could not open file \"" + filePath + "\": no such file or directory.\n" +
+                "File path was interpreted as: \"" + ansi::white + filePath + ansi::reset + "\".\n" +
+                "Make sure that the path is correct and the file exists."
+            );
+        }
+
+        // Print an error if the file doesn't have read permission
+        std::string actualFilePath = fs::canonical(filePath);
+        if(!checkResult.canRead) {
+            printError(
+                ErrorCode::ERROR_PRE_PATH_NO_PERMISSION,
+                utils::ErrType::PREPROCESSOR,
+                relevantCoords,
+                filePathCoords,
+                "Could not open file \"" + filePath + "\": no read permission.\n" +
+                "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\"."
+            );
+        }
+
+        // Print an error if the file is a directory
+        if(checkResult.isDir) {
+            printError(
+                ErrorCode::ERROR_PRE_PATH_IS_DIRECTORY,
+                utils::ErrType::PREPROCESSOR,
+                relevantCoords,
+                filePathCoords,
+                "Could not include the specified path: \"" + filePath + "\" is a directory.\n" +
+                "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\"."
+            );
+        }
+
+        // Reutrn canonical path
+        return actualFilePath;
     }
 }
