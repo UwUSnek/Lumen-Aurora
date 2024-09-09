@@ -82,11 +82,17 @@ namespace utils {
      *      Invisible characters are replaced with visible glyphs.
      * @param c The character.
      * @param useColor Whether to color invisible characters black. Default: false.
+     * @param i The index of the character. This is used to render tab characters.
      * @return The formatted character.
      */
-    std::string formatChar(char c, bool useColor) {
+    std::string formatChar(char c, ulong i, bool useColor) {
         /**/ if(c ==  ' ') return useColor ? ansi::bright_black + "·" + ansi::reset : "·";
         else if(c == '\n') return useColor ? ansi::bright_black + "↓" + ansi::reset : "↓";
+        else if(c == '\t') {
+            const char* s[] = { "╶──╴", "╶─╴", "╶╴", "-" };
+            std::string tabRender = s[i % 4];
+            return useColor ? ansi::bright_black + tabRender + ansi::reset : tabRender;
+        }
         else return std::string(1, c);
     }
 
@@ -254,7 +260,7 @@ std::string formatMilliseconds(long _ms) {
             }
 
             // Actually print the formatted character
-            cerr << utils::formatChar(fullCommand[i]);
+            cerr << utils::formatChar(fullCommand[i], i);
         }
 
 
@@ -354,7 +360,7 @@ std::string formatMilliseconds(long _ms) {
             }
 
             // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
-            cerr << formatChar(s[i]);
+            cerr << formatChar(s[i], i);
             if(s[i] == '\n') {
                 ++curLine;
                 if(curLine > targetLineNum) {

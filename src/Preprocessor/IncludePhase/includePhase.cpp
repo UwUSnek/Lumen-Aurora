@@ -73,54 +73,14 @@ namespace pre {
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
                             // Calculate the actual file path
-
-                            //! Include path relative to the file the include statement was used in. No changes if the raw path is an absolute path
-                            fs::path adjustedIncludeFilePath;
-                            if(rawIncludeFilePath[0] == '/') adjustedIncludeFilePath = rawIncludeFilePath;
-                            else {
-                                sourceFilePathsLock.lock();
-                                adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i]->f]).parent_path() / rawIncludeFilePath;
-                                sourceFilePathsLock.unlock();
-                            }
-
-                            //! Canonical version of the adjusted file path. No changes if file was not found
-                            std::string canonicalIncludeFilePath;
-                            try { canonicalIncludeFilePath = fs::canonical(adjustedIncludeFilePath).string(); }
-                            catch(fs::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
-
-
-                            // Print an error if the file is a directory
-                            if(utils::isDir(canonicalIncludeFilePath)) {
-                                printError(
-                                    ErrorCode::ERROR_PRE_PATH_IS_DIRECTORY,
-                                    utils::ErrType::PREPROCESSOR,
-                                    relevantCoords,
-                                    filePathCoords,
-                                    "Could not include the specified path: \"" + rawIncludeFilePath + "\" is a directory.\n" +
-                                    "File path was interpreted as: \"" + ansi::white + canonicalIncludeFilePath + ansi::reset + "\"."
-                                );
-                            }
-
-
-                            // Print an error if the file cannot be opened
-                            std::ifstream includeFile(canonicalIncludeFilePath);
-                            if(!includeFile) {
-                                printError(
-                                    ErrorCode::ERROR_PRE_PATH_CANNOT_OPEN,
-                                    utils::ErrType::PREPROCESSOR,
-                                    relevantCoords,
-                                    filePathCoords,
-                                    "Could not open file \"" + rawIncludeFilePath + "\": " + std::strerror(errno) + ".\n" +
-                                    "File path was interpreted as: \"" + ansi::white + canonicalIncludeFilePath + ansi::reset + "\".\n" +
-                                    "Make sure that the path is correct and the compiler has read access to the file."
-                                );
-                            }
+                            std::ifstream actualFile;
+                            std::string actualFilePath = resolveFilePath(rawIncludeFilePath, actualFile);
 
 
                             // Copy file contents and metadata
-                            std::string* fileContents = new std::string(utils::readFile(includeFile)); //FIXME add a function that read a file and saves it in a global array so they don't go out of scope
+                            std::string* fileContents = new std::string(utils::readFile(actualFile)); //FIXME add a function that read a file and saves it in a global array so they don't go out of scope
                             totalFiles.fetch_add(1);
-                            SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, canonicalIncludeFilePath); //FIXME run concurrently
+                            SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, actualFilePath); //FIXME run concurrently
                             preprocessedCode.str.awaitClose();
                             preprocessedCode.meta.awaitClose();
                             r->str  += *preprocessedCode.str.cpp();
@@ -258,5 +218,63 @@ namespace pre {
                 last = c;
             }
         }
+    }
+}
+
+
+
+
+
+
+
+
+/**
+ * @brief //TODO
+ * @param rawFilePath The path that was found in the include directive, without any modification.
+ * @param foundFile Where to save the ifstream of the specified file.
+ * @return The canonical path of the specified file.
+ */
+std::string resolveFilePath(std::string rawFilePath, std::ifstream &foundFile) {
+
+    //! Include path relative to the file the include statement was used in. No changes if the raw path is an absolute path
+    fs::path adjustedIncludeFilePath;
+    if(rawIncludeFilePath[0] == '/') adjustedIncludeFilePath = rawIncludeFilePath;
+    else {
+        sourceFilePathsLock.lock();
+        adjustedIncludeFilePath = fs::path(sourceFilePaths[b->meta[i]->f]).parent_path() / rawIncludeFilePath;
+        sourceFilePathsLock.unlock();
+    }
+
+    //! Canonical version of the adjusted file path. No changes if file was not found
+    std::string canonicalIncludeFilePath;
+    try { canonicalIncludeFilePath = fs::canonical(adjustedIncludeFilePath).string(); }
+    catch(fs::filesystem_error e) { canonicalIncludeFilePath = adjustedIncludeFilePath.string(); }
+
+
+    // Print an error if the file is a directory
+    if(utils::isDir(canonicalIncludeFilePath)) {
+        printError(
+            ErrorCode::ERROR_PRE_PATH_IS_DIRECTORY,
+            utils::ErrType::PREPROCESSOR,
+            relevantCoords,
+            filePathCoords,
+            "Could not include the specified path: \"" + rawIncludeFilePath + "\" is a directory.\n" +
+            "File path was interpreted as: \"" + ansi::white + canonicalIncludeFilePath + ansi::reset + "\"."
+        );
+    }
+
+
+    // Print an error if the file cannot be opened
+    std::ifstream includeFile(actualFilePath);
+    if(!includeFile) {
+        printError(
+            ErrorCode::ERROR_PRE_PATH_CANNOT_OPEN,
+            utils::ErrType::PREPROCESSOR,
+            relevantCoords,
+            filePathCoords,
+            "Could not open file \"" + rawIncludeFilePath + "\": " + std::strerror(errno) + ".\n" +
+            "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\".\n" +
+            "Make sure that the path is correct and the compiler has read access to the file."
+        );
     }
 }
