@@ -283,7 +283,7 @@ namespace pre {
                     relevantCoords,
                     filePathCoords,
                     "Could not open file \"" + rawFilePath + "\": no such file or directory.\n" +
-                    "These paths were tried: " + invalidPathsList
+                    "Paths tried: " + invalidPathsList
                 );
             }
 
@@ -298,8 +298,8 @@ namespace pre {
                     utils::ErrType::PREPROCESSOR,
                     relevantCoords,
                     filePathCoords,
-                    "Ambiguous file path \"" + rawFilePath + "\" in include directory.\n" +
-                    "Multiple valid files were found: " + validPathsList
+                    "Ambiguous file path \"" + rawFilePath + "\".\n" +
+                    "Files that match this path: " + validPathsList
                 );
             }
 

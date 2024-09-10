@@ -29,18 +29,17 @@ std::vector<UnitTest*> tests;
 int compile(std::string options, ulong testIndex) {
 
     // Calculate full command and print "running" message
-    std::string fullCommand = compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options + " -I ./Tests";
+    std::string fullCommand = compilerLocation + " " + tmpFileLocatiton + std::to_string(testIndex) + " " + options;
     cout << "Running " << fullCommand << "\n";
 
     // Start subprocess
-    FILE* pipe = popen(fullCommand.c_str(), "r");
+    FILE* pipe = popen((fullCommand + " 2>&1").c_str(), "r");
     if(!pipe) {
         perror("popen failed"); //FIXME replace with an actual error or test failure
     }
 
     // Empty output buffer and discard its contents
     char buffer[128];
-    // while(fgets(buffer, sizeof(buffer), pipe) != nullptr) std::cout << buffer;
     while(fgets(buffer, sizeof(buffer), pipe) != nullptr);
 
     // Return the exit code
@@ -124,7 +123,7 @@ void TestExitValue::startTest() {
 
 void TestPreprocessorOutput::startTest() {
     UnitTest::startTest();
-    int exitValue = compile(options + "-p " + tmpOutputLocatiton + std::to_string(testIndex), testIndex);
+    int exitValue = compile(options + " -p " + tmpOutputLocatiton + std::to_string(testIndex), testIndex);
 
     if(exitValue) {
         result << ansi::bold_red << "    Compilation stopped with exit code " << exitValue << ".";

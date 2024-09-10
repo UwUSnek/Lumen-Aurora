@@ -73,36 +73,36 @@ int main(){
 
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy 1",
-        "A#include  \t\"Includes/basic.lum\"B",
+        "A#include  \t\"basic.lum\"B",
         "AtestB",
-        "-I Accuracy"
+        "-I Tests/Includes/Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy 2",
-        "A#include  \t\"Includes/inception2.lum\"B",
+        "A#include  \t\"inception2.lum\"B",
         "AtestB",
-        "-I Accuracy"
+        "-I Tests/Includes/Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy - comment only",
-        "A#include  \t\"Includes/commentOnly.lum\"B",
+        "A#include  \t\"commentOnly.lum\"B",
         "AB",
-        "-I Accuracy"
+        "-I Tests/Includes/Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy - comment boundaries",
-        "A#include  \t\"Includes/commentBoundaries.lum\"B",
+        "A#include  \t\"commentBoundaries.lum\"B",
         "AtestB",
-        "-I Accuracy"
+        "-I Tests/Includes/Accuracy"
     ));
 
 
 
-    tests.push_back(new TestPreprocessorOutput(
+    tests.push_back(new TestExitValue(
         "include conflict",
-        "A#include  \t\"Includes/commentBoundaries.lum\"B",
-        "AtestB",
-        "-I Conflict1 -I Conflict2"
+        "A#include   \t\"test.lum\"B",
+        ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,
+        "-I Tests/Includes/Conflict1 -I Tests/Includes/Conflict2"
     ));
 
 
