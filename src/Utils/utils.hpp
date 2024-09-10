@@ -24,7 +24,7 @@ namespace utils {
     int getConsoleWidth();
     // bool isDir(std::string const &path);
 
-    std::string formatChar(char c, ulong i, bool useColor = false);
+    std::string formatChar(char c, ulong col, bool useColor = false);
     std::string shortenInteger(ulong n);
     std::string formatMilliseconds(long n);
 

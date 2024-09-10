@@ -12,7 +12,7 @@ namespace pre {
 
         for(ulong i = 0; i < str.length(); ++i) {
             char c = *str[i];
-            r << utils::formatChar(c, true);
+            r << utils::formatChar(c, meta[i]->c, true);
             if(c == '\n') r << "\n";
         }
 
@@ -29,7 +29,7 @@ namespace pre {
         ulong lineStart = 0;
         for(ulong i = 0; i < str.length(); ++i) {
             char c = *str[i];
-            r << utils::formatChar(c, true);
+            r << utils::formatChar(c, meta[i]->c, true);
 
             if(c == '\n' || i == str.length() - 1) {
                 r << "\n";

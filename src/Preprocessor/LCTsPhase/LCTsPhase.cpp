@@ -36,25 +36,30 @@ namespace pre {
         increaseMaxProgress(b->length());
 
 
-        ulong i = 0;                // Current index relative to the raw data
-        ulong curLine = 0;          // The current line number relative to the raw data
+        ulong i = 0;        // The current index relative to the raw data
+        ulong c = 0;        // The current column number relative to the raw data
+        ulong l = 0;        // The current line number relative to the raw data
         while(i < b->length()) {
 
             // Skip LCTs
             ulong lct = checkLct(b, i);
             if(lct) {
                 i += lct;
+                c += lct;
                 increaseLocalProgress(lct);
-                ++curLine;
+                ++l;
             }
 
             // Push normal characters
             else {
                 r->str  += (*b)[i];
-                r->meta += CleanSourceMeta(CleanSourceType::MISC, i, curLine, DBG_filePathIndex);
-                if(b->at(i) == '\n') ++curLine;
+                r->meta += CleanSourceMeta(CleanSourceType::MISC, i, l, c, DBG_filePathIndex);
+                if(b->at(i) == '\n') {
+                    ++l;
+                    c = 0;
+                }
                 ++i;
-                // pre::increaseLocalProgress(1);
+                ++c;
             }
         }
 

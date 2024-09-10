@@ -43,7 +43,8 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
     phaseDataArrayLock.lock(); //FIXME replace pre::totalProgress with progressbar saved in the Phase array
     for(ulong i = 0; i < phaseDataArray.size(); ++i) {
         //FIXME replace pre::totalProgress with progressbar saved in the Phase array
-        const bool isPhaseComplete = phaseDataArray[i].totalProgress->isComplete();
+        // const bool isPhaseComplete = phaseDataArray[i].totalProgress->isComplete();
+        const bool isPhaseComplete = phaseDataArray[i].timeEnd->load() > 0;
         const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
 
         cout << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    " << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;

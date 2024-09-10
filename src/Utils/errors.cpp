@@ -14,6 +14,67 @@ namespace fs = std::filesystem;
 
 
 /**
+ * @brief Checks if a character is whitespace (either a space, \n or \t).
+ * @return Whether a character is whitespace or not.
+ */
+static bool isWhitespace(char c) {
+    return c == ' ' || c == '\n' || c == '\t';
+}
+
+
+
+
+/**
+ * @brief Resizes <coords> to remove any leading and trailing whitespace characters.
+ * @param s The string <coords> refers to.
+ * @param coords The coordinates.
+ * @return The trimmed coordinates.
+ */
+static inline ElmCoords trimCoords(std::string s, ElmCoords coords) {
+    ulong end = coords.end;
+    ulong start = coords.start;;
+    ulong curLine = coords.lineNum;
+
+    while(end >= coords.start && isWhitespace(s[end])) {
+        --end;
+    }
+    while(start <= end && isWhitespace(s[start])) {
+        if(s[end] == '\n') ++curLine;
+        ++start;
+    }
+    return ElmCoords(coords.filePathIndex, curLine, start, end);
+}
+
+
+
+
+/**
+ * @brief Resizes <coords> to remove any leading and trailing whitespace characters.
+ * @param fullCommand The command string <coords> refers to.
+ * @param coords The coordinates.
+ * @return The trimmed coordinates.
+ */
+static inline cmd::ElmCoordsCL trimCoords(std::string fullCommand, cmd::ElmCoordsCL coords) {
+    ulong end = coords.end;
+    ulong start = coords.start;;
+
+    while(end >= coords.start && isWhitespace(fullCommand[end])) {
+        --end;
+    }
+    while(start <= end && isWhitespace(fullCommand[start])) {
+        ++start;
+    }
+    return cmd::ElmCoordsCL(start, end);
+}
+
+
+
+
+
+
+
+
+/**
  * @brief Prints a formatted line indicator and colors it black.
  *      The color is NOT reset after. The caller function will have to manually change it back.
 *      This function is NOT thread safe. Use a mutex to ensure other threads don't print at the same time.
@@ -22,6 +83,18 @@ namespace fs = std::filesystem;
 static inline void printLineNum(ulong n) {
     cerr << ansi::reset << ansi::bold_black << "\n" << std::right << std::setw(8) << n + 1 << " │ ";
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -49,7 +122,9 @@ void utils::printErrorGeneric(ErrorCode errorCode, std::string const &message) {
 
 
 
-void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &relPos, cmd::ElmCoordsCL const &errPos, std::string const &message, std::string const &fullCommand) {
+void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, std::string const &message, std::string const &fullCommand) {
+    cmd::ElmCoordsCL const &relPos = trimCoords(fullCommand, _relPos);
+    cmd::ElmCoordsCL const &errPos = trimCoords(fullCommand, _errPos);
     consoleLock.lock();
 
     cerr << ansi::bold_red;
@@ -69,7 +144,7 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &relPos, cm
         }
 
         // Actually print the formatted character
-        cerr << utils::formatChar(fullCommand[i], i);
+        cerr << utils::formatChar(fullCommand[i], i, true);
     }
 
 
@@ -95,8 +170,8 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &relPos, cm
  * @param message The error message. This can contain multiple lines.
  *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
  */
-void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &errPos, std::string const &message) {
-    printError(errorCode, errType, ElmCoords(), errPos, message);
+void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_errPos, std::string const &message) {
+    printError(errorCode, errType, ElmCoords(), _errPos, message);
 }
 
 
@@ -117,10 +192,10 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &er
  * @param message The error message. This can contain multiple lines.
  *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
  */
-void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &relPos, ElmCoords const &errPos, std::string const &message) {
+void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_relPos, ElmCoords const &_errPos, std::string const &message) {
     sourceFilePathsLock.lock();
-    std::string relFilePath = sourceFilePaths[relPos.filePathIndex];
-    std::string errFilePath = sourceFilePaths[errPos.filePathIndex];
+    std::string relFilePath = sourceFilePaths[_relPos.filePathIndex];
+    std::string errFilePath = sourceFilePaths[_errPos.filePathIndex];
     sourceFilePathsLock.unlock();
 
     consoleLock.lock();
@@ -135,6 +210,8 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &re
     // Find the line in the original file and calculate the starting index of the preceding line
     bool useRelevant = relFilePath.length();
     std::string s = readAndCheckFile(errFilePath);
+    ElmCoords const &relPos = trimCoords(s, _relPos);
+    ElmCoords const &errPos = trimCoords(s, _errPos);
     ulong curLine = useRelevant ? std::min(relPos.lineNum, errPos.lineNum) : errPos.lineNum;
     curLine -= !!curLine;
     ulong i       = useRelevant ? std::min(relPos.start,     errPos.start) : errPos.start;
@@ -159,6 +236,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &re
     ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
     ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
     const char* lastColor;
+    ulong col = 0;
     for(; s[i] != '\0'; ++i) {
 
         // Calculate current color based on the current character index and print it if it differs form the last one
@@ -169,8 +247,10 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &re
         }
 
         // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
-        cerr << formatChar(s[i], i);
+        cerr << formatChar(s[i], col, true);
+        ++col;
         if(s[i] == '\n') {
+            col = 0;
             ++curLine;
             if(curLine > targetLineNum) {
                 break;

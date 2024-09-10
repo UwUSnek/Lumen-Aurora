@@ -12,8 +12,8 @@ namespace utils {
         COMPILER
     };
 
-    void printErrorGeneric(ErrorCode errorCode,                                                                                  std::string const &message);
-    void      printErrorCL(ErrorCode errorCode,                  cmd::ElmCoordsCL const &relPos, cmd::ElmCoordsCL const &errPos, std::string const &message, std::string const &fullCommand);
-    void        printError(ErrorCode errorCode, ErrType errType,                                        ElmCoords const &errPos, std::string const &message);
-    void        printError(ErrorCode errorCode, ErrType errType,        ElmCoords const &relPos,        ElmCoords const &errPos, std::string const &message);
+    void printErrorGeneric(ErrorCode errorCode,                                                                                    std::string const &message);
+    void      printErrorCL(ErrorCode errorCode,                  cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, std::string const &message, std::string const &fullCommand);
+    void        printError(ErrorCode errorCode, ErrType errType,                                       ElmCoords   const &_errPos, std::string const &message);
+    void        printError(ErrorCode errorCode, ErrType errType,        ElmCoords const &_relPos,      ElmCoords   const &_errPos, std::string const &message);
 }

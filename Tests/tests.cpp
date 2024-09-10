@@ -107,7 +107,7 @@ int main(){
     tests.push_back(new TestExitValue(
         "include path merging",
         "A#include   \t\"test.lum\"B",
-        ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,
+        ErrorCode::SUCCESS,
         "-I Tests/Includes/Conflict1 -I Tests/Includes/Conflict1 -I Tests/Includes/./../Includes/Conflict1"
     ));
 

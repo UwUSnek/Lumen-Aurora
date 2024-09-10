@@ -68,16 +68,16 @@ int utils::getConsoleWidth() {
  * @brief Returns a string containing the character.
  *      Invisible characters are replaced with visible glyphs.
  * @param c The character.
+ * @param col The column number of the character (its index relative to the start of the line). This is used to render tab characters.
  * @param useColor Whether to color invisible characters black. Default: false.
- * @param i The index of the character. This is used to render tab characters.
  * @return The formatted character.
  */
-std::string utils::formatChar(char c, ulong i, bool useColor) {
+std::string utils::formatChar(char c, ulong col, bool useColor) {
     /**/ if(c ==  ' ') return useColor ? ansi::bright_black + "·" + ansi::reset : "·";
-    else if(c == '\n') return useColor ? ansi::bright_black + "↓" + ansi::reset : "↓";
+    else if(c == '\n') return useColor ? ansi::bright_black + "⏷" + ansi::reset : "⏷";
     else if(c == '\t') {
         const char* s[] = { "╶──╴", "╶─╴", "╶╴", "-" };
-        std::string tabRender = s[i % 4];
+        std::string tabRender = s[col % 4];
         return useColor ? ansi::bright_black + tabRender + ansi::reset : tabRender;
     }
     else return std::string(1, c);

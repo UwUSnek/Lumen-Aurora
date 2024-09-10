@@ -9,5 +9,5 @@
   */e"test.lum"
 
 '\u0042'\
-'\n'
-//#include "../Tests/HugeSource/huge.lum"
+'\n'a
+#include 	"../Tests/HugeSource/huge.lum."

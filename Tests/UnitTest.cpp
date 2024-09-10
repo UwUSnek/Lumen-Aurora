@@ -139,16 +139,26 @@ void TestPreprocessorOutput::startTest() {
 
                 // Print formatted input code
                 result << ansi::bold_red << "    Used input:\n        " << ansi::reset;
+                ulong col = 0;
                 for(int i = 0; i < code.length(); ++i) {
-                    result << utils::formatChar(code[i], true);
-                    if(code[i] == '\n' && i < code.length() - 1) result << "\n        ";
+                    result << utils::formatChar(code[i], col, true);
+                    if(code[i] == '\n') {
+                        col = 0;
+                        if(i < code.length() - 1) result << "\n        ";
+                    }
+                    else ++col;
                 }
 
                 // Print formatted output code
                 result << ansi::bold_red << "\n    Generated output:\n        " << ansi::reset;
+                col = 0;
                 for(int i = 0; i < outputCode.length(); ++i) {
-                    result << utils::formatChar(outputCode[i], true);
-                    if(outputCode[i] == '\n' && i < outputCode.length() - 1) result << "\n        ";
+                    result << utils::formatChar(outputCode[i], col, true);
+                    if(outputCode[i] == '\n') {
+                        col = 0;
+                        if(i < outputCode.length() - 1) result << "\n        ";
+                    }
+                    else ++col;
                 }
             }
             f.close();
