@@ -267,7 +267,21 @@ namespace pre {
             for(std::string const &dir : cmd::options.includePaths) {
                 std::string const &fullPath = dir + "/" + rawFilePath;
                 utils::PathCheckResult const &result = utils::checkPath(fullPath);
-                (result.exists ? validPaths : invalidPaths).push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
+
+                // Skip current file path if one equivalent to it already exists. If not, push it to the correct vector
+                if(result.exists) {
+                    std::string canonical = fs::canonical(fullPath);
+                    for(int i = 0;; ++i) {
+                        if(i < validPaths.size() && canonical == validPaths[i].first) {
+                            break;
+                        }
+                        if(i >= validPaths.size()) { //! Checking -1 makes it overflow and loop forever
+                            validPaths.push_back(std::pair<std::string, utils::PathCheckResult>(canonical, result));
+                            break;
+                        }
+                    }
+                }
+                else invalidPaths.push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
             }
 
 
@@ -291,7 +305,7 @@ namespace pre {
             if(validPaths.size() > 1) {
                 std::string validPathsList = ansi::reset;
                 for(ulong i = 0; i < validPaths.size(); ++i) {
-                    validPathsList += "\n    " + std::to_string(i + 1) + ". \"" + ansi::white + fs::canonical(validPaths[i].first).string() + ansi::reset + "\"";
+                    validPathsList += "\n    " + std::to_string(i + 1) + ". \"" + ansi::white + validPaths[i].first + ansi::reset + "\"";
                 }
                 printError(
                     ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,

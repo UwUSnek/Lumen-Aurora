@@ -8,7 +8,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/Build/out",
             "args": [
-                "./Test/main.lum",
+                "/tmp/Lumina-Aurora_UnitTests/src11",
+                "-I", "Tests/Includes/Accuracy",
                 "-p", "./Test/out"
             ],
             "stopAtEntry": false,
