@@ -35,10 +35,10 @@ static inline ElmCoords trimCoords(std::string s, ElmCoords coords) {
     ulong start = coords.start;;
     ulong curLine = coords.lineNum;
 
-    while(end >= coords.start && isWhitespace(s[end])) {
+    while(end > coords.start && isWhitespace(s[end])) {
         --end;
     }
-    while(start <= end && isWhitespace(s[start])) {
+    while(start < end && isWhitespace(s[start])) {
         if(s[end] == '\n') ++curLine;
         ++start;
     }

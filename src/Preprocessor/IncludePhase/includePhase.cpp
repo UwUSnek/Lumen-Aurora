@@ -50,13 +50,17 @@ namespace pre {
             // If an include directive is detected, replace it with the preprocessed contents of the file
             parseIncludeStatementName(i, b, match);
             if(!match.empty()) {
-                ElmCoords relevantCoords(b, i, i + match.length() - 1);
+                ulong j = i + match.length();
+                ElmCoords relevantCoords(b, i, j - 1);
+
+                // Skip whitespace if present
+                while(b->str[j] == ' ' || b->str[j] == '\t') ++j;
 
                 // Detect specified file path
-                parseIncludeStatementPath(i + match.length(), b, filePathMatch);
+                parseIncludeStatementPath(j, b, filePathMatch);
                 if(!filePathMatch.empty()) {
-                    ElmCoords filePathCoords(b, i + match.length(), i + match.length() + filePathMatch.length() - 1);
-
+                    ulong k = j + filePathMatch.length();
+                    ElmCoords filePathCoords(b, j, k - 1);
 
                     // File path is present
                     if(filePathMatch.length() > 2) {
@@ -108,9 +112,8 @@ namespace pre {
 
 
                     // Increase index (skip include and file path)
-                    ulong fullLen = match.length() + filePathMatch.length();
-                    i += fullLen;
-                    increaseLocalProgress(fullLen);
+                    increaseLocalProgress(k - i);
+                    i = k;
                 }
 
                 // File path not found
@@ -119,7 +122,7 @@ namespace pre {
                         ErrorCode::ERROR_PRE_NO_PATH,
                         utils::ErrType::PREPROCESSOR,
                         relevantCoords,
-                        (!b->str[i + match.length()].has_value()) ? relevantCoords : ElmCoords(b, i + match.length(), i + match.length()),
+                        (!b->str[j].has_value()) ? relevantCoords : ElmCoords(b, j, j),
                         "Missing file path in include statement.\n"
                         "A valid file path was expected, but could not be found."
                     );
@@ -170,15 +173,6 @@ namespace pre {
         while(true) {
             char c = *b->str[j];
             if(std::isdigit(c) || std::isalpha(c) || c == '_') {
-                match += c;
-                ++j;
-            }
-            else break;
-        }
-
-        while(true) {
-            char c = *b->str[j];
-            if(c == ' ' || c == '\t') {
                 match += c;
                 ++j;
             }
