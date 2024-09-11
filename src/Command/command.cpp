@@ -169,8 +169,6 @@ namespace cmd {
                         break;
                     }
                 }
-                //TODO CHECK THIS TOO IN THE INCLUDE STUFF but the other way around
-                //TODO                         if(!fs::is_directory(fs::is_symlink(canonicalPath) ? fs::read_symlink(canonicalPath).string() : canonicalPath)) {
 
 
 

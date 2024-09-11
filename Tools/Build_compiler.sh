@@ -10,20 +10,19 @@ g++                                                            \
     ./src/Utils/utils.cpp                                      \
     ./src/Utils/errors.cpp                                     \
     ./src/Utils/DynamicProgressBar.cpp                         \
-    ./src/Utils/Containers/StringPipe.cpp                      \
     ./src/ALC.cpp                                              \
     ./src/main.cpp                                             \
     \
     ./src/Command/command.cpp                                  \
     \
     ./src/Preprocessor/preprocessor.cpp                        \
-    ./src/Preprocessor/IntermediateCodeFormat.cpp              \
     ./src/Preprocessor/CleanupPhase/SegmentedCleanSource.cpp   \
     ./src/Preprocessor/ElmCoords.cpp                           \
     \
     ./src/Preprocessor/LCTsPhase/LCTsPhase.cpp                 \
     ./src/Preprocessor/CleanupPhase/cleanupPhase.cpp           \
     ./src/Preprocessor/IncludePhase/includePhase.cpp           \
+    ./src/Preprocessor/MacroPhase/macroPhase.cpp               \
     \
 -std=c++20                                                     \
 -O0 -g                                                         \

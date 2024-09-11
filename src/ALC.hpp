@@ -41,16 +41,6 @@ enum class ThreadType : ulong {
 extern thread_local ThreadType threadType;
 
 
-//TODO replace with a more automated system
-
-// extern std::chrono::_V2::system_clock::time_point timeStartPre;   extern std::chrono::duration<double> timePre;
-// extern std::chrono::_V2::system_clock::time_point timeStartComp;  extern std::chrono::duration<double> timeComp;
-// extern std::chrono::_V2::system_clock::time_point timeStartOpt;   extern std::chrono::duration<double> timeOpt;
-// extern std::chrono::_V2::system_clock::time_point timeStartConv;  extern std::chrono::duration<double> timeConv;
-
-// extern std::map<std::string, std::string*> fileContentCache;
-
-
 extern std::atomic<bool> isComplete;
 
 
@@ -130,7 +120,6 @@ extern std::mutex             phaseDataArrayLock;
 struct SubphaseData {
     PhaseID phaseId;
 
-    //TODO add something that points to the main phase this subphase is part of
     //! pointers avoid having to lock and unlock every time an element is accessed by a subphase thread
     std::atomic<ulong>*                         localProgress;
 
@@ -211,35 +200,3 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
         }
     ).detach();
 }
-
-
-// struct PhaseData {
-
-//     // The name of the phase
-//     std::string name;
-
-//     // The progress bar that shows up in the output
-//     // This is only accessed by the server thread
-//     DynamicProgressBar totalProgress;
-
-//     // Local progress data
-//     //! Worker threads MUST use a thread_local pointer to their element in order to access it
-//     // Modifying the vector itself requires using localProgressArrayLock. Any thread can modify it
-//     std::vector<std::atomic<ulong>*> localProgressArray;
-//     std::mutex                       localProgressArrayLock;
-
-
-//     PhaseData() : totalProgress(0, ansi::bright_green, ansi::bright_black) {}
-// };
-
-
-
-
-// struct SubphaseData {
-//     std::string name;
-//     pre::SegmentedCleanSource outputPipe;
-// };
-// extern std::vector<SubphaseData*> subphases;
-// extern std::mutex subphasesLock;
-
-// void

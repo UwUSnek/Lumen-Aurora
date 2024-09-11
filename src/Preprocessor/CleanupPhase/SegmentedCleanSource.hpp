@@ -59,6 +59,5 @@ namespace pre {
         VectorPipe<CleanSourceMeta> meta;   // Informations about each character
 
         std::string toString();
-        std::string toStringVerbose();
     };
 }

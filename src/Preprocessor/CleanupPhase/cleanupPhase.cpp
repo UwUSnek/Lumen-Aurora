@@ -18,10 +18,7 @@
 
 
 namespace pre {
-    //FIXME use a stream and process the steps concurrently
     void startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
-        // pre::totalProgress.increaseTot(b.str.cpp_str()->length());
-        //FIXME count progress of deleted characters + all characters of last phase
 
 
 
@@ -40,13 +37,10 @@ namespace pre {
             ulong literalLen = saveLiteral(b, i, r);
             if(literalLen) {
                 i += literalLen;
-                // pre::increaseLocalProgress(literalLen);
                 continue;
             }
 
             // Skip (and preserve) macro definitions and calls
-            // FIXME
-            // FIXME
             // FIXME
 
 
@@ -79,11 +73,9 @@ namespace pre {
             r->str  += *b->str[i];
             r->meta += *b->meta[i];
             ++i;
-            // pre::increaseLocalProgress(1);
         }
 
 
-        // return r;
         r->str.closePipe();
         r->meta.closePipe();
     }
@@ -173,7 +165,7 @@ namespace pre {
      *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
      */
     ulong measureComment(StringPipe &b, ulong index) {
-        if(b[index] != '/') return 0; //TODO
+        if(b[index] != '/') return 0;
 
 
         char last = *b[index];
@@ -193,7 +185,6 @@ namespace pre {
             }
 
             // Single character closing sequences (End of file or single line comments)
-            // else if(b[i] == '\0' || commType == '/' && b[i] == '\n') {
             else if(!b[i].has_value() || commType == '/' && b[i] == '\n') {
                 break;
             }
@@ -228,9 +219,6 @@ namespace pre {
      * @param index The index at which the literal starts.
      * @param r The buffer in which to save the literal.
      * @return The length of the literal, including the opening and closing character sequences, or 0 if none was found.
-     //FIXME add saveInclude function
-     //FIXME add saveMacroDef function
-     //FIXME add saveMacroCall function
      */
     ulong saveLiteral(SegmentedCleanSource *b, ulong index, SegmentedCleanSource *r) {
         if(b->str[index] != '"' && b->str[index] != '\'') return 0;
@@ -246,14 +234,10 @@ namespace pre {
             if(b->str[i] == '\\') {
                 r->str  += *b->str[i];
                 r->meta += *b->meta[i];
-                // if(b->str[i + 1] != '\0') {
                 if(b->str[i].has_value()) {
                     r->str  += *b->str[i + 1];
                     r->meta += *b->meta[i + 1];
                 }
-                // i += 1 + (b.str[i + 1] != '\0'); //TODO remove if not needed
-                // //! ^ Only add 1 if the \ is the last character of the file. //TODO remove if not needed
-                // //! This allows the next iteration to detect the error and print it //TODO remove if not needed
                 i += 2;
             }
 
@@ -267,7 +251,6 @@ namespace pre {
             }
 
             // Missing closing sequence
-            // else if(b->str[i] == '\0') {
             else if(!b->str[i].has_value()) {
                 ulong lastI = std::min(i - 1, b->str.length() - 1);
                 utils::printError(

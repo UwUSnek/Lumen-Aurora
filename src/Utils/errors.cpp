@@ -1,5 +1,6 @@
 #include <regex>
 #include <filesystem>
+#include <fstream>
 namespace fs = std::filesystem;
 
 #include "errors.hpp"
@@ -180,10 +181,6 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_e
 //FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 
 
-//FIXME TRIM RELEVANT SECTION AND ERROR SECTION
-//FIXME remove all tabs, newlines and whitespaces before and after both
-//FIXME add a parameter to disable trimming
-
 /**
  * @brief Stop the program and prints an error to stderr, specifying the error type.
  * @param errorType The type of the error.
@@ -207,56 +204,70 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
     cerr << " error:\n";
 
 
-    // Find the line in the original file and calculate the starting index of the preceding line
+    // Check original file
     bool useRelevant = relFilePath.length();
-    std::string s = readAndCheckFile(errFilePath);
-    ElmCoords const &relPos = trimCoords(s, _relPos);
-    ElmCoords const &errPos = trimCoords(s, _errPos);
-    ulong curLine = useRelevant ? std::min(relPos.lineNum, errPos.lineNum) : errPos.lineNum;
-    curLine -= !!curLine;
-    ulong i       = useRelevant ? std::min(relPos.start,     errPos.start) : errPos.start;
-    do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
-    do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
-    if(curLine > 0 && s[i] == '\n') ++i;
+    std::ifstream f(errFilePath);
+    if(!f.is_open()) {
 
-
-    // Print location
-    ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
-    if(errFilePath.length()) {
-        cerr << "    File │ " << ansi::reset << fs::canonical(errFilePath) << ansi::bold_red << "\n";
-        cerr << "    Line │ " << ansi::reset;
-        if(errHeight == 0) cerr << errPos.lineNum + 1;
-        else               cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;
+        // Print location
+        if(errFilePath.length()) {
+            cerr << "    File │ " << ansi::reset << errFilePath << ansi::bright_black << " (source file unavailable)\n" << ansi::reset;
+            cerr << "    Line │ " << ansi::reset << _errPos.lineNum + 1;
+        }
     }
+    else {
+
+        // Find the line in the original file and calculate the starting index of the preceding line
+        std::string s = readFile(f);
+        f.close();
+        ElmCoords const &relPos = trimCoords(s, _relPos);
+        ElmCoords const &errPos = trimCoords(s, _errPos);
+        ulong curLine = useRelevant ? std::min(relPos.lineNum, errPos.lineNum) : errPos.lineNum;
+        curLine -= !!curLine;
+        ulong i       = useRelevant ? std::min(relPos.start,     errPos.start) : errPos.start;
+        do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
+        do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
+        if(curLine > 0 && s[i] == '\n') ++i;
 
 
-    // Print all the interested lines and change color according to the indices of the relevant and offending sections
-    cerr << "\n";
-    printLineNum(curLine);
-    ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
-    ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
-    const char* lastColor;
-    ulong col = 0;
-    for(; s[i] != '\0'; ++i) {
-
-        // Calculate current color based on the current character index and print it if it differs form the last one
-        const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
-        if(curColor != lastColor) {
-            cerr << curColor;
-            lastColor = curColor;
+        // Print location
+        ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
+        if(errFilePath.length()) {
+            cerr << "    File │ " << ansi::reset << errFilePath << ansi::bold_red << "\n";
+            cerr << "    Line │ " << ansi::reset;
+            if(errHeight == 0) cerr << errPos.lineNum + 1;
+            else               cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;
         }
 
-        // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
-        cerr << formatChar(s[i], col, true);
-        ++col;
-        if(s[i] == '\n') {
-            col = 0;
-            ++curLine;
-            if(curLine > targetLineNum) {
-                break;
+
+        // Print all the interested lines and change color according to the indices of the relevant and offending sections
+        cerr << "\n";
+        printLineNum(curLine);
+        ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
+        ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
+        const char* lastColor;
+        ulong col = 0;
+        for(; s[i] != '\0'; ++i) {
+
+            // Calculate current color based on the current character index and print it if it differs form the last one
+            const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
+            if(curColor != lastColor) {
+                cerr << curColor;
+                lastColor = curColor;
             }
-            printLineNum(curLine);
-            cerr << lastColor;
+
+            // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
+            cerr << formatChar(s[i], col, true);
+            ++col;
+            if(s[i] == '\n') {
+                col = 0;
+                ++curLine;
+                if(curLine > targetLineNum) {
+                    break;
+                }
+                printLineNum(curLine);
+                cerr << lastColor;
+            }
         }
     }
 

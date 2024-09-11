@@ -10,4 +10,4 @@
 
 '\u0042'\
 '\n'
-//#include/*aa*/  	"../Tests/HugeSource/huge.lum"
+#include/*aa*/  	"../Tests/HugeSource/huge.lum"

@@ -31,7 +31,7 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
     // Adjust position and print command
     cout << "\033[s";             // Save cursor position
-    cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI) //FIXME understand why this is not working
+    cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI)
     cout << "\033[999;999H";      // Move cursor to bottom-left corner
     cout << "\033[8A";            // Move cursor 8 lines up
     if(_isComplete) cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
@@ -40,10 +40,8 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
 
 
     // Print the status of each phase, in order
-    phaseDataArrayLock.lock(); //FIXME replace pre::totalProgress with progressbar saved in the Phase array
+    phaseDataArrayLock.lock();
     for(ulong i = 0; i < phaseDataArray.size(); ++i) {
-        //FIXME replace pre::totalProgress with progressbar saved in the Phase array
-        // const bool isPhaseComplete = phaseDataArray[i].totalProgress->isComplete();
         const bool isPhaseComplete = phaseDataArray[i].timeEnd->load() > 0;
         const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
 
@@ -64,7 +62,7 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
             ;
         }
     }
-    phaseDataArrayLock.unlock(); //FIXME replace pre::totalProgress with progressbar saved in the Phase array
+    phaseDataArrayLock.unlock();
 
 
 
@@ -113,15 +111,8 @@ void startMonitorThread(std::string fullCommand){
             phaseDataArrayLock.lock();
             phaseDataArray[e.phaseId].totalProgress->increase(e.localProgress->exchange(0));
             phaseDataArrayLock.unlock();
-            // if(e.phaseId == PhaseID::PREPROCESSING) pre::totalProgress.increase(e.localProgress->load());
         }
         subphaseDataArrayLock.unlock();
-        // localProgressArrayLock.lock();
-        // for(ulong i = 0; i < localProgressArray.size(); ++i) {
-            // pre::totalProgress.increase(localProgressArray[i]->exchange(0));
-        // }
-        // localProgressArrayLock.unlock();
-
 
 
         // Calculate progress bar width
@@ -140,10 +131,6 @@ void startMonitorThread(std::string fullCommand){
         ++loop;
 
     } while(!delayedIsCompleted);
-
-
-    // // Print final update before joining main thread
-    // printStatusUI(fullCommand, loop, progressBarWidth, true);
 }
 
 
@@ -153,22 +140,6 @@ void startMonitorThread(std::string fullCommand){
 
 
 
-
-//TODO real time progress bares for each phase, all visible at once
-//TODO real time progress bares for each phase, all visible at once
-//TODO real time progress bares for each phase, all visible at once
-//TODO real time progress bares for each phase, all visible at once
-//TODO real time progress bares for each phase, all visible at once
-//TODO real time progress bares for each phase, all visible at once
-//TODO real time progress bares for each phase, all visible at once
-
-//TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-//TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-//TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-//TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-//TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-//TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
-//TODO 100% VALUE CHANGES WHEN A NEW FILE OR SECTION IS DISCOVERED. PROGRESS BAR SHOWS THE TOTAL PROGRESS OF ALL THREADS
 void writeOutputFile(std::string &code) {
     // Create directories
     fs::create_directories(fs::path(cmd::options.outputFile).parent_path());
@@ -195,7 +166,6 @@ void writeOutputFile(std::string &code) {
 
 
 
-//TODO run all passes concurrently. make the next pass wait for the previous one when it reached it and make them read from streams
 int main(int argc, char* argv[]){
     threadType = ThreadType::MAIN;
 
@@ -219,7 +189,6 @@ int main(int argc, char* argv[]){
         exit(0);
     }
 
-    // bool preprocessOnly = cmd::options.outputType == 'p';
     bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
     bool compileExec    = cmd::options.outputType == 'x';
 
@@ -233,54 +202,36 @@ int main(int argc, char* argv[]){
 
 
 
-    //TODO add an option to suppress fancy real-time output
-
-    //FIXME write info and estimated percentage progress instead of the time spent after the name of the phase.
-    //FIXME color them green and replace them with the time after completing it.
-
-    //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
     // Preprocessing
-    // timeStartPre = std::chrono::high_resolution_clock::now();
-    std::string s = utils::readAndCheckFile(cmd::options.sourceFile);
+    std::ifstream f(cmd::options.sourceFile);
+    std::string s = utils::readFile(f);
+    f.close();
     totalFiles.fetch_add(1);
     pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
-    // timePre = std::chrono::high_resolution_clock::now() - timeStartPre;
 
 
 
 
-    // if(cmd::options.outputType == 'p') {
-        // writeOutputFile(*sourceCode.str.cpp());
-        //TODO write source informations if requested
-    // }
     if(compileModule) {
-        //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
         // Compilation
-        // timeStartComp = std::chrono::high_resolution_clock::now();
         //TODO actually compile the code
-        // timeComp = std::chrono::high_resolution_clock::now() - timeStartComp;
 
 
 
 
-        //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
         // Optimization
-        // timeStartOpt = std::chrono::high_resolution_clock::now();
         //TODO actually optimize the code
-        // timeOpt = std::chrono::high_resolution_clock::now() - timeStartOpt;
     }
+
 
 
 
     if(compileExec) {
-        //FIXME write progress bar and update output in real time. only show errors/success when they actually happen and clear the progress
         // Conversion to C and gcc compilation
-        // timeStartConv = std::chrono::high_resolution_clock::now();
         //TODO actually convert the code
-        // timeConv = std::chrono::high_resolution_clock::now() - timeStartConv;
-
-        // writeOutputFile(sourceCode.str); //TODO use the output from the conversion phase
     }
+
+
 
 
 
@@ -295,9 +246,6 @@ int main(int argc, char* argv[]){
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    // threadsLock.lock();
-    // for(auto &t : threads) t.join();
-    // threadsLock.unlock();
 
 
 

@@ -20,11 +20,6 @@ namespace fs = std::filesystem;
 
 namespace pre {
     void startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
-        // pre::totalProgress.increaseTot(b.str.length());
-        //FIXME count progress of deleted characters + all characters of last phase
-
-
-
 
         ulong i = 0; // The character index relative to the current file, not including included files
         while(b->str[i].has_value()) {
@@ -37,7 +32,6 @@ namespace pre {
             ulong literalLen = saveLiteral(b, i, r);
             if(literalLen) {
                 i += literalLen;
-                increaseLocalProgress(literalLen);
                 continue;
             }
 
@@ -76,20 +70,18 @@ namespace pre {
 
                         // If it is an actual file
                         else {
-                            //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
-                            //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
-                            //FIXME MOVE ACTUAL FILE PATH CALCULATION AND ERRORS TO THE utils::readAndCheckFile FUNCTION
+
                             // Calculate the actual file path
                             std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[b->meta[i]->f], relevantCoords, filePathCoords);
 
-
                             // Copy file contents and metadata
                             std::ifstream actualFile(actualFilePath);
-                            std::string* fileContents = new std::string(utils::readFile(actualFile)); //FIXME add a function that read a file and saves it in a global array so they don't go out of scope
+                            std::string* fileContents = new std::string(utils::readFile(actualFile));
+                            //FIXME add a function that reads a file and saves it in a global array so they don't go out of scope
                             actualFile.close();
 
                             totalFiles.fetch_add(1);
-                            SegmentedCleanSource& preprocessedCode = loadSourceCode(fileContents, actualFilePath); //FIXME run concurrently
+                            SegmentedCleanSource& preprocessedCode = loadSourceCode_loop(fileContents, actualFilePath);
                             preprocessedCode.str.awaitClose();
                             preprocessedCode.meta.awaitClose();
                             r->str  += *preprocessedCode.str.cpp();
@@ -136,7 +128,6 @@ namespace pre {
                 r->str  += *b->str[i];
                 r->meta += *b->meta[i];
                 ++i;
-                increaseLocalProgress(1);
             }
         }
 
@@ -157,12 +148,12 @@ namespace pre {
 
     //! Manual regex because std doesn't support my custom pipe.
     //! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b->str[i:]
-    void parseIncludeStatementName(ulong i, pre::SegmentedCleanSource *b, std::string &match) {
+    void parseIncludeStatementName(ulong index, pre::SegmentedCleanSource *b, std::string &match) {
         std::string tmp;
         ulong nameLen = sizeof("#include") - 1;
-        ulong j = i + nameLen;
-        if(b->str[j].has_value()) {
-            if(!strncmp(b->str.cpp()->c_str() + i, "#include", nameLen)) {
+        ulong i = index + nameLen;
+        if(b->str[i].has_value()) {
+            if(!strncmp(b->str.cpp()->c_str() + index, "#include", nameLen)) {
                 tmp += "#include";
             }
             else return;
@@ -171,10 +162,10 @@ namespace pre {
         match = tmp;
 
         while(true) {
-            char c = *b->str[j];
+            char c = *b->str[i];
             if(std::isdigit(c) || std::isalpha(c) || c == '_') {
                 match += c;
-                ++j;
+                ++i;
             }
             else break;
         }
@@ -189,10 +180,11 @@ namespace pre {
 
     //! Manual regex because std doesn't support my custom pipe.
     //! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b->str[i:]
-    void parseIncludeStatementPath(ulong i, pre::SegmentedCleanSource *b, std::string &filePathMatch) {
+    void parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, std::string &filePathMatch) {
         std::string tmp;
 
         char type;
+        ulong i = index;
         if(b->str[i].has_value()) {
             type = *b->str[i];
             if(type == '<' || type == '"') {
@@ -201,11 +193,30 @@ namespace pre {
             }
             else return;
         }
+        else return;
 
         char last = type;
         while(true) {
+            if(!b->str[i].has_value()) {
+                utils::printError(
+                    ErrorCode::ERROR_STRING_INCOMPLETE_0,
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(b, index, i - 1),
+                    ElmCoords(b, i - 1, i - 1),
+                    "Standard module name is missing a closing \">\" character." //! Copy incomplete string error message
+                );
+            }
+
             char c = *b->str[i];
-            if(c == '\n' || c == '\0') return; // TODO maybe write a more detailed error
+            if(c == '\n') {
+                utils::printError(
+                    ErrorCode::ERROR_STRING_INCOMPLETE_n,
+                    utils::ErrType::PREPROCESSOR,
+                    ElmCoords(b, index, i - 1),
+                    ElmCoords(b, i - 1, i - 1),
+                    "Standard module name is missing a closing \">\" character." //! Copy incomplete string error message
+                );
+            }
             else if(last != '\\' && c == (type == '<' ? '>' : '"')) {
                 tmp += c;
                 filePathMatch = tmp;
@@ -227,7 +238,7 @@ namespace pre {
 
 
     /**
-     * @brief //TODO
+     * @brief Calculates the canonical path from the raw file path used in the include directive and prints an error if it's invalid or ambiguous.
      * @param rawFilePath The path that was found in the include directive, without any modification.
      * @param curFilePatht The path of the file that is currently being preprocessed.
      * @param relevantCoords The position of the relevant section.

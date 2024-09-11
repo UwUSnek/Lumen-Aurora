@@ -5,6 +5,9 @@
 enum ErrorCode : int {
     SUCCESS = 0,
     ERROR_OUTPUT_CANNOT_CREATE, // Output file cannot be created
+    ERROR_CODE_DISPLAY_NO_SOURCE, // Source file of code display is not accessible anymore
+
+
 
     ERROR_CMD_SOURCE_MISSING,   // No source path specified in command
     ERROR_CMD_SOURCE_INVALID, // Source path could not be found

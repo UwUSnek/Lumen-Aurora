@@ -16,7 +16,6 @@ template <class t, class elmt> struct BasePipe { // could be the name of an inst
 private:
     std::atomic<ulong> len = 0;
     std::atomic<bool> _isOpen = true;
-    // void wait(ulong i);
 
 
 protected:
@@ -88,7 +87,7 @@ public:
      * @brief Checks if the pipe is still open
      * @return true if the pipe is open, false otherwise
      */
-    inline bool isOpen() {
+    inline bool isOpen() const {
         return _isOpen.load();
     }
 
@@ -96,7 +95,7 @@ public:
     /**
      * @brief Makes the thread sleep until the pipe closes.
      */
-    void awaitClose() {
+    void awaitClose() const {
         while(isOpen()) std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
@@ -106,10 +105,7 @@ public:
      *      NOTICE: This might not be its final length. To know if the pipe has been fully written, use !.isOpen()
      * @return The length of the pipe.
      */
-    ulong length() {
-        // sReallocLock.lock();
-        // auto r = s.length();
-        // sReallocLock.unlock();
+    ulong length() const {
         return len.load();
     }
 
@@ -124,15 +120,12 @@ public:
      * @return A copy of the requested element wrapped in an std::optional, or an empty optional if the pipe was closed before reaching it.
      */
     std::optional<elmt> operator[](ulong i) {
-        // wait(i);
         while(len.load() <= i) {
-            // if(!isOpen() && len.load() <= i) return '\0';
             if(!isOpen() && len.load() <= i) return std::nullopt;
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
         sReallocLock.lock();
-        // char r = s[i];
         elmt r = s[i];
         sReallocLock.unlock();
         return r;
@@ -147,6 +140,18 @@ public:
      * @return A pointer to the base object.
      */
     t *cpp() {
+        return &s;
+    }
+
+
+
+
+    /**
+     * @brief Returns the address to the base value used by this BasePipe.
+     *      Operations on this object are only thread-safe if .isOpen() returns false.
+     * @return A pointer to the base object.
+     */
+    t const *cpp() const {
         return &s;
     }
 };

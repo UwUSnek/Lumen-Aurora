@@ -29,25 +29,16 @@ std::mutex sourceFilePathsLock;
 std::mutex consoleLock;
 
 
-// std::vector<std::thread> threads;
-// std::mutex threadsLock;
 std::atomic<ulong> activeThreads = 0;
 std::atomic<ulong> totalThreads = 0;
 std::atomic<ulong> totalFiles = 0;
 std::atomic<ulong> totalModules = 0;
 
-// std::map<std::string, std::string*> fileContentCache;
 thread_local ThreadType threadType = ThreadType::UNKNOWN;
 
 
 
 
-
-// // Phase clocks and durations (they are set right before starting each phase and the duration calculated after it ends)
-// std::chrono::_V2::system_clock::time_point timeStartPre;   std::chrono::duration<double> timePre;
-// std::chrono::_V2::system_clock::time_point timeStartComp;  std::chrono::duration<double> timeComp;
-// std::chrono::_V2::system_clock::time_point timeStartOpt;   std::chrono::duration<double> timeOpt;
-// std::chrono::_V2::system_clock::time_point timeStartConv;  std::chrono::duration<double> timeConv;
 
 
 

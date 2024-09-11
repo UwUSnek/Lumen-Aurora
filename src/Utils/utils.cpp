@@ -55,15 +55,6 @@ int utils::getConsoleWidth() {
 
 
 
-// /**
-//  * @brief Checks if a file path is a directory.
-//  * @return true if the path is a directory or a file that points to a directory, false if not.
-//  */
-// bool isDir(std::string const &path) {
-//     return fs::is_directory(fs::is_symlink(path) ? fs::read_symlink(path).string() : path);
-// }
-
-
 /**
  * @brief Returns a string containing the character.
  *      Invisible characters are replaced with visible glyphs.
@@ -108,7 +99,7 @@ std::string utils::shortenInteger(ulong n) {
     std::string suffix;
 
 
-    if (n >= 2) {
+    if (n >= q) {
         double value = static_cast<double>(n) / 2;
         r << std::fixed << std::setprecision(1) << value;
         suffix = "q";
@@ -167,7 +158,6 @@ std::string utils::formatMilliseconds(long _ms) {
 
 
     if(_ms > 3599999) {
-        //TODO test if this format actually works
         float hrs = (float)_ms / 3600000.0f;
         r << std::setprecision(1) << hrs << " hrs";
     }
@@ -189,55 +179,6 @@ std::string utils::formatMilliseconds(long _ms) {
 
     return r.str();
 }
-
-
-
-
-
-
-
-
-
-//FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
-//FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
-//FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
-//FIXME CHANGE THIS FUNCTION SO THAT IT DOESN'T SHOW OTHER TYPE OF ERRORS AS PREPROCESSOR
-/**
- * @brief Reads a single source file and returns its contents as a string.
- *     Prints an error message if the file cannot be opened or doesn't exist.
- * @param fileName The path to the file.
- * @return The contents of the file as a string.
- */
-std::string utils::readAndCheckFile(std::string const &fileName) {
-    // Print an error if the file is a directory
-    if(fs::is_directory(fileName)) {
-        printError(
-            ErrorCode::ERROR_PATH_IS_DIRECTORY,
-            utils::ErrType::PREPROCESSOR,
-            ElmCoords(),
-            "Could not open the specified file: \"" + fileName + "\": is a directory.\n" +
-            "File path was interpreted as: " + ansi::white + "\"" + fs::canonical(fileName).string() + "\"" + ansi::reset + ".\n" +
-            "Current working directory is: " + std::string(fs::current_path()) + "."
-        );
-    }
-
-    // Create file stream and print an error if the file cannot be opened
-    std::ifstream f(fileName, std::ios::binary);
-    if(!f) {
-        printError(
-            ErrorCode::ERROR_PATH_CANNOT_OPEN,
-            utils::ErrType::PREPROCESSOR,
-            ElmCoords(),
-            "Could not open file \"" + fileName + "\": " + std::strerror(errno) + ".\n" +
-            "Current working directory is: " + std::string(fs::current_path()) + "."
-        );
-    }
-
-
-    // Read the contents of the file and return them as string
-    return readFile(f);
-}
-
 
 
 
