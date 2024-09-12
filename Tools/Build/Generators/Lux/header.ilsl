@@ -1,3 +1,0 @@
-u32 add_value(u32 init) {
-    init = init + 5;
-}
