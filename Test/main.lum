@@ -1,0 +1,13 @@
+"test\U0001f600aa"
+"test😀aa"
+"\u0041"
+"TEST_\u0041_TEST"
+
+//START
+#in/*
+     */clud/*
+  */e"test.lum"
+
+'\u0042'\
+'\n'
+#include/*aa*/  	"../Tests/HugeSource/huge.lum"

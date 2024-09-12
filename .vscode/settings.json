@@ -1,0 +1,14 @@
+{
+    "C_Cpp.autoAddFileAssociations": false,
+
+
+    "files.associations": {
+        "*.cpp": "cpp",    "*.c" : "c",     "*.ccomp": "glsl",
+        "*.hpp": "cpp",    "*.h" : "c",
+
+        "*.py" : "python",
+        "*.sh" : "shellscript",
+        "*.json" : "json",
+        "*.tcc": "cpp", "*.inc": "cpp"
+    }
+}
