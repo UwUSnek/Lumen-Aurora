@@ -1,9 +1,6 @@
 #pragma once
 #include <string>
-#include <mutex>
-#include <atomic>
-
-#include "ansi.hpp"
+#include <chrono>
 
 
 
@@ -14,11 +11,6 @@ namespace utils {
     static inline long getEpochMs() {
         return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
-
-
-
-    extern std::atomic<int> exitMainRequest;
-    void exitMain(int exitCode);
 
 
     int getConsoleWidth();

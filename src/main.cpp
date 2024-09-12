@@ -11,6 +11,7 @@ namespace fs = std::filesystem;
 
 #include "ALC.hpp"
 #include "Utils/errors.hpp"
+#include "Utils/ansi.hpp"
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
@@ -240,7 +241,7 @@ int main(int argc, char* argv[]){
     //TODO cross out skipped phases when using -e, -p or --o-none
     // Join subphase threads
     while(activeThreads.load()) {
-        int exitCode = utils::exitMainRequest.load();
+        int exitCode = exitMainRequest.load();
         if(exitCode) {
             std::exit(exitCode);
         }

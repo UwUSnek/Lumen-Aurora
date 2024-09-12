@@ -1,18 +1,18 @@
 #pragma once
 
-#include <iostream>
 #include <thread>
-#include <vector>
-#include <mutex>
-#include <map>
-#include <atomic>
-#include <functional>
 
-#include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
 #include "Utils/utils.hpp"
 #include "Utils/DynamicProgressBar.hpp"
 
 
+
+
+
+
+
+extern std::atomic<int> exitMainRequest;
+void exitMain(int exitCode);
 
 
 
@@ -25,8 +25,6 @@ extern std::mutex sourceFilePathsLock;
 extern std::mutex consoleLock;
 
 
-// extern std::vector<std::thread> threads;
-// extern std::mutex threadsLock;
 extern std::atomic<ulong> activeThreads;
 extern std::atomic<ulong> totalThreads;
 extern std::atomic<ulong> totalFiles;
@@ -100,12 +98,7 @@ struct PhaseData {
     std::atomic<long>  *timeStart;
     std::atomic<long>  *timeEnd;
 
-    PhaseData(long _timeStart) :
-        totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
-        activeSubphases(new std::atomic<ulong>(0)),
-        timeStart      (new std::atomic<long>(_timeStart)),
-        timeEnd        (new std::atomic<long>(0)) {
-    }
+    PhaseData(long _timeStart);
 };
 
 // Data read by the display thread

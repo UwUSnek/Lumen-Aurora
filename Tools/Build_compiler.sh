@@ -25,6 +25,7 @@ g++                                                            \
     ./src/Preprocessor/MacroPhase/macroPhase.cpp               \
     \
 -std=c++20                                                     \
+-Wfatal-errors                                                     \
 -O0 -g                                                         \
 -I                                                             \
     ./src/                                                     \

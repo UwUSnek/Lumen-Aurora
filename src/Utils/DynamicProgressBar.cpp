@@ -2,6 +2,7 @@
 #include <iomanip>
 
 #include "Utils/utils.hpp"
+#include "Utils/ansi.hpp"
 #include "DynamicProgressBar.hpp"
 
 

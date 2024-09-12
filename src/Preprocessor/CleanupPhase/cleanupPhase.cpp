@@ -1,14 +1,8 @@
-#include <tuple>
-#include <regex>
 #include "ALC.hpp"
 
 #include "cleanupPhase.hpp"
-#include "Preprocessor/ElmCoords.hpp"
-#include "SegmentedCleanSource.hpp"
-#include "Utils/utils.hpp"
 #include "Utils/errors.hpp"
-#include "Preprocessor/preprocessor.hpp"
-#include "UTF8_decoder.h"
+#include "Utils/ansi.hpp"
 
 
 

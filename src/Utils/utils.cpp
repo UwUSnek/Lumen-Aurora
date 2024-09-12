@@ -10,32 +10,13 @@ namespace fs = std::filesystem;
 
 #include "ALC.hpp"
 #include "utils.hpp"
+#include "ansi.hpp"
 #include "errors.hpp"
 #include "Preprocessor/ElmCoords.hpp"
 #include "Preprocessor/preprocessor.hpp"
 
 
 
-
-
-
-// The exit value specified by the thread that requested an exit. //! 0 means no threads exited yet.
-std::atomic<int> utils::exitMainRequest = 0;
-
-
-/**
- * @brief Stops the current thread and makes the main thread exit.
- *      This function does NOT prevent other threads from printing to the console while it is being executed.
- *      External synchronization is required.
- *      If the current thread is the main thread, this is equivalent to calling exit()
- */
-void utils::exitMain(int exitCode) {
-    if(threadType == ThreadType::MAIN) exit(exitCode);
-    else {
-        exitMainRequest.store(exitCode);
-        while(true) std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-}
 
 
 

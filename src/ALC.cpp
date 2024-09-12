@@ -1,9 +1,34 @@
 #include <iostream>
-#include <streambuf>
-#include <string>
-#include <mutex>
 
 #include "ALC.hpp"
+#include "Utils/ansi.hpp"
+
+
+
+
+
+
+
+
+
+
+// The exit value specified by the thread that requested an exit. //! 0 means no threads exited yet.
+std::atomic<int> exitMainRequest = 0;
+
+
+/**
+ * @brief Stops the current thread and makes the main thread exit.
+ *      This function does NOT prevent other threads from printing to the console while it is being executed.
+ *      External synchronization is required.
+ *      If the current thread is the main thread, this is equivalent to calling exit()
+ */
+void exitMain(int exitCode) {
+    if(threadType == ThreadType::MAIN) exit(exitCode);
+    else {
+        exitMainRequest.store(exitCode);
+        while(true) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
 
 
 
@@ -100,6 +125,15 @@ std::string phaseIdTotring(PhaseID phaseId) {
         "Conversion",
     };
     return names[phaseId];
+}
+
+
+
+PhaseData::PhaseData(long _timeStart) :
+    totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
+    activeSubphases(new std::atomic<ulong>(0)),
+    timeStart      (new std::atomic<long>(_timeStart)),
+    timeEnd        (new std::atomic<long>(0)) {
 }
 
 
