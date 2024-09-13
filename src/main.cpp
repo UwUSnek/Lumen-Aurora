@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
-#include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
+#include "Compiler/compiler.hpp"
 
 
 
@@ -208,14 +208,15 @@ int main(int argc, char* argv[]){
     std::string s = utils::readFile(f);
     f.close();
     totalFiles.fetch_add(1);
-    pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
+    pre::SegmentedCleanSource *preprocessedSourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
 
 
 
 
     if(compileModule) {
         // Compilation
-        //TODO actually compile the code
+        cmp::compilePreprocessedSourceCode(preprocessedSourceCode);
+
 
 
 
@@ -239,7 +240,7 @@ int main(int argc, char* argv[]){
 
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
-    // Join subphase threads
+    // Wait for subphase threads to complete
     while(activeThreads.load()) {
         int exitCode = exitMainRequest.load();
         if(exitCode) {
@@ -258,10 +259,10 @@ int main(int argc, char* argv[]){
         //TODO write module
     }
     else {
-        sourceCode.str.awaitClose();
-        sourceCode.str.sReallocLock.lock();
-        writeOutputFile(*sourceCode.str.cpp());
-        sourceCode.str.sReallocLock.unlock();
+        preprocessedSourceCode->str.awaitClose();
+        preprocessedSourceCode->str.sReallocLock.lock();
+        writeOutputFile(*preprocessedSourceCode->str.cpp());
+        preprocessedSourceCode->str.sReallocLock.unlock();
     }
 
 

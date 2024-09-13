@@ -9,35 +9,23 @@
 
 
 namespace pre {
-    enum class CleanSourceType {
-        MISC,
-        STRING,
-        CHAR
-    };
-
-
-
-
     /**
      * @brief A structure that contains informations about a single character
      */
     struct CleanSourceMeta {
-        CleanSourceType type;  // The type of the segment the character is part of
         ulong i;               // The original index of the character in the str buffer
         ulong l;               // The original   line number of the character in the str buffer (starts from 0)
         ulong c;               // The original column number of the character in the str buffer (starts from 0)
         ulong f;               // The index of the original file of the character in the str buffer
 
-        CleanSourceMeta(CleanSourceType _type, ulong _i, ulong _l, ulong _c, ulong _f) :
-            type(_type),
+        CleanSourceMeta(ulong _i, ulong _l, ulong _c, ulong _f) :
             i(_i),
             l(_l),
             c(_c),
             f(_f) {
         }
 
-        CleanSourceMeta(CleanSourceType _type, CleanSourceMeta const &meta) :
-            type(_type),
+        CleanSourceMeta(CleanSourceMeta const &meta) :
             i(meta.i),
             l(meta.l),
             c(meta.c),
