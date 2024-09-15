@@ -169,7 +169,7 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
  *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
  */
 void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_errPos, std::string const &message) {
-    printError(errorCode, errType, ElmCoords(), _errPos, message);
+    printError(errorCode, errType, _errPos, _errPos, message);
 }
 
 

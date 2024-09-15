@@ -5,7 +5,7 @@
 
 
 namespace cmp {
-    enum class TokenType {
+    enum class TokenType : ulong {
         KEYWORD_NAMESPACE,        // namespace
         KEYWORD_ENUM,             // enum
         KEYWORD_STRUCT,           // struct
@@ -78,6 +78,13 @@ namespace cmp {
         TokenType type;                 // The type of the token
         pre::CleanSourceMeta start;     // The index, line, columns and file of the first character relative to the original source code
         pre::CleanSourceMeta end;       // The index, line, columns and file of the last  character relative to the original source code
+
+        Token(std::string const &_value, TokenType _type, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+            value(_value),
+            type(_type),
+            start(_start),
+            end(_end) {
+        }
     };
 
 

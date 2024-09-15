@@ -59,6 +59,9 @@ pre::SegmentedCleanSource* pre::loadSourceCode(std::string const *s, std::string
     SegmentedCleanSource *r3 = loadSourceCode_loop(s, filePath);
     SegmentedCleanSource *r4 = new SegmentedCleanSource();
 
+
+    r3-> str.awaitClose(); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
+    r3->meta.awaitClose(); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
     startSubphaseAsync(PhaseID::PREPROCESSING, startMacroPhase, r3, r4);
     return r4;
 }

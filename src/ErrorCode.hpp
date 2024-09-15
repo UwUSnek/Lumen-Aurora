@@ -59,4 +59,16 @@ enum ErrorCode : int {
     ERROR_PRE_PATH_NOT_FOUND,     // Included file doesn't exist
     ERROR_PRE_PATH_NO_PERMISSION,     // Included file has no read permission
     ERROR_PRE_PATH_AMBIGUOUS,     // Included path can point to multiple files in different include paths
+
+
+
+
+
+
+
+
+
+
+
+    ERROR_CMP_CHARACTER_INVALID,     //
 };
