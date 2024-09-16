@@ -35,9 +35,9 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::s
     SegmentedCleanSource *r2 = new SegmentedCleanSource();
     SegmentedCleanSource *r3 = new SegmentedCleanSource();
 
-    startSubphaseAsync(PhaseID::PREPROCESSING, startLCTsPhase,     s, pathIndex, r1);
-    startSubphaseAsync(PhaseID::PREPROCESSING, startCleanupPhase, r1,            r2);
-    startSubphaseAsync(PhaseID::PREPROCESSING, startIncludePhase, r2,            r3);
+    startSubphaseAsync(PREPROCESSING, false, startLCTsPhase,     s, pathIndex, r1);
+    startSubphaseAsync(PREPROCESSING, false, startCleanupPhase, r1,            r2);
+    startSubphaseAsync(PREPROCESSING, false, startIncludePhase, r2,            r3);
 
     return r3;
 }
@@ -62,6 +62,11 @@ pre::SegmentedCleanSource* pre::loadSourceCode(std::string const *s, std::string
 
     r3-> str.awaitClose(); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
     r3->meta.awaitClose(); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
-    startSubphaseAsync(PhaseID::PREPROCESSING, startMacroPhase, r3, r4);
+    startSubphaseAsync(PREPROCESSING, true, startMacroPhase, r3, r4);
     return r4;
 }
+
+//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
+//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
+//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
+//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.

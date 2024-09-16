@@ -6,5 +6,5 @@
 void cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b) {
     TokenizedSource *r1 = new TokenizedSource();
 
-    startSubphaseAsync(PhaseID::COMPILATION, startTokenizationPhase, b, r1);
+    startSubphaseAsync(PhaseID::COMPILATION, false, startTokenizationPhase, b, r1);
 }

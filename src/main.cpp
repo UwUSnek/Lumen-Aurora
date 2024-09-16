@@ -208,6 +208,7 @@ int main(int argc, char* argv[]){
 
 
 
+
     // Preprocessing
     std::ifstream f(cmd::options.sourceFile);
     std::string s = utils::readFile(f);
@@ -216,21 +217,14 @@ int main(int argc, char* argv[]){
     pre::SegmentedCleanSource *preprocessedSourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
 
 
-
-
     if(compileModule) {
         // Compilation
         cmp::compilePreprocessedSourceCode(preprocessedSourceCode);
 
 
-
-
-
         // Optimization
         //TODO actually optimize the code
     }
-
-
 
 
     if(compileExec) {

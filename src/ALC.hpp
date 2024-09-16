@@ -94,7 +94,7 @@ std::string phaseIdTotring(PhaseID phaseId);
 
 struct PhaseData {
     DynamicProgressBar *totalProgress;
-    std::atomic<ulong> *activeSubphases;
+    // std::atomic<ulong> *activeSubphases;
     std::atomic<long>  *timeStart;
     std::atomic<long>  *timeEnd;
 
@@ -141,7 +141,8 @@ void increaseMaxProgress(ulong n);
 
 
 
-template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, func_t &&f, args_t &&...args) {
+
+template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
 
     // Init thread data and counters
     threadType = ThreadType::SUBPHASE;
@@ -155,7 +156,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
         phaseDataArray.push_back(PhaseData(utils::getEpochMs()));
     }
     maxProgress = phaseDataArray[phaseId].totalProgress;
-    phaseDataArray[phaseId].activeSubphases->fetch_add(1);
+    // phaseDataArray[phaseId].activeSubphases->fetch_add(1);
     phaseDataArrayLock.unlock();
 
 
@@ -167,16 +168,19 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
 
     // Start the actual function
+    initFeedback->store(true);
     std::forward<func_t>(f)(std::forward<args_t>(args)...);
 
 
-    // Decrease active subphases count and set the end time if needed
-    phaseDataArrayLock.lock();
-    phaseDataArray[phaseId].activeSubphases->fetch_sub(1);
     //BUG this can execute instantly if the thread finishes before the server starts a new one
-    if(phaseDataArray[phaseId].activeSubphases->load() == 0) {
-        phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
-    }
+    // // Decrease active subphases count and set the end time if needed
+    // Set the ending time if needed
+    phaseDataArrayLock.lock();
+    // phaseDataArray[phaseId].activeSubphases->fetch_sub(1);
+    // if(isLast && phaseDataArray[phaseId].activeSubphases->load() == 0) {
+        // phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
+    // }
+    if(isLast) phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
     phaseDataArrayLock.unlock();
 
 
@@ -187,10 +191,37 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
 
 
-template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, func_t &&f, args_t &&...args) {
+/**
+ * @brief Starts a subphase thread using the specified task function and arguments.
+ * @param phaseId The ID of the main phase.
+ * @param isLast Whether this is the last subphase of the main phase.
+ * @param f The task function to execute.
+ * @param args The list of arguments to pass to <f>.
+ *      All arguments are passed to the new thread by value.
+ */
+template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, bool isLast, func_t &&f, args_t &&...args) {
+
+    //! Subphase and Phase data initialization feedback
+    std::atomic<bool> *isThreadDataInitialized = new std::atomic<bool>(false);
+
+
+    // Start the new thread
     std::thread(
-        [lambda_phaseId = phaseId, lambda_f = std::forward<func_t>(f), ...lambda_args = std::forward<args_t>(args)]() mutable {
-            __internal_subphase_exec(lambda_phaseId, std::move(lambda_f), std::move(lambda_args)...);
+        [
+            _phaseId = phaseId,
+            _isThreadDataInitialized = isThreadDataInitialized,
+            _isLast = isLast,
+            _f = std::forward<func_t>(f),
+            ..._args = std::forward<args_t>(args)
+        ]() mutable {
+            __internal_subphase_exec(_phaseId, _isLast, _isThreadDataInitialized, std::move(_f), std::move(_args)...);
         }
     ).detach();
+
+
+    // Wait for the feedback before letting the main thread go
+    while(!isThreadDataInitialized->load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    delete isThreadDataInitialized;
 }
