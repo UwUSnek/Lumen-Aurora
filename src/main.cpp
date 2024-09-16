@@ -15,6 +15,7 @@ namespace fs = std::filesystem;
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "Compiler/compiler.hpp"
+#include "Command/info.hpp"
 
 
 
@@ -182,11 +183,15 @@ int main(int argc, char* argv[]){
     // Parse command line options
     cmd::parseOptions(argc, argv, fullCommand);
     if(cmd::options.isHelp) {
-        cmd::printHelp();
+        consoleLock.lock();
+        cout << cmd::getHelpMessage();
+        consoleLock.unlock();
         exit(0);
     }
     if(cmd::options.isVersion) {
-        cmd::printVersion();
+        consoleLock.lock();
+        cout << cmd::getVersionMessage();
+        consoleLock.unlock();
         exit(0);
     }
 

@@ -24,11 +24,11 @@ int main(){
 
 
 
-    tests.push_back(new TestExitValue("string \\0", "\"test",     ErrorCode::ERROR_STRING_INCOMPLETE_0));
-    tests.push_back(new TestExitValue("string \\n", "\"test\n\"", ErrorCode::ERROR_STRING_INCOMPLETE_n));
+    tests.push_back(new TestExitValue("string \\0", "\"test",     ErrorCode::ERROR_CMP_STRING_INCOMPLETE_0));
+    tests.push_back(new TestExitValue("string \\n", "\"test\n\"", ErrorCode::ERROR_CMP_STRING_INCOMPLETE_n));
 
-    tests.push_back(new TestExitValue("char \\0",   "'test",      ErrorCode::ERROR_CHAR_INCOMPLETE_0));
-    tests.push_back(new TestExitValue("char \\n",   "'test\n'",   ErrorCode::ERROR_CHAR_INCOMPLETE_n));
+    tests.push_back(new TestExitValue("char \\0",   "'test",      ErrorCode::ERROR_CMP_CHAR_INCOMPLETE_0));
+    tests.push_back(new TestExitValue("char \\n",   "'test\n'",   ErrorCode::ERROR_CMP_CHAR_INCOMPLETE_n));
 
 
 

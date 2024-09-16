@@ -173,6 +173,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     // Decrease active subphases count and set the end time if needed
     phaseDataArrayLock.lock();
     phaseDataArray[phaseId].activeSubphases->fetch_sub(1);
+    //BUG this can execute instantly if the thread finishes before the server starts a new one
     if(phaseDataArray[phaseId].activeSubphases->load() == 0) {
         phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
     }

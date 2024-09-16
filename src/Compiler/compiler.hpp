@@ -1,3 +1,4 @@
+#pragma once
 #include "Preprocessor/SegmentedCleanSource.hpp"
 
 

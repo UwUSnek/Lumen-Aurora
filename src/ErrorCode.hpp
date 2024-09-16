@@ -7,6 +7,13 @@ enum ErrorCode : int {
     ERROR_OUTPUT_CANNOT_CREATE, // Output file cannot be created
     ERROR_CODE_DISPLAY_NO_SOURCE, // Source file of code display is not accessible anymore
 
+    ERROR_PATH_IS_DIRECTORY,   // Path is a directory
+    ERROR_PATH_CANNOT_OPEN,     // File cannot be opened (either missing or no permissions)
+
+
+
+
+
 
 
     ERROR_CMD_SOURCE_MISSING,   // No source path specified in command
@@ -32,23 +39,6 @@ enum ErrorCode : int {
 
 
 
-    ERROR_PATH_IS_DIRECTORY,   // Path is a directory
-    ERROR_PATH_CANNOT_OPEN,     // File cannot be opened (either missing or no permissions)
-
-
-
-
-
-    ERROR_STRING_INCOMPLETE_n,               // String literal that doesn't have a closing " character (ends with \n)
-    ERROR_STRING_INCOMPLETE_0,               // String literal that doesn't have a closing " character (ends with \0)
-
-    ERROR_CHAR_INCOMPLETE_n,                 // Char literal that doesn't have a closing ' character (ends with \n)
-    ERROR_CHAR_INCOMPLETE_0,                 // Char literal that doesn't have a closing ' character (ends with \0)
-
-    // ERROR_ESCAPE_UNKNOWN,                    // Unknown escape sequence
-    // ERROR_ESCAPE_U_EMPTY,                    // No digits in \u or \U escape sequence
-    // ERROR_ESCAPE_U4_MISSING,                 // Missing digits in \u escape sequence
-    // ERROR_ESCAPE_U4_MISSING,                 // Missing digits in \U escape sequence
 
 
 
@@ -67,8 +57,18 @@ enum ErrorCode : int {
 
 
 
+    ERROR_CMP_CHARACTER_INVALID,     // Invalid character found in the source code
 
+    ERROR_CMP_STRING_INCOMPLETE_n,               // String literal that doesn't have a closing " character (ends with \n)
+    ERROR_CMP_STRING_INCOMPLETE_0,               // String literal that doesn't have a closing " character (ends with \0)
 
+    ERROR_CMP_CHAR_INCOMPLETE_n,                 // Char literal that doesn't have a closing ' character (ends with \n)
+    ERROR_CMP_CHAR_INCOMPLETE_0,                 // Char literal that doesn't have a closing ' character (ends with \0)
+    ERROR_CMP_CHAR_EMPTY,                 // Char literal contains 0 bytes
+    ERROR_CMP_CHAR_LONG,                 // Char literal contains more than 1 byte
 
-    ERROR_CMP_CHARACTER_INVALID,     //
+    ERROR_CMP_ESCAPE_INVALID,                    // Unknown escape sequence
+    ERROR_CMP_ESCAPE_U_EMPTY,                    // No digits in \u or \U escape sequence
+    ERROR_CMP_ESCAPE_U4_MISSING,                 // Missing digits in \u escape sequence
+    ERROR_CMP_ESCAPE_U8_MISSING,                 // Missing digits in \U escape sequence
 };
