@@ -79,15 +79,21 @@ extern std::ostream cerr;
 
 //TODO make this more readable, maybe group stuff in namespaces
 
+#define LIST_PHASE_ID   \
+    X(Preprocessing)    \
+    X(Compilation)      \
+    X(Optimization)     \
+    X(Conversion)       \
+    X(NUM)              \
+    // ^ The number of phases, not including this enum value.
+
+
 // Identifies the phases of the compilation progress
 // Phases must be declared in order. Update phaseIdToString after changing this enum.
 enum PhaseID : ulong {
-    PREPROCESSING = 0,
-    COMPILATION,
-    OPTIMIZATION,
-    CONVERSION,
-    num // The number of phases, not including this enum value.
-    //TODO add other phases
+    #define X(e) e,
+    LIST_PHASE_ID
+    #undef X
 };
 std::string phaseIdTotring(PhaseID phaseId);
 

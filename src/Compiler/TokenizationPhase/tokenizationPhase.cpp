@@ -17,7 +17,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
     // Copy total progress from preprocessing phase
     phaseDataArrayLock.lock();
-    ulong max = phaseDataArray[PhaseID::PREPROCESSING].totalProgress->max.load(); //! Max doesn't change after merging the files
+    ulong max = phaseDataArray[PhaseID::Preprocessing].totalProgress->max.load(); //! Max doesn't change after merging the files
     phaseDataArrayLock.unlock();
     increaseMaxProgress(max);
     //TODO subtract deleted characters from the preprocessor max

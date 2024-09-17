@@ -24,6 +24,16 @@ namespace fs = std::filesystem;
 
 
 
+static ulong const maxPhaseNameLen = [] {
+    #define X(e) #e,
+    static std::vector<std::string> const names = { LIST_PHASE_ID };
+    #undef X
+    return std::max_element(names.begin(), names.end(),
+        [](std::string const &a, std::string const &b) {
+            return a.length() < b.length();
+        }
+    )->length();
+}();
 
 
 
@@ -47,7 +57,10 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
         const bool isPhaseComplete = phaseDataArray[i].timeEnd->load() > 0;
         const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
 
-        cout << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    " << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
+        cout
+            << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black)
+            << "\n    " << std::right << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
+
         if(isPhaseComplete) {
             cout
                 << bar->max.load() << " steps"

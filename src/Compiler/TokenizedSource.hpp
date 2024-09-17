@@ -4,73 +4,87 @@
 
 
 
+#define LIST_TOKEN_TYPE                                                                                            \
+    X(KEYWORD_NAMESPACE)        /* namespace */                                                                    \
+    X(KEYWORD_ENUM)             /* enum */                                                                         \
+    X(KEYWORD_STRUCT)           /* struct */                                                                       \
+    X(KEYWORD_CONST)            /* const */                                                                        \
+    X(KEYWORD_AUTO)             /* auto */                                                                         \
+    X(KEYWORD_TYPEOF)           /* typeof */                                                                       \
+    X(KEYWORD_ALIAS)            /* alias */                                                                        \
+    X(KEYWORD_FROM)             /* from */                                                                         \
+    X(KEYWORD_IMPORT)           /* import */                                                                       \
+    X(KEYWORD_EXPORT)           /* export */                                                                       \
+    X(KEYWORD_TRUE)             /* true */                                                                         \
+    X(KEYWORD_FALSE)            /* false */                                                                        \
+    X(KEYWORD_PTR)              /* @ //TODO check if this is correct */                                            \
+    X(KEYWORD_ADDR)             /* $ */                                                                            \
+\
+    X(KEYWORD_IF)               /* if */                                                                           \
+    X(KEYWORD_ELSE)             /* else */                                                                         \
+    X(KEYWORD_FOR)              /* for */                                                                          \
+    X(KEYWORD_WHILE)            /* while */                                                                        \
+    X(KEYWORD_DO)               /* do */                                                                           \
+    X(KEYWORD_CONTINUE)         /* continue */                                                                     \
+    X(KEYWORD_BREAK)            /* break */                                                                        \
+    X(KEYWORD_ONCE)             /* once */                                                                         \
+    X(KEYWORD_THEN)             /* then */                                                                         \
+    X(KEYWORD_RETURN)           /* return */                                                                       \
+    X(KEYWORD_DELAY)            /* delay //TODO prob not used */                                                   \
+    X(KEYWORD_ASYNC)            /* async //TODO prob not used //FIXME add to documentation */                      \
+\
+    X(KEYWORD_ROUND_L)          /* ( */                                                                            \
+    X(KEYWORD_ROUND_R)          /* ) */                                                                            \
+    X(KEYWORD_CURLY_L)          /* { */                                                                            \
+    X(KEYWORD_CURLY_R)          /* } */                                                                            \
+\
+    X(KEYWORD_COMMA)            /* , */                                                                            \
+    X(KEYWORD_SEMICOLON)        /* ; */                                                                            \
+    X(KEYWORD_MEMBER)           /* . */                                                                            \
+    X(KEYWORD_REFLECTION)       /* :: */                                                                           \
+\
+\
+    X(META_KEYWORD_TEMPLATE)    /* template */                                                                     \
+    X(META_KEYWORD_LT)          /* < */                                                                            \
+    X(META_KEYWORD_GT)          /* > */                                                                            \
+    X(META_KEYWORD_TYPE)        /* type */                                                                         \
+    X(META_KEYWORD_TARGET)      /* ! */                                                                            \
+    X(META_KEYWORD_ATS)         /* ? */                                                                            \
+    X(META_KEYWORD_WHEN)        /* when */                                                                         \
+    X(META_KEYWORD_PRIORITY)    /* priority */                                                                     \
+    X(META_KEYWORD_AS)          /* as */                                                                           \
+    X(META_KEYWORD_TO)          /* to */                                                                           \
+    X(META_KEYWORD_ASSIGN)      /* = */                                                                            \
+    X(META_KEYWORD_BASE)        /* : */                                                                            \
+        /* META_KEYWORD_ //TODO : */\
+        /* META_KEYWORD_ //TODO & */\
+\
+\
+\
+\
+    X(KEYWORD_CANDIDATE)        /* Meta keywords (not confirmed, might be identifiers depending on the context) */ \
+\
+    X(IDENTIFIER)               /* Identifiers */                                                                  \
+\
+    X(LITERAL_NUM)              /* Number literals */                                                              \
+    X(LITERAL_STR)              /* String literals */                                                              \
+    X(LITERAL_CHR)              /* Char literals */                                                                \
+
+
+
+
+
+
+
+
+
+
 
 namespace cmp {
     enum class TokenType : ulong {
-        KEYWORD_NAMESPACE,        // namespace
-        KEYWORD_ENUM,             // enum
-        KEYWORD_STRUCT,           // struct
-        KEYWORD_CONST,            // const
-        KEYWORD_AUTO,             // auto
-        KEYWORD_TYPEOF,           // typeof
-        KEYWORD_ALIAS,            // alias
-        KEYWORD_FROM,             // from
-        KEYWORD_IMPORT,           // import
-        KEYWORD_EXPORT,           // export
-        KEYWORD_TRUE,             // true
-        KEYWORD_FALSE,            // false
-        KEYWORD_PTR,              // @ //TODO check if this is correct
-        KEYWORD_ADDR,             // $
-
-        KEYWORD_IF,               // if
-        KEYWORD_ELSE,             // else
-        KEYWORD_FOR,              // for
-        KEYWORD_WHILE,            // while
-        KEYWORD_DO,               // do
-        KEYWORD_CONTINUE,         // continue
-        KEYWORD_BREAK,            // break
-        KEYWORD_ONCE,             // once
-        KEYWORD_THEN,             // then
-        KEYWORD_RETURN,           // return
-        KEYWORD_DELAY,            // delay //TODO prob not used
-        KEYWORD_ASYNC,            // async //TODO prob not used //FIXME add to documentation
-
-        KEYWORD_ROUND_L,          // (
-        KEYWORD_ROUND_R,          // )
-        KEYWORD_CURLY_L,          // {
-        KEYWORD_CURLY_R,          // }
-
-        KEYWORD_COMMA,            // ,
-        KEYWORD_SEMICOLON,        // ;
-        KEYWORD_MEMBER,           // .
-        KEYWORD_REFLECTION,       // ::
-
-
-        META_KEYWORD_TEMPLATE,      // template
-        META_KEYWORD_LT,            // <
-        META_KEYWORD_GT,            // >
-        META_KEYWORD_TYPE,          // type
-        META_KEYWORD_TARGET,        // !
-        META_KEYWORD_ATS,           // ?
-        META_KEYWORD_WHEN,          // when
-        META_KEYWORD_PRIORITY,      // priority
-        META_KEYWORD_AS,            // as
-        META_KEYWORD_TO,            // to
-        META_KEYWORD_ASSIGN,        // =
-        META_KEYWORD_BASE,          // :
-        // META_KEYWORD_ //TODO :
-        // META_KEYWORD_ //TODO &
-
-
-
-
-        KEYWORD_CANDIDATE,        // Meta keywords (not confirmed, might be identifiers depending on the context)
-
-        IDENTIFIER,               // Identifiers
-
-        LITERAL_NUM,              // Number literals
-        LITERAL_STR,              // String literals
-        LITERAL_CHR,              // Char literals
+        #define X(e) e,
+        LIST_TOKEN_TYPE
+        #undef X
     };
 
 
