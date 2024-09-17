@@ -19,7 +19,7 @@
 std::optional<std::string> cmp::parseAlphanumericToken(pre::SegmentedCleanSource *b, ulong index){
     std::stringstream r;
     std::optional<char> c = b->str[index];
-    if(!c.has_value() || !std::isalpha(*c) || c != '_') return std::nullopt;
+    if(!c.has_value() || (!std::isalpha(*c) && c != '_')) return std::nullopt;
     r << *c;
 
     ulong i = index + 1;
@@ -53,7 +53,7 @@ bool cmp::isAlphanumericChar(std::optional<char> const &c) {
 std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b, ulong index){
     std::stringstream r;
 
-    ulong i = index + 1;
+    ulong i = index;
     while(isSymbolicChar(b->str[i])) {
         r << *b->str[i];
         ++i;

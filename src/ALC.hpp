@@ -168,18 +168,14 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
 
     // Start the actual function
-    initFeedback->store(true);
-    std::forward<func_t>(f)(std::forward<args_t>(args)...);
+    {
+        initFeedback->store(true);
+        std::forward<func_t>(f)(std::forward<args_t>(args)...);
+    }
 
 
-    //BUG this can execute instantly if the thread finishes before the server starts a new one
-    // // Decrease active subphases count and set the end time if needed
     // Set the ending time if needed
     phaseDataArrayLock.lock();
-    // phaseDataArray[phaseId].activeSubphases->fetch_sub(1);
-    // if(isLast && phaseDataArray[phaseId].activeSubphases->load() == 0) {
-        // phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
-    // }
     if(isLast) phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
     phaseDataArrayLock.unlock();
 
@@ -220,6 +216,8 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
 
 
     // Wait for the feedback before letting the main thread go
+    //! Not sure if this is actually necessary, but im leaving it just in case it is.
+    //! It's very difficult to debug and the overhead is negligible.
     while(!isThreadDataInitialized->load()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }

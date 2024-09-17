@@ -36,6 +36,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         ulong wsLen = countWhitespace(b, i);
         if(wsLen) {
             i += wsLen;
+            increaseLocalProgress(wsLen); //FIXME
             continue;
         }
 
@@ -62,6 +63,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
             // Push token to output array and update buffer index
             *r += Token(*token, tokenType, *b->meta[i], *b->meta[i + token->length()]);
             i += token->length();
+            increaseLocalProgress(token->length()); //FIXME
             continue;
         }
 
@@ -69,16 +71,19 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
 
         // Parse literals
-        token = parseStrLiteral(b, i);
+        ulong lenOutput;
+        token = parseStrLiteral(b, i, &lenOutput);
         if(token.has_value()) {
             *r += Token(*token, TokenType::LITERAL_STR, *b->meta[i], *b->meta[i + token->length()]);
-            i += token->length();
+            i += lenOutput;
+            increaseLocalProgress(lenOutput); //FIXME
             continue;
         }
-        token = parseCharLiteral(b, i);
+        token = parseCharLiteral(b, i, &lenOutput);
         if(token.has_value()) {
             *r += Token(*token, TokenType::LITERAL_CHR, *b->meta[i], *b->meta[i + token->length()]);
-            i += token->length();
+            i += lenOutput;
+            increaseLocalProgress(lenOutput); //FIXME
             continue;
         }
 

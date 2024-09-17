@@ -33,26 +33,35 @@ namespace cmp {
         KEYWORD_THEN,             // then
         KEYWORD_RETURN,           // return
         KEYWORD_DELAY,            // delay //TODO prob not used
-        KEYWORD_ASYNC,            // async //TODO prob not used
+        KEYWORD_ASYNC,            // async //TODO prob not used //FIXME add to documentation
 
-        KEYWORD_CLASS_CONTAINER,  //    (  )  {  }
-        KEYWORD_CLASS_SEPARATOR,  //    ,  ;  .  ::
+        KEYWORD_ROUND_L,          // (
+        KEYWORD_ROUND_R,          // )
+        KEYWORD_CURLY_L,          // {
+        KEYWORD_CURLY_R,          // }
+
+        KEYWORD_COMMA,            // ,
+        KEYWORD_SEMICOLON,        // ;
+        KEYWORD_MEMBER,           // .
+        KEYWORD_REFLECTION,       // ::
 
 
-        META_KEYWORD_TEMPLATE,
-        META_KEYWORD_LT,
-        META_KEYWORD_GT,
-        META_KEYWORD_TYPE,
-        META_KEYWORD_TARGET,
-        META_KEYWORD_ATS,
-        META_KEYWORD_WHEN,
-        META_KEYWORD_PRIORITY,
-        META_KEYWORD_AS,
-        META_KEYWORD_TO,
-        META_KEYWORD_ASSIGN,
-        META_KEYWORD_BASE,
+        META_KEYWORD_TEMPLATE,      // template
+        META_KEYWORD_LT,            // <
+        META_KEYWORD_GT,            // >
+        META_KEYWORD_TYPE,          // type
+        META_KEYWORD_TARGET,        // !
+        META_KEYWORD_ATS,           // ?
+        META_KEYWORD_WHEN,          // when
+        META_KEYWORD_PRIORITY,      // priority
+        META_KEYWORD_AS,            // as
+        META_KEYWORD_TO,            // to
+        META_KEYWORD_ASSIGN,        // =
+        META_KEYWORD_BASE,          // :
         // META_KEYWORD_ //TODO :
         // META_KEYWORD_ //TODO &
+
+
 
 
         KEYWORD_CANDIDATE,        // Meta keywords (not confirmed, might be identifiers depending on the context)

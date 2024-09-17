@@ -12,17 +12,19 @@
 
 
 /**
- * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " character.
- * @param b The string buffer that contains the string literal.
+ * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " or newline character.
+ * @param b The buffer that contains the string literal.
  * @param index The index at which the string literal starts.
- * @param r The output buffer in which to save the characters that make up the literal. Opening and closing character sequences ar NOT pushed.
- * @return The length of the string literal. 0 if none was found.
+ * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
+ * @return The string value of the literal token, or nullopt if one was not found.
  */
-//FIXME update documentation
-std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ulong index) {
+std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
     std::optional<char> const &c0 = b->str[index];
-    if(!c0.has_value() || c0 != '"') return std::nullopt;
+    if(!c0.has_value() || c0 != '"') {
+        *rawLiteralLen = 0;
+        return std::nullopt;
+    }
     r << '"';
 
 
@@ -56,7 +58,7 @@ std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ul
 
         // Escape sequences
         ulong rawEscapeLen;
-        std::optional<std::string> const &decodedEscape = decodeEscapeSequence(b, i, '"', &rawEscapeLen);
+        std::optional<std::string> const &decodedEscape = decodeEscapeSequence(b, i, &rawEscapeLen);
         if(decodedEscape.has_value()) {
             r << *decodedEscape;
             i += rawEscapeLen;
@@ -77,7 +79,7 @@ std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ul
 
 
 
-
+    *rawLiteralLen = i - index;
     return r.str();
 }
 
@@ -89,17 +91,20 @@ std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ul
 
 
 /**
- * @brief Parses the char literal that starts at index <index> and checks if it contains a single 8-bit character (or a valid escape sequence).
- * @param b The string buffer that contains the char literal.
+ * @brief Parses the char literal that starts at index <index> and checks if it contains a single 8-bit character
+ *      (or a valid escape sequence that translates to an 8-bit character).
+ * @param b The buffer that contains the char literal.
  * @param index The index at which the char literal starts.
- * @param r The buffer in which to push the characters that make up the literal. Opening and closing character sequences ar NOT pushed.
- * @return The length of the char literal. 0 if none was found.
+ * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
+ * @return The string value of the literal token, or nullopt if one was not found.
  */
-//FIXME update documentation
-std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, ulong index) {
+std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
     std::optional<char> c0 = b->str[index];
-    if(!c0.has_value() || c0 != '\'') return std::nullopt;
+    if(!c0.has_value() || c0 != '\'') {
+        *rawLiteralLen = 0;
+        return std::nullopt;
+    }
     r << '\'';
 
 
@@ -139,7 +144,7 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
         // Escape sequences
         // ulong oldRLen = r.tellp();
         ulong rawEscapeLen;
-        std::optional<std::string> const &decodedEscape = decodeEscapeSequence(b, i, '\'', &rawEscapeLen);
+        std::optional<std::string> const &decodedEscape = decodeEscapeSequence(b, i, &rawEscapeLen);
         // // The length of the scape sequence as written in the source code
         // ulong utf_escapeLen = r.str.length() - oldRLen;                             // The length of the UTF-8 representation of the escape sequence
         if(decodedEscape.has_value()) {
@@ -198,6 +203,7 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
 
 
 
+    *rawLiteralLen = i - index;
     return r.str();
 }
 
@@ -211,13 +217,12 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
 //TODO PUT THIS IN THE DOCUMENTATION. these are usable in strings and chars, but longer sequences produce errors when used inside of chars
 /**
  * @brief Parses the escape sequence that starts at index <index> and prints an error if it is invalid.
- * @param b The string buffer that contains the escape sequence.
+ * @param b The buffer that contains the escape sequence.
  * @param index The index at which the escape sequence starts.
- * @param r The buffer in which to push the decoded UTF-8 bytes.
- * @param literalType The type to use when pushing characters to <r>.
- * @return A pair containing the length and height of the escape sequence, or (0, 0) if none was found.
+ * @param rawEscapeLen The raw length of the escape sequence (the number of characters it occupies in the original source code)
+ * @return The string value of the translated escape sequence, expressed in the UTF-8 format, or nullopt if one was not found.
  */
-std::optional<std::string> cmp::decodeEscapeSequence(pre::SegmentedCleanSource *b, ulong index, char literalType, ulong *rawEscapeLen) {
+std::optional<std::string> cmp::decodeEscapeSequence(pre::SegmentedCleanSource *b, ulong index, ulong *rawEscapeLen) {
     std::stringstream r;
 
     // Return if there is no escape sequence
@@ -231,8 +236,6 @@ std::optional<std::string> cmp::decodeEscapeSequence(pre::SegmentedCleanSource *
     // If there is
     ulong i = index + 1;
     std::optional<char> c = b->str[i];
-    // pre::CleanSourceMeta outputCharData(literalType, b->meta[index]->i, b->meta[index]->l, b->meta[index]->f);
-    // //!  ^ Create bogus character data. All the output characters will use a copy of this.
     if(c.has_value()) switch(*c) {
 
         // Convert basic escapes

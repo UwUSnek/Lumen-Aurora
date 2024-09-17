@@ -30,11 +30,24 @@ std::map<std::string, cmp::TokenType> cmp::keywordMap  = {
     { "then",      TokenType::KEYWORD_THEN      },
     { "return",    TokenType::KEYWORD_RETURN    },
     { "delay",     TokenType::KEYWORD_DELAY     },
-// };
+    { "async",     TokenType::KEYWORD_ASYNC     },
 
 
 
-// std::map<std::string, cmp::TokenType> cmp::metaKeywordMap  = {
+
+    { "(",         TokenType::KEYWORD_ROUND_L    },
+    { ")",         TokenType::KEYWORD_ROUND_R    },
+    { "{",         TokenType::KEYWORD_CURLY_L    },
+    { "}",         TokenType::KEYWORD_CURLY_R    },
+
+    { ",",         TokenType::KEYWORD_COMMA      },
+    { ";",         TokenType::KEYWORD_SEMICOLON  },
+    { ".",         TokenType::KEYWORD_MEMBER     },
+    { "::",        TokenType::KEYWORD_REFLECTION },
+
+
+
+
     { "template",  TokenType::META_KEYWORD_TEMPLATE },
     { "<",         TokenType::META_KEYWORD_LT       },
     { ">",         TokenType::META_KEYWORD_GT       },
