@@ -11,6 +11,23 @@
 
 
 
+// /**
+//  * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " or newline character.
+//  * @param b The buffer that contains the string literal.
+//  * @param index The index at which the string literal starts.
+//  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
+//  * @return The string value of the literal token, or nullopt if one was not found.
+//  */
+// std::optional<std::string> cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
+// }
+
+
+
+
+
+
+
+
 /**
  * @brief Parses the string literal that strarts at index <index> and ends at the first non-escaped " or newline character.
  * @param b The buffer that contains the string literal.
@@ -18,12 +35,12 @@
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal token, or nullopt if one was not found.
  */
-std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
+cmp::TokenValue* cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
     std::optional<char> const &c0 = b->str[index];
     if(!c0.has_value() || c0 != '"') {
         *rawLiteralLen = 0;
-        return std::nullopt;
+        return nullptr;
     }
     r << '"';
 
@@ -80,7 +97,7 @@ std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ul
 
 
     *rawLiteralLen = i - index;
-    return r.str();
+    return new TokenValue_STR(r.str());
 }
 
 
@@ -98,14 +115,13 @@ std::optional<std::string> cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ul
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal token, or nullopt if one was not found.
  */
-std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
+cmp::TokenValue* cmp::parseCharLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
     std::optional<char> c0 = b->str[index];
     if(!c0.has_value() || c0 != '\'') {
         *rawLiteralLen = 0;
-        return std::nullopt;
+        return nullptr;
     }
-    r << '\'';
 
 
 
@@ -115,7 +131,6 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
 //FIXME merge with string logic. they are ideantical but use different names and delimiters
 //FIXME merge with string logic. they are ideantical but use different names and delimiters
     ulong i = index + 1;
-    ulong finalLiteralLen = 1;  //! Starts from 1 to account for the skipped starting ' character
     while(true) {
         std::optional<char> c = b->str[i];
 
@@ -150,22 +165,18 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
         if(decodedEscape.has_value()) {
             r << *decodedEscape;
             i += rawEscapeLen;
-            finalLiteralLen += decodedEscape->length();
             continue;
         }
 
         // Closing sequence (escaped closing sequences are parsed by the previous escape sequence step)
         if(c == '\'') {
-            r << '\'';
             ++i;
-            ++finalLiteralLen;
             break;
         }
 
         // Normal characters
         r << *c;
         ++i;
-        ++finalLiteralLen;
     }
     //FIXME ADD ESCAPE PARSING TO STRING FUNCTION
     //FIXME TEST ALL ESCAPE SEQUENCES AND LOCATIONS
@@ -179,7 +190,7 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
 
 
     // Detect non-escaped character sequences longer than 1 byte
-    if(finalLiteralLen > 3) {
+    if(r.tellp() > 1) {
         utils::printError(
             ERROR_CMP_CHAR_LONG,
             utils::ErrType::COMPILER,
@@ -191,7 +202,7 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
     }
 
     // Detect empty literals
-    if(finalLiteralLen == 2) {
+    if(r.tellp() == 0) {
         utils::printError(
             ERROR_CMP_CHAR_EMPTY,
             utils::ErrType::COMPILER,
@@ -204,7 +215,7 @@ std::optional<std::string> cmp::parseCharLiteral(pre::SegmentedCleanSource *b, u
 
 
     *rawLiteralLen = i - index;
-    return r.str();
+    return new TokenValue_CHR(r.str()[0]);
 }
 
 

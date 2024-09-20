@@ -81,11 +81,23 @@
 
 
 namespace cmp {
-    enum class TokenType : ulong {
+    enum class TokenType : ulong { //FIXME rename to "KeywordID"
         #define X(e) e,
         LIST_TOKEN_TYPE
         #undef X
     };
+
+
+
+//TODO check if LNG has to be singed or unsigned
+
+    struct TokenValue {};
+    struct TokenValue_STR : TokenValue { std::string v; TokenValue_STR(std::string const &_v) : v(_v) {}};
+    struct TokenValue_CHR : TokenValue { char        v; TokenValue_CHR(char               _v) : v(_v) {}};
+    struct TokenValue_LNG : TokenValue { long        v; TokenValue_LNG(long               _v) : v(_v) {}};
+    struct TokenValue_DBL : TokenValue { double      v; TokenValue_DBL(double             _v) : v(_v) {}};
+    struct TokenValue_KEY : TokenValue { TokenType   v; TokenValue_KEY(TokenType          _v) : v(_v) {}};
+    struct TokenValue_ID  : TokenValue { std::string v; TokenValue_ID (std::string const &_v) : v(_v) {}};
 
 
 
@@ -98,17 +110,34 @@ namespace cmp {
 
 
     struct Token {
-        std::string value;              // The trimmed, clean stirng value of the token
-        TokenType type;                 // The type of the token
+        TokenValue *value;               // The value of the token (number or string)
+        // TokenType type;                 // The type of the token
         pre::CleanSourceMeta start;     // The index, line, columns and file of the first character relative to the original source code
         pre::CleanSourceMeta end;       // The index, line, columns and file of the last  character relative to the original source code
 
-        Token(std::string const &_value, TokenType _type, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+        // Token(std::string const &_value, TokenType _type, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+        Token(TokenValue *_value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
             value(_value),
-            type(_type),
+            // type(_type),
             start(_start),
             end(_end) {
         }
+
+
+//TODO check if LNG has to be singed or unsign
+        // void setValue_STR(std::string const &v) { ((TokenValue_STR*)value)->v = v; }
+        // void setValue_CHR(char        const &v) { ((TokenValue_CHR*)value)->v = v; }
+        // void setValue_LNG(long        const &v) { ((TokenValue_LNG*)value)->v = v; }
+        // void setValue_DBL(double      const &v) { ((TokenValue_DBL*)value)->v = v; }
+        // void setValue_KEY(TokenType   const &v) { ((TokenValue_KEY*)value)->v = v; }
+        // void setValue_ID (std::string const &v) { ((TokenValue_ID *)value)->v = v; }
+
+        std::string& getValue_STR() { return ((TokenValue_STR*)value)->v; }
+        char&        getValue_CHR() { return ((TokenValue_CHR*)value)->v; }
+        long&        getValue_LNG() { return ((TokenValue_LNG*)value)->v; }
+        double&      getValue_DBL() { return ((TokenValue_DBL*)value)->v; }
+        TokenType&   getValue_KEY() { return ((TokenValue_KEY*)value)->v; }
+        std::string& getValue_ID () { return ((TokenValue_ID *)value)->v; }
     };
 
 

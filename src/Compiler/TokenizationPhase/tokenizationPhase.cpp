@@ -47,21 +47,24 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         std::optional<std::string> token = parseAlphanumericToken(b, i);
         if(!token.has_value())     token = parseSymbolicToken(b, i);
         if(token.has_value()) {
-            TokenType tokenType;
+            TokenValue *tokenValue;
 
             // If the token is a known keyword
             auto keywordType = keywordMap.find(*token);
             if(keywordType != keywordMap.end()) {
-                tokenType = keywordType->second;
+                // tokenType = keywordType->second;
+                tokenValue = new TokenValue_KEY(keywordType->second);
             }
 
             // If not, treat it as an identifier
             else {
-                tokenType = TokenType::IDENTIFIER;
+                // tokenType = TokenType::IDENTIFIER;
+                tokenValue = new TokenValue_STR(*token);
             }
 
             // Push token to output array and update buffer index
-            *r += Token(*token, tokenType, *b->meta[i], *b->meta[i + token->length()]);
+            // *r += Token(*token, tokenType, *b->meta[i], *b->meta[i + token->length()]);
+            *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
             i += token->length();
             increaseLocalProgress(token->length()); //FIXME
             continue;
@@ -72,16 +75,16 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
         // Parse literals
         ulong lenOutput;
-        token = parseStrLiteral(b, i, &lenOutput);
-        if(token.has_value()) {
-            *r += Token(*token, TokenType::LITERAL_STR, *b->meta[i], *b->meta[i + token->length()]);
+        TokenValue *tokenValue = parseStrLiteral(b, i, &lenOutput);
+        if(tokenValue) {
+            *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
             i += lenOutput;
             increaseLocalProgress(lenOutput); //FIXME
             continue;
         }
-        token = parseCharLiteral(b, i, &lenOutput);
-        if(token.has_value()) {
-            *r += Token(*token, TokenType::LITERAL_CHR, *b->meta[i], *b->meta[i + token->length()]);
+        tokenValue = parseCharLiteral(b, i, &lenOutput);
+        if(tokenValue) {
+            *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
             i += lenOutput;
             increaseLocalProgress(lenOutput); //FIXME
             continue;
