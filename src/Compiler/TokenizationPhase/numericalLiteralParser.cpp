@@ -17,13 +17,9 @@
 cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
     std::optional<char> const &c0 = b->str[index];
-    if(!c0.has_value()) {
+    if(!c0.has_value() || !std::isdigit(*c0)) { //! inf, nan, true and false are checked by the keyword parser
         *rawLiteralLen = 0;
         return nullptr;
-    }
-    if(!std::isdigit(*c0)) {
-        cmp::TokenValue* text = parseTextNumericalLiteral(b, index, rawLiteralLen);
-        return text;
     }
 
 
@@ -131,16 +127,16 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
 
 
 
-/**
- * @brief Parses literals with value "inf", "nan", "true" or "false"
- * @param b The buffer that contains the numerical literal.
- * @param index The index at which the numerical literal starts.
- * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
- * @return The string value of the literal token, or nullptr if one was not found.
- */
-cmp::TokenValue* cmp::parseTextNumericalLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
-    //FIXME
-}
+// /**
+//  * @brief Parses literals with value "inf", "nan", "true" or "false"
+//  * @param b The buffer that contains the numerical literal.
+//  * @param index The index at which the numerical literal starts.
+//  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
+//  * @return The string value of the literal token, or nullptr if one was not found.
+//  */
+// cmp::TokenValue* cmp::parseTextNumericalLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
+//     //FIXME
+// }
 
 
 

@@ -64,20 +64,24 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
             TokenValue *tokenValue;
 
             // If the token is a known keyword
-            auto keywordType = keywordMap.find(*token);
-            if(keywordType != keywordMap.end()) {
-                // tokenType = keywordType->second;
-                tokenValue = new TokenValue_KEY(keywordType->second);
+            auto keywordType = reservedTokensMap.find(*token);
+            if(keywordType != reservedTokensMap.end()) {
+                switch(keywordType->second) {
+                    case ReservedTokenId::TMP_LITERAL_TRUE:  { tokenValue = new TokenValue_BLN(true);  break; }
+                    case ReservedTokenId::TMP_LITERAL_FALSE: { tokenValue = new TokenValue_BLN(false); break; }
+                    case ReservedTokenId::TMP_LITERAL_INF:   { tokenValue = new TokenValue_DBL(std::numeric_limits<double>::infinity());  break; }
+                    case ReservedTokenId::TMP_LITERAL_NAN:   { tokenValue = new TokenValue_DBL(std::numeric_limits<double>::quiet_NaN()); break; }
+                    default:                                 { tokenValue = new TokenValue_KEY(keywordType->second); }
+                }
+
             }
 
             // If not, treat it as an identifier
             else {
-                // tokenType = TokenType::IDENTIFIER;
                 tokenValue = new TokenValue_STR(*token);
             }
 
             // Push token to output array and update buffer index
-            // *r += Token(*token, tokenType, *b->meta[i], *b->meta[i + token->length()]);
             *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
             i += token->length();
             increaseLocalProgress(token->length()); //FIXME

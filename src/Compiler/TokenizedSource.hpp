@@ -4,7 +4,7 @@
 
 
 
-#define LIST_TOKEN_TYPE                                                                                            \
+#define LIST_RESERVED_TOKENS                                                                                       \
     X(KEYWORD_NAMESPACE)        /* namespace */                                                                    \
     X(KEYWORD_ENUM)             /* enum */                                                                         \
     X(KEYWORD_STRUCT)           /* struct */                                                                       \
@@ -60,13 +60,10 @@
 \
 \
 \
-    X(KEYWORD_CANDIDATE)        /* Meta keywords (not confirmed, might be identifiers depending on the context) */ \
-\
-    X(IDENTIFIER)               /* Identifiers */                                                                  \
-\
-    X(LITERAL_NUM)              /* Number literals */                                                              \
-    X(LITERAL_STR)              /* String literals */                                                              \
-    X(LITERAL_CHR)              /* Char literals */                                                                \
+    X(TMP_LITERAL_TRUE)         /* Temporary enum value used for text numerical literals */                        \
+    X(TMP_LITERAL_FALSE)        /* Temporary enum value used for text numerical literals */                        \
+    X(TMP_LITERAL_NAN)          /* Temporary enum value used for text numerical literals */                        \
+    X(TMP_LITERAL_INF)          /* Temporary enum value used for text numerical literals */                        \
 
 
 
@@ -79,9 +76,9 @@
 
 
 namespace cmp {
-    enum class TokenType : ulong { //FIXME rename to "KeywordID"
+    enum class ReservedTokenId : ulong { //FIXME rename to "KeywordID"
         #define X(e) e,
-        LIST_TOKEN_TYPE
+        LIST_RESERVED_TOKENS
         #undef X
     };
 
@@ -95,14 +92,14 @@ namespace cmp {
     struct TokenValue_LNG : TokenValue { long        v; TokenValue_LNG(long               _v) : v(_v) {}};      // Long literal
     struct TokenValue_DBL : TokenValue { double      v; TokenValue_DBL(double             _v) : v(_v) {}};      // Double literal
     struct TokenValue_BLN : TokenValue { bool        v; TokenValue_BLN(bool               _v) : v(_v) {}};      // Boolean literal
-    struct TokenValue_KEY : TokenValue { TokenType   v; TokenValue_KEY(TokenType          _v) : v(_v) {}};      // Keyword
+    struct TokenValue_KEY : TokenValue { ReservedTokenId   v; TokenValue_KEY(ReservedTokenId          _v) : v(_v) {}};      // Keyword
     struct TokenValue_ID  : TokenValue { std::string v; TokenValue_ID (std::string const &_v) : v(_v) {}};      // Identifier
 
 
 
 
 
-    extern std::map<std::string, TokenType> keywordMap;
+    extern std::map<std::string, ReservedTokenId> reservedTokensMap;
     // std::map<std::string, TokenType> metaKeywordMap;
 
 
@@ -136,7 +133,7 @@ namespace cmp {
         long&        getValue_LNG() { return ((TokenValue_LNG*)value)->v; }
         double&      getValue_DBL() { return ((TokenValue_DBL*)value)->v; }
         bool&        getValue_BLN() { return ((TokenValue_BLN*)value)->v; }
-        TokenType&   getValue_KEY() { return ((TokenValue_KEY*)value)->v; }
+        ReservedTokenId&   getValue_KEY() { return ((TokenValue_KEY*)value)->v; }
         std::string& getValue_ID () { return ((TokenValue_ID *)value)->v; }
     };
 
