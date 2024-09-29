@@ -4,7 +4,8 @@
 
 #include "whitespaceCounter.hpp"
 #include "keywordIdentifierParser.hpp"
-#include "literalParser.hpp"
+#include "textLiteralParser.hpp"
+#include "numericalLiteralParser.hpp"
 
 
 
@@ -43,6 +44,19 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
 
 
+        // Parse numerical literlas
+        ulong lenOutput;
+        TokenValue *tokenValue = parseNumericalLiteral(b, i, &lenOutput);
+        if(tokenValue) {
+            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
+            i += lenOutput;
+            increaseLocalProgress(lenOutput); //FIXME
+            continue;
+        }
+
+
+
+
         // Parse out alphanumeric and symbolic tokens (keywords, meta keywords and identifiers)
         std::optional<std::string> token = parseAlphanumericToken(b, i);
         if(!token.has_value())     token = parseSymbolicToken(b, i);
@@ -73,18 +87,17 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
 
 
-        // Parse literals
-        ulong lenOutput;
-        TokenValue *tokenValue = parseStrLiteral(b, i, &lenOutput);
+        // Parse text literals
+        tokenValue = parseStrLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
+            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
             increaseLocalProgress(lenOutput); //FIXME
             continue;
         }
         tokenValue = parseCharLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
+            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
             increaseLocalProgress(lenOutput); //FIXME
             continue;

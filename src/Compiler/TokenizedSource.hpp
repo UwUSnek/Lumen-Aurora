@@ -15,8 +15,6 @@
     X(KEYWORD_FROM)             /* from */                                                                         \
     X(KEYWORD_IMPORT)           /* import */                                                                       \
     X(KEYWORD_EXPORT)           /* export */                                                                       \
-    X(KEYWORD_TRUE)             /* true */                                                                         \
-    X(KEYWORD_FALSE)            /* false */                                                                        \
     X(KEYWORD_PTR)              /* @ //TODO check if this is correct */                                            \
     X(KEYWORD_ADDR)             /* $ */                                                                            \
 \
@@ -92,12 +90,13 @@ namespace cmp {
 //TODO check if LNG has to be singed or unsigned
 
     struct TokenValue {};
-    struct TokenValue_STR : TokenValue { std::string v; TokenValue_STR(std::string const &_v) : v(_v) {}};
-    struct TokenValue_CHR : TokenValue { char        v; TokenValue_CHR(char               _v) : v(_v) {}};
-    struct TokenValue_LNG : TokenValue { long        v; TokenValue_LNG(long               _v) : v(_v) {}};
-    struct TokenValue_DBL : TokenValue { double      v; TokenValue_DBL(double             _v) : v(_v) {}};
-    struct TokenValue_KEY : TokenValue { TokenType   v; TokenValue_KEY(TokenType          _v) : v(_v) {}};
-    struct TokenValue_ID  : TokenValue { std::string v; TokenValue_ID (std::string const &_v) : v(_v) {}};
+    struct TokenValue_STR : TokenValue { std::string v; TokenValue_STR(std::string const &_v) : v(_v) {}};      // String literal
+    struct TokenValue_CHR : TokenValue { char        v; TokenValue_CHR(char               _v) : v(_v) {}};      // Char literal
+    struct TokenValue_LNG : TokenValue { long        v; TokenValue_LNG(long               _v) : v(_v) {}};      // Long literal
+    struct TokenValue_DBL : TokenValue { double      v; TokenValue_DBL(double             _v) : v(_v) {}};      // Double literal
+    struct TokenValue_BLN : TokenValue { bool        v; TokenValue_BLN(bool               _v) : v(_v) {}};      // Boolean literal
+    struct TokenValue_KEY : TokenValue { TokenType   v; TokenValue_KEY(TokenType          _v) : v(_v) {}};      // Keyword
+    struct TokenValue_ID  : TokenValue { std::string v; TokenValue_ID (std::string const &_v) : v(_v) {}};      // Identifier
 
 
 
@@ -136,6 +135,7 @@ namespace cmp {
         char&        getValue_CHR() { return ((TokenValue_CHR*)value)->v; }
         long&        getValue_LNG() { return ((TokenValue_LNG*)value)->v; }
         double&      getValue_DBL() { return ((TokenValue_DBL*)value)->v; }
+        bool&        getValue_BLN() { return ((TokenValue_BLN*)value)->v; }
         TokenType&   getValue_KEY() { return ((TokenValue_KEY*)value)->v; }
         std::string& getValue_ID () { return ((TokenValue_ID *)value)->v; }
     };

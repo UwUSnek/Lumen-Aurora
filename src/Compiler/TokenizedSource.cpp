@@ -14,8 +14,6 @@ std::map<std::string, cmp::TokenType> cmp::keywordMap  = {
     { "from",      TokenType::KEYWORD_FROM      },
     { "import",    TokenType::KEYWORD_IMPORT    },
     { "export",    TokenType::KEYWORD_EXPORT    },
-    { "true",      TokenType::KEYWORD_TRUE      },
-    { "false",     TokenType::KEYWORD_FALSE     },
 
     { "@",         TokenType::KEYWORD_PTR       },
     { "$",         TokenType::KEYWORD_ADDR      },

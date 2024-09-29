@@ -71,4 +71,8 @@ enum ErrorCode : int {
     ERROR_CMP_ESCAPE_U_EMPTY,                    // No digits in \u or \U escape sequence
     ERROR_CMP_ESCAPE_U4_MISSING,                 // Missing digits in \u escape sequence
     ERROR_CMP_ESCAPE_U8_MISSING,                 // Missing digits in \U escape sequence
+
+    ERROR_CMP_LITERAL_BASE_INVALID,             // Invalid base prefix
+    ERROR_CMP_LITERAL_DIGITS_MISSING,           // No digits afer base prefix
+    ERROR_CMP_LITERAL_DIGITS_INVALID,           // Invalid digit
 };
