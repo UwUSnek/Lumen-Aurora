@@ -119,10 +119,9 @@ std::ostream cerr(&__internal_cerr_streambuff);
 
 std::string phaseIdTotring(PhaseID phaseId) {
     static const char* names[] = {
-        "Preprocessing",
-        "Compilation",
-        "Optimization",
-        "Conversion",
+        #define X(e) #e,
+        LIST_PHASE_ID
+        #undef X
     };
     return names[phaseId];
 }
@@ -131,7 +130,6 @@ std::string phaseIdTotring(PhaseID phaseId) {
 
 PhaseData::PhaseData(long _timeStart) :
     totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
-    activeSubphases(new std::atomic<ulong>(0)),
     timeStart      (new std::atomic<long>(_timeStart)),
     timeEnd        (new std::atomic<long>(0)) {
 }

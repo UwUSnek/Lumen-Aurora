@@ -79,22 +79,28 @@ extern std::ostream cerr;
 
 //TODO make this more readable, maybe group stuff in namespaces
 
+#define LIST_PHASE_ID   \
+    X(Preprocessing)    \
+    X(Compilation)      \
+    X(Optimization)     \
+    X(Conversion)       \
+    X(NUM)              \
+    // ^ The number of phases, not including this enum value.
+
+
 // Identifies the phases of the compilation progress
 // Phases must be declared in order. Update phaseIdToString after changing this enum.
 enum PhaseID : ulong {
-    PREPROCESSING = 0,
-    COMPILATION,
-    OPTIMIZATION,
-    CONVERSION,
-    num // The number of phases, not including this enum value.
-    //TODO add other phases
+    #define X(e) e,
+    LIST_PHASE_ID
+    #undef X
 };
 std::string phaseIdTotring(PhaseID phaseId);
 
 
 struct PhaseData {
     DynamicProgressBar *totalProgress;
-    std::atomic<ulong> *activeSubphases;
+    // std::atomic<ulong> *activeSubphases;
     std::atomic<long>  *timeStart;
     std::atomic<long>  *timeEnd;
 
@@ -141,7 +147,8 @@ void increaseMaxProgress(ulong n);
 
 
 
-template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, func_t &&f, args_t &&...args) {
+
+template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
 
     // Init thread data and counters
     threadType = ThreadType::SUBPHASE;
@@ -155,7 +162,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
         phaseDataArray.push_back(PhaseData(utils::getEpochMs()));
     }
     maxProgress = phaseDataArray[phaseId].totalProgress;
-    phaseDataArray[phaseId].activeSubphases->fetch_add(1);
+    // phaseDataArray[phaseId].activeSubphases->fetch_add(1);
     phaseDataArrayLock.unlock();
 
 
@@ -167,15 +174,15 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
 
     // Start the actual function
-    std::forward<func_t>(f)(std::forward<args_t>(args)...);
-
-
-    // Decrease active subphases count and set the end time if needed
-    phaseDataArrayLock.lock();
-    phaseDataArray[phaseId].activeSubphases->fetch_sub(1);
-    if(phaseDataArray[phaseId].activeSubphases->load() == 0) {
-        phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
+    {
+        initFeedback->store(true);
+        std::forward<func_t>(f)(std::forward<args_t>(args)...);
     }
+
+
+    // Set the ending time if needed
+    phaseDataArrayLock.lock();
+    if(isLast) phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
     phaseDataArrayLock.unlock();
 
 
@@ -186,10 +193,39 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
 
 
-template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, func_t &&f, args_t &&...args) {
+/**
+ * @brief Starts a subphase thread using the specified task function and arguments.
+ * @param phaseId The ID of the main phase.
+ * @param isLast Whether this is the last subphase of the main phase.
+ * @param f The task function to execute.
+ * @param args The list of arguments to pass to <f>.
+ *      All arguments are passed to the new thread by value.
+ */
+template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, bool isLast, func_t &&f, args_t &&...args) {
+
+    //! Subphase and Phase data initialization feedback
+    std::atomic<bool> *isThreadDataInitialized = new std::atomic<bool>(false);
+
+
+    // Start the new thread
     std::thread(
-        [lambda_phaseId = phaseId, lambda_f = std::forward<func_t>(f), ...lambda_args = std::forward<args_t>(args)]() mutable {
-            __internal_subphase_exec(lambda_phaseId, std::move(lambda_f), std::move(lambda_args)...);
+        [
+            _phaseId = phaseId,
+            _isThreadDataInitialized = isThreadDataInitialized,
+            _isLast = isLast,
+            _f = std::forward<func_t>(f),
+            ..._args = std::forward<args_t>(args)
+        ]() mutable {
+            __internal_subphase_exec(_phaseId, _isLast, _isThreadDataInitialized, std::move(_f), std::move(_args)...);
         }
     ).detach();
+
+
+    // Wait for the feedback before letting the main thread go
+    //! Not sure if this is actually necessary, but im leaving it just in case it is.
+    //! It's very difficult to debug and the overhead is negligible.
+    while(!isThreadDataInitialized->load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    delete isThreadDataInitialized;
 }

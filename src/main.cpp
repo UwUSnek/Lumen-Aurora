@@ -14,7 +14,8 @@ namespace fs = std::filesystem;
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
-#include "Preprocessor/CleanupPhase/SegmentedCleanSource.hpp"
+#include "Compiler/compiler.hpp"
+#include "Command/info.hpp"
 
 
 
@@ -23,6 +24,16 @@ namespace fs = std::filesystem;
 
 
 
+static ulong const maxPhaseNameLen = [] {
+    #define X(e) #e,
+    static std::vector<std::string> const names = { LIST_PHASE_ID };
+    #undef X
+    return std::max_element(names.begin(), names.end(),
+        [](std::string const &a, std::string const &b) {
+            return a.length() < b.length();
+        }
+    )->length();
+}();
 
 
 
@@ -46,7 +57,10 @@ void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWi
         const bool isPhaseComplete = phaseDataArray[i].timeEnd->load() > 0;
         const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
 
-        cout << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black) << "\n    " << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
+        cout
+            << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black)
+            << "\n    " << std::right << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
+
         if(isPhaseComplete) {
             cout
                 << bar->max.load() << " steps"
@@ -182,11 +196,15 @@ int main(int argc, char* argv[]){
     // Parse command line options
     cmd::parseOptions(argc, argv, fullCommand);
     if(cmd::options.isHelp) {
-        cmd::printHelp();
+        consoleLock.lock();
+        cout << cmd::getHelpMessage();
+        consoleLock.unlock();
         exit(0);
     }
     if(cmd::options.isVersion) {
-        cmd::printVersion();
+        consoleLock.lock();
+        cout << cmd::getVersionMessage();
+        consoleLock.unlock();
         exit(0);
     }
 
@@ -203,28 +221,23 @@ int main(int argc, char* argv[]){
 
 
 
+
     // Preprocessing
     std::ifstream f(cmd::options.sourceFile);
     std::string s = utils::readFile(f);
     f.close();
     totalFiles.fetch_add(1);
-    pre::SegmentedCleanSource &sourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
-
-
+    pre::SegmentedCleanSource *preprocessedSourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
 
 
     if(compileModule) {
         // Compilation
-        //TODO actually compile the code
-
-
+        cmp::compilePreprocessedSourceCode(preprocessedSourceCode);
 
 
         // Optimization
         //TODO actually optimize the code
     }
-
-
 
 
     if(compileExec) {
@@ -239,7 +252,7 @@ int main(int argc, char* argv[]){
 
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
-    // Join subphase threads
+    // Wait for subphase threads to complete
     while(activeThreads.load()) {
         int exitCode = exitMainRequest.load();
         if(exitCode) {
@@ -258,10 +271,10 @@ int main(int argc, char* argv[]){
         //TODO write module
     }
     else {
-        sourceCode.str.awaitClose();
-        sourceCode.str.sReallocLock.lock();
-        writeOutputFile(*sourceCode.str.cpp());
-        sourceCode.str.sReallocLock.unlock();
+        preprocessedSourceCode->str.awaitClose();
+        preprocessedSourceCode->str.sReallocLock.lock();
+        writeOutputFile(*preprocessedSourceCode->str.cpp());
+        preprocessedSourceCode->str.sReallocLock.unlock();
     }
 
 

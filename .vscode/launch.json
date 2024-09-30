@@ -9,7 +9,7 @@
             "program": "${workspaceFolder}/Build/out",
             "args": [
                 "./Test/main.lum",
-                "-p", "./Test/out"
+                "-m", "./Test/out"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

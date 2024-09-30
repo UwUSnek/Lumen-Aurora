@@ -9,10 +9,6 @@
 
 
 void pre::startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
-    b-> str.awaitClose(); //! Wait for include phase to finish to improve the progress estimation
-    b->meta.awaitClose(); //! Wait for include phase to finish to improve the progress estimation
-
-
     ulong i = 0;
     while(b->str[i].has_value()) {
         r->str  += *b->str[i];
