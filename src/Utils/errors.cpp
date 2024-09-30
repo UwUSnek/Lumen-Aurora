@@ -254,7 +254,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
             }
 
             // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
-            cerr << formatChar(s[i], col, true);
+            cerr << formatChar(s[i], col, false);
             ++col;
             if(s[i] == '\n') {
                 col = 0;

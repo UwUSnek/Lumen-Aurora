@@ -27,17 +27,34 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
 
     // Find the base of the literal and set the starting index
     uint base = 0;
-    std::string pattern;
     std::string baseName;
+    bool (*isDigitValid)(char);
     ulong i;
     std::optional<char> const &c1 = b->str[index + 1];
     if(c0 == '0' && c1.has_value() && std::isalpha(*c1)) {
         i = index + 2;
         switch(*c1) {
-            case 'b': { base = 2;  pattern = "01";                     baseName = "binary";      break; }
-            case 'o': { base = 2;  pattern = "01234567";               baseName = "octal";       break; }
-            case 'd': { base = 10; pattern = "0123456789";             baseName = "decimal";     break; }
-            case 'x': { base = 16; pattern = "0123456789abcdefABCDEF"; baseName = "hexadecimal"; break; }
+            case 'b': {
+                base = 2;
+                isDigitValid = [](char c) { return c == '0' || c == '1'; };
+                baseName = "binary";
+                break;
+            }
+            case 'o': {
+                base = 2;
+                isDigitValid = [](char c) { return c >= '0' && c <= '7'; };
+                baseName = "octal";
+                break;
+            }
+            case 'd': {
+                goto decimal;
+            }
+            case 'x': {
+                base = 16;
+                isDigitValid = [](char c) { return c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F'; };
+                baseName = "hexadecimal";
+                break;
+            }
             default: {
                 utils::printError(
                     ERROR_CMP_LITERAL_BASE_INVALID,
@@ -50,21 +67,23 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
         }
     }
     else {
+        decimal:
         i = index;
         base = 10;
-        pattern = "0123456789";
+        isDigitValid = [](char c) { return c >= '0' && c <= '9'; };
         baseName = "decimal";
     }
 
 
 
 
-    // Convert the string to a token value
+    // Parse the string and check its digits
     bool isFloat = false;
     while(true) {
         std::optional<char> const &c = b->str[i];
         if(c.has_value()) {
-            if(pattern.find(*c)) {
+            // if(pattern.find(*c)) {
+            if(isDigitValid(*c)) {
                 r << *c;
                 ++i;
             }
@@ -112,31 +131,16 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
 
 
 
-    // Return the value
+    // Set the raw lenght and return the value
+    *rawLiteralLen = i - index;
     if(isFloat) {
         return new TokenValue_DBL(strToDbl(r.str(), base));
     }
     else {
-        return new TokenValue_LNG(std::stoul(r.str(), nullptr, base));
+        std::string debug = r.str(); //TODO REMOVE
+        return new TokenValue_LNG(strToLng(r.str(), base));
     }
 }
-
-
-
-
-
-
-
-// /**
-//  * @brief Parses literals with value "inf", "nan", "true" or "false"
-//  * @param b The buffer that contains the numerical literal.
-//  * @param index The index at which the numerical literal starts.
-//  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
-//  * @return The string value of the literal token, or nullptr if one was not found.
-//  */
-// cmp::TokenValue* cmp::parseTextNumericalLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
-//     //FIXME
-// }
 
 
 
@@ -175,36 +179,34 @@ double cmp::strToDbl(std::string const &s, uint base) {
 
     // Return the calculated value
     return r;
+}
 
 
 
 
 
-    // // Find radix point index
-    // size_t point;
-    // if(s[s.length() - 1] == '.') {
-    //     s += '0';
-    //     point = s.length() - 1;
-    // }
-    // else {
-    //     point = s.find('.');
-    // }
 
 
-    // // Calculate integer part
-    // ulong _int = std::stoul(s.substr(0, point), nullptr, base);
-    // double _frc = 0.0;
+
+/**
+ * @brief Converts a string to an unsigned long.
+ * @param s The string.
+ * @param base The numerical base of the value.
+ * @return The value as an unsigned long.
+ */
+ulong cmp::strToLng(std::string const &s, uint base) {
+    ulong r = 0; //FIXME print an error if the value is larger than the max ulong
+
+    // Calculate value
+    ulong i;
+    for(i = 0; i < s.length(); ++i) {
+        char digit = s[i];
+        double value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
+        r *= base;
+        r += value;
+    }
 
 
-    // // Calculate fractional part manually
-    // if(point != std::string::npos) {
-    //     std::string _frcStr = s.substr(point + 1);
-    //     for (size_t i = 0; i < _frcStr.size(); ++i) {
-    //         if (_frcStr[i] == '1') {
-    //             _frc += 1.0 / (1 << (i + 1));
-    //         }
-    //     }
-    // }
-
-    // return _int + b;
+    // Return the calculated value
+    return r;
 }

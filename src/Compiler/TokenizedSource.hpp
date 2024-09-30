@@ -17,7 +17,7 @@
     X(KEYWORD_EXPORT)           /* export */                                                                       \
     X(KEYWORD_PTR)              /* @ //TODO check if this is correct */                                            \
     X(KEYWORD_ADDR)             /* $ */                                                                            \
-\
+    \
     X(KEYWORD_IF)               /* if */                                                                           \
     X(KEYWORD_ELSE)             /* else */                                                                         \
     X(KEYWORD_FOR)              /* for */                                                                          \
@@ -30,18 +30,18 @@
     X(KEYWORD_RETURN)           /* return */                                                                       \
     X(KEYWORD_DELAY)            /* delay //TODO prob not used */                                                   \
     X(KEYWORD_ASYNC)            /* async //TODO prob not used //FIXME add to documentation */                      \
-\
+    \
     X(KEYWORD_ROUND_L)          /* ( */                                                                            \
     X(KEYWORD_ROUND_R)          /* ) */                                                                            \
     X(KEYWORD_CURLY_L)          /* { */                                                                            \
     X(KEYWORD_CURLY_R)          /* } */                                                                            \
-\
+    \
     X(KEYWORD_COMMA)            /* , */                                                                            \
     X(KEYWORD_SEMICOLON)        /* ; */                                                                            \
     X(KEYWORD_MEMBER)           /* . */                                                                            \
     X(KEYWORD_REFLECTION)       /* :: */                                                                           \
-\
-\
+    \
+    \
     X(META_KEYWORD_TEMPLATE)    /* template */                                                                     \
     X(META_KEYWORD_LT)          /* < */                                                                            \
     X(META_KEYWORD_GT)          /* > */                                                                            \
@@ -54,12 +54,12 @@
     X(META_KEYWORD_TO)          /* to */                                                                           \
     X(META_KEYWORD_ASSIGN)      /* = */                                                                            \
     X(META_KEYWORD_BASE)        /* : */                                                                            \
-        /* META_KEYWORD_ //TODO : */\
-        /* META_KEYWORD_ //TODO & */\
-\
-\
-\
-\
+    /* META_KEYWORD_ //TODO : */\
+    /* META_KEYWORD_ //TODO & */\
+    \
+    \
+    \
+    \
     X(TMP_LITERAL_TRUE)         /* Temporary enum value used for text numerical literals */                        \
     X(TMP_LITERAL_FALSE)        /* Temporary enum value used for text numerical literals */                        \
     X(TMP_LITERAL_NAN)          /* Temporary enum value used for text numerical literals */                        \
@@ -87,13 +87,13 @@ namespace cmp {
 //TODO check if LNG has to be singed or unsigned
 
     struct TokenValue {};
-    struct TokenValue_STR : TokenValue { std::string v; TokenValue_STR(std::string const &_v) : v(_v) {}};      // String literal
-    struct TokenValue_CHR : TokenValue { char        v; TokenValue_CHR(char               _v) : v(_v) {}};      // Char literal
-    struct TokenValue_LNG : TokenValue { long        v; TokenValue_LNG(long               _v) : v(_v) {}};      // Long literal
-    struct TokenValue_DBL : TokenValue { double      v; TokenValue_DBL(double             _v) : v(_v) {}};      // Double literal
-    struct TokenValue_BLN : TokenValue { bool        v; TokenValue_BLN(bool               _v) : v(_v) {}};      // Boolean literal
-    struct TokenValue_KEY : TokenValue { ReservedTokenId   v; TokenValue_KEY(ReservedTokenId          _v) : v(_v) {}};      // Keyword
-    struct TokenValue_ID  : TokenValue { std::string v; TokenValue_ID (std::string const &_v) : v(_v) {}};      // Identifier
+    struct TokenValue_STR : TokenValue { std::string     v; TokenValue_STR(std::string const &_v) : v(_v) {}};      // String literal
+    struct TokenValue_CHR : TokenValue { char            v; TokenValue_CHR(char               _v) : v(_v) {}};      // Char literal
+    struct TokenValue_LNG : TokenValue { ulong           v; TokenValue_LNG(ulong              _v) : v(_v) {}};      // Ulong literal
+    struct TokenValue_DBL : TokenValue { double          v; TokenValue_DBL(double             _v) : v(_v) {}};      // Double literal
+    struct TokenValue_BLN : TokenValue { bool            v; TokenValue_BLN(bool               _v) : v(_v) {}};      // Boolean literal
+    struct TokenValue_KEY : TokenValue { ReservedTokenId v; TokenValue_KEY(ReservedTokenId    _v) : v(_v) {}};      // Keyword
+    struct TokenValue_ID  : TokenValue { std::string     v; TokenValue_ID (std::string const &_v) : v(_v) {}};      // Identifier
 
 
 
@@ -128,13 +128,13 @@ namespace cmp {
         // void setValue_KEY(TokenType   const &v) { ((TokenValue_KEY*)value)->v = v; }
         // void setValue_ID (std::string const &v) { ((TokenValue_ID *)value)->v = v; }
 
-        std::string& getValue_STR() { return ((TokenValue_STR*)value)->v; }
-        char&        getValue_CHR() { return ((TokenValue_CHR*)value)->v; }
-        long&        getValue_LNG() { return ((TokenValue_LNG*)value)->v; }
-        double&      getValue_DBL() { return ((TokenValue_DBL*)value)->v; }
-        bool&        getValue_BLN() { return ((TokenValue_BLN*)value)->v; }
-        ReservedTokenId&   getValue_KEY() { return ((TokenValue_KEY*)value)->v; }
-        std::string& getValue_ID () { return ((TokenValue_ID *)value)->v; }
+        std::string&     getValue_STR() { return ((TokenValue_STR*)value)->v; }
+        char&            getValue_CHR() { return ((TokenValue_CHR*)value)->v; }
+        ulong&           getValue_LNG() { return ((TokenValue_LNG*)value)->v; }
+        double&          getValue_DBL() { return ((TokenValue_DBL*)value)->v; }
+        bool&            getValue_BLN() { return ((TokenValue_BLN*)value)->v; }
+        ReservedTokenId& getValue_KEY() { return ((TokenValue_KEY*)value)->v; }
+        std::string&     getValue_ID () { return ((TokenValue_ID *)value)->v; }
     };
 
 
