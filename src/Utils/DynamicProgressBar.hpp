@@ -37,6 +37,7 @@ public:
 
     void    increase(ulong n) { progress.fetch_add(n); }
     void increaseMax(ulong n) {      max.fetch_add(n); }
+    void decreaseMax(ulong n) {      max.fetch_sub(n); }
 
     void render(int terminalWidth) const;
     // bool isComplete() const { return progress.load() >= max.load(); }

@@ -2,7 +2,10 @@
 #include "textLiteralParser.hpp"
 #include "Utils/errors.hpp"
 #include "Utils/ansi.hpp"
-#include "Compiler/UTF8_decoder.h"
+
+extern "C" {
+    #include "Compiler/UTF8_decoder.h"
+}
 
 
 

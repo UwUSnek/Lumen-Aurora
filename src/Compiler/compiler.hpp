@@ -4,5 +4,6 @@
 
 
 namespace cmp {
+    // std::atomic<bool> isCompilationProgressInitialized = false;
     void compilePreprocessedSourceCode(pre::SegmentedCleanSource* b);
 }

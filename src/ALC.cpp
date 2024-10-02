@@ -162,3 +162,12 @@ void increaseLocalProgress(ulong n) {
 void increaseMaxProgress(ulong n) {
     maxProgress->increaseMax(n);
 };
+
+/**
+ * @brief Decreases the max progress value of the associated phase.
+ *      This function can only be called by a phase thread.
+ * @param n The amount of progress steps to subtract.
+ */
+void decreaseMaxProgress(ulong n) {
+    maxProgress->decreaseMax(n);
+};

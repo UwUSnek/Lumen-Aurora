@@ -137,6 +137,7 @@ extern thread_local std::atomic<ulong>* localProgress;
 void increaseLocalProgress(ulong n);
 extern thread_local DynamicProgressBar* maxProgress;
 void increaseMaxProgress(ulong n);
+void decreaseMaxProgress(ulong n);
 
 
 

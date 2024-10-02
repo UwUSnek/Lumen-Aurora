@@ -19,7 +19,7 @@
         {
             "type": "shell",
             "label": "TEST | Run manual testing",
-            "command": "./Build/out",
+            "command": "./Build/lac",
             "args": [
                 "./Test/main.lum",
                 "-m", "./Test/out"
