@@ -1,5 +1,5 @@
 #pragma once
-#include "BasePipe.hpp"
+#include "__base_Pipe.hpp"
 
 
 
@@ -16,7 +16,7 @@
  *      Use .isOpen() to check if the pipe is still being written to.
  *      Once the server thead has finished building the string, it MUST call .closePipe() to notify the other threads.
  */
-struct StringPipe : public BasePipe<std::string, char> {
+struct StringPipe : public __base_Pipe<std::string, char> {
 protected:
     ulong __internal_get_len(const std::string &e) override { return e.length(); }
     void   __internal_append(const std::string &e) override { s.append(e); }

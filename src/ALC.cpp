@@ -171,3 +171,55 @@ void increaseMaxProgress(ulong n) {
 void decreaseMaxProgress(ulong n) {
     maxProgress->decreaseMax(n);
 };
+
+
+/**
+ * @brief Increases the max progress value of the specified phase.
+ * @param n The amount of progress steps to add.
+ */
+void increaseMaxProgress(PhaseID phaseId, ulong n) {
+    phaseDataArrayLock.lock();
+    phaseDataArray[phaseId].totalProgress->increaseMax(n);
+    phaseDataArrayLock.unlock();
+};
+
+/**
+ * @brief Decreases the max progress value of the specified phase.
+ * @param n The amount of progress steps to subtract.
+ */
+void decreaseMaxProgress(PhaseID phaseId, ulong n) {
+    phaseDataArrayLock.lock();
+    phaseDataArray[phaseId].totalProgress->decreaseMax(n);
+    phaseDataArrayLock.unlock();
+};
+
+/**
+ * @brief Retrieves the max progress value of the specified phase.
+ * @param n The max progress value.
+ */
+ulong fetchMaxProgress(PhaseID phaseId) {
+    phaseDataArrayLock.lock();
+    ulong r = phaseDataArray[phaseId].totalProgress->max.load();
+    phaseDataArrayLock.unlock();
+    return r;
+};
+
+
+
+
+
+
+
+
+
+/**
+ * @brief initializes the data of each phase.
+ *      This function MUST be called ONCE before starting any of the subphses
+ */
+void initPhaseData(){
+    for(ulong i = 0; i < PhaseID::NUM; ++i) {
+        phaseDataArrayLock.lock();
+        phaseDataArray.push_back(PhaseData(utils::getEpochMs()));
+        phaseDataArrayLock.unlock();
+    }
+}

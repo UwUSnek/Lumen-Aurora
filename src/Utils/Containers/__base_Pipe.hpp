@@ -12,7 +12,7 @@
 
 
 
-template <class t, class elmt> struct BasePipe { // could be the name of an instrument
+template <class t, class elmt> struct __base_Pipe { // could be the name of an instrument
 private:
     std::atomic<ulong> len = 0;
     std::atomic<bool> _isOpen = true;
@@ -35,7 +35,7 @@ public:
     std::mutex sReallocLock;
 
 
-    BasePipe() {}
+    __base_Pipe() {}
 
 
 

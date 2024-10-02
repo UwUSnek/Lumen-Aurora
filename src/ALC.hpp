@@ -139,6 +139,9 @@ extern thread_local DynamicProgressBar* maxProgress;
 void increaseMaxProgress(ulong n);
 void decreaseMaxProgress(ulong n);
 
+void increaseMaxProgress(PhaseID phaseId, ulong n);
+void decreaseMaxProgress(PhaseID phaseId, ulong n);
+ulong fetchMaxProgress(PhaseID phaseId);
 
 
 
@@ -151,19 +154,19 @@ void decreaseMaxProgress(ulong n);
 
 template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
 
+    // Set thread name
+    pthread_setname_np(pthread_self(), (std::string("Subphase ") + std::to_string(phaseId) + " | " + phaseIdTotring(phaseId)).c_str());
+
+
     // Init thread data and counters
     threadType = ThreadType::SUBPHASE;
     activeThreads.fetch_add(1);
     totalThreads.fetch_add(1);
 
 
-    // If needed, create new phase data (ordered), then increase its active subphases count
+    // Set max progress pointer
     phaseDataArrayLock.lock();
-    if(phaseDataArray.size() <= phaseId) {
-        phaseDataArray.push_back(PhaseData(utils::getEpochMs()));
-    }
     maxProgress = phaseDataArray[phaseId].totalProgress;
-    // phaseDataArray[phaseId].activeSubphases->fetch_add(1);
     phaseDataArrayLock.unlock();
 
 
@@ -230,3 +233,5 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
     }
     delete isThreadDataInitialized;
 }
+
+void initPhaseData();

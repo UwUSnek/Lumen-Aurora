@@ -6,7 +6,7 @@
             "name": "Debug compiler",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Build/lac",
+            "program": "${workspaceFolder}/Build/alc",
             "args": [
                 "./Test/main.lum",
                 "-m", "./Test/out"

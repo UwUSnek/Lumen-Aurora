@@ -16,6 +16,8 @@ void pre::startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
 
         ++i;
         increaseLocalProgress(1);
+        // decreaseMaxProgress(Compilation, definition length); //TODO
+        // decreaseMaxProgress(Compilation, call length); //TODO
     }
 
 
