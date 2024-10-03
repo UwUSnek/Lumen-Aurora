@@ -51,10 +51,11 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
 
         cout
             << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black)
-            << "\n    " << std::right << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ " << ansi::reset;
+            << "\n    " << std::right << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ ";
 
         if(isPhaseComplete) {
             cout
+                << ansi::reset
                 << bar->max.load() << " steps"
                 << " | "
                 << utils::formatMilliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) << " time elapsed"
@@ -104,7 +105,8 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
 void startMonitorThread(std::string fullCommand){
     ulong interval = 100;
 
-    // Set thread name
+    // Set thread name and type
+    threadType = ThreadType::MONITOR;
     pthread_setname_np(pthread_self(), "Monitor");
 
 

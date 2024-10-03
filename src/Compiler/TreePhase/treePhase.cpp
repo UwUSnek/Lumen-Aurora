@@ -3,6 +3,7 @@
 
 
 
-void cmp::startTreePhase(TokenizedSource *b, __base_ST *r) {
-
+void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
+    b->awaitClose(); //TODO remove after writing this and the other subphases
+    r->closePipe();
 }

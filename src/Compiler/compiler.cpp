@@ -10,7 +10,7 @@
 
 
 
-void cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b) {
+cmp::SourceTree* cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b) { //TODO fix return type and value
 
     // Set max progress (updated dynamically by preprocessor threads whenever they remove stuff after merging the files) //TODO remove comment
     // increaseMaxProgress(fetchMaxProgress(Preprocessing) * 2); //FIXME use *n for n subphases //TODO remove comment
@@ -19,9 +19,11 @@ void cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b) {
 
     // Create subphase buffers
     TokenizedSource *r1 = new TokenizedSource();
-    ST_Module       *r2 = new ST_Module();
+    SourceTree      *r2 = new SourceTree();
 
     // Start subphases
     startSubphaseAsync(Compilation, false, startTokenizationPhase, b, r1);
-    startSubphaseAsync(Compilation, false, startTreePhase,        r1, r2);
+    startSubphaseAsync(Compilation, true, startTreePhase,        r1, r2); //FIXME set islast to false and use true in the subphase that's actually last
+
+    return r2;
 }

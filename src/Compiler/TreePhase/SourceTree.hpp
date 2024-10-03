@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 
+#include "Utils/Containers/GenericPipe.hpp"
+
 
 
 
@@ -10,12 +12,14 @@
 
 
 namespace cmp {
+    struct ST_Module;
     /**
      * @brief The base Source Tree structure
      */
     struct __base_ST {
         // Empty
     };
+    typedef GenericPipe<ST_Module> SourceTree;
 
 
 

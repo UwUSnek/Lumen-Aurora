@@ -101,6 +101,7 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
                         "Only one is allowed."
                     );
                 }
+                r << *c;
                 isFloat = true;
                 ++i;
             }

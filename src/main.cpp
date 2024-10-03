@@ -17,6 +17,7 @@ namespace fs = std::filesystem;
 #include "Compiler/compiler.hpp"
 #include "Command/info.hpp"
 #include "monitorThread.hpp"
+#include "Compiler/TreePhase/SourceTree.hpp"
 
 
 
@@ -52,7 +53,10 @@ void writeOutputFile(std::string &code) {
 
 
 int main(int argc, char* argv[]){
+
+    // Set thread name and type
     threadType = ThreadType::MAIN;
+    pthread_setname_np(pthread_self(), "Main Thread");
 
 
     // Recreate full command
@@ -102,13 +106,13 @@ int main(int argc, char* argv[]){
     f.close();
     totalFiles.fetch_add(1);
     pre::SegmentedCleanSource *preprocessedSourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
-    pre::SegmentedCleanSource *precompiledModule = nullptr; //FIXME replace with a tree pipe
-    pre::SegmentedCleanSource *convertedCode     = nullptr; //TODO
+    cmp::SourceTree *precompiledModule = nullptr;
+    // pre::SegmentedCleanSource *convertedCode     = nullptr; //TODO
 
 
     if(compileModule) {
         // Compilation
-        precompiledModule = cmp::compilePreprocessedSourceCode(preprocessedSourceCode); //FIXME replace with a tree pipe
+        precompiledModule = cmp::compilePreprocessedSourceCode(preprocessedSourceCode);
 
 
         // Optimization
@@ -128,14 +132,13 @@ int main(int argc, char* argv[]){
 
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
-    // Wait for subphase threads to complete
-    while(activeThreads.load()) {
+    // Define the task to be executed while waiting for the subphase threads to finish
+    void (*waitTask)() = [](){
         int exitCode = exitMainRequest.load();
         if(exitCode) {
             std::exit(exitCode);
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
+    };
 
 
 
@@ -144,12 +147,12 @@ int main(int argc, char* argv[]){
         //TODO write exec
     }
     else if(compileModule) {
-        precompiledModule->awaitClose(); //FIXME replace with a tree pipe
+        precompiledModule->awaitClose(waitTask);
         //TODO write module
     }
     else {
-        preprocessedSourceCode->str.awaitClose();
-        preprocessedSourceCode->meta.awaitClose();
+        preprocessedSourceCode->str.awaitClose(waitTask);
+        preprocessedSourceCode->meta.awaitClose(waitTask);
         preprocessedSourceCode->str.sReallocLock.lock();
         writeOutputFile(*preprocessedSourceCode->str.cpp());
         preprocessedSourceCode->str.sReallocLock.unlock();

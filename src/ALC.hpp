@@ -34,7 +34,8 @@ extern std::atomic<ulong> totalModules;
 enum class ThreadType : ulong {
     MAIN        = 0,
     SUBPHASE    = 0xC0FFEE,
-    UNKNOWN     = 0xDEADBEEF,
+    MONITOR     = 0xBEE,
+    UNKNOWN     = 0xDEAD,
 };
 extern thread_local ThreadType threadType;
 
@@ -149,13 +150,16 @@ ulong fetchMaxProgress(PhaseID phaseId);
 
 
 
-
+//FIXME move to utils or something
+#define MAX_THR_NAME_LEN 15
+#define ACTUAL_MAX_THR_NAME_LEN (MAX_THR_NAME_LEN - 2 - 3)
 
 
 template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
 
     // Set thread name
-    pthread_setname_np(pthread_self(), (std::string("Subphase ") + std::to_string(phaseId) + " | " + phaseIdTotring(phaseId)).c_str());
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, ACTUAL_MAX_THR_NAME_LEN);
+    pthread_setname_np(pthread_self(), (std::string("S") + std::to_string(phaseId) + " | " + truncatedName).c_str());
 
 
     // Init thread data and counters
