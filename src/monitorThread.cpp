@@ -59,7 +59,7 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
             cout
                 << ansi::reset
                 << bar->max.load() << " steps"
-                << ansi::bright_black << " │ " << ansi::white
+                << ansi::bright_black << " │ " << ansi::reset
                 << utils::formatMilliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) << " time elapsed"
             ;
         }
@@ -67,7 +67,7 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
             static const uint timeElapsedStrLen = 9;
             bar->render(-(3 /*Separator*/) + progressBarWidth - (2 /*Separator*/) - timeElapsedStrLen - (4 /*right margin*/));
             cout
-                << ansi::bright_black << "│ " << ansi::white
+                << ansi::bright_black << "│ " << ansi::reset
                 << std::left << std::setw(9) << utils::formatMilliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0)
             ;
         }

@@ -2,8 +2,9 @@
 
 #include "info.hpp"
 #include "Utils/ansi.hpp"
+#include "Command/command.hpp"
 
-
+#include<iostream>
 
 
 
@@ -12,9 +13,9 @@
 
 //TODO update compiler executable name
 std::string cmd::getHelpMessage(){
-    std::string none______        = "\033[90m │ ";
-    std::string default1_         = ansi::reset + ansi::fill_magenta + " "         + ansi::reset + " ";
-    std::string default__________ = ansi::reset + ansi::fill_magenta + " DEFAULT " + ansi::reset + " ";
+    std::string none______        = ansi::bright_black + " │ ";
+    std::string default1_         = ansi::reset + ansi::fill_magenta + ""         + (cmd::options.printColor ? " " : "█") + ansi::reset + " ";
+    std::string default__________ = ansi::reset + ansi::fill_magenta + " DEFAULT" + (cmd::options.printColor ? " " : "█") + ansi::reset + " ";
 
 
     std::stringstream r;
@@ -62,7 +63,7 @@ std::string cmd::getVersionMessage() {
     //FIXME print version. get version number dynamically
     r
         << ansi::bold_magenta << "ALC" << ansi::reset << " (Aurora/Lumen Compiler)\n"
-        << ansi::bold_magenta << "Version:" << ansi::reset << " L-0.1.0"
+        << ansi::bold_magenta << "Version:" << ansi::reset << " L-0.1.0\n"
         // << ansi::bold_magenta << << "Version:" << ansi::reset << " W-0.1.0" //TODO windows build
         // << ansi::bold_magenta << << "Version:" << ansi::reset << " X-0.1.0" //TODO mac build (prob not gonna happen)
     ;

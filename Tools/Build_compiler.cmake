@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_executable(alc
     ../src/Compiler/UTF8_decoder.c
     ../src/Utils/utils.cpp
+    ../src/Utils/ansi.cpp
     ../src/Utils/errors.cpp
     ../src/Utils/DynamicProgressBar.cpp
     ../src/ALC.cpp

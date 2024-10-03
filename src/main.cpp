@@ -65,7 +65,6 @@ int main(int argc, char* argv[]){
         if(i) fullCommand += " ";
         fullCommand += std::string(argv[i]);
     }
-    cout << "Executing command \"" << ansi::bold_bright_green << fullCommand << ansi::reset << "\"...\n";
 
 
     // Parse command line options
@@ -83,6 +82,7 @@ int main(int argc, char* argv[]){
         exit(0);
     }
 
+    cout << "Executing command \"" << ansi::bold_bright_green << fullCommand << ansi::reset << "\"...\n\n";
     bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
     bool compileExec    = cmd::options.outputType == 'x';
 
