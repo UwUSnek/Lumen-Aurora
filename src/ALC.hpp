@@ -105,7 +105,7 @@ struct PhaseData {
     std::atomic<long>  *timeStart;
     std::atomic<long>  *timeEnd;
 
-    PhaseData(long _timeStart);
+    PhaseData();
 };
 
 // Data read by the display thread
@@ -157,13 +157,13 @@ ulong fetchMaxProgress(PhaseID phaseId);
 
 template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
 
-    // Set thread name
+    // Set thread name and type
+    threadType = ThreadType::SUBPHASE;
     std::string truncatedName = phaseIdTotring(phaseId).substr(0, ACTUAL_MAX_THR_NAME_LEN);
     pthread_setname_np(pthread_self(), (std::string("S") + std::to_string(phaseId) + " | " + truncatedName).c_str());
 
 
-    // Init thread data and counters
-    threadType = ThreadType::SUBPHASE;
+    // Init thread counters
     activeThreads.fetch_add(1);
     totalThreads.fetch_add(1);
 
@@ -171,6 +171,14 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     // Set max progress pointer
     phaseDataArrayLock.lock();
     maxProgress = phaseDataArray[phaseId].totalProgress;
+    phaseDataArrayLock.unlock();
+
+
+    // Init phase starting time if needed
+    phaseDataArrayLock.lock();
+    if(*phaseDataArray[phaseId].timeStart == 0) {
+        phaseDataArray[phaseId].timeStart->store(utils::getEpochMs());
+    }
     phaseDataArrayLock.unlock();
 
 
@@ -239,3 +247,10 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
 }
 
 void initPhaseData();
+
+
+
+//TODO move all newline prints to the beginning of the strings.
+//TODO this is only for consistency reasons
+
+void mainCheckErrors();

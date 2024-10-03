@@ -128,9 +128,9 @@ std::string phaseIdTotring(PhaseID phaseId) {
 
 
 
-PhaseData::PhaseData(long _timeStart) :
+PhaseData::PhaseData() :
     totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
-    timeStart      (new std::atomic<long>(_timeStart)),
+    timeStart      (new std::atomic<long>(0)),
     timeEnd        (new std::atomic<long>(0)) {
 }
 
@@ -219,7 +219,30 @@ ulong fetchMaxProgress(PhaseID phaseId) {
 void initPhaseData(){
     for(ulong i = 0; i < PhaseID::NUM; ++i) {
         phaseDataArrayLock.lock();
-        phaseDataArray.push_back(PhaseData(utils::getEpochMs()));
+        phaseDataArray.push_back(PhaseData());
         phaseDataArrayLock.unlock();
+    }
+}
+
+
+
+
+
+
+/**
+ * @brief Checks if other threads have generated errors and stops the program if that's the case.
+ *      This function can ONLY be called from the MAIN thread.
+ *      Calling it from any other thread will break the compiler.
+ */
+void mainCheckErrors(){
+    if(threadType != ThreadType::MAIN) {
+        cerr << "\nFatal: Error check function was called by a secondary thread. This is a bug and it's the developer's fault.";
+        cerr << "\nThe program was not stopped.";
+    }
+    else {
+        int exitCode = exitMainRequest.load();
+        if(exitCode) {
+            std::exit(exitCode);
+        }
     }
 }

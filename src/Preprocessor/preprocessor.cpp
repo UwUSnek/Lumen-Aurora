@@ -18,7 +18,7 @@
  * @brief The part of loadSourceCode that does the recursive things.
  *      Waits for the subphases to finish before returning the output.
  */
-pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::string const &filePath) {
+pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::string const &filePath, void (*awaitTask)()) {
     sourceFilePathsLock.lock();
     sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to check for them before starting the preprocessor
     ulong pathIndex = sourceFilePaths.size() - 1;
@@ -44,8 +44,8 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::s
 
 
     // Wait for the subphases to finish, then update the max progress of the next phase and return the output buffer
-    r3-> str.awaitClose(); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
-    r3->meta.awaitClose(); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
+    r3-> str.awaitClose(awaitTask); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
+    r3->meta.awaitClose(awaitTask); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
     return r3;
 }
 
@@ -65,7 +65,7 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::s
 pre::SegmentedCleanSource* pre::loadSourceCode(std::string const *s, std::string const &filePath) {
 
     // Load and merge all the files
-    SegmentedCleanSource *r3 = loadSourceCode_loop(s, filePath);
+    SegmentedCleanSource *r3 = loadSourceCode_loop(s, filePath, mainCheckErrors);
     SegmentedCleanSource *r4 = new SegmentedCleanSource();
 
 

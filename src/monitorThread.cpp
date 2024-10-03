@@ -27,17 +27,18 @@ static ulong const maxPhaseNameLen = [] {
     )->length();
 }();
 
-
+//TODO add something to Lumen that can replace the ANSI escape sequences.
+//TODO ^ more readable code, easier to use. escape sequences will still be available.
 
 
 static void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth, bool _isComplete) {
     consoleLock.lock();
 
-    // Adjust position and print command
-    cout << "\033[s";             // Save cursor position
-    cout << std::string(8, '\n'); // Push entire output 8 lines up (make space for the status UI)
+    // Adjust position, clear the console and print the command
+    cout << "\033[s";             // Save current cursor position
+    cout << "\033[J";             // Clear console from current character to last line
     cout << "\033[999;999H";      // Move cursor to bottom-left corner
-    cout << "\033[8A";            // Move cursor 8 lines up
+    cout << "\033[8A";            // Move cursor 8 lines up (make space for the status UI)
     if(_isComplete) cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
     else            cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
 
@@ -46,7 +47,8 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
     // Print the status of each phase, in order
     phaseDataArrayLock.lock();
     for(ulong i = 0; i < phaseDataArray.size(); ++i) {
-        const bool isPhaseComplete = phaseDataArray[i].timeEnd->load() > 0;
+        const bool isPhaseComplete = phaseDataArray[i].timeEnd  ->load() > 0;
+        const bool isPhaseActive   = phaseDataArray[i].timeStart->load() > 0;
         const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
 
         cout
@@ -57,17 +59,16 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
             cout
                 << ansi::reset
                 << bar->max.load() << " steps"
-                << " | "
+                << ansi::bright_black << " │ " << ansi::white
                 << utils::formatMilliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) << " time elapsed"
             ;
         }
         else {
-            // bar->render(progressBarWidth - 3 - 9); //FIXME USE THIS VERSION
-            bar->render(progressBarWidth - 3 - 9 - 20);
+            static const uint timeElapsedStrLen = 9;
+            bar->render(-(3 /*Separator*/) + progressBarWidth - (2 /*Separator*/) - timeElapsedStrLen - (4 /*right margin*/));
             cout
-                << "| "
-                << std::left << std::setw(9) << utils::formatMilliseconds(utils::getEpochMs() - phaseDataArray[i].timeStart->load())
-                << " "
+                << ansi::bright_black << "│ " << ansi::white
+                << std::left << std::setw(9) << utils::formatMilliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0)
             ;
         }
     }
@@ -128,10 +129,8 @@ void startMonitorThread(std::string fullCommand){
 
 
         // Calculate progress bar width
-        static const int nameWidth = 20;  //! 20 is the maximum width of the phase name
-        progressBarWidth = utils::getConsoleWidth();
-        if(progressBarWidth == -1) progressBarWidth = nameWidth + 16; //! Totally arbitrary value
-        progressBarWidth -= nameWidth;
+        progressBarWidth = utils::getConsoleWidth() - maxPhaseNameLen - (4 /* Indentation */);
+        if(progressBarWidth == -1) progressBarWidth = 16; //! 16 is an arbitrary value
 
 
         // Print status UI

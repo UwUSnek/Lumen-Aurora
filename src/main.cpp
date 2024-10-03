@@ -132,13 +132,6 @@ int main(int argc, char* argv[]){
 
     //TODO only print additional timings and info if requested through the command
     //TODO cross out skipped phases when using -e, -p or --o-none
-    // Define the task to be executed while waiting for the subphase threads to finish
-    void (*waitTask)() = [](){
-        int exitCode = exitMainRequest.load();
-        if(exitCode) {
-            std::exit(exitCode);
-        }
-    };
 
 
 
@@ -147,12 +140,12 @@ int main(int argc, char* argv[]){
         //TODO write exec
     }
     else if(compileModule) {
-        precompiledModule->awaitClose(waitTask);
+        precompiledModule->awaitClose(mainCheckErrors);
         //TODO write module
     }
     else {
-        preprocessedSourceCode->str.awaitClose(waitTask);
-        preprocessedSourceCode->meta.awaitClose(waitTask);
+        preprocessedSourceCode->str.awaitClose(mainCheckErrors);
+        preprocessedSourceCode->meta.awaitClose(mainCheckErrors);
         preprocessedSourceCode->str.sReallocLock.lock();
         writeOutputFile(*preprocessedSourceCode->str.cpp());
         preprocessedSourceCode->str.sReallocLock.unlock();

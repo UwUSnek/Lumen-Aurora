@@ -44,11 +44,9 @@ void DynamicProgressBar::render(int consoleWidth) const {
     // Reset colors and print value
     cout << ansi::reset <<
         " " <<
-        // std::right << std::setw(valueWidth) << utils::shortenInteger(_progress) << //FIXME USE THIS VERSION
-        std::right << std::setw(valueWidth) << _progress <<
+        std::right << std::setw(valueWidth) << utils::shortenInteger(_progress) <<
         "/" <<
-        // std::left << std::setw(valueWidth) << utils::shortenInteger(_max) << //FIXME USE THIS VERSION
-        std::left << std::setw(valueWidth) << _max <<
+        std::left << std::setw(valueWidth) << utils::shortenInteger(_max) <<
         " "
     ;
 }
