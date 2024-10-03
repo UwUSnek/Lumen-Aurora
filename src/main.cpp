@@ -65,6 +65,7 @@ int main(int argc, char* argv[]){
         if(i) fullCommand += " ";
         fullCommand += std::string(argv[i]);
     }
+    cout << "Executing command \"" << ansi::bold_bright_green << fullCommand << ansi::reset << "\"...\n";
 
 
     // Parse command line options
