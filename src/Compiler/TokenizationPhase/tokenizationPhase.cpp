@@ -16,19 +16,6 @@
 
 void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r) {
 
-    // Copy total progress from preprocessing phase
-    phaseDataArrayLock.lock();
-    ulong max = phaseDataArray[PhaseID::Preprocessing].totalProgress->max.load(); //! Max doesn't change after merging the files
-    phaseDataArrayLock.unlock();
-    increaseMaxProgress(max);
-    //TODO subtract deleted characters from the preprocessor max
-    //FIXME include and macro stuff doesnt get counted. fix this
-    //FIXME subtract macro calls and definitions
-    //FIXME or do this a different way
-
-
-
-
     ulong i = 0;
     while(b->str[i].has_value()) {
 
@@ -73,7 +60,6 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
                     case ReservedTokenId::TMP_LITERAL_NAN:   { tokenValue = new TokenValue_DBL(std::numeric_limits<double>::quiet_NaN()); break; }
                     default:                                 { tokenValue = new TokenValue_KEY(keywordType->second); }
                 }
-
             }
 
             // If not, treat it as an identifier
@@ -120,4 +106,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         );
         //FIXME ^ decode multi byte characters to print them in the error
     }
+
+
+    r->closePipe();
 }

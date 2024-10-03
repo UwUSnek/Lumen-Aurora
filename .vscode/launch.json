@@ -6,7 +6,7 @@
             "name": "Debug compiler",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/Build/out",
+            "program": "${workspaceFolder}/Build/alc",
             "args": [
                 "./Test/main.lum",
                 "-m", "./Test/out"
@@ -32,7 +32,7 @@
             "name": "Debug unit tests",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/./Tests/tests.out",
+            "program": "${workspaceFolder}/Tests/tests.out",
             "args": [
             ],
             "stopAtEntry": false,

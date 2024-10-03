@@ -128,9 +128,9 @@ std::string phaseIdTotring(PhaseID phaseId) {
 
 
 
-PhaseData::PhaseData(long _timeStart) :
+PhaseData::PhaseData() :
     totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
-    timeStart      (new std::atomic<long>(_timeStart)),
+    timeStart      (new std::atomic<long>(0)),
     timeEnd        (new std::atomic<long>(0)) {
 }
 
@@ -162,3 +162,87 @@ void increaseLocalProgress(ulong n) {
 void increaseMaxProgress(ulong n) {
     maxProgress->increaseMax(n);
 };
+
+/**
+ * @brief Decreases the max progress value of the associated phase.
+ *      This function can only be called by a phase thread.
+ * @param n The amount of progress steps to subtract.
+ */
+void decreaseMaxProgress(ulong n) {
+    maxProgress->decreaseMax(n);
+};
+
+
+/**
+ * @brief Increases the max progress value of the specified phase.
+ * @param n The amount of progress steps to add.
+ */
+void increaseMaxProgress(PhaseID phaseId, ulong n) {
+    phaseDataArrayLock.lock();
+    phaseDataArray[phaseId].totalProgress->increaseMax(n);
+    phaseDataArrayLock.unlock();
+};
+
+/**
+ * @brief Decreases the max progress value of the specified phase.
+ * @param n The amount of progress steps to subtract.
+ */
+void decreaseMaxProgress(PhaseID phaseId, ulong n) {
+    phaseDataArrayLock.lock();
+    phaseDataArray[phaseId].totalProgress->decreaseMax(n);
+    phaseDataArrayLock.unlock();
+};
+
+/**
+ * @brief Retrieves the max progress value of the specified phase.
+ * @param n The max progress value.
+ */
+ulong fetchMaxProgress(PhaseID phaseId) {
+    phaseDataArrayLock.lock();
+    ulong r = phaseDataArray[phaseId].totalProgress->max.load();
+    phaseDataArrayLock.unlock();
+    return r;
+};
+
+
+
+
+
+
+
+
+
+/**
+ * @brief initializes the data of each phase.
+ *      This function MUST be called ONCE before starting any of the subphses
+ */
+void initPhaseData(){
+    for(ulong i = 0; i < PhaseID::NUM; ++i) {
+        phaseDataArrayLock.lock();
+        phaseDataArray.push_back(PhaseData());
+        phaseDataArrayLock.unlock();
+    }
+}
+
+
+
+
+
+
+/**
+ * @brief Checks if other threads have generated errors and stops the program if that's the case.
+ *      This function can ONLY be called from the MAIN thread.
+ *      Calling it from any other thread will break the compiler.
+ */
+void mainCheckErrors(){
+    if(threadType != ThreadType::MAIN) {
+        cerr << "\nFatal: Error check function was called by a secondary thread. This is a bug and it's the developer's fault.";
+        cerr << "\nThe program was not stopped.";
+    }
+    else {
+        int exitCode = exitMainRequest.load();
+        if(exitCode) {
+            std::exit(exitCode);
+        }
+    }
+}

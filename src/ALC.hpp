@@ -34,7 +34,8 @@ extern std::atomic<ulong> totalModules;
 enum class ThreadType : ulong {
     MAIN        = 0,
     SUBPHASE    = 0xC0FFEE,
-    UNKNOWN     = 0xDEADBEEF,
+    MONITOR     = 0xBEE,
+    UNKNOWN     = 0xDEAD,
 };
 extern thread_local ThreadType threadType;
 
@@ -104,7 +105,7 @@ struct PhaseData {
     std::atomic<long>  *timeStart;
     std::atomic<long>  *timeEnd;
 
-    PhaseData(long _timeStart);
+    PhaseData();
 };
 
 // Data read by the display thread
@@ -137,6 +138,11 @@ extern thread_local std::atomic<ulong>* localProgress;
 void increaseLocalProgress(ulong n);
 extern thread_local DynamicProgressBar* maxProgress;
 void increaseMaxProgress(ulong n);
+void decreaseMaxProgress(ulong n);
+
+void increaseMaxProgress(PhaseID phaseId, ulong n);
+void decreaseMaxProgress(PhaseID phaseId, ulong n);
+ulong fetchMaxProgress(PhaseID phaseId);
 
 
 
@@ -144,25 +150,35 @@ void increaseMaxProgress(ulong n);
 
 
 
-
-
+//FIXME move to utils or something
+#define MAX_THR_NAME_LEN 15
+#define ACTUAL_MAX_THR_NAME_LEN (MAX_THR_NAME_LEN - 2 - 3)
 
 
 template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
 
-    // Init thread data and counters
+    // Set thread name and type
     threadType = ThreadType::SUBPHASE;
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, ACTUAL_MAX_THR_NAME_LEN);
+    pthread_setname_np(pthread_self(), (std::string("S") + std::to_string(phaseId) + " | " + truncatedName).c_str());
+
+
+    // Init thread counters
     activeThreads.fetch_add(1);
     totalThreads.fetch_add(1);
 
 
-    // If needed, create new phase data (ordered), then increase its active subphases count
+    // Set max progress pointer
     phaseDataArrayLock.lock();
-    if(phaseDataArray.size() <= phaseId) {
-        phaseDataArray.push_back(PhaseData(utils::getEpochMs()));
-    }
     maxProgress = phaseDataArray[phaseId].totalProgress;
-    // phaseDataArray[phaseId].activeSubphases->fetch_add(1);
+    phaseDataArrayLock.unlock();
+
+
+    // Init phase starting time if needed
+    phaseDataArrayLock.lock();
+    if(*phaseDataArray[phaseId].timeStart == 0) {
+        phaseDataArray[phaseId].timeStart->store(utils::getEpochMs());
+    }
     phaseDataArrayLock.unlock();
 
 
@@ -229,3 +245,12 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
     }
     delete isThreadDataInitialized;
 }
+
+void initPhaseData();
+
+
+
+//TODO move all newline prints to the beginning of the strings.
+//TODO this is only for consistency reasons
+
+void mainCheckErrors();

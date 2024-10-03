@@ -7,6 +7,6 @@
 
 
 namespace pre {
-    SegmentedCleanSource* loadSourceCode_loop(std::string const *s, std::string const &filePath);
+    SegmentedCleanSource* loadSourceCode_loop(std::string const *s, std::string const &filePath, void (*awaitTask)() = [](){});
     SegmentedCleanSource*      loadSourceCode(std::string const *s, std::string const &filePath);
 }

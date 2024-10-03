@@ -1,6 +1,6 @@
 #pragma once
 #include "Preprocessor/SegmentedCleanSource.hpp"
-#include "Compiler/TokenizedSource.hpp"
+#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 
 
 

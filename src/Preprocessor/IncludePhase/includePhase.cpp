@@ -78,8 +78,7 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
 
                         totalFiles.fetch_add(1);
                         SegmentedCleanSource *preprocessedCode = loadSourceCode_loop(fileContents, actualFilePath);
-                        preprocessedCode->str.awaitClose();
-                        preprocessedCode->meta.awaitClose();
+                        //! .awaitClose() is called by loadSourceCode_loop()
                         r->str  += *preprocessedCode->str.cpp();
                         r->meta += *preprocessedCode->meta.cpp();
                     }
