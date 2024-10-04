@@ -3,9 +3,9 @@
 #include "Utils/errors.hpp"
 
 #include "whitespaceCounter.hpp"
-#include "parseKeywordsIdentifiers.hpp"
-#include "parseTextLiterals.hpp"
-#include "parseNumericalLiterals.hpp"
+#include "Parsers/keywordsIdentifiers.hpp"
+#include "Parsers/textLiterals.hpp"
+#include "Parsers/numericalLiterals.hpp"
 
 
 

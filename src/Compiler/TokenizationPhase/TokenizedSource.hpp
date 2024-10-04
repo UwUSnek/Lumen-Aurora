@@ -123,13 +123,21 @@ namespace cmp {
 
 
 
-        std::string&     getValue_String    () { return ((TK_String    *)value)->v; }
-        char&            getValue_Char      () { return ((TK_Char      *)value)->v; }
-        ulong&           getValue_Long      () { return ((TK_Long      *)value)->v; }
-        double&          getValue_Double    () { return ((TK_Double    *)value)->v; }
-        bool&            getValue_Bool      () { return ((TK_Bool      *)value)->v; }
-        ReservedTokenId& getValue_Keyword   () { return ((TK_Keyword   *)value)->v; }
-        std::string&     getValue_Identifier() { return ((TK_Identifier*)value)->v; }
+        std::string           &getValue_String    ()       { return ((TK_String    *)value)->v; }
+        char                  &getValue_Char      ()       { return ((TK_Char      *)value)->v; }
+        ulong                 &getValue_Long      ()       { return ((TK_Long      *)value)->v; }
+        double                &getValue_Double    ()       { return ((TK_Double    *)value)->v; }
+        bool                  &getValue_Bool      ()       { return ((TK_Bool      *)value)->v; }
+        ReservedTokenId       &getValue_Keyword   ()       { return ((TK_Keyword   *)value)->v; }
+        std::string           &getValue_Identifier()       { return ((TK_Identifier*)value)->v; }
+
+        std::string     const &getValue_String    () const { return ((TK_String    *)value)->v; }
+        char            const &getValue_Char      () const { return ((TK_Char      *)value)->v; }
+        ulong           const &getValue_Long      () const { return ((TK_Long      *)value)->v; }
+        double          const &getValue_Double    () const { return ((TK_Double    *)value)->v; }
+        bool            const &getValue_Bool      () const { return ((TK_Bool      *)value)->v; }
+        ReservedTokenId const &getValue_Keyword   () const { return ((TK_Keyword   *)value)->v; }
+        std::string     const &getValue_Identifier() const { return ((TK_Identifier*)value)->v; }
     };
 
 

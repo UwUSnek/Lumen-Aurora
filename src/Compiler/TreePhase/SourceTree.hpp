@@ -34,6 +34,10 @@ namespace cmp {
 
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
         virtual ~__base_ST_Container(){}
+
+        void addChild(__base_ST* c) {
+            children.push_back(c);
+        }
     };
 
     struct __base_ST_Referable : public virtual __base_ST {
