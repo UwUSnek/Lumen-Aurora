@@ -4,4 +4,5 @@
 #pragma once
 #include <string>
 
-static const std::string buildNumber = "1c34e3ae-d9ba-4ab7-b669-c915574ceb2f";
+// The actual value is set after compiling the code
+static const std::string buildNumber = "__BUILD_NUMBER_PLACEHOLDER__ __SHA1SUM__";

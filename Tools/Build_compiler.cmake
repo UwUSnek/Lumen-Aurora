@@ -51,7 +51,10 @@ set_target_properties(alc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ../Build)
 
 
 # GCC compilaiton options
-target_compile_options(alc PRIVATE -O0 -g)
+target_compile_options(alc PRIVATE
+    -O0         # No optimizations
+    -g          # Save debug infos
+)
 
 
 
