@@ -58,6 +58,11 @@ int main(int argc, char* argv[]){
     threadType = ThreadType::MAIN;
     pthread_setname_np(pthread_self(), "Main Thread");
 
+    // Set version number
+    versionNumer = VersionNumber('L', 0, 1, 0, '\0');
+
+
+
 
     // Recreate full command
     std::string fullCommand;

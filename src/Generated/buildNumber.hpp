@@ -4,4 +4,4 @@
 #pragma once
 #include <string>
 
-static const std::string buildNumber = "6e555b62-494e-4947-8020-241d386e249b";
+static const std::string buildNumber = "1c34e3ae-d9ba-4ab7-b669-c915574ceb2f";

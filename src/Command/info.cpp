@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "ALC.hpp"
 #include "info.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
@@ -59,10 +60,15 @@ std::string cmd::getHelpMessage(){
 
 std::string cmd::getVersionMessage() {
     std::stringstream r;
-    //FIXME print version. get version number dynamically
     r
         << ansi::bold_magenta << "Aurora/Lumen Compiler (ALC)\n"
-        << ansi::bold_magenta << "     Version │ " << ansi::reset << "L-0.1.0\n"
+        << ansi::bold_magenta << "     Version │ " << ansi::reset
+            << versionNumer.platform << "-"
+            << versionNumer.major << "."
+            << versionNumer.minor << "."
+            << versionNumer.patch
+            << (versionNumer.label == '\0' ? "" : std::string(1, versionNumer.label))
+            << "\n"
         // << ansi::bold_magenta << << "Version:" << ansi::reset << "W-0.1.0" //TODO windows build
         // << ansi::bold_magenta << << "Version:" << ansi::reset << "X-0.1.0" //TODO mac build (prob not gonna happen)
         << ansi::bold_magenta << "    Build n. │ " << ansi::reset << buildNumber << "\n"

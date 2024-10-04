@@ -11,6 +11,48 @@
 
 
 
+struct VersionNumber {
+    char platform;
+    uint major;
+    uint minor;
+    uint patch;
+    char label;
+
+
+    VersionNumber(){}
+
+    /**
+     * @brief Construct a new Version Number object (Specify a label)
+     * @param _platform 'L' or 'W' for Linux or Windows respectively
+     * @param _major The major version number
+     * @param _minor The minor version number
+     * @param _patch The number of the patch
+     * @param _label The label (alpha, beta etc...)
+     */
+    VersionNumber(char _platform, uint _major, uint _minor, uint _patch, char _label) :
+        platform(_platform),
+        major(_major),
+        minor(_minor),
+        patch(_patch),
+        label(_label) {
+    }
+
+    /**
+     * @brief Construct a new Version Number object (No label)
+     * @param _platform 'L' or 'W' for Linux or Windows respectively
+     * @param _major The major version number
+     * @param _minor The minor version number
+     * @param _patch The number of the patch
+     */
+    VersionNumber(char _platform, uint _major, uint _minor, uint _patch) :
+        VersionNumber(_platform, _major, _minor, _patch, '\0') {
+    }
+};
+extern VersionNumber versionNumer;
+
+
+
+
 extern std::atomic<int> exitMainRequest;
 void exitMain(int exitCode);
 
@@ -152,14 +194,13 @@ ulong fetchMaxProgress(PhaseID phaseId);
 
 //FIXME move to utils or something
 #define MAX_THR_NAME_LEN 15
-#define ACTUAL_MAX_THR_NAME_LEN (MAX_THR_NAME_LEN - 2 - 3)
 
 
 template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
 
     // Set thread name and type
     threadType = ThreadType::SUBPHASE;
-    std::string truncatedName = phaseIdTotring(phaseId).substr(0, ACTUAL_MAX_THR_NAME_LEN);
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (3 /*Separator*/));
     pthread_setname_np(pthread_self(), (std::string("S") + std::to_string(phaseId) + " | " + truncatedName).c_str());
 
 
