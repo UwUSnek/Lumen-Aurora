@@ -1,6 +1,6 @@
 #include <sstream>
 #include <cmath>
-#include "numericalLiteralParser.hpp"
+#include "parseNumericalLiterals.hpp"
 #include "Utils/errors.hpp"
 
 
