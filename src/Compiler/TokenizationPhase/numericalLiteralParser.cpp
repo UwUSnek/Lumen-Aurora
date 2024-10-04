@@ -170,7 +170,7 @@ double cmp::strToDbl(std::string const &s, uint base) {
 
 
     // Calculate fractional part
-    for(int j = i + 1; j < s.length(); ++j) {
+    for(ulong j = i + 1; j < s.length(); ++j) {
         char digit = s[i];
         double value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
         double fraction = pow(10, j - i); //! 10 for first digit, 100 for second etc...

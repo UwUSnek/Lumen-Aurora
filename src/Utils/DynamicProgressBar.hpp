@@ -14,13 +14,11 @@
  *      It features a render function that draws a progress bar to stdout.
  */
 struct DynamicProgressBar {
-    // static int w, h;    // The width and height of the output console
-    // int x, y;           // The position of the top-left corner in the output console
-    std::string progressColor;
-    std::string missingColor;
-
     std::atomic<ulong> progress;     // The current progress in units
     std::atomic<ulong> max;          // The total units of progress required to reach 100%
+
+    std::string progressColor;
+    std::string missingColor;
 
 
 

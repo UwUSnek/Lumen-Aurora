@@ -1,6 +1,7 @@
 #pragma once
 #include <optional>
 #include <type_traits>
+#include <mutex>
 
 #include "__base_Pipe.hpp"
 
@@ -14,7 +15,7 @@
 
 template <class t, class elmt> struct __base_BufferPipe : public __base_Pipe<t> {
 private:
-    std::atomic<ulong> len = 0;
+    std::atomic<ulong> len(0);
 
 
 protected:
