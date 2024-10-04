@@ -135,11 +135,11 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
     // Set the raw lenght and return the value
     *rawLiteralLen = i - index;
     if(isFloat) {
-        return new TokenValue_DBL(strToDbl(r.str(), base));
+        return new TK_Double(strToDbl(r.str(), base));
     }
     else {
         std::string debug = r.str(); //TODO REMOVE
-        return new TokenValue_LNG(strToLng(r.str(), base));
+        return new TK_Long(strToLng(r.str(), base));
     }
 }
 

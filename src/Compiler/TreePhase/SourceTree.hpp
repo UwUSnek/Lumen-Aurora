@@ -17,7 +17,8 @@ namespace cmp {
      * @brief The base Source Tree structure
      */
     struct __base_ST {
-        // Empty
+        // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
+        virtual ~__base_ST(){}
     };
     typedef GenericPipe<ST_Module> SourceTree;
 
@@ -30,10 +31,16 @@ namespace cmp {
 
     struct __base_ST_Container : public virtual __base_ST {
         std::vector<__base_ST*> children;
+
+        // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
+        virtual ~__base_ST_Container(){}
     };
 
     struct __base_ST_Referable : public virtual __base_ST {
         std::string name;
+
+        // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
+        virtual ~__base_ST_Referable(){}
     };
 
 
@@ -43,12 +50,12 @@ namespace cmp {
 
 
 
-    struct ST_Module : public __base_ST_Referable, public __base_ST_Container {
+    struct ST_Module : public virtual __base_ST_Referable, public virtual __base_ST_Container {
     };
 
-    struct ST_Namespace : public __base_ST_Referable, public __base_ST_Container {
+    struct ST_Namespace : public virtual __base_ST_Referable, public virtual __base_ST_Container {
     };
 
-    struct ST_Struct : public __base_ST_Referable, public __base_ST_Container {
+    struct ST_Struct : public virtual __base_ST_Referable, public virtual __base_ST_Container {
     };
 }

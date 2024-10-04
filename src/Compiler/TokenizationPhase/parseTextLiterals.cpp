@@ -82,7 +82,7 @@ cmp::TokenValue* cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ulong index,
 
 
     *rawLiteralLen = i - index;
-    return new TokenValue_STR(r.str());
+    return new TK_String(r.str());
 }
 
 
@@ -200,7 +200,7 @@ cmp::TokenValue* cmp::parseCharLiteral(pre::SegmentedCleanSource *b, ulong index
 
 
     *rawLiteralLen = i - index;
-    return new TokenValue_CHR(r.str()[0]);
+    return new TK_Char(r.str()[0]);
 }
 
 

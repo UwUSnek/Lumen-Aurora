@@ -15,7 +15,7 @@
 
 template <class t, class elmt> struct __base_BufferPipe : public __base_Pipe<t> {
 private:
-    std::atomic<ulong> len(0);
+    std::atomic<ulong> len = 0;
 
 
 protected:

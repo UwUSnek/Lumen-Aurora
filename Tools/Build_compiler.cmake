@@ -32,9 +32,9 @@ add_executable(alc
     ../src/Compiler/compiler.cpp
         ../src/Compiler/TokenizationPhase/TokenizedSource.cpp
         ../src/Compiler/TokenizationPhase/tokenizationPhase.cpp
-            ../src/Compiler/TokenizationPhase/keywordIdentifierParser.cpp
-            ../src/Compiler/TokenizationPhase/textLiteralParser.cpp
-            ../src/Compiler/TokenizationPhase/numericalLiteralParser.cpp
+            ../src/Compiler/TokenizationPhase/parseKeywordsIdentifiers.cpp
+            ../src/Compiler/TokenizationPhase/parseTextLiterals.cpp
+            ../src/Compiler/TokenizationPhase/parseNumericalLiterals.cpp
             ../src/Compiler/TokenizationPhase/whitespaceCounter.cpp
         ../src/Compiler/TreePhase/SourceTree.cpp
         ../src/Compiler/TreePhase/treePhase.cpp
