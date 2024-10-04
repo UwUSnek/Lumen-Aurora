@@ -5,4 +5,4 @@
 #include <string>
 
 // The actual value is set after compiling the code
-static const std::string buildNumber = "__BUILD_NUMBER_PLACEHOLDER__ __SHA1SUM__";
+static const std::string buildNumber = "__BUILD_NUMBER_PLACEHOLDER__*__SHA1SUM__";
