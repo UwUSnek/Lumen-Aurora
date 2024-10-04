@@ -63,7 +63,6 @@ std::string cmd::getVersionMessage() {
     r
         << ansi::bold_magenta << "Aurora/Lumen Compiler (ALC)\n"
         << ansi::bold_magenta << "     Version │ " << ansi::reset
-            << versionNumer.platform << "-"
             << versionNumer.major << "."
             << versionNumer.minor << "."
             << versionNumer.patch
@@ -72,7 +71,7 @@ std::string cmd::getVersionMessage() {
         // << ansi::bold_magenta << << "Version:" << ansi::reset << "W-0.1.0" //TODO windows build
         // << ansi::bold_magenta << << "Version:" << ansi::reset << "X-0.1.0" //TODO mac build (prob not gonna happen)
         << ansi::bold_magenta << "    Build n. │ " << ansi::reset << std::string(const_cast<const char*>(buildNumber)) << "\n"
-        << ansi::bold_magenta << "    Platform │ " << ansi::reset << "Linux\n" //TODO
+        << ansi::bold_magenta << "    Platform │ " << ansi::reset << (versionNumer.platform == 'L' ? "Linux" : "Windows") << "\n" //TODO mac (prob not gonna happen)
     ;
     return r.str();
 }
