@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Source files
 add_executable(alc
+    ../src/Generated/buildNumber.cpp
+
     ../src/Compiler/UTF8_decoder.c
     ../src/Utils/utils.cpp
     ../src/Utils/ansi.cpp

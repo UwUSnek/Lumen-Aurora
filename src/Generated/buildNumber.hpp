@@ -2,7 +2,9 @@
 //!          THE BUILD NUMBER IS USED TO TELL BUILDS APART
 
 #pragma once
-#include <string>
 
 // The actual value is set after compiling the code
-static const std::string buildNumber = "__BUILD_NUMBER_PLACEHOLDER__*__SHA1SUM__";
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+extern volatile const char buildNumber[] __attribute__((used));
+#pragma GCC diagnostic pop

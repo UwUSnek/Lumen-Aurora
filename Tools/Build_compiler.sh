@@ -9,18 +9,30 @@ set -e                  # Exit immedialy if a command fails
 
 
 
-# Write build number header
+# Write build number header and translation unit
 mkdir -p ./src/Generated
 buildNumberPlaceholder="__BUILD_NUMBER_PLACEHOLDER__*__SHA1SUM__" #! Same number of characters as a sha1 output
+
 > ./src/Generated/buildNumber.hpp
-    echo "//!                  DO NOT .GITIGNORE THIS HEADER"                  >> ./src/Generated/buildNumber.hpp
-    echo "//!          THE BUILD NUMBER IS USED TO TELL BUILDS APART"          >> ./src/Generated/buildNumber.hpp
-    echo ""                                                                    >> ./src/Generated/buildNumber.hpp
-    echo "#pragma once"                                                        >> ./src/Generated/buildNumber.hpp
-    echo "#include <string>"                                                   >> ./src/Generated/buildNumber.hpp
-    echo ""                                                                    >> ./src/Generated/buildNumber.hpp
-    echo "// The actual value is set after compiling the code"                 >> ./src/Generated/buildNumber.hpp
-    echo "static const std::string buildNumber = \"$buildNumberPlaceholder\";" >> ./src/Generated/buildNumber.hpp
+    echo "//!                  DO NOT .GITIGNORE THIS HEADER"               >> ./src/Generated/buildNumber.hpp
+    echo "//!          THE BUILD NUMBER IS USED TO TELL BUILDS APART"       >> ./src/Generated/buildNumber.hpp
+    echo ""                                                                 >> ./src/Generated/buildNumber.hpp
+    echo "#pragma once"                                                     >> ./src/Generated/buildNumber.hpp
+    echo ""                                                                 >> ./src/Generated/buildNumber.hpp
+    echo "// The actual value is set after compiling the code"              >> ./src/Generated/buildNumber.hpp
+    echo "#pragma GCC diagnostic push"                                      >> ./src/Generated/buildNumber.hpp
+    echo "#pragma GCC diagnostic ignored \"-Wattributes\""                  >> ./src/Generated/buildNumber.hpp
+    echo "extern volatile const char buildNumber[] __attribute__((used));"  >> ./src/Generated/buildNumber.hpp
+    echo "#pragma GCC diagnostic pop"                                       >> ./src/Generated/buildNumber.hpp
+
+> ./src/Generated/buildNumber.cpp
+    echo "//!                   DO NOT .GITIGNORE THIS FILE"                >> ./src/Generated/buildNumber.cpp
+    echo "//!          THE BUILD NUMBER IS USED TO TELL BUILDS APART"       >> ./src/Generated/buildNumber.cpp
+    echo ""                                                                 >> ./src/Generated/buildNumber.cpp
+    echo "#include \"buildNumber.hpp\""                                     >> ./src/Generated/buildNumber.cpp
+    echo ""                                                                 >> ./src/Generated/buildNumber.cpp
+    echo "// The actual value is set after compiling the code"              >> ./src/Generated/buildNumber.cpp
+    echo "volatile const char buildNumber[] = \"$buildNumberPlaceholder\";" >> ./src/Generated/buildNumber.cpp
 
 
 
