@@ -38,8 +38,8 @@
     \
     X(KEYWORD_COMMA)            /* , */                                                                            \
     X(KEYWORD_SEMICOLON)        /* ; */                                                                            \
-    X(KEYWORD_MEMBER)           /* . */                                                                            \
-    X(KEYWORD_REFLECTION)       /* :: */                                                                           \
+    X(KEYWORD_DOT)              /* . */                                                                            \
+    X(KEYWORD_REFLECTION)       /* :: //TODO maybe use :? tho it might conflict with the metakeyword*/             \
     \
     \
     X(META_KEYWORD_TEMPLATE)    /* template */                                                                     \
@@ -94,8 +94,8 @@ namespace cmp {
     struct TK_Long       : TokenValue { ulong           v; TK_Long      (ulong              _v) : v(_v) {}};      // Ulong literal
     struct TK_Double     : TokenValue { double          v; TK_Double    (double             _v) : v(_v) {}};      // Double literal
     struct TK_Bool       : TokenValue { bool            v; TK_Bool      (bool               _v) : v(_v) {}};      // Boolean literal
-    struct TK_Keyword    : TokenValue { ReservedTokenId v; TK_Keyword   (ReservedTokenId    _v) : v(_v) {}};      // Keyword
     struct TK_Identifier : TokenValue { std::string     v; TK_Identifier(std::string const &_v) : v(_v) {}};      // Identifier
+    struct TK_Keyword    : TokenValue { ReservedTokenId v; TK_Keyword   (ReservedTokenId    _v) : v(_v) {}};      // Keyword
 
 
 
@@ -128,16 +128,25 @@ namespace cmp {
         ulong                 &getValue_Long      ()       { return ((TK_Long      *)value)->v; }
         double                &getValue_Double    ()       { return ((TK_Double    *)value)->v; }
         bool                  &getValue_Bool      ()       { return ((TK_Bool      *)value)->v; }
-        ReservedTokenId       &getValue_Keyword   ()       { return ((TK_Keyword   *)value)->v; }
         std::string           &getValue_Identifier()       { return ((TK_Identifier*)value)->v; }
+        ReservedTokenId       &getValue_Keyword   ()       { return ((TK_Keyword   *)value)->v; }
 
         std::string     const &getValue_String    () const { return ((TK_String    *)value)->v; }
         char            const &getValue_Char      () const { return ((TK_Char      *)value)->v; }
         ulong           const &getValue_Long      () const { return ((TK_Long      *)value)->v; }
         double          const &getValue_Double    () const { return ((TK_Double    *)value)->v; }
         bool            const &getValue_Bool      () const { return ((TK_Bool      *)value)->v; }
-        ReservedTokenId const &getValue_Keyword   () const { return ((TK_Keyword   *)value)->v; }
         std::string     const &getValue_Identifier() const { return ((TK_Identifier*)value)->v; }
+        ReservedTokenId const &getValue_Keyword   () const { return ((TK_Keyword   *)value)->v; }
+
+        bool isString    () const { return dynamic_cast<TK_String    *>(value); }
+        bool isChar      () const { return dynamic_cast<TK_Char      *>(value); }
+        bool isLong      () const { return dynamic_cast<TK_Long      *>(value); }
+        bool isDouble    () const { return dynamic_cast<TK_Double    *>(value); }
+        bool isBool      () const { return dynamic_cast<TK_Bool      *>(value); }
+        bool isIdentifier() const { return dynamic_cast<TK_Identifier*>(value); }
+        bool isKeyword   () const { return dynamic_cast<TK_Keyword   *>(value); }
+        bool isKeyword   (ReservedTokenId id) const { return dynamic_cast<TK_Keyword*>(value) && getValue_Keyword() == id; }
     };
 
 

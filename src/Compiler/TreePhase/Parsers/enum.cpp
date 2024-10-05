@@ -3,6 +3,6 @@
 
 
 
-cmp::__base_ST* cmp::parseEnum(TokenizedSource* b, ulong i) {
+cmp::ST_Enum* cmp::parseEnum(TokenizedSource* b, ulong index, ulong* elmLen) {
 
 }

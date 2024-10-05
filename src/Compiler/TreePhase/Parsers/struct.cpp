@@ -3,6 +3,6 @@
 
 
 
-cmp::__base_ST* cmp::parseStruct(TokenizedSource* b, ulong i) {
+cmp::ST_Struct* cmp::parseStruct(TokenizedSource* b, ulong index, ulong* elmLen) {
 
 }

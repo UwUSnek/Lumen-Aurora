@@ -5,5 +5,5 @@
 
 
 namespace cmp {
-    __base_ST* parseEnum(TokenizedSource* b, ulong i);
+    ST_Enum* parseEnum(TokenizedSource* b, ulong index, ulong* elmLen);
 }

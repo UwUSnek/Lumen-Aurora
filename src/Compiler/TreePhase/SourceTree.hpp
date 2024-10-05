@@ -54,6 +54,17 @@ namespace cmp {
 
 
 
+    struct ST_Path : public virtual __base_ST {
+        std::vector<std::string> idList;
+    };
+
+
+
+
+
+
+
+
     struct ST_Module : public virtual __base_ST_Referable, public virtual __base_ST_Container {
     };
 
@@ -61,5 +72,12 @@ namespace cmp {
     };
 
     struct ST_Struct : public virtual __base_ST_Referable, public virtual __base_ST_Container {
+    };
+
+    struct ST_Enum : public virtual __base_ST_Referable, public virtual __base_ST_Container {
+    };
+
+    struct ST_Alias : public virtual __base_ST_Referable {
+        ST_Path *original = nullptr;
     };
 }

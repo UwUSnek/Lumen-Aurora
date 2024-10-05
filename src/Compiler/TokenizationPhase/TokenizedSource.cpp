@@ -40,7 +40,7 @@ std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
 
     { ",",         ReservedTokenId::KEYWORD_COMMA      },
     { ";",         ReservedTokenId::KEYWORD_SEMICOLON  },
-    { ".",         ReservedTokenId::KEYWORD_MEMBER     },
+    { ".",         ReservedTokenId::KEYWORD_DOT        },
     { "::",        ReservedTokenId::KEYWORD_REFLECTION },
 
 

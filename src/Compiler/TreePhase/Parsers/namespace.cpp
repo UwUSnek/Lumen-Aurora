@@ -3,6 +3,6 @@
 
 
 
-cmp::__base_ST* cmp::parseNamespace(TokenizedSource* b, ulong i) {
+cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index, ulong* elmLen) {
 
 }
