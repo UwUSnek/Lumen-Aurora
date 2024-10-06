@@ -84,7 +84,7 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
                         ERROR_CMP_UNEXPECTED_TOKEN,
                         utils::ErrType::COMPILER,
                         ElmCoords(b, i, i),
-                        "Unexpected token \"" + t->OG_Value + "\"."
+                        "Unexpected " + t->genDecoratedValue() + "."
                     );
                 }
             }
@@ -112,7 +112,7 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
                 ERROR_CMP_UNEXPECTED_TOKEN,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, i, i),
-                "Unexpected token \"" + t->OG_Value + "\"."
+                "Unexpected " + t->genDecoratedValue() + "."
             );
         }
     }

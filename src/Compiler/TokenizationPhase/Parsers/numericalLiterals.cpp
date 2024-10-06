@@ -67,8 +67,8 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
         }
     }
     else {
-        decimal:
         i = index;
+        decimal:
         base = 10;
         isDigitValid = [](char c) { return c >= '0' && c <= '9'; };
         baseName = "decimal";
