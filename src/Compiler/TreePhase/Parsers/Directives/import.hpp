@@ -5,5 +5,5 @@
 
 
 namespace cmp {
-    ST_Import* parseImport(TokenizedSource* b, ulong index, ulong* elmLen);
+    ST_Import* parseImport(TokenizedSource* b, ulong index);
 }

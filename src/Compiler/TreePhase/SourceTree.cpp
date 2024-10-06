@@ -32,20 +32,13 @@ bool cmp::__base_ST::isOperator () const { return dynamic_cast<const ST_Operator
 
 
 
-bool cmp::ST_Sub_Type ::isChildAllowed(__base_ST* c) const { return false; }
-bool cmp::ST_Sub_Path ::isChildAllowed(__base_ST* c) const { return false; }
-bool cmp::ST_Statement::isChildAllowed(__base_ST* c) const { return false; }
 
 bool cmp::ST_Module   ::isChildAllowed(__base_ST* c) const { return !c->isStatement(); }
 bool cmp::ST_Namespace::isChildAllowed(__base_ST* c) const { return !c->isStatement(); }
 bool cmp::ST_Struct   ::isChildAllowed(__base_ST* c) const { return !(c->isStatement() || c->isFunction() || c->isOperator() || c->isVariable()); }
 bool cmp::ST_Enum     ::isChildAllowed(__base_ST* c) const { return !(c->isStatement() || c->isFunction() || c->isOperator() || c->isVariable()); }
-bool cmp::ST_Alias    ::isChildAllowed(__base_ST* c) const { return false; }
 
-bool cmp::ST_Import   ::isChildAllowed(__base_ST* c) const { return false; }
-bool cmp::ST_Export   ::isChildAllowed(__base_ST* c) const { return false; }
-
-bool cmp::ST_Variable ::isChildAllowed(__base_ST* c) const { return false; }
+bool cmp::ST_Statement::isChildAllowed(__base_ST* c) const { return !(c->isFunction() || c->isOperator()); }
 bool cmp::ST_Function ::isChildAllowed(__base_ST* c) const { return !(c->isFunction() || c->isOperator()); }
 bool cmp::ST_Operator ::isChildAllowed(__base_ST* c) const { return !(c->isFunction() || c->isOperator()); }
 

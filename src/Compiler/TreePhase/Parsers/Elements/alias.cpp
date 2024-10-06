@@ -1,6 +1,6 @@
 #include "alias.hpp"
 #include "Utils/errors.hpp"
-#include "Compiler/TreePhase/Parsers/Generic/path.hpp"
+#include "Compiler/TreePhase/Parsers/SubElements/path.hpp"
 
 
 
@@ -9,7 +9,7 @@
 
 
 
-cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index, ulong* elmLen) {
+cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index) {
     ST_Alias* r = new ST_Alias();
     ulong i = index;
 
@@ -17,9 +17,8 @@ cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index, ulong* elmLen) {
 
 
     // Parse original path
-    ulong originalLen;
-    ST_Path* original = parsePath(b, i, &originalLen);
-    if(!originalLen) {
+    ST_Sub_Path* original = parsePath(b, i);
+    if(!original) {
         if((*b)[i].has_value()) {
             utils::printError(
                 ERROR_CMP_ALIAS_NO_PATH,
@@ -39,7 +38,7 @@ cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index, ulong* elmLen) {
         }
     }
     r->original = original;
-    i += originalLen;
+    i = original->tokenEnd + 1;
 
 
 
@@ -109,6 +108,7 @@ cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index, ulong* elmLen) {
 
 
     // Set the element length and return the node
-    *elmLen = i - index;
+    r->tokenBgn = index;
+    r->tokenEnd = i - 1;
     return r;
 }

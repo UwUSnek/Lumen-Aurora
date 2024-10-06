@@ -5,7 +5,7 @@
 
 
 
-cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index, ulong* elmLen) {
+cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
     ST_Sub_Path *r = new ST_Sub_Path();
 
 
@@ -14,7 +14,6 @@ cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index, ulong* elmLen)
     // Save the starting identifier
     std::optional<Token> const &t0 = (*b)[index];
     if(!t0.has_value() || !t0->isIdentifier()) {
-        elmLen = 0;
         return nullptr;
     }
     else {
@@ -53,6 +52,7 @@ cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index, ulong* elmLen)
 
 
     // Set element length and return the node
-    *elmLen = i - index;
+    r->tokenBgn = index;
+    r->tokenEnd = i - 1;
     return r;
 }

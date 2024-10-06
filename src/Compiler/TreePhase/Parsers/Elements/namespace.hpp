@@ -5,5 +5,5 @@
 
 
 namespace cmp {
-    ST_Namespace* parseNamespace(TokenizedSource* b, ulong index, ulong* elmLen);
+    ST_Namespace* parseNamespace(TokenizedSource* b, ulong index);
 }

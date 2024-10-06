@@ -17,17 +17,22 @@ namespace cmp {
      * @brief The base Source Tree structure
      */
     struct __base_ST {
+        ulong tokenBgn;     // The index of the token in which this element begins
+        ulong tokenEnd;     // The index of the token in which this element ends
         __base_ST* parent; //TODO set module's parent
         //TODO also set the root module's parent to NULL
 
+        virtual bool isChildAllowed(__base_ST* c)                const { return false; }
+        virtual std::string getCategoryName(bool plural = false) const { return ""; }
+
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
-        virtual ~__base_ST(){}
-        virtual bool isChildAllowed(__base_ST* c) const;
-        virtual std::string getCategoryName(bool plural = false) const;
+        virtual ~__base_ST() = default;
 
 
         bool isType     () const;
         bool isPath     () const;
+
+        bool isStatement() const;
 
         // bool isExpr     () const;
 
@@ -56,7 +61,6 @@ namespace cmp {
     // Type sub-element
     struct ST_Sub_Type : public virtual __base_ST {
         bool isPointer;
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
 
@@ -77,8 +81,22 @@ namespace cmp {
     // Complex symbol path sub-element (identifiers separated by a dot keyword)
     struct ST_Sub_Path : public virtual __base_ST {
         std::vector<std::string> idList;
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
+    };
+
+
+
+
+
+
+    // Base struct for every first-pass semantic element
+    struct __base_ST_Container : public virtual __base_ST {
+        std::vector<__base_ST*> children;
+
+        void addChild(__base_ST* c) {
+            children.push_back(c);
+            c->parent = this;
+        }
     };
 
 
@@ -86,8 +104,8 @@ namespace cmp {
 
     // Expressions
     //! The array of children contains the sub-expressions
+    struct __base_ST_Container;
     struct ST_Expr : public virtual __base_ST_Container {
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };//FIXME parse this in the generic scope parser
 
@@ -110,19 +128,6 @@ namespace cmp {
     }; //FIXME parse this in the generic scope parser
 
 
-
-
-
-
-    // Base struct for every first-pass semantic element
-    struct __base_ST_Container : public virtual __base_ST {
-        std::vector<__base_ST*> children;
-
-        void addChild(__base_ST* c) {
-            children.push_back(c);
-            c->parent = this;
-        }
-    };
 
 
     // Base struct for any semantic element that can be referenced by its name
@@ -192,7 +197,6 @@ namespace cmp {
 
     struct ST_Alias : public virtual __base_ST_Referable {
         ST_Sub_Path *original = nullptr;
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
 
@@ -205,12 +209,10 @@ namespace cmp {
 
     struct ST_Import : public virtual __base_ST {
         //FIXME whatever import needs
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
     struct ST_Export : public virtual __base_ST {
         //FIXME whatever export needs
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
 
@@ -221,32 +223,29 @@ namespace cmp {
 
 
 
+
+
+    struct ST_Variable : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
+        //FIXME default value
+        //FIXME const qualifier
+        std::string getCategoryName(bool plural = false) const override;
+    };
 
 
     //! Expressions are saved in the generic child array, together with the other elements
     struct __base_ST_Routine : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
         //FIXME parameters
         //FIXME specialization constraint
-
-        // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
-        virtual ~__base_ST_Routine(){}
-    };
-
-    struct ST_Variable : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
-        //FIXME default value
-        //FIXME const qualifier
-        bool isChildAllowed(__base_ST* c) const override;
-        std::string getCategoryName(bool plural = false) const override;
     };
     struct ST_Function : public virtual __base_ST_Routine {
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
+        bool isChildAllowed(__base_ST* c) const override;
     };
     struct ST_Operator : public virtual __base_ST_Routine {
         //FIXME multiple names (or name position in case of split ternary)
         //FIXME priority
-        bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
+        bool isChildAllowed(__base_ST* c) const override;
 
         //FIXME make [] use the normal syntax
     };

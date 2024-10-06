@@ -81,16 +81,22 @@ namespace cmp {
         LIST_RESERVED_TOKENS
         #undef X
     };
+    extern std::map<std::string, ReservedTokenId> reservedTokensMap;
+
+
+
+
 
 
 
 
     struct TokenValue {
-        virtual std::string getCategoryName() const;
+        virtual std::string getCategoryName() const { return ""; };
 
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
-        virtual ~TokenValue(){}
+        virtual ~TokenValue() = default;
     };
+
 
     // String literal
     struct TK_String : TokenValue {
@@ -144,8 +150,6 @@ namespace cmp {
 
 
 
-
-    extern std::map<std::string, ReservedTokenId> reservedTokensMap;
 
 
 

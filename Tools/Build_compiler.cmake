@@ -43,10 +43,10 @@ add_executable(alc
             ../src/Compiler/TreePhase/Parsers/Elements/enum.cpp
             ../src/Compiler/TreePhase/Parsers/Elements/struct.cpp
             ../src/Compiler/TreePhase/Parsers/Elements/alias.cpp
-            ../src/Compiler/TreePhase/Parsers/Generic/path.cpp
             ../src/Compiler/TreePhase/Parsers/Generic/scope.cpp
             ../src/Compiler/TreePhase/Parsers/Directives/import.cpp
             ../src/Compiler/TreePhase/Parsers/Directives/export.cpp
+            ../src/Compiler/TreePhase/Parsers/SubElements/path.cpp
 )
 
 

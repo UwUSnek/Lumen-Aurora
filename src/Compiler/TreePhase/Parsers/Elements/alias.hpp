@@ -5,5 +5,5 @@
 
 
 namespace cmp {
-    ST_Alias* parseAlias(TokenizedSource* b, ulong index, ulong* elmLen);
+    ST_Alias* parseAlias(TokenizedSource* b, ulong index);
 }
