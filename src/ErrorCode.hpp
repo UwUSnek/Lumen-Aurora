@@ -112,10 +112,14 @@ enum ErrorCode : int {
     ERROR_CMP_UNEXPECTED_END,   // Code ends before a semantic element's syntax is complete
     ERROR_CMP_MISSING_TOKEN,   // A token that was expected is missing
 
+    ERROR_CMP_SCOPE_MISSING_INITIATOR,            // Missing {
+    ERROR_CMP_SCOPE_MISSING_TERMINATOR,            // Missing }
+    ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED,   // Target scope cannot contain the element
+
     ERROR_CMP_ALIAS_NO_PATH,   // Alias path is missing
     ERROR_CMP_ALIAS_NO_AS,   // Alias path is missing
     ERROR_CMP_ALIAS_NO_NAME,   // Alias path is missing
 
-    ERROR_CMP_SCOPE_MISSING_INITIATOR,            // Missing {
-    ERROR_CMP_SCOPE_MISSING_TERMINATOR,            // Missing }
+    ERROR_CMP_NAMESPACE_NAME_MISSING,  // Scope {} is missing
+    ERROR_CMP_NAMESPACE_SCOPE_MISSING,  // Scope {} is missing
 };

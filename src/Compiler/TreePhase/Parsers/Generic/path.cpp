@@ -5,8 +5,8 @@
 
 
 
-cmp::ST_Path* cmp::parsePath(TokenizedSource* b, ulong index, ulong* elmLen) {
-    ST_Path *r = new ST_Path();
+cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index, ulong* elmLen) {
+    ST_Sub_Path *r = new ST_Sub_Path();
 
 
 

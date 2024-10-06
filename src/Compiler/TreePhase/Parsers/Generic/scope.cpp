@@ -38,18 +38,16 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
                 ERROR_CMP_SCOPE_MISSING_INITIATOR,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, i - 1, i - 1),
-                "Expected a scope initiator ({), but the " + t0->genDecoratedValue() + " was found instead."
+                "Missing scope initiator ({)"
             );
         }
         else if(!t0->isKeyword(ReservedTokenId::KEYWORD_CURLY_L)) {
             utils::printError(
                 ERROR_CMP_SCOPE_MISSING_INITIATOR,
                 utils::ErrType::COMPILER,
-                ElmCoords(b, i - 1, i - 1),
-                "Missing scope initiator ({)"
+                ElmCoords(b, i, i),
+                "Expected a scope initiator ({), but the " + t0->genDecoratedValue() + " was found instead."
             );
-            // if(scopeLen) *scopeLen = 0;
-            // return r;
         }
         ++i;
     }
@@ -86,7 +84,7 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
                         ERROR_CMP_UNEXPECTED_TOKEN,
                         utils::ErrType::COMPILER,
                         ElmCoords(b, i, i),
-                        "Unexpected token \"" + (*b)[i]->OG_Value + "\"."
+                        "Unexpected token \"" + t->OG_Value + "\"."
                     );
                 }
             }
@@ -114,7 +112,7 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
                 ERROR_CMP_UNEXPECTED_TOKEN,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, i, i),
-                "Unexpected token \"" + (*b)[i]->OG_Value + "\"."
+                "Unexpected token \"" + t->OG_Value + "\"."
             );
         }
     }
@@ -129,8 +127,16 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
             utils::printError(
                 ERROR_CMP_SCOPE_MISSING_TERMINATOR,
                 utils::ErrType::COMPILER,
-                ElmCoords(b, i - !t1.has_value(), i - !t1.has_value()),
+                ElmCoords(b, i - 1, i - 1),
                 "Missing scope terminator (}) after scope definition."
+            );
+        }
+        else if(!t1->isKeyword(ReservedTokenId::KEYWORD_CURLY_R)) {
+            utils::printError(
+                ERROR_CMP_SCOPE_MISSING_TERMINATOR,
+                utils::ErrType::COMPILER,
+                ElmCoords(b, i, i),
+                "Expected a scope terminator (}), but the " + t0->genDecoratedValue() + " was found instead."
             );
         }
         ++i;

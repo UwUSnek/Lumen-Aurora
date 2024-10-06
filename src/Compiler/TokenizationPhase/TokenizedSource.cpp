@@ -75,15 +75,28 @@ std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
 
 
 
-std::string cmp::Token::genDecoratedValue() const {
-    std::string a;
-    if(isString    ()) a = "string literal";
-    if(isChar      ()) a = "char literal";
-    if(isLong      ()) a = "ulong literal";
-    if(isDouble    ()) a = "double literal";
-    if(isBool      ()) a = "bool literal";
-    if(isIdentifier()) a = "identifier";
-    if(isKeyword   ()) a = "keyword";
+std::string cmp::TK_String    ::getCategoryName() const { return "string literal"; }
+std::string cmp::TK_Char      ::getCategoryName() const { return "char literal";   }
+std::string cmp::TK_Long      ::getCategoryName() const { return "ulong literal";  }
+std::string cmp::TK_Double    ::getCategoryName() const { return "double literal"; }
+std::string cmp::TK_Bool      ::getCategoryName() const { return "bool literal";   }
+std::string cmp::TK_Identifier::getCategoryName() const { return "identifier";     }
+std::string cmp::TK_Keyword   ::getCategoryName() const { return "keyword";        }
 
-    return a + " \"" + OG_Value + "\"";
-}
+
+std::string     const &cmp::Token::getValue_String    () const { return ((TK_String    *)value)->v; }
+char                   cmp::Token::getValue_Char      () const { return ((TK_Char      *)value)->v; }
+ulong                  cmp::Token::getValue_Long      () const { return ((TK_Long      *)value)->v; }
+double                 cmp::Token::getValue_Double    () const { return ((TK_Double    *)value)->v; }
+bool                   cmp::Token::getValue_Bool      () const { return ((TK_Bool      *)value)->v; }
+std::string     const &cmp::Token::getValue_Identifier() const { return ((TK_Identifier*)value)->v; }
+cmp::ReservedTokenId   cmp::Token::getValue_Keyword   () const { return ((TK_Keyword   *)value)->v; }
+
+bool cmp::Token::isString    () const { return dynamic_cast<TK_String    *>(value); }
+bool cmp::Token::isChar      () const { return dynamic_cast<TK_Char      *>(value); }
+bool cmp::Token::isLong      () const { return dynamic_cast<TK_Long      *>(value); }
+bool cmp::Token::isDouble    () const { return dynamic_cast<TK_Double    *>(value); }
+bool cmp::Token::isBool      () const { return dynamic_cast<TK_Bool      *>(value); }
+bool cmp::Token::isIdentifier() const { return dynamic_cast<TK_Identifier*>(value); }
+bool cmp::Token::isKeyword   () const { return dynamic_cast<TK_Keyword   *>(value); }
+bool cmp::Token::isKeyword   (ReservedTokenId id) const { return dynamic_cast<TK_Keyword*>(value) && getValue_Keyword() == id; }

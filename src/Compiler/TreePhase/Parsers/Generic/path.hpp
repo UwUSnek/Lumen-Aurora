@@ -5,5 +5,5 @@
 
 
 namespace cmp {
-    ST_Path* parsePath(TokenizedSource* b, ulong index, ulong* elmLen);
+    ST_Sub_Path* parsePath(TokenizedSource* b, ulong index, ulong* elmLen);
 }

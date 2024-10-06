@@ -86,16 +86,60 @@ namespace cmp {
 
 
     struct TokenValue {
+        virtual std::string getCategoryName() const;
+
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
         virtual ~TokenValue(){}
     };
-    struct TK_String     : TokenValue { std::string     v; TK_String    (std::string const &_v) : v(_v) {}};      // String literal
-    struct TK_Char       : TokenValue { char            v; TK_Char      (char               _v) : v(_v) {}};      // Char literal
-    struct TK_Long       : TokenValue { ulong           v; TK_Long      (ulong              _v) : v(_v) {}};      // Ulong literal
-    struct TK_Double     : TokenValue { double          v; TK_Double    (double             _v) : v(_v) {}};      // Double literal
-    struct TK_Bool       : TokenValue { bool            v; TK_Bool      (bool               _v) : v(_v) {}};      // Boolean literal
-    struct TK_Identifier : TokenValue { std::string     v; TK_Identifier(std::string const &_v) : v(_v) {}};      // Identifier
-    struct TK_Keyword    : TokenValue { ReservedTokenId v; TK_Keyword   (ReservedTokenId    _v) : v(_v) {}};      // Keyword
+
+    // String literal
+    struct TK_String : TokenValue {
+        std::string v;
+        TK_String(std::string const&_v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Char literal
+    struct TK_Char : TokenValue {
+        char v;
+        TK_Char(char _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Ulong literal
+    struct TK_Long : TokenValue {
+        ulong v;
+        TK_Long(ulong _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Double literal
+    struct TK_Double : TokenValue {
+        double v;
+        TK_Double(double _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Boolean literal
+    struct TK_Bool : TokenValue {
+        bool v;
+        TK_Bool(bool _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Identifier
+    struct TK_Identifier : TokenValue {
+        std::string v;
+        TK_Identifier(std::string const &_v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Keyword
+    struct TK_Keyword : TokenValue {
+        ReservedTokenId v;
+        TK_Keyword(ReservedTokenId _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
 
 
 
@@ -119,35 +163,27 @@ namespace cmp {
             start(_start),
             end(_end) {
         }
-        std::string genDecoratedValue() const;
+        std::string genDecoratedValue() const { return value->getCategoryName() + " \"" + OG_Value + "\""; }
 
 
 
 
-        std::string           &getValue_String    ()       { return ((TK_String    *)value)->v; }
-        char                  &getValue_Char      ()       { return ((TK_Char      *)value)->v; }
-        ulong                 &getValue_Long      ()       { return ((TK_Long      *)value)->v; }
-        double                &getValue_Double    ()       { return ((TK_Double    *)value)->v; }
-        bool                  &getValue_Bool      ()       { return ((TK_Bool      *)value)->v; }
-        std::string           &getValue_Identifier()       { return ((TK_Identifier*)value)->v; }
-        ReservedTokenId       &getValue_Keyword   ()       { return ((TK_Keyword   *)value)->v; }
+        std::string const &getValue_String    () const;
+        char               getValue_Char      () const;
+        ulong              getValue_Long      () const;
+        double             getValue_Double    () const;
+        bool               getValue_Bool      () const;
+        std::string const &getValue_Identifier() const;
+        ReservedTokenId    getValue_Keyword   () const;
 
-        std::string     const &getValue_String    () const { return ((TK_String    *)value)->v; }
-        char            const &getValue_Char      () const { return ((TK_Char      *)value)->v; }
-        ulong           const &getValue_Long      () const { return ((TK_Long      *)value)->v; }
-        double          const &getValue_Double    () const { return ((TK_Double    *)value)->v; }
-        bool            const &getValue_Bool      () const { return ((TK_Bool      *)value)->v; }
-        std::string     const &getValue_Identifier() const { return ((TK_Identifier*)value)->v; }
-        ReservedTokenId const &getValue_Keyword   () const { return ((TK_Keyword   *)value)->v; }
-
-        bool isString    () const { return dynamic_cast<TK_String    *>(value); }
-        bool isChar      () const { return dynamic_cast<TK_Char      *>(value); }
-        bool isLong      () const { return dynamic_cast<TK_Long      *>(value); }
-        bool isDouble    () const { return dynamic_cast<TK_Double    *>(value); }
-        bool isBool      () const { return dynamic_cast<TK_Bool      *>(value); }
-        bool isIdentifier() const { return dynamic_cast<TK_Identifier*>(value); }
-        bool isKeyword   () const { return dynamic_cast<TK_Keyword   *>(value); }
-        bool isKeyword   (ReservedTokenId id) const { return dynamic_cast<TK_Keyword*>(value) && getValue_Keyword() == id; }
+        bool isString    () const;
+        bool isChar      () const;
+        bool isLong      () const;
+        bool isDouble    () const;
+        bool isBool      () const;
+        bool isIdentifier() const;
+        bool isKeyword   () const;
+        bool isKeyword   (ReservedTokenId id) const;
     };
 
 

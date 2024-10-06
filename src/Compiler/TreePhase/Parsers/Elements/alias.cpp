@@ -59,7 +59,7 @@ cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index, ulong* elmLen) {
         utils::printError(
             ERROR_CMP_ALIAS_NO_AS,
             utils::ErrType::COMPILER,
-            ElmCoords(b, i - !t1.has_value(), i - !t1.has_value()),
+            ElmCoords(b, i, i),
             "Expected the keyword \"as\", but the " + t1->genDecoratedValue() + " was found instead."
         );
     }
