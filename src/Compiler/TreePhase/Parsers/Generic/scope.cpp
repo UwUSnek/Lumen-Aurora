@@ -23,7 +23,7 @@
  * @param scopeLen Where to save the length of the scope, measured in tokens. Can be null.
  * @return A vector containing the elements
  */
-std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bool checkCurly, ulong* scopeLen) {
+std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bool checkCurly, ulong *scopeLen) {
     std::vector<__base_ST*> r;
     ulong i = index;
 

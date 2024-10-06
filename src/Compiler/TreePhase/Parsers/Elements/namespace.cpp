@@ -46,10 +46,10 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index, ulong* e
     for(ulong j = 0; j < children.size(); ++j) {
         if(!r->isChildAllowed(children[i])) {
             utils::printError(
-                ERROR_CMP_NAMESPACE_NAME_MISSING,
+                ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED,
                 utils::ErrType::COMPILER,
                 childrenCoords[i],
-                "" //TODO
+                children[i]->getCategoryName(true) + " are not allowed within namespaces"
             );
         }
         r->addChild(children[i]);

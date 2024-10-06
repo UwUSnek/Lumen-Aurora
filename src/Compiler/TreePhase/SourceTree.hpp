@@ -17,9 +17,13 @@ namespace cmp {
      * @brief The base Source Tree structure
      */
     struct __base_ST {
+        __base_ST* parent; //TODO set module's parent
+        //TODO also set the root module's parent to NULL
+
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
         virtual ~__base_ST(){}
         virtual bool isChildAllowed(__base_ST* c) const;
+        virtual std::string getCategoryName(bool plural = false) const;
 
 
         bool isType     () const;
@@ -53,6 +57,7 @@ namespace cmp {
     struct ST_Sub_Type : public virtual __base_ST {
         bool isPointer;
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
 
     // Basic types
@@ -69,6 +74,42 @@ namespace cmp {
 
 
 
+    // Complex symbol path sub-element (identifiers separated by a dot keyword)
+    struct ST_Sub_Path : public virtual __base_ST {
+        std::vector<std::string> idList;
+        bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
+    };
+
+
+
+
+    // Expressions
+    //! The array of children contains the sub-expressions
+    struct ST_Expr : public virtual __base_ST_Container {
+        bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
+    };//FIXME parse this in the generic scope parser
+
+    //FIXME basic expression types
+        //FIXME path
+            //TODO linkage phase:    operator call
+            //TODO linkage phase:    function call
+            //TODO linkage phase:    variable/parameter
+            //TODO linkage phase:    enum value
+        //FIXME reflection path
+        //FIXME literal
+        //FIXME (
+        //FIXME )
+
+
+    // Reflection path expression
+    struct ST_Expr_Reflection : public virtual __base_ST {
+        ST_Sub_Path* symbolPath;
+        ST_Sub_Path* reflectionIdList;
+    }; //FIXME parse this in the generic scope parser
+
+
 
 
 
@@ -79,6 +120,7 @@ namespace cmp {
 
         void addChild(__base_ST* c) {
             children.push_back(c);
+            c->parent = this;
         }
     };
 
@@ -102,18 +144,18 @@ namespace cmp {
 
 
 
-    // Complex symbol path sub-element (identifiers separated by a dot keyword)
-    struct ST_Sub_Path : public virtual __base_ST {
-        std::vector<std::string> idList;
+    // Statements
+    struct ST_Statement : public virtual __base_ST {
         bool isChildAllowed(__base_ST* c) const override;
-    };
+        std::string getCategoryName(bool plural = false) const override;
+    };//FIXME parse this in the generic scope parser
 
-    // // Expressions
-    // //! The array of children contains the sub-expressions
-    // struct ST_Expr : public virtual __base_ST_Container {
-    //     bool isChildAllowed(__base_ST* c) const override;
-    // };
-    //FIXME basic expression types
+    //FIXME specialized statement types
+        //FIXME expression statements
+        //FIXME while
+        //FIXME for
+        //FIXME if
+        //FIXME etc...
 
 
 
@@ -127,26 +169,31 @@ namespace cmp {
         //TODO take an alternative name from a parameter (for "import as"). in this case, the file's name can be invalid
         //TODO If not imported "as", the file name must be a valid identifier (after removing any extension)
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
 
     struct ST_Namespace : public virtual __base_ST_Referable, public virtual __base_ST_Container {
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
 
     struct ST_Struct : public virtual __base_ST_Referable, public virtual __base_ST_Container {
         //FIXME struct members
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
 
     struct ST_Enum : public virtual __base_ST_Referable, public virtual __base_ST_Container {
         //FIXME base type
         //FIXME enum members
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
 
     struct ST_Alias : public virtual __base_ST_Referable {
         ST_Sub_Path *original = nullptr;
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
 
 
@@ -159,10 +206,12 @@ namespace cmp {
     struct ST_Import : public virtual __base_ST {
         //FIXME whatever import needs
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
     struct ST_Export : public virtual __base_ST {
         //FIXME whatever export needs
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
 
 
@@ -187,14 +236,17 @@ namespace cmp {
         //FIXME default value
         //FIXME const qualifier
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
     struct ST_Function : public virtual __base_ST_Routine {
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
     };
     struct ST_Operator : public virtual __base_ST_Routine {
         //FIXME multiple names (or name position in case of split ternary)
         //FIXME priority
         bool isChildAllowed(__base_ST* c) const override;
+        std::string getCategoryName(bool plural = false) const override;
 
         //FIXME make [] use the normal syntax
     };
