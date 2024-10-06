@@ -35,7 +35,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         ulong lenOutput;
         TokenValue *tokenValue = parseNumericalLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
+            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
             increaseLocalProgress(lenOutput); //FIXME
             continue;
@@ -68,7 +68,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
             }
 
             // Push token to output array and update buffer index
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
+            *r += Token(b->str.substr(i, token->length()), tokenValue, *b->meta[i], *b->meta[i + token->length()]);
             i += token->length();
             increaseLocalProgress(token->length()); //FIXME
             continue;
@@ -80,14 +80,14 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         // Parse text literals
         tokenValue = parseStrLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
+            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
             increaseLocalProgress(lenOutput); //FIXME
             continue;
         }
         tokenValue = parseCharLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
+            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
             increaseLocalProgress(lenOutput); //FIXME
             continue;

@@ -1,3 +1,4 @@
+#include <sstream>
 #include "TokenizedSource.hpp"
 
 
@@ -66,3 +67,23 @@ std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
     { "nan",       ReservedTokenId::TMP_LITERAL_NAN       },
     { "inf",       ReservedTokenId::TMP_LITERAL_INF       },
 };
+
+
+
+
+
+
+
+
+std::string cmp::Token::genDecoratedValue() const {
+    std::string a;
+    if(isString    ()) a = "string literal";
+    if(isChar      ()) a = "char literal";
+    if(isLong      ()) a = "ulong literal";
+    if(isDouble    ()) a = "double literal";
+    if(isBool      ()) a = "bool literal";
+    if(isIdentifier()) a = "identifier";
+    if(isKeyword   ()) a = "keyword";
+
+    return a + " \"" + OG_Value + "\"";
+}

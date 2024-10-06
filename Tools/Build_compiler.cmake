@@ -29,6 +29,7 @@ add_executable(alc
             ../src/Preprocessor/IncludePhase/pathSolver.cpp
         ../src/Preprocessor/MacroPhase/macroPhase.cpp
 
+
     ../src/Compiler/compiler.cpp
         ../src/Compiler/TokenizationPhase/TokenizedSource.cpp
         ../src/Compiler/TokenizationPhase/tokenizationPhase.cpp
@@ -38,11 +39,14 @@ add_executable(alc
             ../src/Compiler/TokenizationPhase/whitespaceCounter.cpp
         ../src/Compiler/TreePhase/SourceTree.cpp
         ../src/Compiler/TreePhase/treePhase.cpp
-            ../src/Compiler/TreePhase/Parsers/namespace.cpp
-            ../src/Compiler/TreePhase/Parsers/enum.cpp
-            ../src/Compiler/TreePhase/Parsers/struct.cpp
-            ../src/Compiler/TreePhase/Parsers/alias.cpp
-                ../src/Compiler/TreePhase/Parsers/Generic/path.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/namespace.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/enum.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/struct.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/alias.cpp
+            ../src/Compiler/TreePhase/Parsers/Generic/path.cpp
+            ../src/Compiler/TreePhase/Parsers/Generic/scope.cpp
+            ../src/Compiler/TreePhase/Parsers/Directives/import.cpp
+            ../src/Compiler/TreePhase/Parsers/Directives/export.cpp
 )
 
 

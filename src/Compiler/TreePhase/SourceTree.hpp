@@ -80,4 +80,19 @@ namespace cmp {
     struct ST_Alias : public virtual __base_ST_Referable {
         ST_Path *original = nullptr;
     };
+
+
+
+
+
+
+
+
+    struct ST_Import : public virtual __base_ST {
+    };
+    struct ST_Export : public virtual __base_ST {
+    };
 }
+
+//TODO add all the .isSomething functions
+//TODO add all the .getAs_Something functions

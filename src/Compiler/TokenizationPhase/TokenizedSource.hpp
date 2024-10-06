@@ -107,18 +107,19 @@ namespace cmp {
 
 
     struct Token {
+        std::string OG_Value;
         TokenValue *value;               // The value of the token (number or string)
-        // TokenType type;                 // The type of the token
         pre::CleanSourceMeta start;     // The index, line, columns and file of the first character relative to the original source code
         pre::CleanSourceMeta end;       // The index, line, columns and file of the last  character relative to the original source code
 
-        // Token(std::string const &_value, TokenType _type, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
-        Token(TokenValue *_value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+
+        Token(std::string _OG_Value, TokenValue *_value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+            OG_Value(_OG_Value),
             value(_value),
-            // type(_type),
             start(_start),
             end(_end) {
         }
+        std::string genDecoratedValue() const;
 
 
 
