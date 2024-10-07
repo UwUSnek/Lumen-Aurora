@@ -18,7 +18,8 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
         utils::printError(
             ERROR_CMP_NAMESPACE_NAME_MISSING,
             utils::ErrType::COMPILER,
-            ElmCoords(b, i - 1, i - 1),
+            ElmCoords(b, index - 1, i - 1),
+            ElmCoords(b, i - 1,     i - 1),
             "Incomplete definition of Namespace.\n"
             "The identifier is missing."
         );
@@ -27,7 +28,8 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
         utils::printError(
             ERROR_CMP_NAMESPACE_NAME_MISSING,
             utils::ErrType::COMPILER,
-            ElmCoords(b, i, i),
+            ElmCoords(b, index - 1, i),
+            ElmCoords(b, i,         i),
             "Expected an identifier, but the " + t0->genDecoratedValue() + " was found instead."
         );
     }
@@ -39,7 +41,7 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
 
     // Parse contents and check if they are allowed
     ulong scopeLen;
-    std::vector<__base_ST*> const &children = parseScope(b, i, true, &scopeLen);
+    std::vector<__base_ST*> const &children = generic_parseScope(b, i, true, &scopeLen);
     i += scopeLen;
 
     for(ulong j = 0; j < children.size(); ++j) {
@@ -47,6 +49,7 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
             utils::printError(
                 ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED,
                 utils::ErrType::COMPILER,
+                ElmCoords(b, index - 1,             children[i]->tokenEnd),
                 ElmCoords(b, children[i]->tokenBgn, children[i]->tokenEnd),
                 children[i]->getCategoryName(true) + " are not allowed within namespaces"
             );
@@ -58,7 +61,7 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
 
 
     // Set the element length and return the node
-    r->tokenBgn = index;
+    r->tokenBgn = index - 1; //! Account for the namespace keyword
     r->tokenEnd = i - 1;
     return r;
 }

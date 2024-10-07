@@ -6,5 +6,5 @@
 
 
 namespace cmp {
-    std::vector<__base_ST*> parseScope(TokenizedSource *b, ulong index, bool checkCurly, ulong* scopeLen);
+    std::vector<__base_ST*> generic_parseScope(TokenizedSource *b, ulong index, bool checkCurly, ulong* scopeLen);
 }

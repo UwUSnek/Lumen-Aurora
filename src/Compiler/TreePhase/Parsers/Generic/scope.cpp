@@ -23,7 +23,7 @@
  * @param scopeLen Where to save the length of the scope, measured in tokens. Can be null.
  * @return A vector containing the elements
  */
-std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bool checkCurly, ulong *scopeLen) {
+std::vector<cmp::__base_ST*> cmp::generic_parseScope(TokenizedSource *b, ulong index, bool checkCurly, ulong *scopeLen) {
     std::vector<__base_ST*> r;
     ulong i = index;
 
@@ -37,7 +37,7 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
             utils::printError(
                 ERROR_CMP_SCOPE_MISSING_INITIATOR,
                 utils::ErrType::COMPILER,
-                ElmCoords(b, i - 1, i - 1),
+                ElmCoords(b, i - 1, i - 1), //TODO maybe pass the relevant section from the caller function
                 "Missing scope initiator ({)"
             );
         }
@@ -127,18 +127,13 @@ std::vector<cmp::__base_ST*> cmp::parseScope(TokenizedSource *b, ulong index, bo
             utils::printError(
                 ERROR_CMP_SCOPE_MISSING_TERMINATOR,
                 utils::ErrType::COMPILER,
+                ElmCoords(b, index, i - 1),
                 ElmCoords(b, i - 1, i - 1),
                 "Missing scope terminator (}) after scope definition."
             );
         }
-        else if(!t1->isKeyword(ReservedTokenId::KEYWORD_CURLY_R)) {
-            utils::printError(
-                ERROR_CMP_SCOPE_MISSING_TERMINATOR,
-                utils::ErrType::COMPILER,
-                ElmCoords(b, i, i),
-                "Expected a scope terminator (}), but the " + t0->genDecoratedValue() + " was found instead."
-            );
-        }
+        //! Checking that the token is not a } isn't needed as the
+        //! previous loop has requirement as part of its condition
         ++i;
     }
 

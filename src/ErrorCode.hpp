@@ -116,6 +116,9 @@ enum ErrorCode : int {
     ERROR_CMP_SCOPE_MISSING_TERMINATOR,            // Missing }
     ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED,   // Target scope cannot contain the element
 
+    ERROR_CMP_PATH_NO_IDENTIFIER,   // No identifier after . keyword
+
+
     ERROR_CMP_ALIAS_NO_PATH,   // Alias path is missing
     ERROR_CMP_ALIAS_NO_AS,   // Alias path is missing
     ERROR_CMP_ALIAS_NO_NAME,   // Alias path is missing
