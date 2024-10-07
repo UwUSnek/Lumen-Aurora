@@ -39,6 +39,8 @@ namespace cmd {
 
         //TODO implement these options
         //TODO add optimization options
+
+        Options(){}
     };
 }
 

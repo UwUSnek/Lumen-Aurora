@@ -11,6 +11,11 @@
 
 
 
+//! Set by the main function
+VersionNumber versionNumer;
+
+
+
 
 // The exit value specified by the thread that requested an exit. //! 0 means no threads exited yet.
 std::atomic<int> exitMainRequest = 0;

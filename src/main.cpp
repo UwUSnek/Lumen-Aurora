@@ -58,6 +58,11 @@ int main(int argc, char* argv[]){
     threadType = ThreadType::MAIN;
     pthread_setname_np(pthread_self(), "Main Thread");
 
+    // Set version number
+    versionNumer = VersionNumber('L', 0, 1, 0, '\0');
+
+
+
 
     // Recreate full command
     std::string fullCommand;
@@ -82,6 +87,7 @@ int main(int argc, char* argv[]){
         exit(0);
     }
 
+    cout << "Executing command \"" << ansi::bold_bright_green << fullCommand << ansi::reset << "\"...\n\n";
     bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
     bool compileExec    = cmd::options.outputType == 'x';
 

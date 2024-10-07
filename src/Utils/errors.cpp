@@ -107,7 +107,11 @@ void utils::printErrorGeneric(ErrorCode errorCode, std::string const &message) {
     cerr << "Error:";
 
     // Print the actual error after indenting it by 4 spaces
-    cerr << ansi::bold_red << "\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+    cerr
+        << ansi::bold_red
+        << "\n    "
+        << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red)
+        << "\n";
 
     // Stop the program
     consoleLock.unlock();

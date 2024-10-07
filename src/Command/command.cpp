@@ -14,7 +14,11 @@ namespace fs = std::filesystem;
 
 
 
-cmd::Options cmd::options;
+cmd::Options cmd::options = cmd::Options();
+
+
+
+
 
 
 
@@ -26,6 +30,31 @@ cmd::Options cmd::options;
  * @param DBG_fullCommand The full command as a string. This is exclusively used for error messages and never parsed.
  */
 void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
+
+
+
+
+    // Pre-parse the options to determine if to use colors or not. //! The actual value of the option is set during the second loop
+    // This also prevents errors when --help or --version are used
+    bool __internal_no_color = false;
+    for(int i = 1; i < argc; ++i) {
+        std::string o(argv[i]);
+        if(o == "--no-color") {
+            __internal_no_color = true;
+            options.printColor = false;
+        }
+        else if(o == "--help") {
+            options.isHelp = true;
+        }
+        else if(o == "--version") {
+            options.isVersion = true;
+        }
+    }
+    if(!__internal_no_color) ansi::enableEscapes();
+    if(options.isHelp || options.isVersion) return;
+
+
+
 
     // Loop the options and parse them
     ulong optionPosition = strlen(argv[0]) + 1;  // The character index of the current option relative to the full command string
@@ -174,18 +203,9 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
 
 
 
-            else if(o == "--help") {
-                options.isHelp = true;
-            }
-            else if(o == "--version") {
-                options.isVersion = true;
-            }
-
-
-
-
             else if(o == "--no-color") {
-                options.printColor = false;
+                //! This option is evaluated during the pre-parsing loop
+                //! This else-if is only used to let the parser recognize it as a valid option
             }
             else if(o == "--no-display") {
                 options.printDisplay = false;

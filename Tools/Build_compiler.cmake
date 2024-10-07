@@ -8,8 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Source files
 add_executable(alc
+    ../src/Generated/buildNumber.cpp
+
     ../src/Compiler/UTF8_decoder.c
     ../src/Utils/utils.cpp
+    ../src/Utils/ansi.cpp
     ../src/Utils/errors.cpp
     ../src/Utils/DynamicProgressBar.cpp
     ../src/ALC.cpp
@@ -50,7 +53,10 @@ set_target_properties(alc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ../Build)
 
 
 # GCC compilaiton options
-target_compile_options(alc PRIVATE -O0 -g)
+target_compile_options(alc PRIVATE
+    -O0         # No optimizations
+    -g          # Save debug infos
+)
 
 
 
