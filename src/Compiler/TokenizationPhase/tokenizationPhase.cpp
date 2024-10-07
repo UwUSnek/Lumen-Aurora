@@ -3,9 +3,9 @@
 #include "Utils/errors.hpp"
 
 #include "whitespaceCounter.hpp"
-#include "keywordIdentifierParser.hpp"
-#include "textLiteralParser.hpp"
-#include "numericalLiteralParser.hpp"
+#include "Parsers/keywordsIdentifiers.hpp"
+#include "Parsers/textLiterals.hpp"
+#include "Parsers/numericalLiterals.hpp"
 
 
 
@@ -24,7 +24,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         ulong wsLen = countWhitespace(b, i);
         if(wsLen) {
             i += wsLen;
-            increaseLocalProgress(wsLen); //FIXME
+            increaseLocalProgress(wsLen);
             continue;
         }
 
@@ -35,9 +35,9 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         ulong lenOutput;
         TokenValue *tokenValue = parseNumericalLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
+            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
-            increaseLocalProgress(lenOutput); //FIXME
+            increaseLocalProgress(lenOutput);
             continue;
         }
 
@@ -54,23 +54,23 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
             auto keywordType = reservedTokensMap.find(*token);
             if(keywordType != reservedTokensMap.end()) {
                 switch(keywordType->second) {
-                    case ReservedTokenId::TMP_LITERAL_TRUE:  { tokenValue = new TokenValue_BLN(true);  break; }
-                    case ReservedTokenId::TMP_LITERAL_FALSE: { tokenValue = new TokenValue_BLN(false); break; }
-                    case ReservedTokenId::TMP_LITERAL_INF:   { tokenValue = new TokenValue_DBL(std::numeric_limits<double>::infinity());  break; }
-                    case ReservedTokenId::TMP_LITERAL_NAN:   { tokenValue = new TokenValue_DBL(std::numeric_limits<double>::quiet_NaN()); break; }
-                    default:                                 { tokenValue = new TokenValue_KEY(keywordType->second); }
+                    case ReservedTokenId::TMP_LITERAL_TRUE:  { tokenValue = new TK_Bool   (true);  break; }
+                    case ReservedTokenId::TMP_LITERAL_FALSE: { tokenValue = new TK_Bool   (false); break; }
+                    case ReservedTokenId::TMP_LITERAL_INF:   { tokenValue = new TK_Double (std::numeric_limits<double>::infinity());  break; }
+                    case ReservedTokenId::TMP_LITERAL_NAN:   { tokenValue = new TK_Double (std::numeric_limits<double>::quiet_NaN()); break; }
+                    default:                                 { tokenValue = new TK_Keyword(keywordType->second); }
                 }
             }
 
             // If not, treat it as an identifier
             else {
-                tokenValue = new TokenValue_STR(*token);
+                tokenValue = new TK_Identifier(*token);
             }
 
             // Push token to output array and update buffer index
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + token->length()]);
+            *r += Token(b->str.substr(i, token->length()), tokenValue, *b->meta[i], *b->meta[i + token->length()]);
             i += token->length();
-            increaseLocalProgress(token->length()); //FIXME
+            increaseLocalProgress(token->length());
             continue;
         }
 
@@ -78,18 +78,12 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
 
         // Parse text literals
-        tokenValue = parseStrLiteral(b, i, &lenOutput);
+        /**/            tokenValue =  parseStrLiteral(b, i, &lenOutput);
+        if(!tokenValue) tokenValue = parseCharLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
+            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
-            increaseLocalProgress(lenOutput); //FIXME
-            continue;
-        }
-        tokenValue = parseCharLiteral(b, i, &lenOutput);
-        if(tokenValue) {
-            *r += Token(tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
-            i += lenOutput;
-            increaseLocalProgress(lenOutput); //FIXME
+            increaseLocalProgress(lenOutput);
             continue;
         }
 

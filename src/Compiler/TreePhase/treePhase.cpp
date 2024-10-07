@@ -1,9 +1,25 @@
 #include "treePhase.hpp"
+#include "Utils/errors.hpp"
+#include "Parsers/Generic/scope.hpp"
+
+
+
+//FIXME add expressions
+
 
 
 
 
 void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
-    b->awaitClose(); //TODO remove after writing this and the other subphases
+    //FIXME parse
+    //FIXME print invalid places
+    std::vector<__base_ST*> const &elms = parseScope(b, 0, false, nullptr);
+    // r->lock();
+    // r->cpp()->addChild()
+    // r->unlock();
+    //TODO
+
+
     r->closePipe();
 }
+//TODO put const everywhere it's needed

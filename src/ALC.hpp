@@ -1,6 +1,8 @@
 #pragma once
 
 #include <thread>
+#include <mutex>
+#include <vector>
 
 #include "Utils/utils.hpp"
 #include "Utils/DynamicProgressBar.hpp"

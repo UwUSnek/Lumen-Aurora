@@ -38,8 +38,8 @@
     \
     X(KEYWORD_COMMA)            /* , */                                                                            \
     X(KEYWORD_SEMICOLON)        /* ; */                                                                            \
-    X(KEYWORD_MEMBER)           /* . */                                                                            \
-    X(KEYWORD_REFLECTION)       /* :: */                                                                           \
+    X(KEYWORD_DOT)              /* . */                                                                            \
+    X(KEYWORD_REFLECTION)       /* :: //TODO maybe use :? tho it might conflict with the metakeyword*/             \
     \
     \
     X(META_KEYWORD_TEMPLATE)    /* template */                                                                     \
@@ -76,65 +76,123 @@
 
 
 namespace cmp {
-    enum class ReservedTokenId : ulong { //FIXME rename to "KeywordID"
+    enum class ReservedTokenId : ulong {
         #define X(e) e,
         LIST_RESERVED_TOKENS
         #undef X
     };
-
-
-
-//TODO check if LNG has to be singed or unsigned
-
-    struct TokenValue {};
-    struct TokenValue_STR : TokenValue { std::string     v; TokenValue_STR(std::string const &_v) : v(_v) {}};      // String literal
-    struct TokenValue_CHR : TokenValue { char            v; TokenValue_CHR(char               _v) : v(_v) {}};      // Char literal
-    struct TokenValue_LNG : TokenValue { ulong           v; TokenValue_LNG(ulong              _v) : v(_v) {}};      // Ulong literal
-    struct TokenValue_DBL : TokenValue { double          v; TokenValue_DBL(double             _v) : v(_v) {}};      // Double literal
-    struct TokenValue_BLN : TokenValue { bool            v; TokenValue_BLN(bool               _v) : v(_v) {}};      // Boolean literal
-    struct TokenValue_KEY : TokenValue { ReservedTokenId v; TokenValue_KEY(ReservedTokenId    _v) : v(_v) {}};      // Keyword
-    struct TokenValue_ID  : TokenValue { std::string     v; TokenValue_ID (std::string const &_v) : v(_v) {}};      // Identifier
-
-
-
-
-
     extern std::map<std::string, ReservedTokenId> reservedTokensMap;
-    // std::map<std::string, TokenType> metaKeywordMap;
+
+
+
+
+
+
+
+
+    struct TokenValue {
+        virtual std::string getCategoryName() const { return ""; };
+
+        // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
+        virtual ~TokenValue() = default;
+    };
+
+
+    // String literal
+    struct TK_String : TokenValue {
+        std::string v;
+        TK_String(std::string const&_v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Char literal
+    struct TK_Char : TokenValue {
+        char v;
+        TK_Char(char _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Ulong literal
+    struct TK_Long : TokenValue {
+        ulong v;
+        TK_Long(ulong _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Double literal
+    struct TK_Double : TokenValue {
+        double v;
+        TK_Double(double _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Boolean literal
+    struct TK_Bool : TokenValue {
+        bool v;
+        TK_Bool(bool _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Identifier
+    struct TK_Identifier : TokenValue {
+        std::string v;
+        TK_Identifier(std::string const &_v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+    // Keyword
+    struct TK_Keyword : TokenValue {
+        ReservedTokenId v;
+        TK_Keyword(ReservedTokenId _v) : v(_v) {}
+        std::string getCategoryName() const override;
+    };
+
+
+
+
 
 
 
 
     struct Token {
+        std::string OG_Value;
         TokenValue *value;               // The value of the token (number or string)
-        // TokenType type;                 // The type of the token
         pre::CleanSourceMeta start;     // The index, line, columns and file of the first character relative to the original source code
         pre::CleanSourceMeta end;       // The index, line, columns and file of the last  character relative to the original source code
 
-        // Token(std::string const &_value, TokenType _type, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
-        Token(TokenValue *_value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+
+        Token(std::string _OG_Value, TokenValue *_value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+            OG_Value(_OG_Value),
             value(_value),
-            // type(_type),
             start(_start),
             end(_end) {
         }
+        std::string genDecoratedValue() const {
+            return isString() || isChar()
+                ? value->getCategoryName() + " \"" + OG_Value.substr(1, OG_Value.length() - 2) + "\""
+                : value->getCategoryName() + " \"" + OG_Value + "\""
+            ;
+        }
 
 
-//TODO check if LNG has to be singed or unsign
-        // void setValue_STR(std::string const &v) { ((TokenValue_STR*)value)->v = v; }
-        // void setValue_CHR(char        const &v) { ((TokenValue_CHR*)value)->v = v; }
-        // void setValue_LNG(long        const &v) { ((TokenValue_LNG*)value)->v = v; }
-        // void setValue_DBL(double      const &v) { ((TokenValue_DBL*)value)->v = v; }
-        // void setValue_KEY(TokenType   const &v) { ((TokenValue_KEY*)value)->v = v; }
-        // void setValue_ID (std::string const &v) { ((TokenValue_ID *)value)->v = v; }
 
-        std::string&     getValue_STR() { return ((TokenValue_STR*)value)->v; }
-        char&            getValue_CHR() { return ((TokenValue_CHR*)value)->v; }
-        ulong&           getValue_LNG() { return ((TokenValue_LNG*)value)->v; }
-        double&          getValue_DBL() { return ((TokenValue_DBL*)value)->v; }
-        bool&            getValue_BLN() { return ((TokenValue_BLN*)value)->v; }
-        ReservedTokenId& getValue_KEY() { return ((TokenValue_KEY*)value)->v; }
-        std::string&     getValue_ID () { return ((TokenValue_ID *)value)->v; }
+
+        std::string const &getValue_String    () const;
+        char               getValue_Char      () const;
+        ulong              getValue_Long      () const;
+        double             getValue_Double    () const;
+        bool               getValue_Bool      () const;
+        std::string const &getValue_Identifier() const;
+        ReservedTokenId    getValue_Keyword   () const;
+
+        bool isString    () const;
+        bool isChar      () const;
+        bool isLong      () const;
+        bool isDouble    () const;
+        bool isBool      () const;
+        bool isIdentifier() const;
+        bool isKeyword   () const;
+        bool isKeyword   (ReservedTokenId id) const;
     };
 
 

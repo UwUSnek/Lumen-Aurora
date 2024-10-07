@@ -32,15 +32,24 @@ add_executable(alc
             ../src/Preprocessor/IncludePhase/pathSolver.cpp
         ../src/Preprocessor/MacroPhase/macroPhase.cpp
 
+
     ../src/Compiler/compiler.cpp
         ../src/Compiler/TokenizationPhase/TokenizedSource.cpp
         ../src/Compiler/TokenizationPhase/tokenizationPhase.cpp
-            ../src/Compiler/TokenizationPhase/keywordIdentifierParser.cpp
-            ../src/Compiler/TokenizationPhase/textLiteralParser.cpp
-            ../src/Compiler/TokenizationPhase/numericalLiteralParser.cpp
+            ../src/Compiler/TokenizationPhase/Parsers/keywordsIdentifiers.cpp
+            ../src/Compiler/TokenizationPhase/Parsers/textLiterals.cpp
+            ../src/Compiler/TokenizationPhase/Parsers/numericalLiterals.cpp
             ../src/Compiler/TokenizationPhase/whitespaceCounter.cpp
         ../src/Compiler/TreePhase/SourceTree.cpp
         ../src/Compiler/TreePhase/treePhase.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/namespace.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/enum.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/struct.cpp
+            ../src/Compiler/TreePhase/Parsers/Elements/alias.cpp
+            ../src/Compiler/TreePhase/Parsers/Generic/scope.cpp
+            ../src/Compiler/TreePhase/Parsers/Directives/import.cpp
+            ../src/Compiler/TreePhase/Parsers/Directives/export.cpp
+            ../src/Compiler/TreePhase/Parsers/SubElements/path.cpp
 )
 
 

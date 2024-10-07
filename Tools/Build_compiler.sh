@@ -43,7 +43,7 @@ cmake -B ./Build -S ./Tools
 
 # Build the source code (8 threads)
 cd ./Build
-make -j8
+make -j10
 
 
 

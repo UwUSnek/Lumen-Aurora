@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
+#include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 
 
-namespace pre {
-    struct SegmentedCleanSource;
-}
+
+
 struct ElmCoords {
     ulong filePathIndex;
     ulong lineNum;
@@ -26,4 +27,5 @@ struct ElmCoords {
     }
 
     ElmCoords(pre::SegmentedCleanSource *source, ulong _start, ulong _end);
+    ElmCoords(cmp::TokenizedSource      *source, ulong _start, ulong _end);
 };

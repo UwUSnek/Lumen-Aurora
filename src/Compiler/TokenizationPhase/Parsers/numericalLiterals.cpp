@@ -1,6 +1,6 @@
 #include <sstream>
 #include <cmath>
-#include "numericalLiteralParser.hpp"
+#include "numericalLiterals.hpp"
 #include "Utils/errors.hpp"
 
 
@@ -67,8 +67,8 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
         }
     }
     else {
-        decimal:
         i = index;
+        decimal:
         base = 10;
         isDigitValid = [](char c) { return c >= '0' && c <= '9'; };
         baseName = "decimal";
@@ -135,11 +135,11 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
     // Set the raw lenght and return the value
     *rawLiteralLen = i - index;
     if(isFloat) {
-        return new TokenValue_DBL(strToDbl(r.str(), base));
+        return new TK_Double(strToDbl(r.str(), base));
     }
     else {
         std::string debug = r.str(); //TODO REMOVE
-        return new TokenValue_LNG(strToLng(r.str(), base));
+        return new TK_Long(strToLng(r.str(), base));
     }
 }
 
@@ -170,7 +170,7 @@ double cmp::strToDbl(std::string const &s, uint base) {
 
 
     // Calculate fractional part
-    for(int j = i + 1; j < s.length(); ++j) {
+    for(ulong j = i + 1; j < s.length(); ++j) {
         char digit = s[i];
         double value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
         double fraction = pow(10, j - i); //! 10 for first digit, 100 for second etc...

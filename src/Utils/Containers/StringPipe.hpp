@@ -21,4 +21,13 @@ protected:
     ulong __internal_get_len(const std::string &e) override { return e.length(); }
     void   __internal_append(const std::string &e) override { s.append(e); }
     void   __internal_append(const char &e)        override { s.push_back(e); }
+
+
+public:
+    std::string substr(ulong i, ulong n) {
+        sReallocLock.lock();
+        std::string const &r = cpp()->substr(i, n);
+        sReallocLock.unlock();
+        return r;
+    }
 };

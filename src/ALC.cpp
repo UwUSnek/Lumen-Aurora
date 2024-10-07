@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 #include "ALC.hpp"
 #include "Utils/ansi.hpp"
@@ -18,7 +19,7 @@ VersionNumber versionNumer;
 
 
 // The exit value specified by the thread that requested an exit. //! 0 means no threads exited yet.
-std::atomic<int> exitMainRequest = 0;
+std::atomic<int> exitMainRequest(0);
 
 
 /**
@@ -59,10 +60,10 @@ std::mutex sourceFilePathsLock;
 std::mutex consoleLock;
 
 
-std::atomic<ulong> activeThreads = 0;
-std::atomic<ulong> totalThreads = 0;
-std::atomic<ulong> totalFiles = 0;
-std::atomic<ulong> totalModules = 0;
+std::atomic<ulong> activeThreads(0);
+std::atomic<ulong> totalThreads(0);
+std::atomic<ulong> totalFiles(0);
+std::atomic<ulong> totalModules(0);
 
 thread_local ThreadType threadType = ThreadType::UNKNOWN;
 

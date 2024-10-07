@@ -1,5 +1,5 @@
 #include <sstream>
-#include "textLiteralParser.hpp"
+#include "textLiterals.hpp"
 #include "Utils/errors.hpp"
 #include "Utils/ansi.hpp"
 
@@ -82,7 +82,8 @@ cmp::TokenValue* cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ulong index,
 
 
     *rawLiteralLen = i - index;
-    return new TokenValue_STR(r.str());
+    std::string rStr = r.str();
+    return new TK_String(rStr.substr(1, rStr.length() - 2));
 }
 
 
@@ -200,7 +201,7 @@ cmp::TokenValue* cmp::parseCharLiteral(pre::SegmentedCleanSource *b, ulong index
 
 
     *rawLiteralLen = i - index;
-    return new TokenValue_CHR(r.str()[0]);
+    return new TK_Char(r.str()[0]);
 }
 
 
