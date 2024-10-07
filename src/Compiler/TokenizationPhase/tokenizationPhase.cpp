@@ -24,7 +24,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         ulong wsLen = countWhitespace(b, i);
         if(wsLen) {
             i += wsLen;
-            increaseLocalProgress(wsLen); //FIXME
+            increaseLocalProgress(wsLen);
             continue;
         }
 
@@ -37,7 +37,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         if(tokenValue) {
             *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
-            increaseLocalProgress(lenOutput); //FIXME
+            increaseLocalProgress(lenOutput);
             continue;
         }
 
@@ -64,13 +64,13 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
             // If not, treat it as an identifier
             else {
-                tokenValue = new TK_String(*token);
+                tokenValue = new TK_Identifier(*token);
             }
 
             // Push token to output array and update buffer index
             *r += Token(b->str.substr(i, token->length()), tokenValue, *b->meta[i], *b->meta[i + token->length()]);
             i += token->length();
-            increaseLocalProgress(token->length()); //FIXME
+            increaseLocalProgress(token->length());
             continue;
         }
 
@@ -78,18 +78,12 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
 
         // Parse text literals
-        tokenValue = parseStrLiteral(b, i, &lenOutput);
+        /**/            tokenValue =  parseStrLiteral(b, i, &lenOutput);
+        if(!tokenValue) tokenValue = parseCharLiteral(b, i, &lenOutput);
         if(tokenValue) {
             *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
             i += lenOutput;
-            increaseLocalProgress(lenOutput); //FIXME
-            continue;
-        }
-        tokenValue = parseCharLiteral(b, i, &lenOutput);
-        if(tokenValue) {
-            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput]);
-            i += lenOutput;
-            increaseLocalProgress(lenOutput); //FIXME
+            increaseLocalProgress(lenOutput);
             continue;
         }
 

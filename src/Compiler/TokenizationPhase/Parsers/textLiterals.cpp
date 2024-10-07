@@ -82,7 +82,8 @@ cmp::TokenValue* cmp::parseStrLiteral(pre::SegmentedCleanSource *b, ulong index,
 
 
     *rawLiteralLen = i - index;
-    return new TK_String(r.str());
+    std::string rStr = r.str();
+    return new TK_String(rStr.substr(1, rStr.length() - 2));
 }
 
 

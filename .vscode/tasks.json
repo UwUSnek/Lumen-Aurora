@@ -18,6 +18,20 @@
         },
         {
             "type": "shell",
+            "label": "CLEAR | Clear compiler",
+            "command": "./Tools/Clear_compiler.sh",
+            "args": [],
+            "problemMatcher": [ "$gcc" ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "showReuseMessage": true,
+            }
+        },
+        {
+            "type": "shell",
             "label": "TEST | Run manual testing",
             "command": "./Build/alc",
             "args": [

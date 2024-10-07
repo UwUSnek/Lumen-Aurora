@@ -167,7 +167,12 @@ namespace cmp {
             start(_start),
             end(_end) {
         }
-        std::string genDecoratedValue() const { return value->getCategoryName() + " \"" + OG_Value + "\""; }
+        std::string genDecoratedValue() const {
+            return isString() || isChar()
+                ? value->getCategoryName() + " \"" + OG_Value.substr(1, OG_Value.length() - 2) + "\""
+                : value->getCategoryName() + " \"" + OG_Value + "\""
+            ;
+        }
 
 
 
