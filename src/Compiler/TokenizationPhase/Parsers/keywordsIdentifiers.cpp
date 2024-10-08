@@ -52,12 +52,13 @@ bool cmp::isAlphanumericChar(std::optional<char> const &c) {
  */
 std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b, ulong index){
     std::stringstream r;
-    bool isKeyword = isCharReserved(*b->str[index]);
-    bool (*checkFunc)(std::optional<char> const&) = isKeyword ? isCharReserved : isSymbolicChar;
+    if(isCharReserved(*b->str[index])) {
+        return std::string(1, *b->str[index]);
+    }
 
 
     ulong i = index;
-    while(checkFunc(b->str[i])) {
+    while(isSymbolicChar(b->str[i])) {
         r << *b->str[i];
         ++i;
     }
@@ -65,6 +66,11 @@ std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b,
 }
 
 
+/**
+ * @brief Parses character that can be part of either a symbolic identifier, a meta keyword or a keyword.
+ * @param c The character to check.
+ * @param c Wether the character can be part of these elements.
+ */
 bool cmp::isSymbolicChar(std::optional<char> const &c) {
     return c.has_value() && (
         c == '!' || c == '$' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == ':' || c == '<' ||
@@ -74,6 +80,14 @@ bool cmp::isSymbolicChar(std::optional<char> const &c) {
 }
 
 
+
+/**
+ * @brief Parses character that can only be keywords (reserved characters).
+ *      ! This kind of keywords can only be composed by a single character as
+ *      ! multi-character sequences are allowed to be near each other. //FIXME specify this in the documentation. maybe put them in a different category. Strong keywords or something
+ * @param c The character to check.
+ * @param c Wether the character is a keyword.
+ */
 bool cmp::isCharReserved(std::optional<char> const &c) {
     return c.has_value() && (
         c == ';' || c == ',' ||
