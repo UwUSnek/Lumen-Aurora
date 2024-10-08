@@ -6,6 +6,34 @@
 #include "ansi.hpp"
 #include "ALC.hpp"
 
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+//FIXME REWRITE THIS WHOLE THING
+
 
 
 
@@ -127,6 +155,7 @@ void utils::printErrorGeneric(ErrorCode errorCode, std::string const &message) {
 
 
 
+
 void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, std::string const &message, std::string const &fullCommand) {
     cmd::ElmCoordsCL const &relPos = trimCoords(fullCommand, _relPos);
     cmd::ElmCoordsCL const &errPos = trimCoords(fullCommand, _errPos);
@@ -167,6 +196,8 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
 
 
 
+
+
 /**
  * @brief Prints an error to stderr, specifying the error type.
  *      This function doesn't stop the program.
@@ -181,10 +212,13 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_e
 
 
 
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 
 
+
+
+
+//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
+//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 /**
  * @brief Stop the program and prints an error to stderr, specifying the error type.
  * @param errorType The type of the error.
@@ -209,7 +243,6 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
     // Check original file
-    bool useRelevant = relFilePath.length();
     std::ifstream f(errFilePath);
     if(!f.is_open()) {
 
@@ -222,13 +255,12 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
     else {
 
         // Find the line in the original file and calculate the starting index of the preceding line
-        std::string s = readFile(f);
+        std::string s = readFile(f); //TODO use cached raw file
         f.close();
         ElmCoords const &relPos = trimCoords(s, _relPos);
         ElmCoords const &errPos = trimCoords(s, _errPos);
-        ulong curLine = useRelevant ? std::min(relPos.lineNum, errPos.lineNum) : errPos.lineNum;
-        curLine -= !!curLine;
-        ulong i       = useRelevant ? std::min(relPos.start,     errPos.start) : errPos.start;
+        ulong curLine = std::min(relPos.lineNum, errPos.lineNum); curLine -= !!curLine;
+        ulong i       = std::min(relPos.start,   errPos.start);
         do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
         do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
         if(curLine > 0 && s[i] == '\n') ++i;
@@ -256,16 +288,25 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
             // Calculate current color based on the current character index and print it if it differs form the last one
-            const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
-            if(curColor != lastColor) {
+            if(errPos.overflow) {
+                const char* curColor = ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black).c_str();
+                if(curColor != lastColor) {
+                    cerr << curColor;
+                    lastColor = curColor;
+                }
 
                 // Print (missing code indicator) if needed
-                if(errPos.overflow && i > errPos.end - 1 && !overflowed) {
-                        overflowed = true;
-                    cerr << " ﹏﹏";
+                if(!overflowed && i > errPos.end) {
+                    overflowed = true;
+                    cerr << ansi::bold_bright_red << " ﹏﹏" << curColor;
                 }
-                cerr << curColor;
-                lastColor = curColor;
+            }
+            else {
+                const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
+                if(curColor != lastColor) {
+                    cerr << curColor;
+                    lastColor = curColor;
+                }
             }
 
 

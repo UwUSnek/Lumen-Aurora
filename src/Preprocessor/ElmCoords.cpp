@@ -24,10 +24,10 @@ ElmCoords::ElmCoords(pre::SegmentedCleanSource *source, ulong _start, ulong _end
 
     filePathIndex = source->meta[actual_start]->f;
     lineNum       = source->meta[actual_start]->l;
-    // start         = actual_start;
-    // end           = actual_end;
-    start         = _start;
-    end           = _end;
+    start         = actual_start;
+    end           = actual_end;
+    // start         = _start;
+    // end           = _end;
 }
 
 
@@ -38,8 +38,8 @@ ElmCoords::ElmCoords(cmp::TokenizedSource *source, ulong _start, ulong _end) {
 
     filePathIndex = (*source)[actual_start]->start.f;
     lineNum       = (*source)[actual_start]->start.l;
-    // start         = (*source)[actual_start]->start.i;
-    // end           = (*source)[actual_end  ]->end  .i;
-    start         = _start >= source->length() ? (*source)[actual_start]->end.i + 1 : (*source)[actual_start]->start.i;
-    end           = (*source)[actual_end  ]->end  .i + (_end   >= source->length());
+    start         = (*source)[actual_start]->start.i;
+    end           = (*source)[actual_end  ]->end  .i;
+    // start         = _start >= source->length() ? (*source)[actual_start]->end.i + 1 : (*source)[actual_start]->start.i;
+    // end           = (*source)[actual_end  ]->end  .i + (_end   >= source->length());
 }
