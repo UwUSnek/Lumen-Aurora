@@ -25,22 +25,25 @@ static bool isWhitespace(char c) {
 /**
  * @brief Resizes <coords> to remove any leading and trailing whitespace characters.
  * @param s The string <coords> refers to.
+ *      Coordinates that point to after the string's last character are set to (ulong)-1.
  * @param coords The coordinates.
  * @return The trimmed coordinates.
  */
 static inline ElmCoords trimCoords(std::string s, ElmCoords coords) {
-    ulong end = coords.end;
-    ulong start = coords.start;;
+    ulong end     = std::min(coords.end,   s.length());
+    ulong start   = std::min(coords.start, s.length());
     ulong curLine = coords.lineNum;
 
     while(end > coords.start && isWhitespace(s[end])) {
         --end;
     }
-    while(start < end && isWhitespace(s[start])) {
-        if(s[end] == '\n') ++curLine;
+    while(start < coords.end && isWhitespace(s[start])) {
+        if(s[start] == '\n') ++curLine;
         ++start;
     }
-    return ElmCoords(coords.filePathIndex, curLine, start, end);
+
+
+    return ElmCoords(coords.filePathIndex, curLine, start, end, coords.overflow);
 }
 
 
@@ -248,27 +251,39 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
         ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
         const char* lastColor;
         ulong col = 0;
-        for(; s[i] != '\0'; ++i) {
+        bool overflowed = false;
+        for(;; ++i) {
+
 
             // Calculate current color based on the current character index and print it if it differs form the last one
             const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
             if(curColor != lastColor) {
+
+                // Print (missing code indicator) if needed
+                if(errPos.overflow && i > errPos.end - 1 && !overflowed) {
+                        overflowed = true;
+                    cerr << " ﹏﹏";
+                }
                 cerr << curColor;
                 lastColor = curColor;
             }
 
+
             // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
-            cerr << formatChar(s[i], col, false);
-            ++col;
-            if(s[i] == '\n') {
-                col = 0;
-                ++curLine;
-                if(curLine > targetLineNum) {
-                    break;
+            if(s[i] != '\0') {
+                cerr << formatChar(s[i], col, false);
+                ++col;
+                if(s[i] == '\n') {
+                    col = 0;
+                    ++curLine;
+                    if(curLine > targetLineNum) {
+                        break;
+                    }
+                    printLineNum(curLine);
+                    cerr << lastColor;
                 }
-                printLineNum(curLine);
-                cerr << lastColor;
             }
+            else break;
         }
     }
 

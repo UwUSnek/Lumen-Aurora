@@ -35,22 +35,13 @@ cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
 
         // Save identifier, print an error if one is not found
         std::optional<Token> const &tb = (*b)[i];
-        if(!tb.has_value()) {
-            utils::printError(
-                ERROR_CMP_PATH_NO_IDENTIFIER, utils::ErrType::COMPILER,
-                ElmCoords(b, index, i - 1),
-                ElmCoords(b, i - 1, i - 1),
-                "Incomplete symbol path.\n"
-                "The identifier is missing."
-            );
-        }
-        else if(!tb->isIdentifier()) {
+        if(!tb.has_value() || !tb->isIdentifier()) {
             utils::printError(
                 ERROR_CMP_PATH_NO_IDENTIFIER, utils::ErrType::COMPILER,
                 ElmCoords(b, index, i),
                 ElmCoords(b, i,     i),
-                "Incomplete symbol path.\n"
-                "Expected an identifier, but the " + tb->genDecoratedValue() + " was found instead."
+                "Incomplete symbol path.\n" +
+                (tb.has_value() ? "Expected an identifier, but the " + tb->genDecoratedValue() + " was found instead." : "The identifier is missing.")
             );
         }
         r->idList.push_back(tb->getValue_Identifier());

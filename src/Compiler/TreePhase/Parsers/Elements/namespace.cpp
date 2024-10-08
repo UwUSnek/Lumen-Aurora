@@ -18,22 +18,13 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
 
     // Parse name
     std::optional<Token> const &t1 = (*b)[i];
-    if(!t1.has_value()){
-        utils::printError(
-            ERROR_CMP_NAMESPACE_NAME_MISSING, utils::ErrType::COMPILER,
-            ElmCoords(b, index, i - 1),
-            ElmCoords(b, i - 1, i - 1),
-            "Incomplete definition of Namespace.\n"
-            "The identifier is missing."
-        );
-    }
-    else if(!t1->isIdentifier()){
+    if(!t1.has_value() || !t1->isIdentifier()){
         utils::printError(
             ERROR_CMP_NAMESPACE_NAME_MISSING, utils::ErrType::COMPILER,
             ElmCoords(b, index, i),
             ElmCoords(b, i,     i),
-            "Incomplete definition of Namespace.\n"
-            "Expected an identifier, but the " + t1->genDecoratedValue() + " was found instead."
+            "Incomplete definition of Namespace.\n" +
+            (t1.has_value() ? "Expected an identifier, but the " + t1->genDecoratedValue() + " was found instead." : "The identifier is missing.")
         );
     }
     r->name = t1->getValue_Identifier();
@@ -44,7 +35,7 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
 
     // Parse contents and check if they are allowed
     ulong scopeLen;
-    std::vector<__base_ST*> const &children = generic_parseScope(b, i, true, &scopeLen);
+    std::vector<__base_ST*> const &children = generic_parseScope(b, i, true, &scopeLen); //TODO maybe pass the starting index to use it for a more accurate relevant section
     i += scopeLen;
 
     for(ulong j = 0; j < children.size(); ++j) {

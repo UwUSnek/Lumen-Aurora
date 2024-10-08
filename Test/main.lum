@@ -7,4 +7,4 @@ alias test3.test as a
 ;
 namespace test{ namespace a{ alias test as test; } }
 
-alias test as
+alias test as    a;
