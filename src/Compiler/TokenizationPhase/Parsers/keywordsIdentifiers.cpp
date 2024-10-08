@@ -46,15 +46,18 @@ bool cmp::isAlphanumericChar(std::optional<char> const &c) {
  * @brief Parses the symbolic token that starts at index <index> of the buffer <b>.
  *      The token stops at the first character that is not part of its pattern.
  *      [!$%&*+\-/:<=>?@^`|~\[\].]+                 //! Symbolic identifiers
- *      [!$%&*+\-/:<=>?@^`|~;\[\]\(\)\{\}.\,]+      //! All symbolic tokens [what this function checks, includes identifiers]
+ *      [!$%&*+\-/:<=>?@^`|~\[\].,;\(\)\{\}]+       //! All symbolic tokens [what this function checks, includes identifiers]
  * @param b The source code buffer.
  * @param index The starting index.
  */
 std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b, ulong index){
     std::stringstream r;
+    bool isKeyword = isCharReserved(*b->str[index]);
+    bool (*checkFunc)(std::optional<char> const&) = isKeyword ? isCharReserved : isSymbolicChar;
+
 
     ulong i = index;
-    while(isSymbolicChar(b->str[i])) {
+    while(checkFunc(b->str[i])) {
         r << *b->str[i];
         ++i;
     }
@@ -65,7 +68,16 @@ std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b,
 bool cmp::isSymbolicChar(std::optional<char> const &c) {
     return c.has_value() && (
         c == '!' || c == '$' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == ':' || c == '<' ||
-        c == '=' || c == '>' || c == '?' || c == '@' || c == '^' || c == '`' || c == '|' || c == '~' || c == ';' ||
-        c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' || c == '.' || c == ','
+        c == '=' || c == '>' || c == '?' || c == '@' || c == '^' || c == '`' || c == '|' || c == '~' || c == '.' ||
+        c == '[' || c == ']'
+    );
+}
+
+
+bool cmp::isCharReserved(std::optional<char> const &c) {
+    return c.has_value() && (
+        c == ';' || c == ',' ||
+        c == '(' || c == ')' ||
+        c == '{' || c == '}'
     );
 }

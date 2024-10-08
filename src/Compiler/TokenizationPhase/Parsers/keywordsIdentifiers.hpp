@@ -10,6 +10,7 @@ namespace cmp {
     bool isAlphanumericChar(std::optional<char> const &c);
 
 
-    std::optional<std::string>     parseSymbolicToken(pre::SegmentedCleanSource *b, ulong index);
-    bool     isSymbolicChar(std::optional<char> const &c);
+    std::optional<std::string> parseSymbolicToken(pre::SegmentedCleanSource *b, ulong index);
+    bool isSymbolicChar(std::optional<char> const &c);
+    bool isCharReserved(std::optional<char> const &c);
 }
