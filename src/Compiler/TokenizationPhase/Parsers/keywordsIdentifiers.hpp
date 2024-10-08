@@ -8,6 +8,7 @@
 namespace cmp {
     std::optional<std::string> parseAlphanumericToken(pre::SegmentedCleanSource *b, ulong index);
     bool isAlphanumericChar(std::optional<char> const &c);
+    bool isAlphanumericCharFirst(std::optional<char> const &c);
 
 
     std::optional<std::string> parseSymbolicToken(pre::SegmentedCleanSource *b, ulong index);

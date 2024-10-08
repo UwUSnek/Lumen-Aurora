@@ -19,7 +19,7 @@
 std::optional<std::string> cmp::parseAlphanumericToken(pre::SegmentedCleanSource *b, ulong index){
     std::stringstream r;
     std::optional<char> c = b->str[index];
-    if(!c.has_value() || (!std::isalpha(*c) && c != '_')) return std::nullopt;
+    if(isAlphanumericCharFirst(*c)) return std::nullopt;
     r << *c;
 
     ulong i = index + 1;
@@ -31,6 +31,25 @@ std::optional<std::string> cmp::parseAlphanumericToken(pre::SegmentedCleanSource
 }
 
 
+
+
+/**
+ * @brief Checks if a character can be the first character of an alphanumeric identifier, a meta keyword or a keyword.
+ * @param c The character to check.
+ * @return Wether the character can be the first character of these elements.
+ */
+bool cmp::isAlphanumericCharFirst(std::optional<char> const &c) {
+    return c.has_value() && (std::isalpha(*c) || c == '_');
+}
+
+
+
+
+/**
+ * @brief Checks if a character can be part of an alphanumeric identifier, a meta keyword or a keyword.
+ * @param c The character to check.
+ * @return Wether the character can be part of these elements.
+ */
 bool cmp::isAlphanumericChar(std::optional<char> const &c) {
     return c.has_value() && (std::isalnum(*c) || c == '_');
 }
@@ -66,10 +85,12 @@ std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b,
 }
 
 
+
+
 /**
- * @brief Parses character that can be part of either a symbolic identifier, a meta keyword or a keyword.
+ * @brief Checks if a character can be part of either a symbolic identifier, a meta keyword or a keyword.
  * @param c The character to check.
- * @param c Wether the character can be part of these elements.
+ * @return Wether the character can be part of these elements.
  */
 bool cmp::isSymbolicChar(std::optional<char> const &c) {
     return c.has_value() && (
@@ -81,12 +102,13 @@ bool cmp::isSymbolicChar(std::optional<char> const &c) {
 
 
 
+
 /**
- * @brief Parses character that can only be keywords (reserved characters).
+ * @brief Checks if a character is reserved for keywords.
  *      ! This kind of keywords can only be composed by a single character as
  *      ! they are allowed to be near each other without the need of whitespace between them. //FIXME specify this in the documentation. maybe put them in a different category. Strong keywords or something
  * @param c The character to check.
- * @param c Wether the character is a keyword.
+ * @return Wether the character is a keyword.
  */
 bool cmp::isCharReserved(std::optional<char> const &c) {
     return c.has_value() && (
