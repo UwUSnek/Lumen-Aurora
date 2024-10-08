@@ -5,5 +5,4 @@
 //#include/*aa*/  	"../Tests/HugeSource/huge.lum"
 alias test3.test as a
 ;
-"\f042"
-test
+namespace test{ namespace a{ alias test as test; } }

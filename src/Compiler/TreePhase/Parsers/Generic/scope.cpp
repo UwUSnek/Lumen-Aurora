@@ -60,49 +60,16 @@ std::vector<cmp::__base_ST*> cmp::generic_parseScope(TokenizedSource *b, ulong i
         std::optional<Token> const &t = (*b)[i];
 
 
-        // Known declarations
-        if(t->isKeyword()) {
-
-            // Choose the parser function based on the keyword
-            using parserFuncType = __base_ST* (*)(cmp::TokenizedSource*, ulong, ulong*);
-            parserFuncType parserFunc;
-            switch(t->getValue_Keyword()) {
-
-                // Elements
-                case ReservedTokenId::KEYWORD_NAMESPACE : { parserFunc = (parserFuncType)parseNamespace; break; }
-                case ReservedTokenId::KEYWORD_ENUM      : { parserFunc = (parserFuncType)parseEnum;      break; }
-                case ReservedTokenId::KEYWORD_STRUCT    : { parserFunc = (parserFuncType)parseStruct;    break; }
-                case ReservedTokenId::KEYWORD_ALIAS     : { parserFunc = (parserFuncType)parseAlias;     break; }
-
-                // Directives
-                case ReservedTokenId::KEYWORD_IMPORT    : { parserFunc = (parserFuncType)parseImport;     break; }
-                case ReservedTokenId::KEYWORD_EXPORT    : { parserFunc = (parserFuncType)parseExport;     break; }
-
-                // Unexpected token
-                default : {
-                    utils::printError(
-                        ERROR_CMP_UNEXPECTED_TOKEN,
-                        utils::ErrType::COMPILER,
-                        ElmCoords(b, i, i),
-                        "Unexpected " + t->genDecoratedValue() + "."
-                    );
-                }
-            }
-
-            // Call the parser function
-            ++i; // Skip keyword //! Parsing starts from {
-            ulong nodeLen;
-            r.push_back(parserFunc(b, i, &nodeLen));
-            i += nodeLen;
-        }
-
-
-        // Identifiers (functions, operators, variables)
-        else if(t->isIdentifier()) {
-            //! The identifier is not skipped as the parser needs to save it in the tree
-            ulong nodeLen;
-            r.push_back(nullptr); //FIXME actually parse it //FIXME pass nodeLen
-            i += nodeLen;
+        // Parse element
+        __base_ST*  result = parseNamespace(b, i);
+        if(!result) result = parseEnum     (b, i);
+        if(!result) result = parseStruct   (b, i);
+        if(!result) result = parseAlias    (b, i);
+        if(!result) result = parseImport   (b, i);
+        if(!result) result = parseExport   (b, i);
+        if(result) {
+            r.push_back(result);
+            i = result->tokenEnd + 1;
         }
 
 

@@ -8,21 +8,15 @@
 
 
 cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
-    ST_Sub_Path *r = new ST_Sub_Path();
-    ulong i = index;
-
-
-
 
     // Save the starting identifier
-    std::optional<Token> const &t0 = (*b)[i];
+    std::optional<Token> const &t0 = (*b)[index];
     if(!t0.has_value() || !t0->isIdentifier()) {
         return nullptr;
     }
-    else {
-        r->idList.push_back(t0->getValue_Identifier());
-        ++i;
-    }
+    ST_Sub_Path *r = new ST_Sub_Path();
+    ulong i = index + 1;
+    r->idList.push_back(t0->getValue_Identifier());
 
 
 

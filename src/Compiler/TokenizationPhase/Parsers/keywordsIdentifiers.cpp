@@ -19,7 +19,7 @@
 std::optional<std::string> cmp::parseAlphanumericToken(pre::SegmentedCleanSource *b, ulong index){
     std::stringstream r;
     std::optional<char> c = b->str[index];
-    if(isAlphanumericCharFirst(*c)) return std::nullopt;
+    if(!isAlphanumericCharFirst(*c)) return std::nullopt;
     r << *c;
 
     ulong i = index + 1;
