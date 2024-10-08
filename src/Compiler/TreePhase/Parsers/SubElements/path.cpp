@@ -57,7 +57,7 @@ cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i),
                 ElmCoords(b, i,     i),
-                "Expected an identifier, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
+                "Expected an identifier, but the " + tb->genDecoratedValue() + " was found instead."
             );
         }
         r->idList.push_back(tb->getValue_Identifier());

@@ -87,7 +87,9 @@ int main(int argc, char* argv[]){
         exit(0);
     }
 
+    consoleLock.lock();
     cout << "Executing command \"" << ansi::bold_bright_green << fullCommand << ansi::reset << "\"...\n\n";
+    consoleLock.unlock();
     bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
     bool compileExec    = cmd::options.outputType == 'x';
 
