@@ -37,8 +37,7 @@ cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
         std::optional<Token> const &tb = (*b)[i];
         if(!tb.has_value()) {
             utils::printError(
-                ERROR_CMP_PATH_NO_IDENTIFIER,
-                utils::ErrType::COMPILER,
+                ERROR_CMP_PATH_NO_IDENTIFIER, utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
                 ElmCoords(b, i - 1, i - 1),
                 "Incomplete symbol path.\n"
@@ -47,10 +46,10 @@ cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
         }
         else if(!tb->isIdentifier()) {
             utils::printError(
-                ERROR_CMP_PATH_NO_IDENTIFIER,
-                utils::ErrType::COMPILER,
+                ERROR_CMP_PATH_NO_IDENTIFIER, utils::ErrType::COMPILER,
                 ElmCoords(b, index, i),
                 ElmCoords(b, i,     i),
+                "Incomplete symbol path.\n"
                 "Expected an identifier, but the " + tb->genDecoratedValue() + " was found instead."
             );
         }

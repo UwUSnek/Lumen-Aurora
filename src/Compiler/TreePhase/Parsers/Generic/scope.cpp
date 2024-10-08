@@ -35,16 +35,14 @@ std::vector<cmp::__base_ST*> cmp::generic_parseScope(TokenizedSource *b, ulong i
     if(checkCurly) {
         if(!t0.has_value()) {
             utils::printError(
-                ERROR_CMP_SCOPE_MISSING_INITIATOR,
-                utils::ErrType::COMPILER,
+                ERROR_CMP_SCOPE_MISSING_INITIATOR, utils::ErrType::COMPILER,
                 ElmCoords(b, i - 1, i - 1), //TODO maybe pass the relevant section from the caller function
                 "Missing scope initiator ({)"
             );
         }
         else if(!t0->isKeyword(ReservedTokenId::KEYWORD_CURLY_L)) {
             utils::printError(
-                ERROR_CMP_SCOPE_MISSING_INITIATOR,
-                utils::ErrType::COMPILER,
+                ERROR_CMP_SCOPE_MISSING_INITIATOR, utils::ErrType::COMPILER,
                 ElmCoords(b, i, i),
                 "Expected a scope initiator ({), but the " + t0->genDecoratedValue() + " was found instead."
             );
@@ -76,8 +74,7 @@ std::vector<cmp::__base_ST*> cmp::generic_parseScope(TokenizedSource *b, ulong i
         // Unexpected tokens
         else {
             utils::printError(
-                ERROR_CMP_UNEXPECTED_TOKEN,
-                utils::ErrType::COMPILER,
+                ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                 ElmCoords(b, i, i),
                 "Unexpected " + t->genDecoratedValue() + "."
             );
@@ -92,8 +89,7 @@ std::vector<cmp::__base_ST*> cmp::generic_parseScope(TokenizedSource *b, ulong i
     if(checkCurly){
         if(!t1.has_value()) {
             utils::printError(
-                ERROR_CMP_SCOPE_MISSING_TERMINATOR,
-                utils::ErrType::COMPILER,
+                ERROR_CMP_SCOPE_MISSING_TERMINATOR, utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
                 ElmCoords(b, i - 1, i - 1),
                 "Missing scope terminator (}) after scope definition."

@@ -20,8 +20,7 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
     std::optional<Token> const &t1 = (*b)[i];
     if(!t1.has_value()){
         utils::printError(
-            ERROR_CMP_NAMESPACE_NAME_MISSING,
-            utils::ErrType::COMPILER,
+            ERROR_CMP_NAMESPACE_NAME_MISSING, utils::ErrType::COMPILER,
             ElmCoords(b, index, i - 1),
             ElmCoords(b, i - 1, i - 1),
             "Incomplete definition of Namespace.\n"
@@ -30,10 +29,10 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
     }
     else if(!t1->isIdentifier()){
         utils::printError(
-            ERROR_CMP_NAMESPACE_NAME_MISSING,
-            utils::ErrType::COMPILER,
+            ERROR_CMP_NAMESPACE_NAME_MISSING, utils::ErrType::COMPILER,
             ElmCoords(b, index, i),
             ElmCoords(b, i,     i),
+            "Incomplete definition of Namespace.\n"
             "Expected an identifier, but the " + t1->genDecoratedValue() + " was found instead."
         );
     }
@@ -51,8 +50,7 @@ cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
     for(ulong j = 0; j < children.size(); ++j) {
         if(!r->isChildAllowed(children[j])) {
             utils::printError(
-                ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED,
-                utils::ErrType::COMPILER,
+                ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED, utils::ErrType::COMPILER,
                 ElmCoords(b, index,                 children[j]->tokenEnd),
                 ElmCoords(b, children[j]->tokenBgn, children[j]->tokenEnd),
                 children[j]->getCategoryName(true) + " are not allowed within namespaces"
