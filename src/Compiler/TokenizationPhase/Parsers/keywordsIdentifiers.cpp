@@ -84,7 +84,7 @@ bool cmp::isSymbolicChar(std::optional<char> const &c) {
 /**
  * @brief Parses character that can only be keywords (reserved characters).
  *      ! This kind of keywords can only be composed by a single character as
- *      ! multi-character sequences are allowed to be near each other. //FIXME specify this in the documentation. maybe put them in a different category. Strong keywords or something
+ *      ! they are allowed to be near each other without the need of whitespace between them. //FIXME specify this in the documentation. maybe put them in a different category. Strong keywords or something
  * @param c The character to check.
  * @param c Wether the character is a keyword.
  */
