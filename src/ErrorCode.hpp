@@ -121,8 +121,14 @@ enum ErrorCode : int {
 
     ERROR_CMP_ALIAS_NO_PATH,   // Alias path is missing
     ERROR_CMP_ALIAS_NO_AS,   // Alias path is missing
-    ERROR_CMP_ALIAS_NO_NAME,   // Alias path is missing
+    ERROR_CMP_ALIAS_NO_NAME,   // Alias name is missing
+    ERROR_CMP_ALIAS_NO_TERMINATOR,   // No semicolon
 
     ERROR_CMP_NAMESPACE_NAME_MISSING,  // Scope {} is missing
     ERROR_CMP_NAMESPACE_SCOPE_MISSING,  // Scope {} is missing
+
+    ERROR_CMP_ENUM_NO_NAME, // Enum name is missing
+    ERROR_CMP_ENUM_NO_TYPE, // No : or type path
+    ERROR_CMP_ENUM_ELM_NO_NAME, // Element of enum element cluster has no identifier
+    ERROR_CMP_ENUM_ELM_NO_TERMINATOR, // No semicolon (or no ,)
 };

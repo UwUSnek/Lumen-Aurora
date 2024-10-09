@@ -89,6 +89,11 @@ namespace cmp {
 
 
 
+
+
+
+
+
     // Base struct for every first-pass semantic element
     struct __base_ST_Container : public virtual __base_ST {
         std::vector<__base_ST*> children;
@@ -189,10 +194,14 @@ namespace cmp {
     };
 
     struct ST_Enum : public virtual __base_ST_Referable, public virtual __base_ST_Container {
-        //FIXME base type
-        //FIXME enum members
+        ST_Sub_Path *baseType; //FIXME use type path
+        //! Enum elements are saved in the children vector
+
         bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
+    };
+    struct ST_Sub_EnumElement : public virtual __base_ST_Referable {
+        //FIXME DEFAULT VALUE
     };
 
     struct ST_Alias : public virtual __base_ST_Referable {

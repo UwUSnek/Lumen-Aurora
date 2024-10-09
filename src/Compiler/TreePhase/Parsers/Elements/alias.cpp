@@ -74,7 +74,7 @@ cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index) {
     std::optional<Token> const &t4 = (*b)[i];
     if(!t4.has_value() || !t4->isKeyword(ReservedTokenId::KEYWORD_SEMICOLON)) {
         utils::printError(
-            ERROR_CMP_ALIAS_NO_NAME, utils::ErrType::COMPILER,
+            ERROR_CMP_ALIAS_NO_TERMINATOR, utils::ErrType::COMPILER,
             ElmCoords(b, index, i),
             ElmCoords(b, i,     i),
             "Missing semicolon (;) after Symbol Alias definition."
