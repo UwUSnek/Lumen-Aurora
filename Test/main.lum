@@ -3,9 +3,9 @@
 //  */e"test.lum"
 
 //#include/*aa*/  	"../Tests/HugeSource/huge.lum"
-alias test3.test as a
-;
-namespace test{ namespace a{ alias test as test; } }
+//alias test3.test as a
+//;
+namespace __Name5_{/* namespace a{ alias test as test; } */}
 
 enum a {
 

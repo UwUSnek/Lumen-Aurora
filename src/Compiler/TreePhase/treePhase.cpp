@@ -9,7 +9,7 @@
 
 
 
-cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index) {
+cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal) {
     ulong i = index;
 
 
@@ -20,10 +20,10 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
         std::vector<__base_ST*> elms;
         for(int i = 0; i < p->v.size(); ++i) {
 
-            __base_ST* elm = generateTree(p->v[i], b, i);
+            __base_ST* elm = generateTree(p->v[i], b, i, true);
             if(!elm) {
-                //FIXME error message
-                //FIXME MISSING *something*
+                if(fatal) utils::printErrorGeneric(ERROR_CMD_IMPORT_PATH_IS_FILE, "Composite semantic element is missing a token"); //FIXME
+                else return nullptr;
             }
             //FIXME ?? check children from somewhere,
             // if(!p->isChildAllowed(elm)) {
@@ -113,7 +113,7 @@ void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
     // for(ulong i = 0; i < parser.v.size(); ++i) {
 
     // }
-    *r->cpp() = *dynamic_cast<ST_Module*>(generateTree(new Pattern_Elm_Module(), b, 0));
+    *r->cpp() = *dynamic_cast<ST_Module*>(generateTree(new Pattern_Elm_Module(), b, 0, true));
 
 
 
