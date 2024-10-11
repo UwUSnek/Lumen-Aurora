@@ -17,7 +17,7 @@
 
 
 
-
+// Tree isType and asType functions
 #define X(type, name) \
     const cmp::type *cmp::__base_ST::as##name() const { return dynamic_cast<const type*>(this); } \
     /**/  cmp::type *cmp::__base_ST::as##name()       { return dynamic_cast<      type*>(this); } \
@@ -73,7 +73,7 @@ std::string cmp::ST_Operator      ::getCategoryName(bool plural) const { return 
 
 
 
-
+// Pattern isType and asType functions
 #define X(type, name) \
     const cmp::type *cmp::__base_Pattern::as##name() const { return dynamic_cast<const type*>(this); } \
     /**/  cmp::type *cmp::__base_Pattern::as##name()       { return dynamic_cast<      type*>(this); } \
@@ -81,3 +81,14 @@ std::string cmp::ST_Operator      ::getCategoryName(bool plural) const { return 
     /**/       bool  cmp::__base_Pattern::is##name()       { return dynamic_cast<      type*>(this); }
 LIST_PATTERN_BASES_TYPES_NAMES
 #undef X
+
+
+
+
+// Pattern singletons
+namespace cmp {
+    #define X(type, name) \
+        type *re::__internal_Pattern_Singleton_##name = nullptr;
+    LIST_PATTERN_ALL_TYPES_NAMES
+    #undef X
+}

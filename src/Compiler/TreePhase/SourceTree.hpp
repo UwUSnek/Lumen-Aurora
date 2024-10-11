@@ -357,17 +357,56 @@ namespace cmp {
         X(Pattern_Identifier,       Identifier)    \
         X(Pattern_Literal,          Literal)
 
+    #define LIST_PATTERN_ALL_TYPES_NAMES           \
+        LIST_PATTERN_BASES_TYPES_NAMES             \
+        X(Pattern_Elm_Module,       Module)        \
+        X(Pattern_Elm_Namespace,    Namespace)     \
+        X(Pattern_Elm_Enum,         Enum)
 
 
+
+
+
+    // Pattern struct signatures
     #define X(type, name) \
         struct type;
-    LIST_PATTERN_BASES_TYPES_NAMES
+    LIST_PATTERN_ALL_TYPES_NAMES
     #undef X
 
 
+
+
+    namespace re {
+        // Custom sizeof function to use the size of the structs before they are formally defined
+        template<class t> size_t forwardSizeof() {
+            return sizeof(t);
+        }
+
+
+        // Pattern singletons and value generators
+        // Usage: re::<name>(<patterns>)
+        //! Placement new prevents circular dependencies between singletons
+        #define X(type, name)                                                                   \
+            extern type *__internal_Pattern_Singleton_##name;                                   \
+            template<class ...t> type *name(t... subPatterns) {                                 \
+                if(!__internal_Pattern_Singleton_##name) {                                      \
+                    __internal_Pattern_Singleton_##name = (type*)malloc(forwardSizeof<type>()); \
+                    new (__internal_Pattern_Singleton_##name) type(subPatterns...);             \
+                }                                                                               \
+                return __internal_Pattern_Singleton_##name;                                     \
+            }
+        LIST_PATTERN_ALL_TYPES_NAMES
+        #undef X
+    }
+
+
+
+
+    // Base Type
     struct __base_Pattern {
         virtual ~__base_Pattern() = default;
 
+        // Define isType and asType functions
         #define X(type, name) \
             const type *as##name() const; \
             /**/  type *as##name()      ; \
@@ -450,16 +489,16 @@ namespace cmp {
 
     struct Pattern_Elm_Namespace : public virtual __base_Pattern_Composite {
         Pattern_Elm_Namespace() : __base_Pattern_Composite(
-            new Pattern_Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
-            new Pattern_Identifier,
-            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+            re::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
+            re::Identifier(),
+            re::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
             //FIXME parse contents
-            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+            re::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
 
         virtual bool isChildAllowed(__base_ST* const c) const {
-            return !c->asStatement();
+            return !c->isStatement();
         }
 
 
@@ -479,15 +518,15 @@ namespace cmp {
     //TODO set metakeyword string names to "meta keyword" (they are currently being referred to as "keywords")
     struct Pattern_Elm_Enum : public virtual __base_Pattern_Composite {
         Pattern_Elm_Enum() : __base_Pattern_Composite(
-            new Pattern_Keyword(ReservedTokenId::KEYWORD_ENUM),
-            new Pattern_Identifier,
-            new Pattern_Keyword(ReservedTokenId::META_KEYWORD_BASE),
-            new Pattern_Identifier,
-            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-            new __Pattern_Operator_Loop(
-                new __Pattern_Operator_OneOf(
-                    new Pattern_Elm_Namespace,
-                    new Pattern_Elm_Enum
+            re::Keyword(ReservedTokenId::KEYWORD_ENUM),
+            re::Identifier(),
+            re::Keyword(ReservedTokenId::META_KEYWORD_BASE),
+            re::Identifier(),
+            re::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+            re::OperatorLoop(
+                re::OperatorOneOf(
+                    re::Namespace(),
+                    re::Enum()
                 )
             ),
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
@@ -495,7 +534,7 @@ namespace cmp {
 
 
         virtual bool isChildAllowed(__base_ST* const c) const {
-            return !c->asStatement();
+            return !c->isStatement();
         }
 
 
@@ -514,19 +553,20 @@ namespace cmp {
 
 
 
+    //TODO rename to "root"
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
         Pattern_Elm_Module() : __base_Pattern_Composite(
-            new __Pattern_Operator_Loop(
-                new __Pattern_Operator_OneOf(
-                    new Pattern_Elm_Namespace,
-                    new Pattern_Elm_Enum
+            re::OperatorLoop(
+                re::OperatorOneOf(
+                    re::Namespace(),
+                    re::Enum()
                 )
             )
         ){}
 
 
         virtual bool isChildAllowed(__base_ST* const c) const {
-            return !c->asStatement();
+            return !c->isStatement();
         }
 
 
@@ -535,7 +575,6 @@ namespace cmp {
             for(ulong i = 0; i < results.size(); ++i) {
                 r->addChild(results[i]);
             }
-            //TODO contents
             return r;
         }
     };
