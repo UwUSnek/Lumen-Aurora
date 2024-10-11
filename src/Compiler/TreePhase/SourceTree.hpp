@@ -91,7 +91,7 @@ namespace cmp {
         #undef X
     };
 
-    typedef GenericPipe<ST_Module> SourceTree;
+    typedef GenericPipe<ST_Module*> SourceTree;
 
 
 
@@ -348,12 +348,13 @@ namespace cmp {
 //TODO   {
 //TODO   }
 
-    #define LIST_PATTERN_BASES_TYPES_NAMES        \
-        X(__base_Pattern_Token,     Token)        \
-        X(__base_Pattern_Composite, Composite)    \
-        X(__Pattern_Operator_Loop,  OperatorLoop) \
-        X(Pattern_Keyword,          Keyword)      \
-        X(Pattern_Identifier,       Identifier)   \
+    #define LIST_PATTERN_BASES_TYPES_NAMES         \
+        X(__base_Pattern_Token,     Token)         \
+        X(__base_Pattern_Composite, Composite)     \
+        X(__Pattern_Operator_Loop,  OperatorLoop)  \
+        X(__Pattern_Operator_OneOf, OperatorOneOf) \
+        X(Pattern_Keyword,          Keyword)       \
+        X(Pattern_Identifier,       Identifier)    \
         X(Pattern_Literal,          Literal)
 
 
@@ -411,6 +412,13 @@ namespace cmp {
         }
     };
 
+    struct __Pattern_Operator_OneOf : public virtual __base_Pattern {
+        std::vector<__base_Pattern*> v;
+        template<class ...t> __Pattern_Operator_OneOf(t... _v) :
+            v{ static_cast<__base_Pattern*>(_v)... } {
+        }
+    };
+
 
 
 
@@ -458,9 +466,46 @@ namespace cmp {
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
             ST_Namespace* r = new ST_Namespace;
             r->name = results[1]->asIdentifier();
-            consoleLock.lock();
-            cout << "found namespace " << r->name->s << "\n";
-            consoleLock.unlock();
+            consoleLock.lock();                               //TODO remove
+            cout << "found namespace " << r->name->s << "\n"; //TODO remove
+            consoleLock.unlock();                             //TODO remove
+            //TODO contents
+            return r;
+        }
+    };
+
+
+
+    //TODO set metakeyword string names to "meta keyword" (they are currently being referred to as "keywords")
+    struct Pattern_Elm_Enum : public virtual __base_Pattern_Composite {
+        Pattern_Elm_Enum() : __base_Pattern_Composite(
+            new Pattern_Keyword(ReservedTokenId::KEYWORD_ENUM),
+            new Pattern_Identifier,
+            new Pattern_Keyword(ReservedTokenId::META_KEYWORD_BASE),
+            new Pattern_Identifier,
+            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+            new __Pattern_Operator_Loop(
+                new __Pattern_Operator_OneOf(
+                    new Pattern_Elm_Namespace,
+                    new Pattern_Elm_Enum
+                )
+            ),
+            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+        ){}
+
+
+        virtual bool isChildAllowed(__base_ST* const c) const {
+            return !c->asStatement();
+        }
+
+
+        __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
+            ST_Enum* r = new ST_Enum;
+            r->name = results[1]->asIdentifier();
+            r->baseType = nullptr; //FIXME save atual type
+            consoleLock.lock();                               //TODO remove
+            cout << "found enum " << r->name->s << "\n";      //TODO remove
+            consoleLock.unlock();                             //TODO remove
             //TODO contents
             return r;
         }
@@ -472,7 +517,10 @@ namespace cmp {
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
         Pattern_Elm_Module() : __base_Pattern_Composite(
             new __Pattern_Operator_Loop(
-                new Pattern_Elm_Namespace
+                new __Pattern_Operator_OneOf(
+                    new Pattern_Elm_Namespace,
+                    new Pattern_Elm_Enum
+                )
             )
         ){}
 

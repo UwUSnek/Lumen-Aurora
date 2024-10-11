@@ -13,16 +13,30 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
     ulong i = index;
 
 
+    // Parse OneOf operator
+    if(pattern->isOperatorOneOf()) {
+        __Pattern_Operator_OneOf* p = pattern->asOperatorOneOf();
+
+        //TODO maybe optimize OneOf to check all patterns at once? instead of going back to the list if one fails
+        for(int j = 0; j < p->v.size(); ++j) {
+            __base_Pattern* pElm = p->v[j];
+            __base_ST* elm = generateTree(pElm, b, i, false);
+            if(elm) return elm;
+        }
+    }
+
+
+
+
     // Parse composite patterns
     if(pattern->isComposite()) {
-        //FIXME Pattern_Operator_Loop
-        //FIXME Pattern_Operator_OneOf
         __base_Pattern_Composite* p = pattern->asComposite();
 
         std::vector<__base_ST*> elms;
         for(int j = 0; j < p->v.size(); ++j) {
             __base_Pattern* pElm = p->v[j];
 
+            // Parse Loop operator
             if(pElm->isOperatorLoop()) {
                 while(true) {
                     __base_ST* elm = generateTree(pElm->asOperatorLoop()->v, b, i, true); //FIXME determine when fatal should be used and when not.
@@ -138,7 +152,7 @@ void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
     // for(ulong i = 0; i < parser.v.size(); ++i) {
 
     // }
-    *r->cpp() = *dynamic_cast<ST_Module*>(generateTree(new Pattern_Elm_Module(), b, 0, true));
+    *r->cpp() = dynamic_cast<ST_Module*>(generateTree(new Pattern_Elm_Module(), b, 0, true));
 
 
 
