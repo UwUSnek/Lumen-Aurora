@@ -458,7 +458,9 @@ namespace cmp {
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
             ST_Namespace* r = new ST_Namespace;
             r->name = results[1]->asIdentifier();
-            cout << "found namespace " << r->name->s;
+            consoleLock.lock();
+            cout << "found namespace " << r->name->s << "\n";
+            consoleLock.unlock();
             //TODO contents
             return r;
         }

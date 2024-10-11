@@ -5,8 +5,8 @@
 //#include/*aa*/  	"../Tests/HugeSource/huge.lum"
 //alias test3.test as a
 //;
-namespace __Name5_{ a/* namespace a{ alias test as test; } */}
+namespace __Name5_{ /* namespace a{ alias test as test; } */}
 
-enum a {
+namespace a {
 }
 
