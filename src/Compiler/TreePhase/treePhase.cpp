@@ -15,18 +15,31 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
     // Parse composite patterns
     if(pattern->isComposite()) {
+        //FIXME Pattern_Operator_Loop
+        //FIXME Pattern_Operator_OneOf
         __base_Pattern_Composite* p = pattern->asComposite();
 
         std::vector<__base_ST*> elms;
         for(int i = 0; i < p->v.size(); ++i) {
+            if(p->v[i]->isOperatorLoop()) {
+                //TODO do something about it
+            }
 
             __base_ST* elm = generateTree(p->v[i], b, i, true);
             if(!elm) {
-                if(fatal) utils::printErrorGeneric(ERROR_CMD_IMPORT_PATH_IS_FILE, "Composite semantic element is missing a token"); //FIXME
+                if(fatal) utils::printError(
+                    ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                    ElmCoords(b, index, i),
+                    ElmCoords(b, i,     i),
+                    ", but the " + (*b)[i]->genDecoratedValue() + " was found instead."
+                    //FIXME ^ print expected token
+                );
                 else return nullptr;
             }
-            //FIXME ?? check children from somewhere,
+            //FIXME move disallowed child check to somewhere else.
+            //FIXME maybe add a "generic" check when one fails fatally
             // if(!p->isChildAllowed(elm)) {
+            //     utils::printErrorGeneric(ERROR_CMD_IMPORT_PATH_IS_FILE, "Disallowed child"); //FIXME
             //     //FIXME error message, add "disallowed" elements to the pattern
             //     //TODO maybe add a class for the disallowed elements instead of checking with a function
             // }

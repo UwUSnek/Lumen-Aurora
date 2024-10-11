@@ -348,11 +348,12 @@ namespace cmp {
 //TODO   {
 //TODO   }
 
-    #define LIST_PATTERN_BASES_TYPES_NAMES      \
-        X(__base_Pattern_Token,     Token)      \
-        X(__base_Pattern_Composite, Composite)  \
-        X(Pattern_Keyword,          Keyword)    \
-        X(Pattern_Identifier,       Identifier) \
+    #define LIST_PATTERN_BASES_TYPES_NAMES        \
+        X(__base_Pattern_Token,     Token)        \
+        X(__base_Pattern_Composite, Composite)    \
+        X(__Pattern_Operator_Loop,  OperatorLoop) \
+        X(Pattern_Keyword,          Keyword)      \
+        X(Pattern_Identifier,       Identifier)   \
         X(Pattern_Literal,          Literal)
 
 
@@ -376,6 +377,12 @@ namespace cmp {
     };
 
 
+
+
+
+
+
+
     struct __base_Pattern_Token : public virtual __base_Pattern {
     };
 
@@ -388,6 +395,20 @@ namespace cmp {
 
         virtual bool isChildAllowed(__base_ST* const child) const = 0;
         virtual __base_ST* generateData(std::vector<__base_ST*> const &parsedElements) const = 0;
+    };
+
+
+
+
+
+
+
+
+    struct __Pattern_Operator_Loop : public virtual __base_Pattern {
+        __base_Pattern* v;
+        __Pattern_Operator_Loop(__base_Pattern* _v) :
+            v(_v) {
+        }
     };
 
 
@@ -424,6 +445,7 @@ namespace cmp {
             new Pattern_Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
             new Pattern_Identifier,
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+            //FIXME parse contents
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
@@ -447,7 +469,9 @@ namespace cmp {
 
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
         Pattern_Elm_Module() : __base_Pattern_Composite(
-            new Pattern_Elm_Namespace
+            new __Pattern_Operator_Loop(
+                new Pattern_Elm_Namespace
+            )
         ){}
 
 
