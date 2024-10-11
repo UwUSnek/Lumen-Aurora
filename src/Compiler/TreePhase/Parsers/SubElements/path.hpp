@@ -1,10 +1,10 @@
-#pragma once
-#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
-#include "Compiler/TreePhase/SourceTree.hpp"
+// #pragma once
+// #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
+// #include "Compiler/TreePhase/SourceTree.hpp"
 
 
 
 
-namespace cmp {
-    ST_Sub_Path* parsePath(TokenizedSource* b, ulong index);
-}
+// namespace cmp {
+//     ST_Sub_Path* parsePath(TokenizedSource* b, ulong index);
+// }

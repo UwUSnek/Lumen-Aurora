@@ -202,7 +202,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
     // Set thread name and type
     threadType = ThreadType::SUBPHASE;
-    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (3 /*Separator*/));
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (1 /*Phase number*/) - (3 /*Separator*/));
     pthread_setname_np(pthread_self(), (std::string("S") + std::to_string(phaseId) + " | " + truncatedName).c_str());
 
 

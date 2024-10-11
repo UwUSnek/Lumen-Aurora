@@ -2,7 +2,9 @@
 #include <vector>
 #include <string>
 
+#include "ALC.hpp"
 #include "Utils/Containers/GenericPipe.hpp"
+#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 
 
 
@@ -12,6 +14,52 @@
 
 
 namespace cmp {
+
+    // struct Pattern_Identifier : public virtual __base_Pattern {
+    //     bool parse() override {
+
+    //     }
+    // };
+
+    // struct PatternOr : public virtual __base_PatternElm {
+        // __base_PatternElm* a;
+        // __base_PatternElm* b;
+    // }
+
+
+
+
+
+    #define LIST_SOURCE_TREE_TYPES_NAMES    \
+        X(ST_Sub_Identifier, Identifier)    \
+        X(ST_Sub_Type, Type)                \
+        X(ST_Sub_Path, Path)                \
+        \
+        X(ST_Statement, Statement)          \
+        \
+        X(ST_Module, Module)                \
+        X(ST_Namespace, Namespace)          \
+        X(ST_Struct, Struct)                \
+        X(ST_Enum, Enum)                    \
+        X(ST_Alias, Alias)                  \
+        \
+        X(ST_Import, Import)                \
+        X(ST_Export, Export)                \
+        \
+        X(ST_Variable, Variable)            \
+        X(ST_Function, Function)            \
+        X(ST_Operator, Operator)
+
+
+
+
+    // Write struct signatures for the asType functions
+    #define X(type, name) \
+        struct type;
+    LIST_SOURCE_TREE_TYPES_NAMES
+    #undef X
+
+
     struct ST_Module;
     /**
      * @brief The base Source Tree structure
@@ -22,32 +70,25 @@ namespace cmp {
         __base_ST* parent; //TODO set module's parent
         //TODO also set the root module's parent to NULL
 
-        virtual bool isChildAllowed(__base_ST* c)                const { return false; }
+        // std::vector<__base_PatternElm*> pattern;
+
+
+        // virtual bool isChildAllowed(__base_ST* c)                const { return false; }
         virtual std::string getCategoryName(bool plural = false) const { return ""; }
 
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
         virtual ~__base_ST() = default;
 
 
-        bool isType     () const;
-        bool isPath     () const;
 
-        bool isStatement() const;
 
-        // bool isExpr     () const;
-
-        bool isModule   () const;
-        bool isNamespace() const;
-        bool isStruct   () const;
-        bool isEnum     () const;
-        bool isAlias    () const;
-
-        bool isImport   () const;
-        bool isExport   () const;
-
-        bool isVariable () const;
-        bool isFunction () const;
-        bool isOperator () const;
+        #define X(type, name) \
+            const type *as##name() const; \
+            /**/  type *as##name()      ; \
+            /**/  bool  is##name() const; \
+            /**/  bool  is##name()      ;
+        LIST_SOURCE_TREE_TYPES_NAMES
+        #undef X
     };
 
     typedef GenericPipe<ST_Module> SourceTree;
@@ -55,6 +96,35 @@ namespace cmp {
 
 
 
+
+
+
+
+    // Wrapper for identifier tokens
+    struct ST_Sub_Identifier : public virtual __base_ST {
+        std::string s;
+        std::string getCategoryName(bool plural = false) const override;
+
+        ST_Sub_Identifier(std::string _s) :
+            s(_s) {
+        }
+    };
+
+    // Wrapper for keyword tokens
+    struct ST_Sub_Keyword : public virtual __base_ST {
+        ReservedTokenId id;
+        std::string getCategoryName(bool plural = false) const override;
+
+        ST_Sub_Keyword(ReservedTokenId _id) :
+            id(_id) {
+        }
+    };
+
+    // // Wrapper for literal tokens
+    // struct ST_Sub_Identifier : public virtual __base_ST {
+    //     std::string s;
+    //     std::string getCategoryName(bool plural = false) const override;
+    // };
 
 
 
@@ -69,6 +139,7 @@ namespace cmp {
     struct ST_Sub_Type_Basic : public virtual ST_Sub_Type {
         ST_Sub_Path *typeName;
     };
+
     // Function types
     struct ST_Sub_Type_Function : public virtual ST_Sub_Type {
         ST_Sub_Type *returnType;
@@ -137,7 +208,7 @@ namespace cmp {
 
     // Base struct for any semantic element that can be referenced by its name
     struct __base_ST_Referable : public virtual __base_ST {
-        std::string name;
+        ST_Sub_Identifier *name;
     };
 
 
@@ -156,7 +227,7 @@ namespace cmp {
 
     // Statements
     struct ST_Statement : public virtual __base_ST {
-        bool isChildAllowed(__base_ST* c) const override;
+        // bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };//FIXME parse this in the generic scope parser
 
@@ -178,18 +249,18 @@ namespace cmp {
         //TODO set the name in the treePhase parsing function
         //TODO take an alternative name from a parameter (for "import as"). in this case, the file's name can be invalid
         //TODO If not imported "as", the file name must be a valid identifier (after removing any extension)
-        bool isChildAllowed(__base_ST* c) const override;
+        // bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
 
     struct ST_Namespace : public virtual __base_ST_Referable, public virtual __base_ST_Container {
-        bool isChildAllowed(__base_ST* c) const override;
+        // bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
 
     struct ST_Struct : public virtual __base_ST_Referable, public virtual __base_ST_Container {
         //FIXME struct members
-        bool isChildAllowed(__base_ST* c) const override;
+        // bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
 
@@ -197,7 +268,7 @@ namespace cmp {
         ST_Sub_Path *baseType; //FIXME use type path
         //! Enum elements are saved in the children vector
 
-        bool isChildAllowed(__base_ST* c) const override;
+        // bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
     struct ST_Sub_EnumElement : public virtual __base_ST_Referable {
@@ -248,26 +319,159 @@ namespace cmp {
     };
     struct ST_Function : public virtual __base_ST_Routine {
         std::string getCategoryName(bool plural = false) const override;
-        bool isChildAllowed(__base_ST* c) const override;
+        // bool isChildAllowed(__base_ST* c) const override;
     };
     struct ST_Operator : public virtual __base_ST_Routine {
         //FIXME multiple names (or name position in case of split ternary)
         //FIXME priority
         std::string getCategoryName(bool plural = false) const override;
-        bool isChildAllowed(__base_ST* c) const override;
+        // bool isChildAllowed(__base_ST* c) const override;
 
         //FIXME make [] use the normal syntax
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+//TODO TEST: Parse a namespace
+//TODO   Keyword namespace
+//TODO   Name
+//TODO   {
+//TODO   }
+
+    #define LIST_PATTERN_BASES_TYPES_NAMES      \
+        X(__base_Pattern_Token,     Token)      \
+        X(__base_Pattern_Composite, Composite)  \
+        X(Pattern_Keyword,          Keyword)    \
+        X(Pattern_Identifier,       Identifier) \
+        X(Pattern_Literal,          Literal)
+
+
+
+    #define X(type, name) \
+        struct type;
+    LIST_PATTERN_BASES_TYPES_NAMES
+    #undef X
+
+
+    struct __base_Pattern {
+        virtual ~__base_Pattern() = default;
+
+        #define X(type, name) \
+            const type *as##name() const; \
+            /**/  type *as##name()      ; \
+            /**/  bool  is##name() const; \
+            /**/  bool  is##name()      ;
+        LIST_PATTERN_BASES_TYPES_NAMES
+        #undef X
+    };
+
+
+    struct __base_Pattern_Token : public virtual __base_Pattern {
+    };
+
+
+    struct __base_Pattern_Composite : public virtual __base_Pattern {
+        std::vector<__base_Pattern*> v;
+        template<class ...t> __base_Pattern_Composite(t... _v) :
+            v{ static_cast<__base_Pattern*>(_v)... } {
+        }
+
+        virtual bool isChildAllowed(__base_ST* const child) const = 0;
+        virtual __base_ST* generateData(std::vector<__base_ST*> const &parsedElements) const = 0;
+    };
+
+
+
+
+
+
+
+
+    struct Pattern_Keyword : public virtual __base_Pattern_Token {
+        ReservedTokenId id;
+        Pattern_Keyword(ReservedTokenId _id) :
+            id(_id) {
+        }
+    };
+
+    struct Pattern_Identifier : public virtual __base_Pattern_Token {
+        Pattern_Identifier(){}
+    };
+
+    struct Pattern_Literal : public virtual __base_Pattern_Token {
+        Pattern_Literal(){}
+    };
+
+
+
+
+
+
+
+
+    struct Pattern_Elm_Namespace : public virtual __base_Pattern_Composite {
+        Pattern_Elm_Namespace() : __base_Pattern_Composite(
+            new Pattern_Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
+            new Pattern_Identifier,
+            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+        ){}
+
+
+        virtual bool isChildAllowed(__base_ST* const c) const {
+            return !c->asStatement();
+        }
+
+
+        __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
+            ST_Namespace* r = new ST_Namespace;
+            r->name = results[1]->asIdentifier();
+            cout << "found namespace " << r->name->s;
+            //TODO contents
+            return r;
+        }
+    };
+
+
+
+
+    struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
+        Pattern_Elm_Module() : __base_Pattern_Composite(
+            new Pattern_Elm_Namespace
+        ){}
+
+
+        virtual bool isChildAllowed(__base_ST* const c) const {
+            return !c->asStatement();
+        }
+
+
+        __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
+            ST_Module* r = new ST_Module;
+            for(ulong i = 0; i < results.size(); ++i) {
+                r->addChild(results[i]);
+            }
+            //TODO contents
+            return r;
+        }
+    };
 }
 
-//TODO add all the .isSomething functions
-//TODO add all the .getAs_Something functions
 
+//FIXME add "null" literal for pointers
 
-
-
-//TODO ? returns a pointer. it points to the 2nd parameter if the first evaluates to true, or NULL if it evaluates to false
-//TODO : takes a pointer and a value. it returns the value pointer by the pointer if it's a valid address, or the second value if it's NULL.
+//TODO ?        t (bool c) ? (t value) { if(c) return @value; else return null; }
+//TODO : takes a pointer and a value. it returns the value pointed by the pointer if it's a valid address, or the second value if it's NULL.
 
 //TODO [ takes a container and an index. it returns a pointer to the element that is at index <index>
 //TODO ] takes a pointer and returns a reference to its value

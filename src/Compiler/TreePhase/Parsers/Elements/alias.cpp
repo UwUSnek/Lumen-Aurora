@@ -1,6 +1,6 @@
-#include "alias.hpp"
-#include "Utils/errors.hpp"
-#include "Compiler/TreePhase/Parsers/SubElements/path.hpp"
+// #include "alias.hpp"
+// #include "Utils/errors.hpp"
+// #include "Compiler/TreePhase/Parsers/SubElements/path.hpp"
 
 
 
@@ -9,84 +9,84 @@
 
 
 
-cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index) {
-    std::optional<Token> const &t0 = (*b)[index];
-    if(!t0.has_value() || !t0->isKeyword(ReservedTokenId::KEYWORD_ALIAS)) {
-        return nullptr;
-    }
-    ST_Alias* r = new ST_Alias();
-    ulong i = index + 1;
+// cmp::ST_Alias* cmp::parseAlias(TokenizedSource* b, ulong index) {
+//     std::optional<Token> const &t0 = (*b)[index];
+//     if(!t0.has_value() || !t0->isKeyword(ReservedTokenId::KEYWORD_ALIAS)) {
+//         return nullptr;
+//     }
+//     ST_Alias* r = new ST_Alias();
+//     ulong i = index + 1;
 
 
 
 
-    // Parse original path
-    ST_Sub_Path* original = parsePath(b, i);
-    if(!original) {
-        utils::printError(
-            ERROR_CMP_ALIAS_NO_PATH, utils::ErrType::COMPILER,
-            ElmCoords(b, index, i),
-            ElmCoords(b, i,     i),
-            "Incomplete definition of Symbol alias.\n" +
-            ((*b)[i].has_value() ? "Expected a symbol path, but the " + (*b)[i]->genDecoratedValue() + " was found instead." : "The symbol path is missing.")
-        );
-    }
-    r->original = original;
-    i = original->tokenEnd + 1;
+//     // Parse original path
+//     ST_Sub_Path* original = parsePath(b, i);
+//     if(!original) {
+//         utils::printError(
+//             ERROR_CMP_ALIAS_NO_PATH, utils::ErrType::COMPILER,
+//             ElmCoords(b, index, i),
+//             ElmCoords(b, i,     i),
+//             "Incomplete definition of Symbol alias.\n" +
+//             ((*b)[i].has_value() ? "Expected a symbol path, but the " + (*b)[i]->genDecoratedValue() + " was found instead." : "The symbol path is missing.")
+//         );
+//     }
+//     r->original = original;
+//     i = original->tokenEnd + 1;
 
 
 
 
-    // Parse "as" keyword
-    std::optional<Token> const &t2 = (*b)[i];
-    if(!t2.has_value() || !t2->isKeyword(ReservedTokenId::META_KEYWORD_AS)) {
-        utils::printError(
-            ERROR_CMP_ALIAS_NO_AS, utils::ErrType::COMPILER,
-            ElmCoords(b, index, i),
-            ElmCoords(b, i,     i),
-            "Incomplete definition of Symbol alias.\n" +
-            (t2.has_value() ? "Expected the keyword \"as\", but the " + t2->genDecoratedValue() + " was found instead." : "The \"as\" keyword is missing.")
-        );
-    }
-    ++i;
+//     // Parse "as" keyword
+//     std::optional<Token> const &t2 = (*b)[i];
+//     if(!t2.has_value() || !t2->isKeyword(ReservedTokenId::META_KEYWORD_AS)) {
+//         utils::printError(
+//             ERROR_CMP_ALIAS_NO_AS, utils::ErrType::COMPILER,
+//             ElmCoords(b, index, i),
+//             ElmCoords(b, i,     i),
+//             "Incomplete definition of Symbol alias.\n" +
+//             (t2.has_value() ? "Expected the keyword \"as\", but the " + t2->genDecoratedValue() + " was found instead." : "The \"as\" keyword is missing.")
+//         );
+//     }
+//     ++i;
 
 
 
 
-    // Parse new name
-    std::optional<Token> const &t3 = (*b)[i];
-    if(!t3.has_value() || !t3->isIdentifier()) {
-        utils::printError(
-            ERROR_CMP_ALIAS_NO_NAME, utils::ErrType::COMPILER,
-            ElmCoords(b, index, i),
-            ElmCoords(b, i,     i),
-            "Incomplete definition of Symbol alias.\n" +
-            (t3.has_value() ? "Expected an identifier, but the " + t3->genDecoratedValue() + " was found instead." : "The identifier is missing.")
-        );
-    }
-    r->name = t3->getValue_Identifier();
-    ++i;
+//     // Parse new name
+//     std::optional<Token> const &t3 = (*b)[i];
+//     if(!t3.has_value() || !t3->isIdentifier()) {
+//         utils::printError(
+//             ERROR_CMP_ALIAS_NO_NAME, utils::ErrType::COMPILER,
+//             ElmCoords(b, index, i),
+//             ElmCoords(b, i,     i),
+//             "Incomplete definition of Symbol alias.\n" +
+//             (t3.has_value() ? "Expected an identifier, but the " + t3->genDecoratedValue() + " was found instead." : "The identifier is missing.")
+//         );
+//     }
+//     r->name = t3->getValue_Identifier();
+//     ++i;
 
 
 
 
-    // Check ;
-    std::optional<Token> const &t4 = (*b)[i];
-    if(!t4.has_value() || !t4->isKeyword(ReservedTokenId::KEYWORD_SEMICOLON)) {
-        utils::printError(
-            ERROR_CMP_ALIAS_NO_TERMINATOR, utils::ErrType::COMPILER,
-            ElmCoords(b, index, i),
-            ElmCoords(b, i,     i),
-            "Missing semicolon (;) after Symbol Alias definition."
-        );
-    }
-    ++i;
+//     // Check ;
+//     std::optional<Token> const &t4 = (*b)[i];
+//     if(!t4.has_value() || !t4->isKeyword(ReservedTokenId::KEYWORD_SEMICOLON)) {
+//         utils::printError(
+//             ERROR_CMP_ALIAS_NO_TERMINATOR, utils::ErrType::COMPILER,
+//             ElmCoords(b, index, i),
+//             ElmCoords(b, i,     i),
+//             "Missing semicolon (;) after Symbol Alias definition."
+//         );
+//     }
+//     ++i;
 
 
 
 
-    // Set the element length and return the node
-    r->tokenBgn = index;
-    r->tokenEnd = i - 1;
-    return r;
-}
+//     // Set the element length and return the node
+//     r->tokenBgn = index;
+//     r->tokenEnd = i - 1;
+//     return r;
+// }

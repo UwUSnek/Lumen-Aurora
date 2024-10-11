@@ -1,10 +1,10 @@
-#pragma once
-#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
-#include "Compiler/TreePhase/SourceTree.hpp"
+// #pragma once
+// #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
+// #include "Compiler/TreePhase/SourceTree.hpp"
 
 
 
 
-namespace cmp {
-    ST_Enum* parseEnum(TokenizedSource* b, ulong index);
-}
+// namespace cmp {
+//     ST_Enum* parseEnum(TokenizedSource* b, ulong index);
+// }
