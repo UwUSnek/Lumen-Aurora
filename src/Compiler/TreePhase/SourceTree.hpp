@@ -534,6 +534,9 @@ namespace cmp {
 
 
 
+    //BUG nested namespaces don't seem they are being recognized
+    //BUG nested namespaces don't seem they are being recognized
+    //BUG nested namespaces don't seem they are being recognized
 
 
 
@@ -542,7 +545,15 @@ namespace cmp {
             tk::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
             tk::Identifier(),
             tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-            //FIXME parse contents
+            //BUG turning on these lines makes the parser not work
+            //BUG turning on these lines makes the parser not work
+            //BUG turning on these lines makes the parser not work
+            //BUG turning on these lines makes the parser not work
+            // op::Loop(op::OneOf(
+            //     re::Namespace(),
+            //     re::Enum()
+            //     //FIXME other possible elements
+            // )),
             tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
@@ -576,6 +587,7 @@ namespace cmp {
             op::Loop(op::OneOf(
                 re::Namespace(),
                 re::Enum()
+                //FIXME other possible elements
             )),
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
@@ -629,8 +641,8 @@ namespace cmp {
 
 //FIXME add "null" literal for pointers
 
-//TODO ?        t (bool c) ? (t value) { if(c) return @value; else return null; }
-//TODO : takes a pointer and a value. it returns the value pointed by the pointer if it's a valid address, or the second value if it's NULL.
+//TODO ?        t (bool c) ? (t? value) { if(c) return $value; else return null; }
+//TODO :        t (t? $a) : (t@ b) { if(a) return @a; else return b; }
 
 //TODO [ takes a container and an index. it returns a pointer to the element that is at index <index>
 //TODO ] takes a pointer and returns a reference to its value
