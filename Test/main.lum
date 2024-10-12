@@ -5,7 +5,7 @@
 //#include/*aa*/  	"../Tests/HugeSource/huge.lum"
 //alias test3.test as a
 //;
-namespace __Name5_{ /* namespace a{  } */}
+namespace __Name5_{}
 
 namespace b {
 }

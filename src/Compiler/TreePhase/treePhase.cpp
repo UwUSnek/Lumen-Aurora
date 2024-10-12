@@ -12,6 +12,20 @@
 cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal) {
     ulong i = index;
 
+    void* ptr1 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[0];
+    void* ptr2 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[1];
+
+    bool _a = pattern->asComposite()->v[0]->asComposite()->v[0]->isKeyword();
+    bool _b = pattern->asComposite()->v[0]->asComposite()->v[1]->isIdentifier();
+    bool _c = pattern->asComposite()->v[0]->asComposite()->v[2]->isKeyword();
+    bool _d = pattern->asComposite()->v[0]->asComposite()->v[3]->isIdentifier();
+    bool _e = pattern->asComposite()->v[0]->asComposite()->v[4]->isKeyword();
+    bool _f = pattern->asComposite()->v[0]->asComposite()->v[5]->isLoop();
+    int len = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v.size();
+    // bool _e = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[0]->isComposite();
+    // bool _f = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[1]->isComposite();
+
+
 
     // Parse OneOf operator
     if(pattern->isOneOf()) {
@@ -23,6 +37,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
             __base_ST* elm = generateTree(pElm, b, i, false);
             if(elm) return elm;
         }
+        return nullptr;
 
         //FIXME use OneOf to force at least one element
         //FIXME add an Optional operator
@@ -84,8 +99,6 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
 
 
-//BUG KEYWORD PATTERNS ALWAYS HAVE ID CURLY_R for some reason.
-//BUG fix this
     // Parse keyword tokens
     if(pattern->isKeyword()) {
         Pattern_Keyword* p = pattern->asKeyword();
@@ -128,9 +141,8 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
     // }
 
-
-    //FIXME
-    return nullptr;
+    //! Bogus return value to silence GCC
+    return (__base_ST*)0xDEAD;
 }
 
 
@@ -156,7 +168,7 @@ void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
     // for(ulong i = 0; i < parser.v.size(); ++i) {
 
     // }
-    *r->cpp() = dynamic_cast<ST_Module*>(generateTree(new Pattern_Elm_Module(), b, 0, true));
+    *r->cpp() = dynamic_cast<ST_Module*>(generateTree(re::Module(), b, 0, true));
 
 
 

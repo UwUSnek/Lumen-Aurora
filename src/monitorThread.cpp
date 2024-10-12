@@ -40,7 +40,8 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
     cout << "\033[999;999H";      // Move cursor to bottom-left corner
     cout << "\033[8A";            // Move cursor 8 lines up (make space for the status UI)
     if(_isComplete) cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
-    else            cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
+    // else            cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
+    else            cout << ansi::reset << "\n" << std::string("     ").replace(1 + abs((loop / 2) % 6 - 3), 1, 1, '-');
 
 
 

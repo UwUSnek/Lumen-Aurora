@@ -394,14 +394,19 @@ namespace cmp {
 
         // Pattern singletons and value generators
         // Usage: re::<name>(<patterns>)
-        //! Placement new prevents circular dependencies between singletons
+        //! Placement new prevents circular dependencies between patterns
         #define X(type, name)                                                                   \
             extern type *__internal_Pattern_Singleton_##name;                                   \
             template<class ...t> type *name(t... subPatterns) {                                 \
                 if(!__internal_Pattern_Singleton_##name) {                                      \
-                    __internal_Pattern_Singleton_##name = (type*)malloc(forwardSizeof<type>()); \
-                    new (__internal_Pattern_Singleton_##name) type(subPatterns...);             \
+                    __internal_Pattern_Singleton_##name = (type*)malloc(forwardSizeof<type>());   cout << "allocated   " << __internal_Pattern_Singleton_##name << " | "#name << "\n";\
+                    new (__internal_Pattern_Singleton_##name) type(subPatterns...);               cout << "initialized " << __internal_Pattern_Singleton_##name << " | "#name << "\n";\
                 }                                                                               \
+                else {\
+                consoleLock.lock();                              \
+                cout << "found       " << __internal_Pattern_Singleton_##name << " | "#name << "\n";\
+                consoleLock.unlock();                              \
+                }\
                 return __internal_Pattern_Singleton_##name;                                     \
             }
         LIST_PATTERN_BASES_TYPES_NAMES
@@ -411,7 +416,6 @@ namespace cmp {
     // //BUG the keyword bug is prob caused by this generator function converting the Keyword ENUM value to a pointer and passing it to the constructor
     // //BUG tho there is no static cast here, idk
 
-    //BUG the keyword bug is prob caused by keyword IDs all using the same cache.
 
 
 
@@ -421,7 +425,10 @@ namespace cmp {
         // Usage: op::<name>(<patterns>)
         #define X(type, name)                                   \
             template<class ...t> type *name(t... subPatterns) { \
-                return new type(subPatterns...);                \
+                consoleLock.lock();                              \
+                type* r = new type(subPatterns...); cout << "created     " << r << " | "#name << "\n";\
+                consoleLock.unlock();                            \
+                return r;                \
             }
         LIST_PATTERN_OPERATOR_TYPES_NAMES
         #undef X
@@ -434,7 +441,10 @@ namespace cmp {
         // Usage: tk::<name>(<expected value>?)
         #define X(type, name)                                     \
             template<class ...t> type *name(t... expectedValue) { \
-                return new type(expectedValue...);                \
+                consoleLock.lock();                              \
+                type* r = new type(expectedValue...); cout << "created     " << r << " | "#name << "\n";\
+                consoleLock.unlock();                            \
+                return r;                \
             }
         LIST_PATTERN_TOKENS_TYPES_NAMES
         #undef X
@@ -549,11 +559,11 @@ namespace cmp {
             //BUG turning on these lines makes the parser not work
             //BUG turning on these lines makes the parser not work
             //BUG turning on these lines makes the parser not work
-            // op::Loop(op::OneOf(
-            //     re::Namespace(),
-            //     re::Enum()
-            //     //FIXME other possible elements
-            // )),
+            op::Loop(op::OneOf(
+                re::Enum(),
+                re::Namespace()
+                //FIXME other possible elements
+            )),
             tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
@@ -585,10 +595,14 @@ namespace cmp {
             tk::Identifier(),
             tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
             op::Loop(op::OneOf(
-                re::Namespace(),
-                re::Enum()
+                re::Enum(),
+                re::Namespace()
                 //FIXME other possible elements
             )),
+            //BUG sub-element of the same type doesn't have the correct address
+            //BUG the cached value is correct, but the value saved in the instance is not
+            //! THIS DOES NOT DEPEND ON LOOP
+            //! probably caused by OneOf or a it might be a deeper problem
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
@@ -616,10 +630,10 @@ namespace cmp {
     //TODO rename to "root"
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
         Pattern_Elm_Module() : __base_Pattern_Composite(
-            op::Loop(op::OneOf(
-                re::Namespace(),
+            // op::Loop(op::OneOf(
+                // re::Namespace()
                 re::Enum()
-            ))
+            // ))
         ){}
 
 
