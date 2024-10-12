@@ -81,6 +81,7 @@ std::string cmp::ST_Operator      ::getCategoryName(bool plural) const { return 
     /**/       bool  cmp::__base_Pattern::is##name()       { return dynamic_cast<      type*>(this); }
 LIST_PATTERN_OPERATOR_TYPES_NAMES
 LIST_PATTERN_BASES_TYPES_NAMES
+LIST_PATTERN_TOKENS_TYPES_NAMES
 #undef X
 
 

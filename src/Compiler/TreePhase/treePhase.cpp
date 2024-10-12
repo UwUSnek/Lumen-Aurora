@@ -23,6 +23,9 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
             __base_ST* elm = generateTree(pElm, b, i, false);
             if(elm) return elm;
         }
+
+        //FIXME use OneOf to force at least one element
+        //FIXME add an Optional operator
     }
 
 
@@ -39,7 +42,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
             // Parse Loop operator
             if(pElm->isLoop()) {
                 while(true) {
-                    __base_ST* elm = generateTree(pElm->asLoop()->v, b, i, true); //FIXME determine when fatal should be used and when not.
+                    __base_ST* elm = generateTree(pElm->asLoop()->v, b, i, fatal); //FIXME determine when fatal should be used and when not.
                     if(!elm) break;
                     i += elm->tokenEnd - elm->tokenBgn + 1;
                     elms.push_back(elm);
@@ -47,7 +50,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
                 //TODO this should prob print an error if fatal is true
             }
             else {
-                __base_ST* elm = generateTree(pElm, b, i, true); //FIXME determine when fatal should be used and when not.
+                __base_ST* elm = generateTree(pElm, b, i, fatal); //FIXME determine when fatal should be used and when not.
 
                 if(!elm) {
                     if(fatal) utils::printError(
@@ -81,7 +84,8 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
 
 
-
+//BUG KEYWORD PATTERNS ALWAYS HAVE ID CURLY_R for some reason.
+//BUG fix this
     // Parse keyword tokens
     if(pattern->isKeyword()) {
         Pattern_Keyword* p = pattern->asKeyword();

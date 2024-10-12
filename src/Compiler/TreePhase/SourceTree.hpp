@@ -346,16 +346,22 @@ namespace cmp {
 
     // Pattern operators. These patterns cannot be cached and they can't generate a tree. They are only used to specify the syntax.
     #define LIST_PATTERN_OPERATOR_TYPES_NAMES      \
-        X(__Pattern_Operator_Loop,  Loop)  \
-        X(__Pattern_Operator_OneOf, OneOf) \
+        X(__Pattern_Operator_Loop,  Loop)          \
+        X(__Pattern_Operator_OneOf, OneOf)
 
-    // Base and first-level patterns. These include any base pattern but the root class.
+
+    // Base patterns. Doesn't include the root class.
     #define LIST_PATTERN_BASES_TYPES_NAMES         \
         X(__base_Pattern_Token,     Token)         \
         X(__base_Pattern_Composite, Composite)     \
+
+
+    // First-level patterns. These only include single-token patterns.
+    #define LIST_PATTERN_TOKENS_TYPES_NAMES        \
         X(Pattern_Keyword,          Keyword)       \
         X(Pattern_Identifier,       Identifier)    \
         X(Pattern_Literal,          Literal)
+
 
     // Element patterns. These identify actual semantic elements in the code and can generate trees.
     #define LIST_PATTERN_ELM_TYPES_NAMES           \
@@ -372,6 +378,7 @@ namespace cmp {
         struct type;
     LIST_PATTERN_OPERATOR_TYPES_NAMES
     LIST_PATTERN_BASES_TYPES_NAMES
+    LIST_PATTERN_TOKENS_TYPES_NAMES
     LIST_PATTERN_ELM_TYPES_NAMES
     #undef X
 
@@ -401,6 +408,10 @@ namespace cmp {
         LIST_PATTERN_ELM_TYPES_NAMES
         #undef X
     }
+    // //BUG the keyword bug is prob caused by this generator function converting the Keyword ENUM value to a pointer and passing it to the constructor
+    // //BUG tho there is no static cast here, idk
+
+    //BUG the keyword bug is prob caused by keyword IDs all using the same cache.
 
 
 
@@ -413,6 +424,19 @@ namespace cmp {
                 return new type(subPatterns...);                \
             }
         LIST_PATTERN_OPERATOR_TYPES_NAMES
+        #undef X
+    }
+
+
+
+    namespace tk {
+        // Value generators for token operators (they don't need singletons and are stored in a different namespace)
+        // Usage: tk::<name>(<expected value>?)
+        #define X(type, name)                                     \
+            template<class ...t> type *name(t... expectedValue) { \
+                return new type(expectedValue...);                \
+            }
+        LIST_PATTERN_TOKENS_TYPES_NAMES
         #undef X
     }
 
@@ -438,6 +462,7 @@ namespace cmp {
             /**/  bool  is##name()      ;
         LIST_PATTERN_OPERATOR_TYPES_NAMES
         LIST_PATTERN_BASES_TYPES_NAMES
+        LIST_PATTERN_TOKENS_TYPES_NAMES
         #undef X
     };
 
@@ -514,11 +539,11 @@ namespace cmp {
 
     struct Pattern_Elm_Namespace : public virtual __base_Pattern_Composite {
         Pattern_Elm_Namespace() : __base_Pattern_Composite(
-            re::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
-            re::Identifier(),
-            re::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+            tk::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
+            tk::Identifier(),
+            tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
             //FIXME parse contents
-            re::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+            tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
 
@@ -543,11 +568,11 @@ namespace cmp {
     //TODO set metakeyword string names to "meta keyword" (they are currently being referred to as "keywords")
     struct Pattern_Elm_Enum : public virtual __base_Pattern_Composite {
         Pattern_Elm_Enum() : __base_Pattern_Composite(
-            re::Keyword(ReservedTokenId::KEYWORD_ENUM),
-            re::Identifier(),
-            re::Keyword(ReservedTokenId::META_KEYWORD_BASE),
-            re::Identifier(),
-            re::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+            tk::Keyword(ReservedTokenId::KEYWORD_ENUM),
+            tk::Identifier(),
+            tk::Keyword(ReservedTokenId::META_KEYWORD_BASE),
+            tk::Identifier(),
+            tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
             op::Loop(op::OneOf(
                 re::Namespace(),
                 re::Enum()
