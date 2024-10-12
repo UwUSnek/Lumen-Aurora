@@ -14,8 +14,8 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
 
     // Parse OneOf operator
-    if(pattern->isOperatorOneOf()) {
-        __Pattern_Operator_OneOf* p = pattern->asOperatorOneOf();
+    if(pattern->isOneOf()) {
+        __Pattern_Operator_OneOf* p = pattern->asOneOf();
 
         //TODO maybe optimize OneOf to check all patterns at once? instead of going back to the list if one fails
         for(int j = 0; j < p->v.size(); ++j) {
@@ -37,9 +37,9 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
             __base_Pattern* pElm = p->v[j];
 
             // Parse Loop operator
-            if(pElm->isOperatorLoop()) {
+            if(pElm->isLoop()) {
                 while(true) {
-                    __base_ST* elm = generateTree(pElm->asOperatorLoop()->v, b, i, true); //FIXME determine when fatal should be used and when not.
+                    __base_ST* elm = generateTree(pElm->asLoop()->v, b, i, true); //FIXME determine when fatal should be used and when not.
                     if(!elm) break;
                     i += elm->tokenEnd - elm->tokenBgn + 1;
                     elms.push_back(elm);

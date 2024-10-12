@@ -79,6 +79,7 @@ std::string cmp::ST_Operator      ::getCategoryName(bool plural) const { return 
     /**/  cmp::type *cmp::__base_Pattern::as##name()       { return dynamic_cast<      type*>(this); } \
     /**/       bool  cmp::__base_Pattern::is##name() const { return dynamic_cast<const type*>(this); } \
     /**/       bool  cmp::__base_Pattern::is##name()       { return dynamic_cast<      type*>(this); }
+LIST_PATTERN_OPERATOR_TYPES_NAMES
 LIST_PATTERN_BASES_TYPES_NAMES
 #undef X
 
@@ -89,6 +90,7 @@ LIST_PATTERN_BASES_TYPES_NAMES
 namespace cmp {
     #define X(type, name) \
         type *re::__internal_Pattern_Singleton_##name = nullptr;
-    LIST_PATTERN_ALL_TYPES_NAMES
+    LIST_PATTERN_BASES_TYPES_NAMES
+    LIST_PATTERN_ELM_TYPES_NAMES
     #undef X
 }

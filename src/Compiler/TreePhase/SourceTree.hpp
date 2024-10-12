@@ -342,23 +342,23 @@ namespace cmp {
 
 
 
-//TODO TEST: Parse a namespace
-//TODO   Keyword namespace
-//TODO   Name
-//TODO   {
-//TODO   }
 
+
+    // Pattern operators. These patterns cannot be cached and they can't generate a tree. They are only used to specify the syntax.
+    #define LIST_PATTERN_OPERATOR_TYPES_NAMES      \
+        X(__Pattern_Operator_Loop,  Loop)  \
+        X(__Pattern_Operator_OneOf, OneOf) \
+
+    // Base and first-level patterns. These include any base pattern but the root class.
     #define LIST_PATTERN_BASES_TYPES_NAMES         \
         X(__base_Pattern_Token,     Token)         \
         X(__base_Pattern_Composite, Composite)     \
-        X(__Pattern_Operator_Loop,  OperatorLoop)  \
-        X(__Pattern_Operator_OneOf, OperatorOneOf) \
         X(Pattern_Keyword,          Keyword)       \
         X(Pattern_Identifier,       Identifier)    \
         X(Pattern_Literal,          Literal)
 
-    #define LIST_PATTERN_ALL_TYPES_NAMES           \
-        LIST_PATTERN_BASES_TYPES_NAMES             \
+    // Element patterns. These identify actual semantic elements in the code and can generate trees.
+    #define LIST_PATTERN_ELM_TYPES_NAMES           \
         X(Pattern_Elm_Module,       Module)        \
         X(Pattern_Elm_Namespace,    Namespace)     \
         X(Pattern_Elm_Enum,         Enum)
@@ -370,7 +370,9 @@ namespace cmp {
     // Pattern struct signatures
     #define X(type, name) \
         struct type;
-    LIST_PATTERN_ALL_TYPES_NAMES
+    LIST_PATTERN_OPERATOR_TYPES_NAMES
+    LIST_PATTERN_BASES_TYPES_NAMES
+    LIST_PATTERN_ELM_TYPES_NAMES
     #undef X
 
 
@@ -395,9 +397,31 @@ namespace cmp {
                 }                                                                               \
                 return __internal_Pattern_Singleton_##name;                                     \
             }
-        LIST_PATTERN_ALL_TYPES_NAMES
+        LIST_PATTERN_BASES_TYPES_NAMES
+        LIST_PATTERN_ELM_TYPES_NAMES
         #undef X
     }
+
+
+
+
+    namespace op {
+        // Value generators for pattern operators (they don't need singletons and are stored in a different namespace)
+        // Usage: op::<name>(<patterns>)
+        #define X(type, name)                                   \
+            template<class ...t> type *name(t... subPatterns) { \
+                return new type(subPatterns...);                \
+            }
+        LIST_PATTERN_OPERATOR_TYPES_NAMES
+        #undef X
+    }
+
+
+
+//FIXME make namespaces only allow what their parent allows
+//FIXME make namespaces only allow what their parent allows
+//FIXME make namespaces only allow what their parent allows
+//FIXME make namespaces only allow what their parent allows
 
 
 
@@ -412,6 +436,7 @@ namespace cmp {
             /**/  type *as##name()      ; \
             /**/  bool  is##name() const; \
             /**/  bool  is##name()      ;
+        LIST_PATTERN_OPERATOR_TYPES_NAMES
         LIST_PATTERN_BASES_TYPES_NAMES
         #undef X
     };
@@ -523,12 +548,10 @@ namespace cmp {
             re::Keyword(ReservedTokenId::META_KEYWORD_BASE),
             re::Identifier(),
             re::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-            re::OperatorLoop(
-                re::OperatorOneOf(
-                    re::Namespace(),
-                    re::Enum()
-                )
-            ),
+            op::Loop(op::OneOf(
+                re::Namespace(),
+                re::Enum()
+            )),
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
@@ -541,7 +564,7 @@ namespace cmp {
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
             ST_Enum* r = new ST_Enum;
             r->name = results[1]->asIdentifier();
-            r->baseType = nullptr; //FIXME save atual type
+            r->baseType = nullptr; //FIXME save actual type
             consoleLock.lock();                               //TODO remove
             cout << "found enum " << r->name->s << "\n";      //TODO remove
             consoleLock.unlock();                             //TODO remove
@@ -556,12 +579,10 @@ namespace cmp {
     //TODO rename to "root"
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
         Pattern_Elm_Module() : __base_Pattern_Composite(
-            re::OperatorLoop(
-                re::OperatorOneOf(
-                    re::Namespace(),
-                    re::Enum()
-                )
-            )
+            op::Loop(op::OneOf(
+                re::Namespace(),
+                re::Enum()
+            ))
         ){}
 
 
