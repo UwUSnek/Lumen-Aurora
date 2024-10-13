@@ -1,4 +1,8 @@
 #include "SourceTree.hpp"
+#include "Parsers/Elements/alias.hpp"
+#include "Parsers/Elements/enum.hpp"
+#include "Parsers/Elements/namespace.hpp"
+#include "Parsers/SubElements/path.hpp"
 
 
 
@@ -52,14 +56,11 @@ std::string cmp::ST_Sub_Identifier::getCategoryName(bool plural) const { return 
 std::string cmp::ST_Sub_Keyword   ::getCategoryName(bool plural) const { return plural ? "keyword"  : "keywords"; } //TODO check if plural is needed
 
 std::string cmp::ST_Sub_Type      ::getCategoryName(bool plural) const { return plural ? "type path"   : "type paths"; } //TODO check if plural is needed
-std::string cmp::ST_Sub_Path      ::getCategoryName(bool plural) const { return plural ? "symbol path" : "symbol paths"; } //TODO check if plural is needed
+
 std::string cmp::ST_Statement     ::getCategoryName(bool plural) const { return plural ? "statement"   : "statements"; } //TODO check if plural is needed
 
 std::string cmp::ST_Module        ::getCategoryName(bool plural) const { return plural ? "module" : "modules"; } //TODO check if plural is needed
-std::string cmp::ST_Namespace     ::getCategoryName(bool plural) const { return plural ? "namespace definition" : "namespace definitions"; }
 std::string cmp::ST_Struct        ::getCategoryName(bool plural) const { return plural ? "struct definition" : "struct definitions"; }
-std::string cmp::ST_Enum          ::getCategoryName(bool plural) const { return plural ? "enum definition" : "enum definitions"; }
-std::string cmp::ST_Alias         ::getCategoryName(bool plural) const { return plural ? "symbol alias definition" : "symbol alias definitions"; }
 
 std::string cmp::ST_Import        ::getCategoryName(bool plural) const { return plural ? "import directive" : "import directives"; }
 std::string cmp::ST_Export        ::getCategoryName(bool plural) const { return plural ? "export directive" : "export directives"; }
@@ -94,4 +95,29 @@ namespace cmp {
         __base_Pattern *re::__internal_base_##name = nullptr;
     LIST_PATTERN_ELM_TYPES_NAMES
     #undef X
+}
+
+
+
+
+
+
+
+
+cmp::Pattern_Elm_Module::Pattern_Elm_Module() : __base_Pattern_Composite(
+    op::Loop(op::OneOf(
+        re::Namespace(),
+        re::Enum()
+    ))
+){}
+
+
+
+
+cmp::__base_ST* cmp::Pattern_Elm_Module::generateData(std::vector<__base_ST*> const &results) const {
+    ST_Module* r = new ST_Module;
+    for(ulong i = 0; i < results.size(); ++i) {
+        r->addChild(results[i]);
+    }
+    return r;
 }

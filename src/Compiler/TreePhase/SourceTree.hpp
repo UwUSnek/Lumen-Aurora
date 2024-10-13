@@ -149,15 +149,6 @@ namespace cmp {
 
 
 
-    // Complex symbol path sub-element (identifiers separated by a dot keyword)
-    struct ST_Sub_Path : public virtual __base_ST {
-        std::vector<std::string> idList;
-        std::string getCategoryName(bool plural = false) const override;
-    };
-
-
-
-
 
 
 
@@ -253,31 +244,13 @@ namespace cmp {
         std::string getCategoryName(bool plural = false) const override;
     };
 
-    struct ST_Namespace : public virtual __base_ST_Referable, public virtual __base_ST_Container {
-        // bool isChildAllowed(__base_ST* c) const override;
-        std::string getCategoryName(bool plural = false) const override;
-    };
-
     struct ST_Struct : public virtual __base_ST_Referable, public virtual __base_ST_Container {
         //FIXME struct members
         // bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
     };
-
-    struct ST_Enum : public virtual __base_ST_Referable, public virtual __base_ST_Container {
-        ST_Sub_Path *baseType; //FIXME use type path
-        //! Enum elements are saved in the children vector
-
-        // bool isChildAllowed(__base_ST* c) const override;
-        std::string getCategoryName(bool plural = false) const override;
-    };
     struct ST_Sub_EnumElement : public virtual __base_ST_Referable {
         //FIXME DEFAULT VALUE
-    };
-
-    struct ST_Alias : public virtual __base_ST_Referable {
-        ST_Sub_Path *original = nullptr;
-        std::string getCategoryName(bool plural = false) const override;
     };
 
 
@@ -365,7 +338,9 @@ namespace cmp {
 
     // Element patterns. These identify actual semantic elements in the code and can generate trees.
     #define LIST_PATTERN_ELM_TYPES_NAMES           \
+        X(Pattern_Elm_Path,         Path)          \
         X(Pattern_Elm_Module,       Module)        \
+        X(Pattern_Elm_Alias,        Alias)         \
         X(Pattern_Elm_Namespace,    Namespace)     \
         X(Pattern_Elm_Enum,         Enum)
 
@@ -499,7 +474,7 @@ namespace cmp {
             v{reinterpret_cast<__base_Pattern*>(_v)... } {
         }
 
-        virtual bool isChildAllowed(__base_ST* const child) const = 0;
+        // virtual bool isChildAllowed(__base_ST* const child) const = 0;
         virtual __base_ST* generateData(std::vector<__base_ST*> const &parsedElements) const = 0;
     };
 
@@ -511,13 +486,13 @@ namespace cmp {
 
 
     struct __Pattern_Operator_Loop : public virtual __base_Pattern {
-        __base_Pattern* v;
+        std::vector<__base_Pattern*> v;
 
-        __Pattern_Operator_Loop(__base_Pattern* _v) :
+        template<class ...t> __Pattern_Operator_Loop(t... _v) :
             //! Reinterpret cast is used instead of dynamic cast because the cached elements
             //! are not initialized until all of their children are consrtucted.
             //! Dynamic cast cannot be used on pointers that point to uninitialized data.
-            v(reinterpret_cast<__base_Pattern*>(_v)) {
+            v{ reinterpret_cast<__base_Pattern*>(_v)...} {
         }
     };
 
@@ -528,7 +503,7 @@ namespace cmp {
             //! Reinterpret cast is used instead of dynamic cast because the cached elements
             //! are not initialized until all of their children are consrtucted.
             //! Dynamic cast cannot be used on pointers that point to uninitialized data.
-            v{reinterpret_cast<__base_Pattern*>(_v)... } {
+            v{ reinterpret_cast<__base_Pattern*>(_v)...} {
         }
     };
 
@@ -561,93 +536,17 @@ namespace cmp {
 
 
 
-    struct Pattern_Elm_Namespace : public virtual __base_Pattern_Composite {
-        Pattern_Elm_Namespace() : __base_Pattern_Composite(
-            tk::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
-            tk::Identifier(),
-            tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-            op::Loop(op::OneOf(
-                re::Enum(),
-                re::Namespace()
-                //FIXME other possible elements
-            )),
-            tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
-        ){}
-
-
-        virtual bool isChildAllowed(__base_ST* const c) const {
-            return !c->isStatement();
-        }
-
-
-        __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
-            ST_Namespace* r = new ST_Namespace;
-            r->name = results[1]->asIdentifier();
-            debug(consoleLock.lock(); cout << "found namespace " << r->name->s << "\n"; consoleLock.unlock();)
-            //TODO contents
-            return r;
-        }
-    };
-
-
-
-    //TODO set metakeyword string names to "meta keyword" (they are currently being referred to as "keywords")
-    struct Pattern_Elm_Enum : public virtual __base_Pattern_Composite {
-        Pattern_Elm_Enum() : __base_Pattern_Composite(
-            tk::Keyword(ReservedTokenId::KEYWORD_ENUM),
-            tk::Identifier(),
-            tk::Keyword(ReservedTokenId::META_KEYWORD_BASE),
-            tk::Identifier(),
-            tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-            op::Loop(op::OneOf(
-                re::Enum(),
-                re::Namespace()
-                //FIXME other possible elements
-            )),
-            new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
-        ){}
-
-
-        virtual bool isChildAllowed(__base_ST* const c) const {
-            return !c->isStatement();
-        }
-
-
-        __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
-            ST_Enum* r = new ST_Enum;
-            r->name = results[1]->asIdentifier();
-            r->baseType = nullptr; //FIXME save actual type
-            debug(consoleLock.lock(); cout << "found enum " << r->name->s << "\n"; consoleLock.unlock();)
-            //TODO contents
-            return r;
-        }
-    };
-
 
 
 
     //TODO rename to "root"
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
-        Pattern_Elm_Module() : __base_Pattern_Composite(
-            op::Loop(op::OneOf(
-                re::Namespace(),
-                re::Enum()
-            ))
-        ){}
+        Pattern_Elm_Module();
+        __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
 
-
-        virtual bool isChildAllowed(__base_ST* const c) const {
-            return !c->isStatement();
-        }
-
-
-        __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
-            ST_Module* r = new ST_Module;
-            for(ulong i = 0; i < results.size(); ++i) {
-                r->addChild(results[i]);
-            }
-            return r;
-        }
+        // virtual bool isChildAllowed(__base_ST* const c) const {
+            // return !c->isStatement();
+        // }
     };
 }
 

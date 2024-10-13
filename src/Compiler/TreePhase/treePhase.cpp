@@ -32,7 +32,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
         __Pattern_Operator_OneOf* p = pattern->asOneOf();
 
         //TODO maybe optimize OneOf to check all patterns at once? instead of going back to the list if one fails
-        for(int j = 0; j < p->v.size(); ++j) {
+        for(ulong j = 0; j < p->v.size(); ++j) {
             __base_Pattern* pElm = p->v[j];
             __base_ST* elm = generateTree(pElm, b, i, false);
             if(elm) return elm;
@@ -51,16 +51,22 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
         __base_Pattern_Composite* p = pattern->asComposite();
 
         std::vector<__base_ST*> elms;
-        for(int j = 0; j < p->v.size(); ++j) {
+        for(ulong j = 0; j < p->v.size(); ++j) {
             __base_Pattern* pElm = p->v[j];
 
             // Parse Loop operator
             if(pElm->isLoop()) {
-                while(true) {
-                    __base_ST* elm = generateTree(pElm->asLoop()->v, b, i, fatal); //FIXME determine when fatal should be used and when not.
+                __Pattern_Operator_Loop* pLoop = pElm->asLoop();
+
+                for(ulong k = 0;; ++k) {
+                    __base_Pattern* pLoopElm = pLoop->v[k];
+                    __base_ST* elm = generateTree(pLoopElm, b, i, fatal); //FIXME determine when fatal should be used and when not.
                     if(!elm) break;
+
+
                     i += elm->tokenEnd - elm->tokenBgn + 1;
                     elms.push_back(elm);
+                    if(k >= pLoop->v.size()) k = 0;
                 }
                 //TODO this should prob print an error if fatal is true
             }

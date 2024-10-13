@@ -1,10 +1,28 @@
-// #pragma once
-// #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
-// #include "Compiler/TreePhase/SourceTree.hpp"
+#pragma once
+#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
+#include "Compiler/TreePhase/SourceTree.hpp"
 
 
 
 
-// namespace cmp {
-//     ST_Namespace* parseNamespace(TokenizedSource* b, ulong index);
-// }
+
+
+
+
+namespace cmp {
+    struct ST_Namespace : public virtual __base_ST_Referable, public virtual __base_ST_Container {
+        std::string getCategoryName(bool plural = false) const override;
+    };
+
+
+
+
+    struct Pattern_Elm_Namespace : public virtual __base_Pattern_Composite {
+        Pattern_Elm_Namespace();
+        __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
+
+        // virtual bool isChildAllowed(__base_ST* const c) const {
+        //     return !c->isStatement();
+        // }
+    };
+}

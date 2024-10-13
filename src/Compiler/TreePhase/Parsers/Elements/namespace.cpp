@@ -1,60 +1,34 @@
-// #include "namespace.hpp"
-// #include "Utils/errors.hpp"
-// #include "Compiler/TreePhase/Parsers/Generic/scope.hpp"
+#include "namespace.hpp"
+#include "Utils/errors.hpp"
+
+#include "enum.hpp"
+
+std::string cmp::ST_Namespace::getCategoryName(bool plural) const {
+    return plural ? "namespace definition" : "namespace definitions";
+}
 
 
 
 
-// cmp::ST_Namespace* cmp::parseNamespace(TokenizedSource* b, ulong index) {
-//     std::optional<Token> const &t0 = (*b)[index];
-//     if(!t0.has_value() || !t0->isKeyword(ReservedTokenId::KEYWORD_NAMESPACE)) {
-//         return nullptr;
-//     }
-//     ST_Namespace* r = new ST_Namespace();
-//     ulong i = index + 1;
+cmp::Pattern_Elm_Namespace::Pattern_Elm_Namespace() : __base_Pattern_Composite(
+    tk::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
+    tk::Identifier(),
+    tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+    op::Loop(op::OneOf(
+        re::Enum(),
+        re::Namespace()
+        //FIXME other possible elements
+    )),
+    tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+){}
 
 
 
 
-//     // Parse name
-//     std::optional<Token> const &t1 = (*b)[i];
-//     if(!t1.has_value() || !t1->isIdentifier()){
-//         utils::printError(
-//             ERROR_CMP_NAMESPACE_NAME_MISSING, utils::ErrType::COMPILER,
-//             ElmCoords(b, index, i),
-//             ElmCoords(b, i,     i),
-//             "Incomplete definition of Namespace.\n" +
-//             (t1.has_value() ? "Expected an identifier, but the " + t1->genDecoratedValue() + " was found instead." : "The identifier is missing.")
-//         );
-//     }
-//     r->name = t1->getValue_Identifier();
-//     ++i;
-
-
-
-
-//     // Parse contents and check if they are allowed
-//     ulong scopeLen;
-//     std::vector<__base_ST*> const &children = generic_parseScope(b, i, true, &scopeLen); //TODO maybe pass the starting index to use it for a more accurate relevant section
-//     i += scopeLen;
-
-//     for(ulong j = 0; j < children.size(); ++j) {
-//         if(!r->isChildAllowed(children[j])) {
-//             utils::printError(
-//                 ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED, utils::ErrType::COMPILER,
-//                 ElmCoords(b, index,                 children[j]->tokenEnd),
-//                 ElmCoords(b, children[j]->tokenBgn, children[j]->tokenEnd),
-//                 children[j]->getCategoryName(true) + " are not allowed within namespaces"
-//             );
-//         }
-//         r->addChild(children[j]);
-//     }
-
-
-
-
-//     // Set the element length and return the node
-//     r->tokenBgn = index;
-//     r->tokenEnd = i - 1;
-//     return r;
-// }
+cmp::__base_ST* cmp::Pattern_Elm_Namespace::generateData(std::vector<__base_ST*> const &results) const {
+    ST_Namespace* r = new ST_Namespace;
+    r->name = results[1]->asIdentifier();
+    debug(consoleLock.lock(); cout << "found namespace " << r->name->s << "\n"; consoleLock.unlock();)
+    //TODO contents
+    return r;
+}

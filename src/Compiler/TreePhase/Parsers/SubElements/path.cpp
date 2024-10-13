@@ -1,58 +1,28 @@
-// #include "path.hpp"
-// #include "Utils/errors.hpp"
+#include "path.hpp"
+#include "Utils/errors.hpp"
 
-// //FIXME free the tokens after using them
-// //FIXME also free the other stuff
-
-
-
-
-// cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
-
-//     // Save the starting identifier
-//     std::optional<Token> const &t0 = (*b)[index];
-//     if(!t0.has_value() || !t0->isIdentifier()) {
-//         return nullptr;
-//     }
-//     ST_Sub_Path *r = new ST_Sub_Path();
-//     ulong i = index + 1;
-//     r->idList.push_back(t0->getValue_Identifier());
+std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
+    return plural ? "symbol path" : "symbol paths";
+} //TODO check if plural is needed
 
 
 
 
-//     // Save subsequent separator-identifier pairs
-//     while(true) {
-
-
-//         // Skip . separator, return if one is not found
-//         std::optional<Token> const &ta = (*b)[i];
-//         if(!ta.has_value() || !ta->isKeyword(ReservedTokenId::KEYWORD_DOT)) {
-//             break;
-//         }
-//         ++i;
-
-
-//         // Save identifier, print an error if one is not found
-//         std::optional<Token> const &tb = (*b)[i];
-//         if(!tb.has_value() || !tb->isIdentifier()) {
-//             utils::printError(
-//                 ERROR_CMP_PATH_NO_IDENTIFIER, utils::ErrType::COMPILER,
-//                 ElmCoords(b, index, i),
-//                 ElmCoords(b, i,     i),
-//                 "Incomplete symbol path.\n" +
-//                 (tb.has_value() ? "Expected an identifier, but the " + tb->genDecoratedValue() + " was found instead." : "The identifier is missing.")
-//             );
-//         }
-//         r->idList.push_back(tb->getValue_Identifier());
-//         ++i;
-//     }
+cmp::Pattern_Elm_Path::Pattern_Elm_Path() : __base_Pattern_Composite(
+    tk::Identifier(),
+    op::Loop(
+        tk::Keyword(ReservedTokenId::KEYWORD_DOT),
+        tk::Identifier()
+    )
+){}
 
 
 
 
-//     // Set element length and return the node
-//     r->tokenBgn = index;
-//     r->tokenEnd = i - 1;
-//     return r;
-// }
+cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> const &results) const {
+    ST_Sub_Path* r = new ST_Sub_Path;
+    for(ulong i = 0; i < results.size(); i += 2) {
+        r->idList.push_back(results[i]->asIdentifier()->s);
+    }
+    return r;
+}
