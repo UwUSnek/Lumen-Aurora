@@ -501,7 +501,10 @@ namespace cmp {
     struct __base_Pattern_Composite : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
         template<class ...t> __base_Pattern_Composite(t... _v) :
-            v{<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
+            //! Reinterpret cast is used instead of dynamic cast because the cached elements
+            //! are not initialized until all of their children are consrtucted.
+            //! Dynamic cast cannot be used on pointers that point to uninitialized data.
+            v{reinterpret_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
             //BUG this cast is prob messing things up.
             //BUG Dynamic cast cannot be performed on uninitialized memory
             //BUG cached elements are uninitialized during the construction of their children
@@ -525,14 +528,20 @@ namespace cmp {
     struct __Pattern_Operator_Loop : public virtual __base_Pattern {
         __base_Pattern* v;
         __Pattern_Operator_Loop(__base_Pattern* _v) :
-            v(_v) {
+            //! Reinterpret cast is used instead of dynamic cast because the cached elements
+            //! are not initialized until all of their children are consrtucted.
+            //! Dynamic cast cannot be used on pointers that point to uninitialized data.
+            v(reinterpret_cast<__base_Pattern*>(_v)) {
         }
     };
 
     struct __Pattern_Operator_OneOf : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
         template<class ...t> __Pattern_Operator_OneOf(t... _v) :
-            v{<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
+            //! Reinterpret cast is used instead of dynamic cast because the cached elements
+            //! are not initialized until all of their children are consrtucted.
+            //! Dynamic cast cannot be used on pointers that point to uninitialized data.
+            v{reinterpret_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
             //BUG this cast is prob messing things up.
             //BUG Dynamic cast cannot be performed on uninitialized memory
             //BUG cached elements are uninitialized during the construction of their children
@@ -664,10 +673,10 @@ namespace cmp {
     //TODO rename to "root"
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
         Pattern_Elm_Module() : __base_Pattern_Composite(
-            // op::Loop(op::OneOf(
-                // re::Namespace()
+            op::Loop(op::OneOf(
+                re::Namespace(),
                 re::Enum()
-            // ))
+            ))
         ){}
 
 

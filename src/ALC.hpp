@@ -12,7 +12,6 @@
 
 
 
-
 struct VersionNumber {
     char platform;
     uint major;
