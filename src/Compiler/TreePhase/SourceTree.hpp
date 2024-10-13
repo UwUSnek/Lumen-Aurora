@@ -411,7 +411,6 @@ namespace cmp {
 
 
 
-
     namespace re {
         // Custom sizeof function to use the size of the structs before they are formally defined
         template<class t> size_t forwardSizeof() {
@@ -422,30 +421,25 @@ namespace cmp {
         // Pattern singletons and value generators
         // Usage: re::<name>(<patterns>)
         //! Placement new prevents circular dependencies between patterns
-        #define X(type, name)                                                                   \
-            extern void           *__internal_void_##name;                                   \
-            extern __base_Pattern *__internal_base_##name;                                   \
-            template<class ...t> type *name(t... subPatterns) {                                 \
-                if(!__internal_void_##name) {                                      /*//TODO fix extra space*/\
-                    __internal_void_##name = malloc(forwardSizeof<type>() + 50 );                                                     cout << "allocated   " << __internal_void_##name << " | "#name << "\n";\
-                    __internal_base_##name = reinterpret_cast<__base_Pattern*>(__internal_void_##name);\
-                    /*new (reinterpret_cast<type*>(__internal_base_##name)) type(subPatterns...);                                                          cout << "initialized " << __internal_base_##name << " | "#name << "\n";*/\
-                    new (__internal_base_##name) type(subPatterns...);                                                          cout << "initialized " << __internal_void_##name << " | "#name << "\n";\
-                }                                                                               \
-                else {\
-                consoleLock.lock();                              \
-                cout << "found       " << __internal_base_##name << " | "#name << "\n";\
-                consoleLock.unlock();                              \
-                }\
-                /*return dynamic_cast<type*>(__internal_base_##name);                                     */\
-                return reinterpret_cast<type*>(__internal_base_##name);                                     \
+        #define X(type, name)                                                                           \
+            extern void           *__internal_void_##name;                                              \
+            extern __base_Pattern *__internal_base_##name;                                              \
+            template<class ...t> type *name(t... subPatterns) {                                         \
+                if(!__internal_void_##name) {                                                           \
+                    __internal_void_##name = malloc(forwardSizeof<type>());                             \
+                    debug(consoleLock.lock(); cout << "allocated   " << __internal_void_##name << " | "#name << "\n"; consoleLock.unlock();)\
+                    __internal_base_##name = reinterpret_cast<__base_Pattern*>(__internal_void_##name); \
+                    new (__internal_base_##name) type(subPatterns...);                                  \
+                    debug(consoleLock.lock(); cout << "initialized " << __internal_void_##name << " | "#name << "\n"; consoleLock.unlock();)\
+                }                                                                                       \
+                else {                                                                                  \
+                debug(consoleLock.lock(); cout << "found       " << __internal_base_##name << " | "#name << "\n"; consoleLock.unlock();)\
+                }                                                                                       \
+                return reinterpret_cast<type*>(__internal_base_##name);                                 \
             }
         LIST_PATTERN_ELM_TYPES_NAMES
         #undef X
     }
-    // //BUG the keyword bug is prob caused by this generator function converting the Keyword ENUM value to a pointer and passing it to the constructor
-    // //BUG tho there is no static cast here, idk
-
 
 
 
@@ -453,12 +447,11 @@ namespace cmp {
     namespace op {
         // Value generators for pattern operators (they don't need singletons and are stored in a different namespace)
         // Usage: op::<name>(<patterns>)
-        #define X(type, name)                                   \
-            template<class ...t> type *name(t... subPatterns) { \
-                consoleLock.lock();                              \
-                type* r = new type(subPatterns...); cout << "created     " << r << " | "#name << "\n";\
-                consoleLock.unlock();                            \
-                return r;                \
+        #define X(type, name)                                     \
+            template<class ...t> type *name(t... subPatterns) {   \
+                type* r = new type(subPatterns...);               \
+                debug(consoleLock.lock(); cout << "created     " << r << " | "#name << "\n"; consoleLock.unlock();)\
+                return r;                                         \
             }
         LIST_PATTERN_OPERATOR_TYPES_NAMES
         #undef X
@@ -471,10 +464,9 @@ namespace cmp {
         // Usage: tk::<name>(<expected value>?)
         #define X(type, name)                                     \
             template<class ...t> type *name(t... expectedValue) { \
-                consoleLock.lock();                              \
-                type* r = new type(expectedValue...); cout << "created     " << r << " | "#name << "\n";\
-                consoleLock.unlock();                            \
-                return r;                \
+                type* r = new type(expectedValue...);             \
+                debug(consoleLock.lock(); cout << "created     " << r << " | "#name << "\n"; consoleLock.unlock();)\
+                return r;                                         \
             }
         LIST_PATTERN_TOKENS_TYPES_NAMES
         #undef X
@@ -504,14 +496,7 @@ namespace cmp {
             //! Reinterpret cast is used instead of dynamic cast because the cached elements
             //! are not initialized until all of their children are consrtucted.
             //! Dynamic cast cannot be used on pointers that point to uninitialized data.
-            v{reinterpret_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
-            //BUG this cast is prob messing things up.
-            //BUG Dynamic cast cannot be performed on uninitialized memory
-            //BUG cached elements are uninitialized during the construction of their children
-
-            //BUG non-cached elements need casting
-            //BUG cached elements need NO casting
-            //BUG fix this mess
+            v{reinterpret_cast<__base_Pattern*>(_v)... } {
         }
 
         virtual bool isChildAllowed(__base_ST* const child) const = 0;
@@ -527,6 +512,7 @@ namespace cmp {
 
     struct __Pattern_Operator_Loop : public virtual __base_Pattern {
         __base_Pattern* v;
+
         __Pattern_Operator_Loop(__base_Pattern* _v) :
             //! Reinterpret cast is used instead of dynamic cast because the cached elements
             //! are not initialized until all of their children are consrtucted.
@@ -537,27 +523,12 @@ namespace cmp {
 
     struct __Pattern_Operator_OneOf : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
+
         template<class ...t> __Pattern_Operator_OneOf(t... _v) :
             //! Reinterpret cast is used instead of dynamic cast because the cached elements
             //! are not initialized until all of their children are consrtucted.
             //! Dynamic cast cannot be used on pointers that point to uninitialized data.
-            v{reinterpret_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
-            //BUG this cast is prob messing things up.
-            //BUG Dynamic cast cannot be performed on uninitialized memory
-            //BUG cached elements are uninitialized during the construction of their children
-
-            //BUG non-cached elements need casting
-            //BUG cached elements need NO casting
-            //BUG fix this mess
-                //FIXME remove debug variables
-            // __base_Pattern* _a           = reinterpret_cast<__base_Pattern*>(std::get<0>(std::make_tuple(_v...)));
-            // __base_Pattern* _a_converted =     dynamic_cast<__base_Pattern*>(std::get<0>(std::make_tuple(_v...)));
-            // __base_Pattern* _b           = reinterpret_cast<__base_Pattern*>(std::get<1>(std::make_tuple(_v...)));
-            // __base_Pattern* _b_converted =     dynamic_cast<__base_Pattern*>(std::get<1>(std::make_tuple(_v...)));
-            // auto test = dynamic_cast<__base_Pattern_Composite*>(_a_converted);
-            // bool _a_converted_check = dynamic_cast<__base_Pattern_Composite*>(_a_converted)->isComposite();
-            // bool _b_converted_check = dynamic_cast<__base_Pattern_Composite*>(_b_converted)->isComposite();
-            int dummy = 0;
+            v{reinterpret_cast<__base_Pattern*>(_v)... } {
         }
     };
 
@@ -587,9 +558,6 @@ namespace cmp {
 
 
 
-    //BUG nested namespaces don't seem they are being recognized
-    //BUG nested namespaces don't seem they are being recognized
-    //BUG nested namespaces don't seem they are being recognized
 
 
 
@@ -598,10 +566,6 @@ namespace cmp {
             tk::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
             tk::Identifier(),
             tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-            //BUG turning on these lines makes the parser not work
-            //BUG turning on these lines makes the parser not work
-            //BUG turning on these lines makes the parser not work
-            //BUG turning on these lines makes the parser not work
             op::Loop(op::OneOf(
                 re::Enum(),
                 re::Namespace()
@@ -619,9 +583,7 @@ namespace cmp {
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override {
             ST_Namespace* r = new ST_Namespace;
             r->name = results[1]->asIdentifier();
-            consoleLock.lock();                               //TODO remove
-            cout << "found namespace " << r->name->s << "\n"; //TODO remove
-            consoleLock.unlock();                             //TODO remove
+            debug(consoleLock.lock(); cout << "found namespace " << r->name->s << "\n"; consoleLock.unlock();)
             //TODO contents
             return r;
         }
@@ -642,10 +604,6 @@ namespace cmp {
                 re::Namespace()
                 //FIXME other possible elements
             )),
-            //BUG sub-element of the same type doesn't have the correct address
-            //BUG the cached value is correct, but the value saved in the instance is not
-            //! THIS DOES NOT DEPEND ON LOOP
-            //! probably caused by OneOf or it might be a deeper problem
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
@@ -659,9 +617,7 @@ namespace cmp {
             ST_Enum* r = new ST_Enum;
             r->name = results[1]->asIdentifier();
             r->baseType = nullptr; //FIXME save actual type
-            consoleLock.lock();                               //TODO remove
-            cout << "found enum " << r->name->s << "\n";      //TODO remove
-            consoleLock.unlock();                             //TODO remove
+            debug(consoleLock.lock(); cout << "found enum " << r->name->s << "\n"; consoleLock.unlock();)
             //TODO contents
             return r;
         }

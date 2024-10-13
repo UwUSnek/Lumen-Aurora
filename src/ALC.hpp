@@ -8,6 +8,14 @@
 #include "Utils/DynamicProgressBar.hpp"
 
 
+#define PRINT_DEBUG_INFO 1
+
+#if PRINT_DEBUG_INFO == 1
+    #define debug(...) __VA_ARGS__
+#else
+    #define debug(...)
+#endif
+
 
 
 
