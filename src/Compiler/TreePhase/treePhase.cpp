@@ -12,18 +12,18 @@
 cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal) {
     ulong i = index;
 
-    auto* ptr1 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[0];
-    auto* ptr2 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[1];
+    // auto* ptr1 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[0];
+    // auto* ptr2 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[1];
 
-    bool _a = pattern->asComposite()->v[0]->asComposite()->v[0]->isKeyword();
-    bool _b = pattern->asComposite()->v[0]->asComposite()->v[1]->isIdentifier();
-    bool _c = pattern->asComposite()->v[0]->asComposite()->v[2]->isKeyword();
-    bool _d = pattern->asComposite()->v[0]->asComposite()->v[3]->isIdentifier();
-    bool _e = pattern->asComposite()->v[0]->asComposite()->v[4]->isKeyword();
-    bool _f = pattern->asComposite()->v[0]->asComposite()->v[5]->isLoop();
-    int len = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v.size();
-    // bool _e = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[0]->isComposite();
-    // bool _f = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[1]->isComposite();
+    // bool _a = pattern->asComposite()->v[0]->asComposite()->v[0]->isKeyword();
+    // bool _b = pattern->asComposite()->v[0]->asComposite()->v[1]->isIdentifier();
+    // bool _c = pattern->asComposite()->v[0]->asComposite()->v[2]->isKeyword();
+    // bool _d = pattern->asComposite()->v[0]->asComposite()->v[3]->isIdentifier();
+    // bool _e = pattern->asComposite()->v[0]->asComposite()->v[4]->isKeyword();
+    // bool _f = pattern->asComposite()->v[0]->asComposite()->v[5]->isLoop();
+    // int len = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v.size();
+    // // bool _e = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[0]->isComposite();
+    // // bool _f = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[1]->isComposite();
 
 
 

@@ -281,7 +281,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
         printLineNum(curLine);
         ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
         ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
-        const char* lastColor;
+        const char* lastColor = nullptr;
         ulong col = 0;
         bool overflowed = false;
         for(;; ++i) {
