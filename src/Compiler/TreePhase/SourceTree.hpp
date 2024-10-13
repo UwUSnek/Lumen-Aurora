@@ -384,88 +384,6 @@ namespace cmp {
 
 
 
-
-    namespace re {
-        // Custom sizeof function to use the size of the structs before they are formally defined
-        template<class t> size_t forwardSizeof() {
-            return sizeof(t);
-        }
-
-
-        // Pattern singletons and value generators
-        // Usage: re::<name>(<patterns>)
-        //! Placement new prevents circular dependencies between patterns
-        #define X(type, name)                                                                   \
-            extern type *__internal_singleton_##name;                                   \
-            template<class ...t> type *name(t... subPatterns) {                                 \
-                if(!__internal_singleton_##name) {                                      \
-                    __internal_singleton_##name = reinterpret_cast<type*>(malloc(forwardSizeof<type>()));   cout << "allocated   " << __internal_singleton_##name << " | "#name << "\n";\
-                    new (__internal_singleton_##name) type(subPatterns...);               cout << "initialized " << __internal_singleton_##name << " | "#name << "\n";\
-                }                                                                               \
-                else {\
-                consoleLock.lock();                              \
-                cout << "found       " << __internal_singleton_##name << " | "#name << "\n";\
-                consoleLock.unlock();                              \
-                }\
-                return __internal_singleton_##name;                                     \
-            }
-        LIST_PATTERN_BASES_TYPES_NAMES
-        LIST_PATTERN_ELM_TYPES_NAMES
-        #undef X
-    }
-    // //BUG the keyword bug is prob caused by this generator function converting the Keyword ENUM value to a pointer and passing it to the constructor
-    // //BUG tho there is no static cast here, idk
-
-
-
-
-
-    namespace op {
-        // Value generators for pattern operators (they don't need singletons and are stored in a different namespace)
-        // Usage: op::<name>(<patterns>)
-        #define X(type, name)                                   \
-            template<class ...t> type *name(t... subPatterns) { \
-                consoleLock.lock();                              \
-                type* r = new type(subPatterns...); cout << "created     " << r << " | "#name << "\n";\
-                consoleLock.unlock();                            \
-                return r;                \
-            }
-        // LIST_PATTERN_OPERATOR_TYPES_NAMES
-        X(__Pattern_Operator_Loop, Loop)
-        #undef X
-        //FIXME remove debug copy
-        #define X(type, name)                                   \
-            template<class ...t> type *name(t... subPatterns) { \
-                consoleLock.lock();                              \
-                type* r = new type(subPatterns...); cout << "created     " << r << " | "#name << "\n";\
-                cout << "0: " << std::get<0>(std::make_tuple(subPatterns...)) << "\n";\
-                cout << "1: " << std::get<1>(std::make_tuple(subPatterns...)) << "\n";\
-                consoleLock.unlock();                            \
-                return r;                \
-            }
-        // LIST_PATTERN_OPERATOR_TYPES_NAMES
-        X(__Pattern_Operator_OneOf, OneOf)
-        #undef X
-    }
-
-
-
-    namespace tk {
-        // Value generators for token operators (they don't need singletons and are stored in a different namespace)
-        // Usage: tk::<name>(<expected value>?)
-        #define X(type, name)                                     \
-            template<class ...t> type *name(t... expectedValue) { \
-                consoleLock.lock();                              \
-                type* r = new type(expectedValue...); cout << "created     " << r << " | "#name << "\n";\
-                consoleLock.unlock();                            \
-                return r;                \
-            }
-        LIST_PATTERN_TOKENS_TYPES_NAMES
-        #undef X
-    }
-
-
-
 //FIXME make namespaces only allow what their parent allows
 //FIXME make namespaces only allow what their parent allows
 //FIXME make namespaces only allow what their parent allows
@@ -494,6 +412,85 @@ namespace cmp {
 
 
 
+    namespace re {
+        // Custom sizeof function to use the size of the structs before they are formally defined
+        template<class t> size_t forwardSizeof() {
+            return sizeof(t);
+        }
+
+
+        // Pattern singletons and value generators
+        // Usage: re::<name>(<patterns>)
+        //! Placement new prevents circular dependencies between patterns
+        #define X(type, name)                                                                   \
+            extern void           *__internal_void_##name;                                   \
+            extern __base_Pattern *__internal_base_##name;                                   \
+            template<class ...t> type *name(t... subPatterns) {                                 \
+                if(!__internal_void_##name) {                                      /*//TODO fix extra space*/\
+                    __internal_void_##name = malloc(forwardSizeof<type>() + 50 );                                                     cout << "allocated   " << __internal_void_##name << " | "#name << "\n";\
+                    __internal_base_##name = reinterpret_cast<__base_Pattern*>(__internal_void_##name);\
+                    /*new (reinterpret_cast<type*>(__internal_base_##name)) type(subPatterns...);                                                          cout << "initialized " << __internal_base_##name << " | "#name << "\n";*/\
+                    new (__internal_base_##name) type(subPatterns...);                                                          cout << "initialized " << __internal_void_##name << " | "#name << "\n";\
+                }                                                                               \
+                else {\
+                consoleLock.lock();                              \
+                cout << "found       " << __internal_base_##name << " | "#name << "\n";\
+                consoleLock.unlock();                              \
+                }\
+                /*return dynamic_cast<type*>(__internal_base_##name);                                     */\
+                return reinterpret_cast<type*>(__internal_base_##name);                                     \
+            }
+        LIST_PATTERN_ELM_TYPES_NAMES
+        #undef X
+    }
+    // //BUG the keyword bug is prob caused by this generator function converting the Keyword ENUM value to a pointer and passing it to the constructor
+    // //BUG tho there is no static cast here, idk
+
+
+
+
+
+    namespace op {
+        // Value generators for pattern operators (they don't need singletons and are stored in a different namespace)
+        // Usage: op::<name>(<patterns>)
+        #define X(type, name)                                   \
+            template<class ...t> type *name(t... subPatterns) { \
+                consoleLock.lock();                              \
+                type* r = new type(subPatterns...); cout << "created     " << r << " | "#name << "\n";\
+                consoleLock.unlock();                            \
+                return r;                \
+            }
+        LIST_PATTERN_OPERATOR_TYPES_NAMES
+        #undef X
+    }
+
+
+
+    namespace tk {
+        // Value generators for token operators (they don't need singletons and are stored in a different namespace)
+        // Usage: tk::<name>(<expected value>?)
+        #define X(type, name)                                     \
+            template<class ...t> type *name(t... expectedValue) { \
+                consoleLock.lock();                              \
+                type* r = new type(expectedValue...); cout << "created     " << r << " | "#name << "\n";\
+                consoleLock.unlock();                            \
+                return r;                \
+            }
+        LIST_PATTERN_TOKENS_TYPES_NAMES
+        #undef X
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -504,7 +501,14 @@ namespace cmp {
     struct __base_Pattern_Composite : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
         template<class ...t> __base_Pattern_Composite(t... _v) :
-            v{ dynamic_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
+            v{<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
+            //BUG this cast is prob messing things up.
+            //BUG Dynamic cast cannot be performed on uninitialized memory
+            //BUG cached elements are uninitialized during the construction of their children
+
+            //BUG non-cached elements need casting
+            //BUG cached elements need NO casting
+            //BUG fix this mess
         }
 
         virtual bool isChildAllowed(__base_ST* const child) const = 0;
@@ -528,7 +532,14 @@ namespace cmp {
     struct __Pattern_Operator_OneOf : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
         template<class ...t> __Pattern_Operator_OneOf(t... _v) :
-            v{ dynamic_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
+            v{<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
+            //BUG this cast is prob messing things up.
+            //BUG Dynamic cast cannot be performed on uninitialized memory
+            //BUG cached elements are uninitialized during the construction of their children
+
+            //BUG non-cached elements need casting
+            //BUG cached elements need NO casting
+            //BUG fix this mess
                 //FIXME remove debug variables
             // __base_Pattern* _a           = reinterpret_cast<__base_Pattern*>(std::get<0>(std::make_tuple(_v...)));
             // __base_Pattern* _a_converted =     dynamic_cast<__base_Pattern*>(std::get<0>(std::make_tuple(_v...)));
@@ -537,7 +548,7 @@ namespace cmp {
             // auto test = dynamic_cast<__base_Pattern_Composite*>(_a_converted);
             // bool _a_converted_check = dynamic_cast<__base_Pattern_Composite*>(_a_converted)->isComposite();
             // bool _b_converted_check = dynamic_cast<__base_Pattern_Composite*>(_b_converted)->isComposite();
-            // int dummy = 0;
+            int dummy = 0;
         }
     };
 
