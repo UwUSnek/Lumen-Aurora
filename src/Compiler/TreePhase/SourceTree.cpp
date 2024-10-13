@@ -90,7 +90,7 @@ LIST_PATTERN_TOKENS_TYPES_NAMES
 // Pattern singletons
 namespace cmp {
     #define X(type, name) \
-        type *re::__internal_Pattern_Singleton_##name = nullptr;
+        type *re::__internal_singleton_##name = nullptr;
     LIST_PATTERN_BASES_TYPES_NAMES
     LIST_PATTERN_ELM_TYPES_NAMES
     #undef X

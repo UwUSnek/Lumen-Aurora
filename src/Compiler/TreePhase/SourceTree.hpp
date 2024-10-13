@@ -396,18 +396,18 @@ namespace cmp {
         // Usage: re::<name>(<patterns>)
         //! Placement new prevents circular dependencies between patterns
         #define X(type, name)                                                                   \
-            extern type *__internal_Pattern_Singleton_##name;                                   \
+            extern type *__internal_singleton_##name;                                   \
             template<class ...t> type *name(t... subPatterns) {                                 \
-                if(!__internal_Pattern_Singleton_##name) {                                      \
-                    __internal_Pattern_Singleton_##name = (type*)malloc(forwardSizeof<type>());   cout << "allocated   " << __internal_Pattern_Singleton_##name << " | "#name << "\n";\
-                    new (__internal_Pattern_Singleton_##name) type(subPatterns...);               cout << "initialized " << __internal_Pattern_Singleton_##name << " | "#name << "\n";\
+                if(!__internal_singleton_##name) {                                      \
+                    __internal_singleton_##name = reinterpret_cast<type*>(malloc(forwardSizeof<type>()));   cout << "allocated   " << __internal_singleton_##name << " | "#name << "\n";\
+                    new (__internal_singleton_##name) type(subPatterns...);               cout << "initialized " << __internal_singleton_##name << " | "#name << "\n";\
                 }                                                                               \
                 else {\
                 consoleLock.lock();                              \
-                cout << "found       " << __internal_Pattern_Singleton_##name << " | "#name << "\n";\
+                cout << "found       " << __internal_singleton_##name << " | "#name << "\n";\
                 consoleLock.unlock();                              \
                 }\
-                return __internal_Pattern_Singleton_##name;                                     \
+                return __internal_singleton_##name;                                     \
             }
         LIST_PATTERN_BASES_TYPES_NAMES
         LIST_PATTERN_ELM_TYPES_NAMES
@@ -430,7 +430,21 @@ namespace cmp {
                 consoleLock.unlock();                            \
                 return r;                \
             }
-        LIST_PATTERN_OPERATOR_TYPES_NAMES
+        // LIST_PATTERN_OPERATOR_TYPES_NAMES
+        X(__Pattern_Operator_Loop, Loop)
+        #undef X
+        //FIXME remove debug copy
+        #define X(type, name)                                   \
+            template<class ...t> type *name(t... subPatterns) { \
+                consoleLock.lock();                              \
+                type* r = new type(subPatterns...); cout << "created     " << r << " | "#name << "\n";\
+                cout << "0: " << std::get<0>(std::make_tuple(subPatterns...)) << "\n";\
+                cout << "1: " << std::get<1>(std::make_tuple(subPatterns...)) << "\n";\
+                consoleLock.unlock();                            \
+                return r;                \
+            }
+        // LIST_PATTERN_OPERATOR_TYPES_NAMES
+        X(__Pattern_Operator_OneOf, OneOf)
         #undef X
     }
 
@@ -490,7 +504,7 @@ namespace cmp {
     struct __base_Pattern_Composite : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
         template<class ...t> __base_Pattern_Composite(t... _v) :
-            v{ static_cast<__base_Pattern*>(_v)... } {
+            v{ dynamic_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
         }
 
         virtual bool isChildAllowed(__base_ST* const child) const = 0;
@@ -514,7 +528,16 @@ namespace cmp {
     struct __Pattern_Operator_OneOf : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
         template<class ...t> __Pattern_Operator_OneOf(t... _v) :
-            v{ static_cast<__base_Pattern*>(_v)... } {
+            v{ dynamic_cast<__base_Pattern*>(_v)... } { //FIXME this might need to be reverted to static_cast
+                //FIXME remove debug variables
+            // __base_Pattern* _a           = reinterpret_cast<__base_Pattern*>(std::get<0>(std::make_tuple(_v...)));
+            // __base_Pattern* _a_converted =     dynamic_cast<__base_Pattern*>(std::get<0>(std::make_tuple(_v...)));
+            // __base_Pattern* _b           = reinterpret_cast<__base_Pattern*>(std::get<1>(std::make_tuple(_v...)));
+            // __base_Pattern* _b_converted =     dynamic_cast<__base_Pattern*>(std::get<1>(std::make_tuple(_v...)));
+            // auto test = dynamic_cast<__base_Pattern_Composite*>(_a_converted);
+            // bool _a_converted_check = dynamic_cast<__base_Pattern_Composite*>(_a_converted)->isComposite();
+            // bool _b_converted_check = dynamic_cast<__base_Pattern_Composite*>(_b_converted)->isComposite();
+            // int dummy = 0;
         }
     };
 
@@ -602,7 +625,7 @@ namespace cmp {
             //BUG sub-element of the same type doesn't have the correct address
             //BUG the cached value is correct, but the value saved in the instance is not
             //! THIS DOES NOT DEPEND ON LOOP
-            //! probably caused by OneOf or a it might be a deeper problem
+            //! probably caused by OneOf or it might be a deeper problem
             new Pattern_Keyword(ReservedTokenId::KEYWORD_CURLY_R)
         ){}
 
