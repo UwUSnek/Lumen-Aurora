@@ -73,7 +73,6 @@ extern std::mutex sourceFilePathsLock;
 
 
 
-extern std::mutex consoleLock;
 
 
 extern std::atomic<ulong> activeThreads;
@@ -99,32 +98,68 @@ extern std::atomic<bool> isComplete;
 
 
 
+extern std::mutex __internal_consoleLock;
+
+
+
 
 class __internal_cout_stream_t : public std::streambuf {
-private:
-    std::mutex output_mutex;
-
 protected:
     virtual int overflow(int c) override;
 };
 extern __internal_cout_stream_t __internal_cout_streambuff;
-extern std::ostream cout;
-// extern std::ostream lockedCout;
+extern std::ostream __internal_cout;
 
+
+class __internal_cout_stream_t_wrapper {
+public:
+    template<typename T> __internal_cout_stream_t_wrapper &operator<<(const T& val) {
+        __internal_cout << val;
+        return *this;
+    }
+    __internal_cout_stream_t_wrapper &operator++(int dummy) {
+        __internal_consoleLock.lock();
+        return *this;
+    }
+
+    __internal_cout_stream_t_wrapper &operator--(int dummy) {
+        __internal_consoleLock.unlock();
+        return *this;
+    }
+};
+extern  __internal_cout_stream_t_wrapper cout;
 
 
 
 
 class __internal_cerr_stream_t : public std::streambuf {
-private:
-    std::mutex output_mutex;
-
 protected:
     virtual int overflow(int c) override;
 };
 extern __internal_cerr_stream_t __internal_cerr_streambuff;
-extern std::ostream cerr;
-// extern std::ostream lockedCerr;
+extern std::ostream __internal_cerr;
+
+
+class __internal_cerr_stream_t_wrapper {
+public:
+    template<typename T> __internal_cerr_stream_t_wrapper &operator<<(const T& val) {
+        __internal_cerr << val;
+        return *this;
+    }
+    __internal_cerr_stream_t_wrapper &operator++(int dummy) {
+        __internal_consoleLock.lock();
+        return *this;
+    }
+
+    __internal_cerr_stream_t_wrapper &operator--(int dummy) {
+        __internal_consoleLock.unlock();
+        return *this;
+    }
+};
+extern  __internal_cerr_stream_t_wrapper cerr;
+
+
+
 
 
 

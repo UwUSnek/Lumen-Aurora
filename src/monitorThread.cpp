@@ -32,7 +32,7 @@ static ulong const maxPhaseNameLen = [] {
 
 
 static void printStatusUI(std::string &fullCommand, ulong loop, const int progressBarWidth, bool _isComplete) {
-    consoleLock.lock();
+    cout++;
 
     // Adjust position, clear the console and print the command
     cout << "\033[s";             // Save current cursor position
@@ -93,10 +93,9 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
 
 
 
-    // Restore cursor position
+    // Restore cursor position and unlock output
     cout << "\033[u";
-
-    consoleLock.unlock();
+    cout--;
 }
 
 

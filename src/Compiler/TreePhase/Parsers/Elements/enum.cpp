@@ -34,7 +34,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Enum::generateData(std::vector<__base_ST*> cons
     ST_Enum* r = new ST_Enum;
     r->name     = results[1]->asIdentifier();
     r->baseType = results[3]->asPath();
-    debug(consoleLock.lock(); cout << "found enum " << r->name->s << "\n"; consoleLock.unlock();)
+    debug((cout++ << "found enum " << r->name->s << "\n")--;)
     //TODO contents
     return dynamic_cast<__base_ST*>(r);
 }

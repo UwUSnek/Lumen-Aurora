@@ -402,19 +402,19 @@ namespace cmp {
         // Pattern singletons and value generators
         // Usage: re::<name>(<patterns>)
         //! Placement new prevents circular dependencies between patterns
-        #define X(type, name)                                                                    \
-            extern type *__internal_cache_##name;                                                \
-            template<class ...t> type *name(t... subPatterns) {                                  \
-                if(!__internal_cache_##name) {                                                   \
-                    __internal_cache_##name = __internal_forwardNew<type>();                     \
-                    debug(consoleLock.lock(); cout << "allocated   " << __internal_cache_##name << " | "#name << "\n"; consoleLock.unlock();)\
-                    __internal_forwardInit<type>(__internal_cache_##name); \
-                    debug(consoleLock.lock(); cout << "initialized " << __internal_cache_##name << " | "#name << "\n"; consoleLock.unlock();)\
-                }                                                                                \
-                else {                                                                           \
-                    debug(consoleLock.lock(); cout << "found       " << __internal_cache_##name << " | "#name << "\n"; consoleLock.unlock();)\
-                }                                                                                \
-                return __internal_cache_##name;                                                  \
+        #define X(type, name)                                                                             \
+            extern type *__internal_cache_##name;                                                         \
+            template<class ...t> type *name(t... subPatterns) {                                           \
+                if(!__internal_cache_##name) {                                                            \
+                    __internal_cache_##name = __internal_forwardNew<type>();                              \
+                    debug((cout++ << "allocated   " << __internal_cache_##name << " | "#name << "\n")--;) \
+                    __internal_forwardInit<type>(__internal_cache_##name);                                \
+                    debug((cout++ << "initialized " << __internal_cache_##name << " | "#name << "\n")--;) \
+                }                                                                                         \
+                else {                                                                                    \
+                    debug((cout++ << "found       " << __internal_cache_##name << " | "#name << "\n")--;) \
+                }                                                                                         \
+                return __internal_cache_##name;                                                           \
             }
         LIST_PATTERN_ELM_TYPES_NAMES
         #undef X
@@ -430,7 +430,7 @@ namespace cmp {
             template<class ...t> type *name(t... subPatterns) {                 \
                 type* r = re::__internal_forwardNew<type>();                    \
                 re::__internal_forwardInit<type, t...>(r, subPatterns...);      \
-                debug(consoleLock.lock(); cout << "created     " << r << " | "#name << "\n"; consoleLock.unlock();)\
+                debug((cout++ << "created     " << r << " | "#name << "\n")--;) \
                 return r;                                                       \
             }
         LIST_PATTERN_OPERATOR_TYPES_NAMES
@@ -446,7 +446,7 @@ namespace cmp {
             template<class ...t> type *name(t... expectedValue) {               \
                 type* r = re::__internal_forwardNew<type>();                    \
                 re::__internal_forwardInit<type, t...>(r, expectedValue...);    \
-                debug(consoleLock.lock(); cout << "created     " << r << " | "#name << "\n"; consoleLock.unlock();)\
+                debug((cout++ << "created     " << r << " | "#name << "\n")--;) \
                 return r;                                                       \
             }
         LIST_PATTERN_TOKENS_TYPES_NAMES
@@ -484,13 +484,13 @@ namespace cmp {
         template<class ...t> void __internal_init(t... _v) {
             v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
             debug(
-                consoleLock.lock();
+                cout++;
                 cout << "\n" << this << " Composite pattern initialized with:\n";
                 for(ulong i = 0; i < v.size(); ++i) {
                     printPatternElmInfo(v[i], 1);
                 }
                 cout << "\n";
-                consoleLock.unlock();
+                cout--;
             );
         }
 

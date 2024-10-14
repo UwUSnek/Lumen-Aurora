@@ -30,7 +30,7 @@ void cmp::Pattern_Elm_Namespace::init() {
 cmp::__base_ST* cmp::Pattern_Elm_Namespace::generateData(std::vector<__base_ST*> const &results) const {
     ST_Namespace* r = new ST_Namespace;
     r->name = results[1]->asIdentifier();
-    debug(consoleLock.lock(); cout << "found namespace " << r->name->s << "\n"; consoleLock.unlock();)
+    debug((cout++ << "found namespace " << r->name->s << "\n")--;)
     //TODO contents
     return dynamic_cast<__base_ST*>(r);
 }

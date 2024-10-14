@@ -12,11 +12,7 @@
 
 cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal debug(, int indent)) {
     ulong i = index;
-    debug(
-        consoleLock.lock();
-        cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << ansi::green << pattern << "\n" << ansi::reset;
-        consoleLock.unlock();
-    )
+    debug((cout++ << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << ansi::green << pattern << "\n" << ansi::reset)--;)
 
 
     // bool _0 = pattern->isComposite();
@@ -81,11 +77,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
             // Parse Loop operator
             if(pElm->isLoop()) {
                 __Pattern_Operator_Loop* pLoop = pElm->asLoop();
-                debug(
-                    consoleLock.lock();
-                    cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent + 1) << ansi::green << pElm << " (loop)\n" << ansi::reset;
-                    consoleLock.unlock();
-                )
+                debug((cout++ << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent + 1) << ansi::green << pElm << " (loop)\n" << ansi::reset)--;)
 
                 for(ulong k = 0;; ++k) {
                     if(k >= pLoop->v.size()) k = 0;
