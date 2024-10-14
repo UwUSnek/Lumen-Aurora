@@ -1,16 +1,22 @@
 #include "treePhase.hpp"
 #include "Utils/errors.hpp"
+#include "Utils/ansi.hpp"
 #include "Parsers/Generic/scope.hpp"
 
 
 
 //FIXME add expressions
 
+#include "Parsers/Elements/enum.hpp"
 
 
-
-cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal) {
+cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal debug(, int indent)) {
     ulong i = index;
+    debug(
+        consoleLock.lock();
+        cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << ansi::green << pattern << "\n" << ansi::reset;
+        consoleLock.unlock();
+    )
 
 
     // bool _0 = pattern->isComposite();
@@ -37,6 +43,12 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
     // bool _b6 = tmp_b->v[6]->isKeyword();
 
 
+    // auto _TEST_a0 = tmp_a->v[3]->asLoop()->v[0]->asOneOf()->v[0]->asComposite(); //Enum
+    // auto _TEST_a1 = tmp_a->v[3]->asLoop()->v[0]->asOneOf()->v[1]->asComposite(); //Namespace
+    // auto _TEST_b0 = tmp_b->v[5]->asLoop()->v[0]->asOneOf()->v[0]->asComposite(); //Enum
+    // auto _TEST_b1 = tmp_b->v[5]->asLoop()->v[0]->asOneOf()->v[1]->asComposite(); //Namespace
+
+    // auto _TEST_c = dynamic_cast<__base_Pattern_Composite*>(re::__internal_cache_Enum);
 
 
     // Parse OneOf operator
@@ -45,8 +57,8 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
         //TODO maybe optimize OneOf to check all patterns at once? instead of going back to the list if one fails
         for(ulong j = 0; j < p->v.size(); ++j) {
-            __base_Pattern* pElm = dynamic_cast<__base_Pattern*>(p->v[j]);
-            __base_ST* elm = generateTree(pElm, b, i, false);
+            __base_Pattern* pElm = p->v[j];
+            __base_ST* elm = generateTree(pElm, b, i, false debug(, indent + 1));
             if(elm) return elm;
         }
         return nullptr;
@@ -64,26 +76,31 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
         std::vector<__base_ST*> elms;
         for(ulong j = 0; j < p->v.size(); ++j) {
-            __base_Pattern* pElm = dynamic_cast<__base_Pattern*>(p->v[j]);
+            __base_Pattern* pElm = p->v[j];
 
             // Parse Loop operator
             if(pElm->isLoop()) {
                 __Pattern_Operator_Loop* pLoop = pElm->asLoop();
+                debug(
+                    consoleLock.lock();
+                    cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent + 1) << ansi::green << pElm << " (loop)\n" << ansi::reset;
+                    consoleLock.unlock();
+                )
 
                 for(ulong k = 0;; ++k) {
-                    __base_Pattern* pLoopElm = dynamic_cast<__base_Pattern*>(pLoop->v[k]);
-                    __base_ST* elm = generateTree(pLoopElm, b, i, fatal); //FIXME determine when fatal should be used and when not.
+                    if(k >= pLoop->v.size()) k = 0;
+                    __base_Pattern* pLoopElm = pLoop->v[k];
+                    __base_ST* elm = generateTree(pLoopElm, b, i, fatal debug(, indent + 2)); //FIXME determine when fatal should be used and when not.
                     if(!elm) break;
 
 
                     i += elm->tokenEnd - elm->tokenBgn + 1;
                     elms.push_back(elm);
-                    if(k >= pLoop->v.size()) k = 0;
                 }
                 //TODO this should prob print an error if fatal is true
             }
             else {
-                __base_ST* elm = generateTree(pElm, b, i, fatal); //FIXME determine when fatal should be used and when not.
+                __base_ST* elm = generateTree(pElm, b, i, fatal debug(, indent + 1)); //FIXME determine when fatal should be used and when not.
 
                 if(!elm) {
                     if(fatal) utils::printError(
@@ -186,7 +203,8 @@ void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
     // for(ulong i = 0; i < parser.v.size(); ++i) {
 
     // }
-    *r->cpp() = dynamic_cast<ST_Module*>(generateTree(re::Module(), b, 0, true));
+    // debug(\n\n)
+    *r->cpp() = dynamic_cast<ST_Module*>(generateTree(re::Module(), b, 0, true debug(, 0)));
 
 
 

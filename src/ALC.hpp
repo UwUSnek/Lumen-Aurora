@@ -109,6 +109,7 @@ protected:
 };
 extern __internal_cout_stream_t __internal_cout_streambuff;
 extern std::ostream cout;
+// extern std::ostream lockedCout;
 
 
 
@@ -123,6 +124,7 @@ protected:
 };
 extern __internal_cerr_stream_t __internal_cerr_streambuff;
 extern std::ostream cerr;
+// extern std::ostream lockedCerr;
 
 
 

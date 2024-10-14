@@ -5,12 +5,15 @@
 //#include/*aa*/  	"../Tests/HugeSource/huge.lum"
 //alias test3.test as a
 //;
-enum __Name5_ : uint { enum __Name6_ : ulong{ namespace _namespace1 {      }} }
+
+
+
+//enum __Name5_ : uint { enum __Name6_ : ulong{ namespace _namespace1 {      }} }
 
 enum b : uint  {
-    namespace _namespace2 {
+    //namespace _namespace2 {
 
-    }
+    //}
 }
 
 namespace _namespace3 {}
