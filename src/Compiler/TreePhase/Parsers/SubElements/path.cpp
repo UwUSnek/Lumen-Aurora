@@ -8,13 +8,15 @@ std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
 
 
 
-cmp::Pattern_Elm_Path::Pattern_Elm_Path() : __base_Pattern_Composite(
-    tk::Identifier(),
-    op::Loop(
-        tk::Keyword(ReservedTokenId::KEYWORD_DOT),
-        tk::Identifier()
-    )
-){}
+void cmp::Pattern_Elm_Path::init(){
+    __base_Pattern_Composite::__internal_init(
+        tk::Identifier(),
+        op::Loop(
+            tk::Keyword(ReservedTokenId::KEYWORD_DOT),
+            tk::Identifier()
+        )
+    );
+}
 
 
 
@@ -24,5 +26,5 @@ cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> cons
     for(ulong i = 0; i < results.size(); i += 2) {
         r->idList.push_back(results[i]->asIdentifier()->s);
     }
-    return r;
+    return dynamic_cast<__base_ST*>(r);
 }

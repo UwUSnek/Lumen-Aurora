@@ -12,18 +12,30 @@
 cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal) {
     ulong i = index;
 
-    // auto* ptr1 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[0];
-    // auto* ptr2 = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v[1];
 
-    // bool _a = pattern->asComposite()->v[0]->asComposite()->v[0]->isKeyword();
-    // bool _b = pattern->asComposite()->v[0]->asComposite()->v[1]->isIdentifier();
-    // bool _c = pattern->asComposite()->v[0]->asComposite()->v[2]->isKeyword();
-    // bool _d = pattern->asComposite()->v[0]->asComposite()->v[3]->isIdentifier();
-    // bool _e = pattern->asComposite()->v[0]->asComposite()->v[4]->isKeyword();
-    // bool _f = pattern->asComposite()->v[0]->asComposite()->v[5]->isLoop();
-    // int len = pattern->asComposite()->v[0]->asComposite()->v[5]->asLoop()->v->asOneOf()->v.size();
-    // // bool _e = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[0]->isComposite();
-    // // bool _f = pattern->asComposite()->v[0]->asComposite()->v[3]->asLoop()->v->asOneOf()->v[1]->isComposite();
+    // bool _0 = pattern->isComposite();
+    // bool _1 = pattern->asComposite()->v[0]->isLoop();
+    // bool _3 = pattern->asComposite()->v[0]->asLoop()->v[0]->isOneOf();
+    // auto tmp = pattern->asComposite()->v[0]->asLoop()->v[0]->asOneOf();
+
+    // bool _a = tmp->v[0]->isComposite();
+    // auto tmp_a = tmp->v[0]->asComposite();
+    // bool _a0 = tmp_a->v[0]->isKeyword();
+    // bool _a1 = tmp_a->v[1]->isIdentifier();
+    // bool _a2 = tmp_a->v[2]->isKeyword();
+    // bool _a3 = tmp_a->v[3]->isLoop();
+    // bool _a4 = tmp_a->v[4]->isKeyword();
+
+    // bool _b = tmp->v[0]->isComposite();
+    // auto tmp_b = tmp->v[1]->asComposite();
+    // bool _b0 = tmp_b->v[0]->isKeyword();
+    // bool _b1 = tmp_b->v[1]->isIdentifier();
+    // bool _b2 = tmp_b->v[2]->isKeyword();
+    // bool _b3 = tmp_b->v[3]->isComposite(); //path
+    // bool _b4 = tmp_b->v[4]->isKeyword();
+    // bool _b5 = tmp_b->v[5]->isLoop();
+    // bool _b6 = tmp_b->v[6]->isKeyword();
+
 
 
 
@@ -33,7 +45,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
         //TODO maybe optimize OneOf to check all patterns at once? instead of going back to the list if one fails
         for(ulong j = 0; j < p->v.size(); ++j) {
-            __base_Pattern* pElm = p->v[j];
+            __base_Pattern* pElm = dynamic_cast<__base_Pattern*>(p->v[j]);
             __base_ST* elm = generateTree(pElm, b, i, false);
             if(elm) return elm;
         }
@@ -52,14 +64,14 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
 
         std::vector<__base_ST*> elms;
         for(ulong j = 0; j < p->v.size(); ++j) {
-            __base_Pattern* pElm = p->v[j];
+            __base_Pattern* pElm = dynamic_cast<__base_Pattern*>(p->v[j]);
 
             // Parse Loop operator
             if(pElm->isLoop()) {
                 __Pattern_Operator_Loop* pLoop = pElm->asLoop();
 
                 for(ulong k = 0;; ++k) {
-                    __base_Pattern* pLoopElm = pLoop->v[k];
+                    __base_Pattern* pLoopElm = dynamic_cast<__base_Pattern*>(pLoop->v[k]);
                     __base_ST* elm = generateTree(pLoopElm, b, i, fatal); //FIXME determine when fatal should be used and when not.
                     if(!elm) break;
 
@@ -115,7 +127,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
         }
 
         ++i;
-        __base_ST* r = new ST_Sub_Keyword(t->getValue_Keyword());
+        __base_ST* r = dynamic_cast<__base_ST*>(new ST_Sub_Keyword(t->getValue_Keyword()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         return r;
@@ -133,7 +145,7 @@ cmp::__base_ST* cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, u
         }
 
         ++i;
-        __base_ST* r = new ST_Sub_Identifier(t->getValue_Identifier());
+        __base_ST* r = dynamic_cast<__base_ST*>(new ST_Sub_Identifier(t->getValue_Identifier()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         return r;

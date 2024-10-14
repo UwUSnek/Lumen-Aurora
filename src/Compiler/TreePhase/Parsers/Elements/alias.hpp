@@ -19,9 +19,8 @@ namespace cmp {
 
 
     struct Pattern_Elm_Alias : public virtual __base_Pattern_Composite {
-        Pattern_Elm_Alias();
+        void init();
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
-
 
         // virtual bool isChildAllowed(__base_ST* const c) const {
         //     return !c->isStatement();

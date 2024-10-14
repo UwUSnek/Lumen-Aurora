@@ -91,8 +91,7 @@ LIST_PATTERN_TOKENS_TYPES_NAMES
 // Pattern singletons
 namespace cmp {
     #define X(type, name) \
-        void           *re::__internal_void_##name = nullptr; \
-        __base_Pattern *re::__internal_base_##name = nullptr;
+        type *re::__internal_cache_##name = nullptr;
     LIST_PATTERN_ELM_TYPES_NAMES
     #undef X
 }
@@ -104,12 +103,14 @@ namespace cmp {
 
 
 
-cmp::Pattern_Elm_Module::Pattern_Elm_Module() : __base_Pattern_Composite(
-    op::Loop(op::OneOf(
-        re::Namespace(),
-        re::Enum()
-    ))
-){}
+void cmp::Pattern_Elm_Module::init() {
+    __base_Pattern_Composite::__internal_init(
+        op::Loop(op::OneOf(
+            re::Namespace(),
+            re::Enum()
+        ))
+    );
+}
 
 
 
@@ -119,5 +120,5 @@ cmp::__base_ST* cmp::Pattern_Elm_Module::generateData(std::vector<__base_ST*> co
     for(ulong i = 0; i < results.size(); ++i) {
         r->addChild(results[i]);
     }
-    return r;
+    return dynamic_cast<__base_ST*>(r);
 }

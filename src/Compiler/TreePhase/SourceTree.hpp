@@ -387,30 +387,34 @@ namespace cmp {
 
 
     namespace re {
-        // Custom sizeof function to use the size of the structs before they are formally defined
-        template<class t> size_t forwardSizeof() {
-            return sizeof(t);
+        // Custom new function that allows the macro to create elements before their types are fully defined
+        template<class t> t* __internal_forwardNew() {
+            return new t();
+        }
+
+
+        // Custom init wrapper that allows the macro to initialize elements before their types are fully defined
+        template<class t, class ...u> void __internal_forwardInit(t* ptr, u... subPatterns) {
+            ptr->init(subPatterns...);
         }
 
 
         // Pattern singletons and value generators
         // Usage: re::<name>(<patterns>)
         //! Placement new prevents circular dependencies between patterns
-        #define X(type, name)                                                                           \
-            extern void           *__internal_void_##name;                                              \
-            extern __base_Pattern *__internal_base_##name;                                              \
-            template<class ...t> type *name(t... subPatterns) {                                         \
-                if(!__internal_void_##name) {                                                           \
-                    __internal_void_##name = malloc(forwardSizeof<type>());                             \
-                    debug(consoleLock.lock(); cout << "allocated   " << __internal_void_##name << " | "#name << "\n"; consoleLock.unlock();)\
-                    __internal_base_##name = reinterpret_cast<__base_Pattern*>(__internal_void_##name); \
-                    new (__internal_base_##name) type(subPatterns...);                                  \
-                    debug(consoleLock.lock(); cout << "initialized " << __internal_void_##name << " | "#name << "\n"; consoleLock.unlock();)\
-                }                                                                                       \
-                else {                                                                                  \
-                debug(consoleLock.lock(); cout << "found       " << __internal_base_##name << " | "#name << "\n"; consoleLock.unlock();)\
-                }                                                                                       \
-                return reinterpret_cast<type*>(__internal_base_##name);                                 \
+        #define X(type, name)                                                                    \
+            extern type *__internal_cache_##name;                                                \
+            template<class ...t> type *name(t... subPatterns) {                                  \
+                if(!__internal_cache_##name) {                                                   \
+                    __internal_cache_##name = __internal_forwardNew<type>();                     \
+                    debug(consoleLock.lock(); cout << "allocated   " << __internal_cache_##name << " | "#name << "\n"; consoleLock.unlock();)\
+                    __internal_forwardInit<type>(__internal_cache_##name); \
+                    debug(consoleLock.lock(); cout << "initialized " << __internal_cache_##name << " | "#name << "\n"; consoleLock.unlock();)\
+                }                                                                                \
+                else {                                                                           \
+                    debug(consoleLock.lock(); cout << "found       " << __internal_cache_##name << " | "#name << "\n"; consoleLock.unlock();)\
+                }                                                                                \
+                return __internal_cache_##name;                                                  \
             }
         LIST_PATTERN_ELM_TYPES_NAMES
         #undef X
@@ -422,11 +426,12 @@ namespace cmp {
     namespace op {
         // Value generators for pattern operators (they don't need singletons and are stored in a different namespace)
         // Usage: op::<name>(<patterns>)
-        #define X(type, name)                                     \
-            template<class ...t> type *name(t... subPatterns) {   \
-                type* r = new type(subPatterns...);               \
+        #define X(type, name)                                                   \
+            template<class ...t> type *name(t... subPatterns) {                 \
+                type* r = re::__internal_forwardNew<type>();                    \
+                re::__internal_forwardInit<type, t...>(r, subPatterns...);      \
                 debug(consoleLock.lock(); cout << "created     " << r << " | "#name << "\n"; consoleLock.unlock();)\
-                return r;                                         \
+                return r;                                                       \
             }
         LIST_PATTERN_OPERATOR_TYPES_NAMES
         #undef X
@@ -437,11 +442,12 @@ namespace cmp {
     namespace tk {
         // Value generators for token operators (they don't need singletons and are stored in a different namespace)
         // Usage: tk::<name>(<expected value>?)
-        #define X(type, name)                                     \
-            template<class ...t> type *name(t... expectedValue) { \
-                type* r = new type(expectedValue...);             \
+        #define X(type, name)                                                   \
+            template<class ...t> type *name(t... expectedValue) {               \
+                type* r = re::__internal_forwardNew<type>();                    \
+                re::__internal_forwardInit<type, t...>(r, expectedValue...);    \
                 debug(consoleLock.lock(); cout << "created     " << r << " | "#name << "\n"; consoleLock.unlock();)\
-                return r;                                         \
+                return r;                                                       \
             }
         LIST_PATTERN_TOKENS_TYPES_NAMES
         #undef X
@@ -467,11 +473,8 @@ namespace cmp {
 
     struct __base_Pattern_Composite : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
-        template<class ...t> __base_Pattern_Composite(t... _v) :
-            //! Reinterpret cast is used instead of dynamic cast because the cached elements
-            //! are not initialized until all of their children are consrtucted.
-            //! Dynamic cast cannot be used on pointers that point to uninitialized data.
-            v{reinterpret_cast<__base_Pattern*>(_v)... } {
+        template<class ...t> void __internal_init(t... _v) {
+            v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
         }
 
         // virtual bool isChildAllowed(__base_ST* const child) const = 0;
@@ -488,22 +491,16 @@ namespace cmp {
     struct __Pattern_Operator_Loop : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
 
-        template<class ...t> __Pattern_Operator_Loop(t... _v) :
-            //! Reinterpret cast is used instead of dynamic cast because the cached elements
-            //! are not initialized until all of their children are consrtucted.
-            //! Dynamic cast cannot be used on pointers that point to uninitialized data.
-            v{ reinterpret_cast<__base_Pattern*>(_v)...} {
+        template<class ...t> void init(t... _v) {
+            v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
         }
     };
 
     struct __Pattern_Operator_OneOf : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
 
-        template<class ...t> __Pattern_Operator_OneOf(t... _v) :
-            //! Reinterpret cast is used instead of dynamic cast because the cached elements
-            //! are not initialized until all of their children are consrtucted.
-            //! Dynamic cast cannot be used on pointers that point to uninitialized data.
-            v{ reinterpret_cast<__base_Pattern*>(_v)...} {
+        template<class ...t> void init(t... _v) {
+            v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
         }
     };
 
@@ -516,17 +513,17 @@ namespace cmp {
 
     struct Pattern_Keyword : public virtual __base_Pattern_Token {
         ReservedTokenId id;
-        Pattern_Keyword(ReservedTokenId _id) :
-            id(_id) {
+        void init(ReservedTokenId _id){
+            id = _id;
         }
     };
 
     struct Pattern_Identifier : public virtual __base_Pattern_Token {
-        Pattern_Identifier(){}
+        void init(){}
     };
 
     struct Pattern_Literal : public virtual __base_Pattern_Token {
-        Pattern_Literal(){}
+        void init(){}
     };
 
 
@@ -541,7 +538,7 @@ namespace cmp {
 
     //TODO rename to "root"
     struct Pattern_Elm_Module : public virtual __base_Pattern_Composite {
-        Pattern_Elm_Module();
+        void init();
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
 
         // virtual bool isChildAllowed(__base_ST* const c) const {

@@ -10,13 +10,15 @@ std::string cmp::ST_Alias::getCategoryName(bool plural) const {
 
 
 
-cmp::Pattern_Elm_Alias::Pattern_Elm_Alias() : __base_Pattern_Composite(
-    tk::Keyword(ReservedTokenId::KEYWORD_ALIAS),
-    re::Path(),
-    tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
-    tk::Identifier(),
-    tk::Keyword(ReservedTokenId::KEYWORD_SEMICOLON)
-){}
+void cmp::Pattern_Elm_Alias::init() {
+    __base_Pattern_Composite::__internal_init(
+        tk::Keyword(ReservedTokenId::KEYWORD_ALIAS),
+        re::Path(),
+        tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+        tk::Identifier(),
+        tk::Keyword(ReservedTokenId::KEYWORD_SEMICOLON)
+    );
+}
 
 
 
@@ -26,7 +28,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Alias::generateData(std::vector<__base_ST*> con
     r->original = results[1]->asPath();
     r->name     = results[3]->asIdentifier();
     debug(consoleLock.lock(); cout << "found alias " << r->name->s << "\n"; consoleLock.unlock();)
-    return r;
+    return dynamic_cast<__base_ST*>(r);
 }
 
 
