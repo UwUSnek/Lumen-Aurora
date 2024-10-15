@@ -18,11 +18,11 @@ void cmp::Pattern_Elm_Enum::init() {
         tk::Keyword(ReservedTokenId::META_KEYWORD_BASE),
         re::Path(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-        op::Loop(op::OneOf(
+        op::Optional(op::Loop(op::OneOf(
             re::Enum(),
             re::Namespace()
             //FIXME other possible elements
-        )),
+        ))),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
     );
 }
@@ -37,4 +37,11 @@ cmp::__base_ST* cmp::Pattern_Elm_Enum::generateData(std::vector<__base_ST*> cons
     debug((cout++ << "found enum " << r->name->s << "\n")--;)
     //TODO contents
     return dynamic_cast<__base_ST*>(r);
+}
+
+
+
+
+std::string cmp::Pattern_Elm_Enum::genDecoratedValue() const {
+    return "Enum declaration";
 }

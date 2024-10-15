@@ -27,9 +27,14 @@ cmp::__base_ST* cmp::Pattern_Elm_Alias::generateData(std::vector<__base_ST*> con
     ST_Alias* r = new ST_Alias;
     r->original = results[1]->asPath();
     r->name     = results[3]->asIdentifier();
+
     debug((cout++ << "found alias " << r->name->s << "\n")--;)
     return dynamic_cast<__base_ST*>(r);
 }
 
 
 
+
+std::string cmp::Pattern_Elm_Alias::genDecoratedValue() const {
+    return "Symbol Alias";
+}

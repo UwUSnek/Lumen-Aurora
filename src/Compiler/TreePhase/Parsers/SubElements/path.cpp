@@ -11,10 +11,10 @@ std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
 void cmp::Pattern_Elm_Path::init(){
     __base_Pattern_Composite::__internal_init(
         tk::Identifier(),
-        op::Loop(
+        op::Optional(op::Loop(
             tk::Keyword(ReservedTokenId::KEYWORD_DOT),
             tk::Identifier()
-        )
+        ))
     );
 }
 
@@ -27,4 +27,11 @@ cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> cons
         r->idList.push_back(results[i]->asIdentifier()->s);
     }
     return dynamic_cast<__base_ST*>(r);
+}
+
+
+
+
+std::string cmp::Pattern_Elm_Path::genDecoratedValue() const {
+    return "Symbol Path";
 }

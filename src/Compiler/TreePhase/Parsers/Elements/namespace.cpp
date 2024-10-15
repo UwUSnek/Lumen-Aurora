@@ -15,11 +15,11 @@ void cmp::Pattern_Elm_Namespace::init() {
         tk::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
         tk::Identifier(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-        op::Loop(op::OneOf(
+        op::Optional(op::Loop(op::OneOf(
             re::Enum(),
             re::Namespace()
             //FIXME other possible elements
-        )),
+        ))),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
     );
 }
@@ -33,4 +33,11 @@ cmp::__base_ST* cmp::Pattern_Elm_Namespace::generateData(std::vector<__base_ST*>
     debug((cout++ << "found namespace " << r->name->s << "\n")--;)
     //TODO contents
     return dynamic_cast<__base_ST*>(r);
+}
+
+
+
+
+std::string cmp::Pattern_Elm_Namespace::genDecoratedValue() const {
+    return "Namespace declaration";
 }
