@@ -23,9 +23,13 @@ void cmp::Pattern_Elm_Path::init(){
 
 cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> const &results) const {
     ST_Sub_Path* r = new ST_Sub_Path;
+
+    // Set all the identifiers (start from 0 and skip . keyword every iteration)
     for(ulong i = 0; i < results.size(); i += 2) {
         r->idList.push_back(results[i]->asIdentifier()->s);
     }
+
+    // Return
     return dynamic_cast<__base_ST*>(r);
 }
 

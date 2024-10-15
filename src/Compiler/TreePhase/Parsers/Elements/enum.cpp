@@ -34,10 +34,16 @@ void cmp::Pattern_Elm_Enum::init() {
 
 cmp::__base_ST* cmp::Pattern_Elm_Enum::generateData(std::vector<__base_ST*> const &results) const {
     ST_Enum* r = new ST_Enum;
+
+    // Set custom data
     r->name     = results[1]->asIdentifier();
     r->baseType = results[3]->asPath();
+
+    // Add child trees
+    for(ulong i = 5; i < results.size() - 1; ++i) r->addChild(results[i]);
+
+    // Print debug info and return
     debug((cout++ << "found enum " << r->name->s << "\n")--;)
-    //TODO contents
     return dynamic_cast<__base_ST*>(r);
 }
 

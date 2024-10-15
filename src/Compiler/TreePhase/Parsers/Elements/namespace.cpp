@@ -31,9 +31,15 @@ void cmp::Pattern_Elm_Namespace::init() {
 
 cmp::__base_ST* cmp::Pattern_Elm_Namespace::generateData(std::vector<__base_ST*> const &results) const {
     ST_Namespace* r = new ST_Namespace;
+
+    // Set custom data
     r->name = results[1]->asIdentifier();
+
+    // Add child trees
+    for(ulong i = 5; i < results.size() - 1; ++i) r->addChild(results[i]);
+
+    // Print debug info and return
     debug((cout++ << "found namespace " << r->name->s << "\n")--;)
-    //TODO contents
     return dynamic_cast<__base_ST*>(r);
 }
 
