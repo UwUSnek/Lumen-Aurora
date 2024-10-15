@@ -129,6 +129,7 @@ debug(
 void cmp::Pattern_Elm_Module::init() {
     __base_Pattern_Composite::__internal_init(
         op::Optional(op::Loop(op::OneOf(
+            re::Alias(),
             re::Namespace(),
             re::Enum()
         )))

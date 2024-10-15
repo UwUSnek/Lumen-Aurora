@@ -62,26 +62,37 @@ std::vector<cmp::__base_ST*> cmp::generateTree(__base_Pattern* pattern, Tokenize
     }
 
 
+
+
     // Parse optional operator
     if(pattern->isOptional()) {
         debug((cout++ << ansi::bright_black << "Optional\n" << ansi::reset)--;)
         __Pattern_Operator_Optional* p = pattern->asOptional();
         std::vector<__base_ST*> r;
 
+        // For each element of the optional's sequence
         for(ulong j = 0; j < p->v.size(); ++j) {
+
+            // Try to generate its tree
             __base_Pattern* pElm = p->v[j];
             std::vector<__base_ST*> const &elms = generateTree(pElm, b, i, false debug(, indent + 1));
 
+            // If the generation succeeds, save the result trees in r
+            if(!elms.empty())
             for(ulong k = 0; k < elms.size(); ++k) {
-                if(elms[k]) {
-                    r.push_back(elms[k]);
-                    i += elms[k]->tokenEnd - elms[k]->tokenBgn + 1;
-                }
-                else return {};
+                r.push_back(elms[k]);
+                i += elms[k]->tokenEnd - elms[k]->tokenBgn + 1;
             }
+
+            // If not, return failure
+            else return {};
         }
+
+        // Result sum of result trees
         return r;
     }
+
+
 
 
     // Parse Loop operator
@@ -90,18 +101,34 @@ std::vector<cmp::__base_ST*> cmp::generateTree(__base_Pattern* pattern, Tokenize
         __Pattern_Operator_Loop* p = pattern->asLoop();
         std::vector<__base_ST*> r;
 
-        for(ulong j = 0;; ++j) {
-            if(j >= p->v.size()) j = 0;
-            __base_Pattern* pElm = p->v[j];
-            std::vector<__base_ST*> const &elms = generateTree(pElm, b, i, fatal debug(, indent + 1));
-            if(!pElm->isOptional() && elms.empty()) return {};
+        // Repeat loop sequence until it fails
+        for(ulong l = 0;; ++l) {
+            ulong j;
 
-            for(ulong k = 0; k < elms.size(); ++k) {
-                r.push_back(elms[k]);
-                i += elms[k]->tokenEnd - elms[k]->tokenBgn + 1;
+            // For each element of the loop's sequence
+            for(j = 0; j < p->v.size(); ++j) {
+
+                // Try to generate its tree. Break if the generation fails
+                __base_Pattern* pElm = p->v[j];
+                std::vector<__base_ST*> const &elms = generateTree(pElm, b, i, fatal debug(, indent + 1));
+                if(!pElm->isOptional() && elms.empty()) break;
+
+                // If the generation succeeds, save all of the result trees and update i
+                for(ulong k = 0; k < elms.size(); ++k) {
+                    r.push_back(elms[k]);
+                    i += elms[k]->tokenEnd - elms[k]->tokenBgn + 1;
+                }
+            }
+
+            // Check iteration result
+            if(j == 0) {                // If the iteration failed
+                if(l > 0) return r;         // If at least 1 previous iteration succeeded, return the trees
+                else return {};             // If this is the first, return failure
             }
         }
-        return r;
+
+        //! Bogus return value to silence GCC
+        return { (__base_ST*)0xDEAD };
     }
 
 
@@ -112,43 +139,27 @@ std::vector<cmp::__base_ST*> cmp::generateTree(__base_Pattern* pattern, Tokenize
         debug((cout++ << ansi::bright_black << "Composite (" << pattern->genDecoratedValue() << ")\n" << ansi::reset)--;)
         __base_Pattern_Composite* p = pattern->asComposite();
 
+        // For each of element of the composite's sequence
         std::vector<__base_ST*> genSource;
         for(ulong j = 0; j < p->v.size(); ++j) {
+
+            // Try to generate its tree
             __base_Pattern* pElm = p->v[j];
+            std::vector<__base_ST*> const &elms = generateTree(pElm, b, i, fatal debug(, indent + 1));
 
-            // // Parse Loop operator
-            // if(pElm->isLoop()) {
-            //     __Pattern_Operator_Loop* pLoop = pElm->asLoop();
-            //     debug((cout++ << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent + 1) << ansi::green << pElm << " (loop)\n" << ansi::reset)--;)
-
-            //     for(ulong k = 0;; ++k) {
-            //         if(k >= pLoop->v.size()) k = 0;
-            //         __base_Pattern* pLoopElm = pLoop->v[k];
-            //         __base_ST* elm = generateTree(pLoopElm, b, i, fatal debug(, indent + 2)); //FIXME determine when fatal should be used and when not.
-            //         if(!elm) break;
-
-
-            //         i += elm->tokenEnd - elm->tokenBgn + 1;
-            //         elms.push_back(elm);
-            //     }
-            //     //TODO this should prob print an error if fatal is true
-            // }
-            // else {
-            std::vector<__base_ST*> const &elms = generateTree(pElm, b, i, fatal debug(, indent + 1)); //FIXME determine when fatal should be used and when not.
-
+            // If the generation fails and fatal is true, print an error. If it's false, return failure
             if(!pElm->isOptional() && elms.empty()) {
                 if(fatal) utils::printError(
-                // utils::printError(
                     ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                     ElmCoords(b, index, i),
                     ElmCoords(b, i,     i),
                     "Incomplete " + p->genDecoratedValue() + ".\n" +
                     pElm->genDecoratedValue() + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
-                    //FIXME ^ print "incomplete *something*: the *something* is missing."
-                    //FIXME         "a *something* was expected, but token was found instead. / *something* is missing"
                 );
                 else return {};
             }
+
+            // If it succeeds, save the result trees in genSource and update i
             for(ulong k = 0; k < elms.size(); ++k) {
                 i += elms[k]->tokenEnd - elms[k]->tokenBgn + 1;
                 genSource.push_back(elms[k]);
@@ -164,6 +175,7 @@ std::vector<cmp::__base_ST*> cmp::generateTree(__base_Pattern* pattern, Tokenize
             // }
         }
 
+        // Generate the tree of the composite element and set its beginning and end indices, then return it as the sole result
         __base_ST* r = p->generateData(genSource);
         r->tokenBgn = index;
         r->tokenEnd = i - 1;

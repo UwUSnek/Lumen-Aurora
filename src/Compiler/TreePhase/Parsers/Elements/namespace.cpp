@@ -2,6 +2,7 @@
 #include "Utils/errors.hpp"
 
 #include "enum.hpp"
+#include "alias.hpp"
 
 std::string cmp::ST_Namespace::getCategoryName(bool plural) const {
     return plural ? "namespace definition" : "namespace definitions";
@@ -16,6 +17,7 @@ void cmp::Pattern_Elm_Namespace::init() {
         tk::Identifier(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(
+            re::Alias(),
             re::Enum(),
             re::Namespace()
             //FIXME other possible elements

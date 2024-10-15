@@ -3,6 +3,7 @@
 
 #include "Compiler/TreePhase/Parsers/SubElements/path.hpp"
 #include "namespace.hpp"
+#include "alias.hpp"
 
 std::string cmp::ST_Enum::getCategoryName(bool plural) const {
     return plural ? "enum definition" : "enum definitions";
@@ -19,6 +20,7 @@ void cmp::Pattern_Elm_Enum::init() {
         re::Path(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(
+            re::Alias(),
             re::Enum(),
             re::Namespace()
             //FIXME other possible elements
