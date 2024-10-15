@@ -55,11 +55,6 @@ std::mutex sourceFilePathsLock;
 
 
 
-// A mutex that controls the console output.
-// This allows multiple threads to write multiple messages at once without being interrupted.
-std::mutex consoleLock;
-
-
 std::atomic<ulong> activeThreads(0);
 std::atomic<ulong> totalThreads(0);
 std::atomic<ulong> totalFiles(0);
@@ -87,17 +82,25 @@ std::atomic<bool> isComplete(false);
 
 
 
+
+
+// A mutex that controls the console output.
+// This allows multiple threads to write multiple messages at once without being interrupted.
+std::mutex __internal_consoleLock;
+
+
+
+
 int __internal_cout_stream_t::overflow(int c) {
     if (c != EOF) {
-        output_mutex.lock();
         if (c == '\n') std::cout << "\033[K";
         std::cout.put(c);
-        output_mutex.unlock();
     }
     return c;
 }
 __internal_cout_stream_t __internal_cout_streambuff;
-std::ostream cout(&__internal_cout_streambuff);
+std::ostream __internal_cout(&__internal_cout_streambuff);
+__internal_cout_stream_t_wrapper cout;
 
 
 
@@ -105,15 +108,18 @@ std::ostream cout(&__internal_cout_streambuff);
 
 int __internal_cerr_stream_t::overflow(int c) {
     if (c != EOF) {
-        output_mutex.lock();
         if (c == '\n') std::cerr << "\033[K";
         std::cerr.put(c);
-        output_mutex.unlock();
     }
     return c;
 }
 __internal_cerr_stream_t __internal_cerr_streambuff;
-std::ostream cerr(&__internal_cerr_streambuff);
+std::ostream __internal_cerr(&__internal_cerr_streambuff);
+__internal_cerr_stream_t_wrapper cerr;
+
+
+
+
 
 
 

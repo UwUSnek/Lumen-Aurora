@@ -1,58 +1,37 @@
 #include "path.hpp"
 #include "Utils/errors.hpp"
 
-//FIXME free the tokens after using them
-//FIXME also free the other stuff
+std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
+    return plural ? "symbol path" : "symbol paths";
+} //TODO check if plural is needed
 
 
 
 
-cmp::ST_Sub_Path* cmp::parsePath(TokenizedSource* b, ulong index) {
+void cmp::Pattern_Elm_Path::init(){
+    __base_Pattern_Composite::__internal_init(
+        tk::Identifier(),
+        op::Optional(op::Loop(
+            tk::Keyword(ReservedTokenId::KEYWORD_DOT),
+            tk::Identifier()
+        ))
+    );
+}
 
-    // Save the starting identifier
-    std::optional<Token> const &t0 = (*b)[index];
-    if(!t0.has_value() || !t0->isIdentifier()) {
-        return nullptr;
+
+
+
+cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> const &results) const {
+    ST_Sub_Path* r = new ST_Sub_Path;
+    for(ulong i = 0; i < results.size(); i += 2) {
+        r->idList.push_back(results[i]->asIdentifier()->s);
     }
-    ST_Sub_Path *r = new ST_Sub_Path();
-    ulong i = index + 1;
-    r->idList.push_back(t0->getValue_Identifier());
+    return dynamic_cast<__base_ST*>(r);
+}
 
 
 
 
-    // Save subsequent separator-identifier pairs
-    while(true) {
-
-
-        // Skip . separator, return if one is not found
-        std::optional<Token> const &ta = (*b)[i];
-        if(!ta.has_value() || !ta->isKeyword(ReservedTokenId::KEYWORD_DOT)) {
-            break;
-        }
-        ++i;
-
-
-        // Save identifier, print an error if one is not found
-        std::optional<Token> const &tb = (*b)[i];
-        if(!tb.has_value() || !tb->isIdentifier()) {
-            utils::printError(
-                ERROR_CMP_PATH_NO_IDENTIFIER, utils::ErrType::COMPILER,
-                ElmCoords(b, index, i),
-                ElmCoords(b, i,     i),
-                "Incomplete symbol path.\n" +
-                (tb.has_value() ? "Expected an identifier, but the " + tb->genDecoratedValue() + " was found instead." : "The identifier is missing.")
-            );
-        }
-        r->idList.push_back(tb->getValue_Identifier());
-        ++i;
-    }
-
-
-
-
-    // Set element length and return the node
-    r->tokenBgn = index;
-    r->tokenEnd = i - 1;
-    return r;
+std::string cmp::Pattern_Elm_Path::genDecoratedValue() const {
+    return "Symbol Path";
 }

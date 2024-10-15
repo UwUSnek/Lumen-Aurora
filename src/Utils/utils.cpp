@@ -114,7 +114,7 @@ std::string utils::shortenInteger(ulong n) {
     // Return the final value + suffix
     // truncate the number if is more than 999 and exceeds 3 characters and remove any stray trailing periods
     std::string r2 = r.str();
-    return r2.substr(0, 2 + (r2[2] != '.') + suffix.empty()) + suffix;
+    return r2.substr(0, 2 + (r2.length() > 2 && r2[2] != '.') + suffix.empty()) + suffix;
 }
 
 

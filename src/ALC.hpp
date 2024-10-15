@@ -8,6 +8,13 @@
 #include "Utils/DynamicProgressBar.hpp"
 
 
+#define PRINT_DEBUG_INFO 1
+
+#if PRINT_DEBUG_INFO == 1
+    #define debug(...) __VA_ARGS__
+#else
+    #define debug(...)
+#endif
 
 
 
@@ -66,7 +73,6 @@ extern std::mutex sourceFilePathsLock;
 
 
 
-extern std::mutex consoleLock;
 
 
 extern std::atomic<ulong> activeThreads;
@@ -92,30 +98,68 @@ extern std::atomic<bool> isComplete;
 
 
 
+extern std::mutex __internal_consoleLock;
+
+
+
 
 class __internal_cout_stream_t : public std::streambuf {
-private:
-    std::mutex output_mutex;
-
 protected:
     virtual int overflow(int c) override;
 };
 extern __internal_cout_stream_t __internal_cout_streambuff;
-extern std::ostream cout;
+extern std::ostream __internal_cout;
 
+
+class __internal_cout_stream_t_wrapper {
+public:
+    template<typename T> __internal_cout_stream_t_wrapper &operator<<(const T& val) {
+        __internal_cout << val;
+        return *this;
+    }
+    __internal_cout_stream_t_wrapper &operator++(int dummy) {
+        __internal_consoleLock.lock();
+        return *this;
+    }
+
+    __internal_cout_stream_t_wrapper &operator--(int dummy) {
+        __internal_consoleLock.unlock();
+        return *this;
+    }
+};
+extern  __internal_cout_stream_t_wrapper cout;
 
 
 
 
 class __internal_cerr_stream_t : public std::streambuf {
-private:
-    std::mutex output_mutex;
-
 protected:
     virtual int overflow(int c) override;
 };
 extern __internal_cerr_stream_t __internal_cerr_streambuff;
-extern std::ostream cerr;
+extern std::ostream __internal_cerr;
+
+
+class __internal_cerr_stream_t_wrapper {
+public:
+    template<typename T> __internal_cerr_stream_t_wrapper &operator<<(const T& val) {
+        __internal_cerr << val;
+        return *this;
+    }
+    __internal_cerr_stream_t_wrapper &operator++(int dummy) {
+        __internal_consoleLock.lock();
+        return *this;
+    }
+
+    __internal_cerr_stream_t_wrapper &operator--(int dummy) {
+        __internal_consoleLock.unlock();
+        return *this;
+    }
+};
+extern  __internal_cerr_stream_t_wrapper cerr;
+
+
+
 
 
 
@@ -202,7 +246,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
     // Set thread name and type
     threadType = ThreadType::SUBPHASE;
-    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (3 /*Separator*/));
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (1 /*Phase number*/) - (3 /*Separator*/));
     pthread_setname_np(pthread_self(), (std::string("S") + std::to_string(phaseId) + " | " + truncatedName).c_str());
 
 

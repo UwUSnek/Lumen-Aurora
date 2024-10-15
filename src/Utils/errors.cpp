@@ -132,7 +132,7 @@ static inline void printLineNum(ulong n) {
 //FIXME    ALSO WRITE WHICH MACRO CALL CREATED IT.
 //FIXME    maybe even write a raw version of the lines on the left and a replaced version of them on the right
 void utils::printErrorGeneric(ErrorCode errorCode, std::string const &message) {
-    consoleLock.lock();
+    cerr++;
 
     cerr << ansi::bold_red;
     cerr << "Error:";
@@ -145,7 +145,7 @@ void utils::printErrorGeneric(ErrorCode errorCode, std::string const &message) {
         << "\n";
 
     // Stop the program
-    consoleLock.unlock();
+    cerr--;
     exitMain(errorCode);
 }
 
@@ -159,7 +159,7 @@ void utils::printErrorGeneric(ErrorCode errorCode, std::string const &message) {
 void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, std::string const &message, std::string const &fullCommand) {
     cmd::ElmCoordsCL const &relPos = trimCoords(fullCommand, _relPos);
     cmd::ElmCoordsCL const &errPos = trimCoords(fullCommand, _errPos);
-    consoleLock.lock();
+    cerr++;
 
     cerr << ansi::bold_red;
     cerr << "Could not parse command:\n";
@@ -187,7 +187,7 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
 
 
     // Stop the program
-    consoleLock.unlock();
+    cerr--;
     exitMain(errorCode);
 }
 
@@ -233,7 +233,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
     std::string errFilePath = sourceFilePaths[_errPos.filePathIndex];
     sourceFilePathsLock.unlock();
 
-    consoleLock.lock();
+    cerr++;
     cerr << ansi::bold_red;
 
     // Print error type and location
@@ -281,7 +281,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
         printLineNum(curLine);
         ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
         ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
-        const char* lastColor;
+        const char* lastColor = nullptr;
         ulong col = 0;
         bool overflowed = false;
         for(;; ++i) {
@@ -336,6 +336,6 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
     // Stop the program
-    consoleLock.unlock();
+    cerr--;
     exitMain(errorCode);
 }

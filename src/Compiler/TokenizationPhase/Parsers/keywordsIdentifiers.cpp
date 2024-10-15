@@ -94,9 +94,8 @@ std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b,
  */
 bool cmp::isSymbolicChar(std::optional<char> const &c) {
     return c.has_value() && (
-        c == '!' || c == '$' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == ':' || c == '<' ||
-        c == '=' || c == '>' || c == '?' || c == '@' || c == '^' || c == '`' || c == '|' || c == '~' || c == '.' ||
-        c == '[' || c == ']'
+        c == '!' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == ':' || c == '<' || c == '[' ||
+        c == '='             || c == '?' || c == '^' || c == '`' || c == '|' || c == '~' || c == '>' || c == ']'
     );
 }
 
@@ -112,8 +111,10 @@ bool cmp::isSymbolicChar(std::optional<char> const &c) {
  */
 bool cmp::isCharReserved(std::optional<char> const &c) {
     return c.has_value() && (
+        c == '$' || c == '@' ||
         c == ';' || c == ',' ||
         c == '(' || c == ')' ||
-        c == '{' || c == '}'
+        c == '{' || c == '}' ||
+        c == '.'
     );
 }

@@ -75,21 +75,15 @@ int main(int argc, char* argv[]){
     // Parse command line options
     cmd::parseOptions(argc, argv, fullCommand);
     if(cmd::options.isHelp) {
-        consoleLock.lock();
-        cout << cmd::getHelpMessage();
-        consoleLock.unlock();
+        (cout++ << cmd::getHelpMessage())--;
         exit(0);
     }
     if(cmd::options.isVersion) {
-        consoleLock.lock();
-        cout << cmd::getVersionMessage();
-        consoleLock.unlock();
+        (cout++ << cmd::getVersionMessage())--;
         exit(0);
     }
 
-    consoleLock.lock();
-    cout << "Executing command \"" << ansi::bold_white << fullCommand << ansi::reset << "\"...\n\n";
-    consoleLock.unlock();
+    (cout++ <<"Executing command \"" << ansi::bold_white << fullCommand << ansi::reset << "\"...\n\n")--;
     bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
     bool compileExec    = cmd::options.outputType == 'x';
 
