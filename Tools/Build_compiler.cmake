@@ -41,6 +41,7 @@ add_executable(alc
             ../src/Compiler/TokenizationPhase/Parsers/numericalLiterals.cpp
             ../src/Compiler/TokenizationPhase/whitespaceCounter.cpp
         ../src/Compiler/TreePhase/SourceTree.cpp
+        ../src/Compiler/TreePhase/TreePatterns.cpp
         ../src/Compiler/TreePhase/treePhase.cpp
             ../src/Compiler/TreePhase/Parsers/Elements/namespace.cpp
             ../src/Compiler/TreePhase/Parsers/Elements/enum.cpp

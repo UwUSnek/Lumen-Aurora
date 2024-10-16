@@ -1,7 +1,6 @@
 #include "alias.hpp"
 #include "Utils/errors.hpp"
-
-#include "Compiler/TreePhase/Parsers/SubElements/path.hpp"
+#include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Alias::getCategoryName(bool plural) const {
     return plural ? "symbol alias definition" : "symbol alias definitions";

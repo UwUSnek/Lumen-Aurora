@@ -1,8 +1,6 @@
 #include "namespace.hpp"
 #include "Utils/errors.hpp"
-
-#include "enum.hpp"
-#include "alias.hpp"
+#include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Namespace::getCategoryName(bool plural) const {
     return plural ? "namespace definition" : "namespace definitions";
@@ -19,6 +17,7 @@ void cmp::Pattern_Elm_Namespace::init() {
         op::Optional(op::Loop(op::OneOf(
             re::Alias(),
             re::Enum(),
+            re::Struct(),
             re::Namespace()
             //FIXME other possible elements
         ))),

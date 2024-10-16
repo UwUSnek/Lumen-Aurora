@@ -2,12 +2,12 @@
 #include "Utils/errors.hpp"
 #include "Utils/ansi.hpp"
 #include "Parsers/Generic/scope.hpp"
+#include "Compiler/TreePhase/PatternGenerators.hpp"
 
 
 
 //FIXME add expressions
 
-#include "Parsers/Elements/enum.hpp"
 
 debug(
     static std::string genIndentation(int indent) { return cmp::__internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent);   }

@@ -19,3 +19,7 @@ enum b : uint  {
 namespace _namespace3 {}
 
 alias a.b.test as abtest;
+
+struct a {
+
+}

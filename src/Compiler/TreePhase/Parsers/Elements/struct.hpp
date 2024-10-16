@@ -1,10 +1,29 @@
-// #pragma once
-// #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
-// #include "Compiler/TreePhase/SourceTree.hpp"
+#pragma once
+#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
+#include "Compiler/TreePhase/SourceTree.hpp"
+#include "Compiler/TreePhase/TreePatterns.hpp"
 
 
 
 
-// namespace cmp {
-//     ST_Struct* parseStruct(TokenizedSource* b, ulong index);
-// }
+
+
+
+
+namespace cmp {
+    struct ST_Struct : public virtual __base_ST_Referable, public virtual __base_ST_Container {
+        //! Enum elements are saved in the children vector
+
+        std::string getCategoryName(bool plural = false) const override;
+    };
+
+
+
+
+    struct Pattern_Elm_Struct : public virtual __base_Pattern_Composite {
+        void init();
+        __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
+        std::string genDecoratedValue() const override;
+        ulong   getCertaintyThreshold() const override;
+    };
+}

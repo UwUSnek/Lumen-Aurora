@@ -1,5 +1,6 @@
 #include "path.hpp"
 #include "Utils/errors.hpp"
+#include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
     return plural ? "symbol path" : "symbol paths";

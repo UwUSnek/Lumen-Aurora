@@ -1,9 +1,6 @@
 #include "enum.hpp"
 #include "Utils/errors.hpp"
-
-#include "Compiler/TreePhase/Parsers/SubElements/path.hpp"
-#include "namespace.hpp"
-#include "alias.hpp"
+#include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Enum::getCategoryName(bool plural) const {
     return plural ? "enum definition" : "enum definitions";
@@ -22,6 +19,7 @@ void cmp::Pattern_Elm_Enum::init() {
         op::Optional(op::Loop(op::OneOf(
             re::Alias(),
             re::Enum(),
+            re::Struct(),
             re::Namespace()
             //FIXME other possible elements
         ))),
