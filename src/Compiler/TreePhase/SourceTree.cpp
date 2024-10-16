@@ -146,3 +146,8 @@ cmp::__base_ST* cmp::Pattern_Elm_Module::generateData(std::vector<__base_ST*> co
     }
     return dynamic_cast<__base_ST*>(r);
 }
+
+
+ulong cmp::Pattern_Elm_Module::getCertaintyThreshold() const {
+    return (ulong)-1;
+}

@@ -39,3 +39,8 @@ cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> cons
 std::string cmp::Pattern_Elm_Path::genDecoratedValue() const {
     return "Symbol Path";
 }
+
+
+ulong cmp::Pattern_Elm_Path::getCertaintyThreshold() const {
+    return 1;
+}

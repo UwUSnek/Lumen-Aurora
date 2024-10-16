@@ -53,3 +53,8 @@ cmp::__base_ST* cmp::Pattern_Elm_Enum::generateData(std::vector<__base_ST*> cons
 std::string cmp::Pattern_Elm_Enum::genDecoratedValue() const {
     return "Enum declaration";
 }
+
+
+ulong cmp::Pattern_Elm_Enum::getCertaintyThreshold() const {
+    return 1;
+}

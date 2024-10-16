@@ -321,7 +321,8 @@ namespace cmp {
     // Base patterns. Doesn't include the root class.
     #define LIST_PATTERN_BASES_TYPES_NAMES         \
         X(__base_Pattern_Token,        Token)      \
-        X(__base_Pattern_Composite,    Composite)
+        X(__base_Pattern_Composite,    Composite)  \
+        X(__base_Pattern_Operator,     Operator)
 
     // Pattern operators. These patterns cannot be cached and they can't generate a tree. They are only used to specify the syntax.
     #define LIST_PATTERN_OPERATOR_TYPES_NAMES      \
@@ -385,6 +386,7 @@ namespace cmp {
 
 
         virtual std::string genDecoratedValue() const = 0;
+        virtual ulong getCertaintyThreshold() const = 0;
     };
 
 
@@ -475,6 +477,19 @@ namespace cmp {
     };
 
 
+
+
+    struct __base_Pattern_Operator : public virtual __base_Pattern {
+        std::vector<__base_Pattern*> v;
+
+        template<class ...t> void __internal_init(t... _v) {
+            v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
+        }
+    };
+
+
+
+
     debug(
         static std::string __internal_repeat(std::string s, ulong n) {
             std::stringstream r;
@@ -509,41 +524,38 @@ namespace cmp {
 
 
 
-    struct __Pattern_Operator_Loop : public virtual __base_Pattern {
-        std::vector<__base_Pattern*> v;
-
+    struct __Pattern_Operator_Loop : public virtual __base_Pattern_Operator {
         template<class ...t> void init(t... _v) {
-            v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
+            __base_Pattern_Operator::__internal_init(_v...);
         }
 
-        std::string genDecoratedValue() const override { return ""; }
+        std::string genDecoratedValue() const override { return "" debug("Debug:OperatorLoop"); }
+        ulong getCertaintyThreshold() const override { return 0; } //TODO check if this is ok
     };
 
 
 
 
-    struct __Pattern_Operator_OneOf : public virtual __base_Pattern {
-        std::vector<__base_Pattern*> v;
-
+    struct __Pattern_Operator_OneOf : public virtual __base_Pattern_Operator {
         template<class ...t> void init(t... _v) {
-            v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
+            __base_Pattern_Operator::__internal_init(_v...);
             debug(for(auto p : v) if(p->isOptional()) (cout++ << "Optional operator used as direct child of OneOf. This is not allowed.")--;)
         }
 
-        std::string genDecoratedValue() const override { return ""; }
+        std::string genDecoratedValue() const override { return "" debug("Debug:OperatorOneOf"); }
+        ulong getCertaintyThreshold() const override { return 0; } //TODO check if this is ok
     };
 
 
 
 
-    struct __Pattern_Operator_Optional : public virtual __base_Pattern {
-        std::vector<__base_Pattern*> v;
-
+    struct __Pattern_Operator_Optional : public virtual __base_Pattern_Operator {
         template<class ...t> void init(t... _v) {
-            v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
+            __base_Pattern_Operator::__internal_init(_v...);
         }
 
-        std::string genDecoratedValue() const override { return ""; }
+        std::string genDecoratedValue() const override { return "" debug("Debug:OperatorOptional"); }
+        ulong getCertaintyThreshold() const override { return 0; } //TODO check if this is ok
     };
 
 
@@ -566,6 +578,9 @@ namespace cmp {
                 [&](const auto& pair) { return pair.second == id; }
             )->first + "\"";
         }
+        ulong getCertaintyThreshold() const override {
+            return 1;
+        }
     };
 
 
@@ -575,6 +590,9 @@ namespace cmp {
         std::string genDecoratedValue() const override {
             return "An identifier";
         }
+        ulong getCertaintyThreshold() const override {
+            return 1;
+        }
     };
 
 
@@ -583,6 +601,9 @@ namespace cmp {
 
         std::string genDecoratedValue() const override {
             return "A literal";
+        }
+        ulong getCertaintyThreshold() const override {
+            return 1;
         }
     };
 
@@ -602,7 +623,8 @@ namespace cmp {
         void init();
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
 
-        std::string genDecoratedValue() const override { return ""; }
+        std::string genDecoratedValue() const override { return "" debug("Debug:Module"); }
+        ulong getCertaintyThreshold() const override;
         // virtual bool isChildAllowed(__base_ST* const c) const {
             // return !c->isStatement();
         // }

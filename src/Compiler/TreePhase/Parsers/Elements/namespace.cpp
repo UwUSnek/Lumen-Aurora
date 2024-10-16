@@ -49,3 +49,8 @@ cmp::__base_ST* cmp::Pattern_Elm_Namespace::generateData(std::vector<__base_ST*>
 std::string cmp::Pattern_Elm_Namespace::genDecoratedValue() const {
     return "Namespace declaration";
 }
+
+
+ulong cmp::Pattern_Elm_Namespace::getCertaintyThreshold() const {
+    return 1;
+}

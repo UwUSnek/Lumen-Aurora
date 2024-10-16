@@ -1,11 +1,12 @@
 #pragma once
 #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 #include "Compiler/TreePhase/SourceTree.hpp"
+#include "GenerationResult.hpp"
 
 
 
 
 namespace cmp {
-    std::vector<cmp::__base_ST*> generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool fatal debug(, int indent));
+    GenerationResult *generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool optional debug(, int indent));
     void startTreePhase(TokenizedSource *b, SourceTree *r);
 }

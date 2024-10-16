@@ -38,3 +38,8 @@ cmp::__base_ST* cmp::Pattern_Elm_Alias::generateData(std::vector<__base_ST*> con
 std::string cmp::Pattern_Elm_Alias::genDecoratedValue() const {
     return "Symbol Alias";
 }
+
+
+ulong cmp::Pattern_Elm_Alias::getCertaintyThreshold() const {
+    return 1;
+}
