@@ -125,19 +125,20 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
                 //               |                                 |
-                //      optional | 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 |
-                //    isComplete | 1 1 1 1 0 0 0 0 1 1 1 1 0 0 0 0 |
+                //    isComplete | 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 |
+                //          l==0 | 1 1 1 1 0 0 0 0 1 1 1 1 0 0 0 0 |
                 //    isOptional | 1 1 0 0 1 1 0 0 1 1 0 0 1 1 0 0 |
-                //          l==0 | 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 |
+                //      optional | 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 |
                 //               |                                 |
-                //    save elms? | 1 1 1 1 0 0 0 0 1 1 1 1 0 0 1 0 | isComplete || (l==0 && !optional && !isOptional)
-                // stop parsing? | 0 0 0 0 1 1 1 1 0 0 0 0 0 0 1 1 | !isComplete && (optional || !isOptional)
+                //    save elms? | 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 | isComplete || l==0
+                // stop parsing? | 0 0 0 0 0 0 0 0 1 1 0 0 1 1 0 0 | !isComplete && !isOptional
                 //               |                                 |
 
 
                 // If the generation succeeds or this is the first iteration, save all of the result trees and update i
-                // if(result->isComplete || l == 0) {
-                if(result->isComplete || (l == 0 && !pElm->isOperator() && !optional)) {
+                if(result->isComplete || l == 0) {
+                // if(result->isComplete || (l == 0 && !pElm->isOperator() && !optional)) {
+                // if(result->isComplete || pElm->isOptional()) {
                     for(ulong k = 0; k < result->trees.size(); ++k) {
                         r->trees.push_back(result->trees[k]);
                         i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
@@ -146,7 +147,8 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
                 // If it fails and the result is not optional, stop parsing
                 // if(!pElm->isOptional() && !result->isComplete) break;
-                if(!result->isComplete && (optional || !pElm->isOptional())) break;
+                // if(!result->isComplete && (optional || !pElm->isOptional())) break;
+                if(!result->isComplete && !pElm->isOptional()) break;
                 // // If the generation succeeds or this is the first iteration, save all of the result trees and update i
             }
 
@@ -196,37 +198,48 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             //               |                                 |
             //  print error? | 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 1 | !isComplete && (>Threshold || (!isOptional && !optional))
             //               |                 1 1 1 1       0 |
+            //FIXME UPDATE THIS TABLE
 
 
             // // If the generation fails and fatal is true, print an error. If it's false, return failure
             // Print an error if the generation fails and (the the number of matched elements exceeds the certainty threshold or the element is not optional and fatal is off) //TODO
             // if(!result->isComplete && (j >= p->getCertaintyThreshold() || (!pElm->isOptional() && fatal))) {
             if(!result->isComplete) {
+                bool allOptional = true;
+                for(ulong k = j; k < p->v.size(); ++k) {
+                    if(!p->v[k]->isOptional()) {
+                        allOptional = false;
+                        break;
+                    }
+                }
                 // // if(!pElm->isOptional() || result->trees.size() >= pElm->getCertaintyThreshold()) {
                 // // if(!pElm->isOptional() || j >= p->getCertaintyThreshold()) { //FIXME check if optionals need to be counted. they might be messing up the threshold detection
-                if(j >= p->getCertaintyThreshold() || (!pElm->isOptional() && !optional)) { //FIXME check if optionals need to be counted. they might be messing up the threshold detection
+                // if(j >= p->getCertaintyThreshold() || (!pElm->isOptional() && !optional)) { //FIXME check if optionals need to be counted. they might be messing up the threshold detection
+                if(j >= p->getCertaintyThreshold()) { //FIXME check if optionals need to be counted. they might be messing up the threshold detection
                 // //BUG threshold gets checked before optional and breaks it
 
-                    // Find the element that caused the error (skip operators)
-                    //FIXME print "unexpected token" without specifying the expected element in case of OneOf
-                    //FIXME it prob needs this even if OneOf is not the direct parent of the problematic element but somewhere between it and the composite elm
-                    std::string expectedElementStr;
-                    for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
-                        if(curPattern->isComposite() || curPattern->isToken()) {
-                            expectedElementStr = curPattern->genDecoratedValue();
-                            break;
+                    if(!allOptional && !optional) {
+                        // Find the element that caused the error (skip operators)
+                        //FIXME print "unexpected token" without specifying the expected element in case of OneOf
+                        //FIXME it prob needs this even if OneOf is not the direct parent of the problematic element but somewhere between it and the composite elm
+                        std::string expectedElementStr;
+                        for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
+                            if(curPattern->isComposite() || curPattern->isToken()) {
+                                expectedElementStr = curPattern->genDecoratedValue();
+                                break;
+                            }
                         }
-                    }
 
-                    // Actually print the error
-                    utils::printError(
-                        ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
-                        ElmCoords(b, index, i),
-                        ElmCoords(b, i,     i),
-                        "Incomplete " + p->genDecoratedValue() + ".\n" +
-                        expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
-                        //FIXME pElm can be an operator - do something about it
-                    );
+                        // Actually print the error
+                        utils::printError(
+                            ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                            ElmCoords(b, index, i),
+                            ElmCoords(b, i,     i),
+                            "Incomplete " + p->genDecoratedValue() + ".\n" +
+                            expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
+                            //FIXME pElm can be an operator - do something about it
+                        );
+                    }
                 }
                 else {
                     debug(printFail(indent);)
