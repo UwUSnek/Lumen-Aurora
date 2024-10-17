@@ -1,4 +1,4 @@
-#include "path.hpp"
+#include "Path.hpp"
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 

@@ -40,17 +40,27 @@ add_executable(alc
             ../src/Compiler/TokenizationPhase/Parsers/textLiterals.cpp
             ../src/Compiler/TokenizationPhase/Parsers/numericalLiterals.cpp
             ../src/Compiler/TokenizationPhase/whitespaceCounter.cpp
+
         ../src/Compiler/TreePhase/SourceTree.cpp
-        ../src/Compiler/TreePhase/TreePatterns.cpp
+        ../src/Compiler/TreePhase/__base_Pattern.cpp
         ../src/Compiler/TreePhase/treePhase.cpp
-            ../src/Compiler/TreePhase/Parsers/Elements/namespace.cpp
-            ../src/Compiler/TreePhase/Parsers/Elements/enum.cpp
-            ../src/Compiler/TreePhase/Parsers/Elements/struct.cpp
-            ../src/Compiler/TreePhase/Parsers/Elements/alias.cpp
-            ../src/Compiler/TreePhase/Parsers/Generic/scope.cpp
-            ../src/Compiler/TreePhase/Parsers/Directives/import.cpp
-            ../src/Compiler/TreePhase/Parsers/Directives/export.cpp
-            ../src/Compiler/TreePhase/Parsers/SubElements/path.cpp
+
+            ../src/Compiler/TreePhase/Composite/Module.cpp
+            ../src/Compiler/TreePhase/Composite/Elements/Namespace.cpp
+            ../src/Compiler/TreePhase/Composite/Elements/Enum.cpp
+            ../src/Compiler/TreePhase/Composite/Elements/Struct.cpp
+            ../src/Compiler/TreePhase/Composite/Elements/Alias.cpp
+            ../src/Compiler/TreePhase/Composite/Directives/Import.cpp
+            ../src/Compiler/TreePhase/Composite/Directives/Export.cpp
+            ../src/Compiler/TreePhase/Composite/SubElements/Path.cpp
+
+            ../src/Compiler/TreePhase/Operators/OperatorLoop.cpp
+            ../src/Compiler/TreePhase/Operators/OperatorOneOf.cpp
+            ../src/Compiler/TreePhase/Operators/OperatorOptional.cpp
+
+            ../src/Compiler/TreePhase/Tokens/Identifier.cpp
+            ../src/Compiler/TreePhase/Tokens/Keyword.cpp
+            ../src/Compiler/TreePhase/Tokens/Literal.cpp
 )
 
 

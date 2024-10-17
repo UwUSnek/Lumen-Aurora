@@ -1,7 +1,6 @@
 #include "treePhase.hpp"
 #include "Utils/errors.hpp"
 #include "Utils/ansi.hpp"
-#include "Parsers/Generic/scope.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 

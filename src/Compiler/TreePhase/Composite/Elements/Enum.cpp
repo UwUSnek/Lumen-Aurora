@@ -1,4 +1,4 @@
-#include "enum.hpp"
+#include "Enum.hpp"
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 

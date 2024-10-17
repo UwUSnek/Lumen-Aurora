@@ -1,7 +1,7 @@
 #pragma once
 #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 #include "Compiler/TreePhase/SourceTree.hpp"
-#include "Compiler/TreePhase/TreePatterns.hpp"
+#include "Compiler/TreePhase/Composite/__base_Pattern_Composite.hpp"
 
 
 

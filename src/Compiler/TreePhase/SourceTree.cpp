@@ -1,9 +1,9 @@
 #include "SourceTree.hpp"
-#include "Parsers/Elements/alias.hpp"
-#include "Parsers/Elements/enum.hpp"
-#include "Parsers/Elements/namespace.hpp"
-#include "Parsers/Elements/struct.hpp"
-#include "Parsers/SubElements/path.hpp"
+#include "Composite/Elements/Alias.hpp"
+#include "Composite/Elements/Enum.hpp"
+#include "Composite/Elements/Namespace.hpp"
+#include "Composite/Elements/Struct.hpp"
+#include "Composite/SubElements/Path.hpp"
 
 
 

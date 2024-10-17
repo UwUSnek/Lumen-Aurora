@@ -1,7 +1,8 @@
 #pragma once
 #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 #include "Compiler/TreePhase/SourceTree.hpp"
-#include "Compiler/TreePhase/TreePatterns.hpp"
+#include "Compiler/TreePhase/Composite/__base_Pattern_Composite.hpp"
+
 
 
 
@@ -10,15 +11,14 @@
 
 
 namespace cmp {
-    struct ST_Alias : public virtual __base_ST_Referable {
-        ST_Sub_Path *original = nullptr;
+    struct ST_Namespace : public virtual __base_ST_Referable, public virtual __base_ST_Container {
         std::string getCategoryName(bool plural = false) const override;
     };
 
 
 
 
-    struct Pattern_Elm_Alias : public virtual __base_Pattern_Composite {
+    struct Pattern_Elm_Namespace : public virtual __base_Pattern_Composite {
         void init();
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
         std::string genDecoratedValue() const override;

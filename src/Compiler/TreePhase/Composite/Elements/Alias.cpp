@@ -1,4 +1,4 @@
-#include "alias.hpp"
+#include "Alias.hpp"
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
