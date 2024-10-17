@@ -15,40 +15,24 @@
 
 namespace cmp {
 
-    // struct Pattern_Identifier : public virtual __base_Pattern {
-    //     bool parse() override {
-
-    //     }
-    // };
-
-    // struct PatternOr : public virtual __base_PatternElm {
-        // __base_PatternElm* a;
-        // __base_PatternElm* b;
-    // }
-
-
-
-
-
     #define LIST_SOURCE_TREE_TYPES_NAMES    \
         X(ST_Sub_Identifier, Identifier)    \
-        X(ST_Sub_Type, Type)                \
-        X(ST_Sub_Path, Path)                \
+        X(ST_Sub_Keyword,    Keyword)    \
+        /* X(ST_Sub_Literal, Identifier)    //TODO*/\
         \
-        X(ST_Statement, Statement)          \
+        X(ST_Sub_Path,       Path)           \
+        X(ST_BasicType,      BasicType)      \
+        X(ST_FunctionType,   FunctionType)   \
+        X(ST_Type,           Type)           \
         \
-        X(ST_Module, Module)                \
-        X(ST_Namespace, Namespace)          \
-        X(ST_Struct, Struct)                \
-        X(ST_Enum, Enum)                    \
-        X(ST_Alias, Alias)                  \
+        X(ST_Statement,      Statement)      \
         \
-        X(ST_Import, Import)                \
-        X(ST_Export, Export)                \
-        \
-        X(ST_Variable, Variable)            \
-        X(ST_Function, Function)            \
-        X(ST_Operator, Operator)
+        X(ST_Module,         Module)         \
+        X(ST_Namespace,      Namespace)      \
+        X(ST_Enum,           Enum)           \
+        X(ST_EnumElm,        EnumElm)        \
+        X(ST_Struct,         Struct)         \
+        X(ST_Alias,          Alias)
 
 
 
@@ -92,59 +76,6 @@ namespace cmp {
     };
 
     typedef GenericPipe<ST_Module*> SourceTree;
-
-
-
-
-
-
-
-
-    // Wrapper for identifier tokens
-    struct ST_Sub_Identifier : public virtual __base_ST {
-        std::string s;
-        std::string getCategoryName(bool plural = false) const override;
-
-        ST_Sub_Identifier(std::string _s) :
-            s(_s) {
-        }
-    };
-
-    // Wrapper for keyword tokens
-    struct ST_Sub_Keyword : public virtual __base_ST {
-        ReservedTokenId id;
-        std::string getCategoryName(bool plural = false) const override;
-
-        ST_Sub_Keyword(ReservedTokenId _id) :
-            id(_id) {
-        }
-    };
-
-    // // Wrapper for literal tokens
-    // struct ST_Sub_Identifier : public virtual __base_ST {
-    //     std::string s;
-    //     std::string getCategoryName(bool plural = false) const override;
-    // };
-
-
-
-    // Type sub-element
-    struct ST_Sub_Type : public virtual __base_ST {
-        bool isPointer;
-        std::string getCategoryName(bool plural = false) const override;
-    };
-
-    // Basic types
-    struct ST_Sub_Path;
-    struct ST_Sub_Type_Basic : public virtual ST_Sub_Type {
-        ST_Sub_Path *typeName;
-    };
-
-    // Function types
-    struct ST_Sub_Type_Function : public virtual ST_Sub_Type {
-        ST_Sub_Type *returnType;
-        std::vector<ST_Sub_Type*> paramTypes;
-    };
 
 
 
@@ -203,10 +134,9 @@ namespace cmp {
     };
 
 
-    struct ST_Sub_Path;
     // Base struct for any semantic element that has an explicit type
     struct __base_ST_Typed : public virtual __base_ST {
-        ST_Sub_Type *type;
+        ST_Type *type;
     };
 
 
@@ -242,58 +172,5 @@ namespace cmp {
         //TODO If not imported "as", the file name must be a valid identifier (after removing any extension)
         // bool isChildAllowed(__base_ST* c) const override;
         std::string getCategoryName(bool plural = false) const override;
-    };
-    struct ST_Sub_EnumElement : public virtual __base_ST_Referable {
-        //FIXME DEFAULT VALUE
-    };
-
-
-
-
-
-
-
-
-    struct ST_Import : public virtual __base_ST {
-        //FIXME whatever import needs
-        std::string getCategoryName(bool plural = false) const override;
-    };
-    struct ST_Export : public virtual __base_ST {
-        //FIXME whatever export needs
-        std::string getCategoryName(bool plural = false) const override;
-    };
-
-
-
-
-
-
-
-
-
-
-    struct ST_Variable : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
-        //FIXME default value
-        //FIXME const qualifier
-        std::string getCategoryName(bool plural = false) const override;
-    };
-
-
-    //! Expressions are saved in the generic child array, together with the other elements
-    struct __base_ST_Routine : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
-        //FIXME parameters
-        //FIXME specialization constraint
-    };
-    struct ST_Function : public virtual __base_ST_Routine {
-        std::string getCategoryName(bool plural = false) const override;
-        // bool isChildAllowed(__base_ST* c) const override;
-    };
-    struct ST_Operator : public virtual __base_ST_Routine {
-        //FIXME multiple names (or name position in case of split ternary)
-        //FIXME priority
-        std::string getCategoryName(bool plural = false) const override;
-        // bool isChildAllowed(__base_ST* c) const override;
-
-        //FIXME make [] use the normal syntax
     };
 }

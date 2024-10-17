@@ -5,11 +5,17 @@
 #include "Composite/Module.hpp"
 
 #include "Composite/Elements/Alias.hpp"
-#include "Composite/Elements/Enum.hpp"
 #include "Composite/Elements/Namespace.hpp"
+
+#include "Composite/Elements/Enum.hpp"
+#include "Composite/SubElements/EnumElm.hpp"
+
 #include "Composite/Elements/Struct.hpp"
 
 #include "Composite/SubElements/Path.hpp"
+#include "Composite/SubElements/Type.hpp"
+#include "Composite/SubElements/Type_Basic.hpp"
+#include "Composite/SubElements/Type_Function.hpp"
 
 #include "Operators/OperatorLoop.hpp"
 #include "Operators/OperatorOneOf.hpp"

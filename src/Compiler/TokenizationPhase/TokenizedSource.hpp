@@ -15,7 +15,7 @@
     X(KEYWORD_FROM)             /* from */                                                                         \
     X(KEYWORD_IMPORT)           /* import */                                                                       \
     X(KEYWORD_EXPORT)           /* export */                                                                       \
-    X(KEYWORD_PTR)              /* @ //TODO check if this is correct */                                            \
+    X(KEYWORD_PTR)              /* @ */                                                                            \
     X(KEYWORD_ADDR)             /* $ */                                                                            \
     \
     X(KEYWORD_IF)               /* if */                                                                           \

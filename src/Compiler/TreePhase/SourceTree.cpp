@@ -1,9 +1,21 @@
 #include "SourceTree.hpp"
 #include "Composite/Elements/Alias.hpp"
-#include "Composite/Elements/Enum.hpp"
 #include "Composite/Elements/Namespace.hpp"
+
+#include "Composite/Elements/Enum.hpp"
+#include "Composite/SubElements/EnumElm.hpp"
+
 #include "Composite/Elements/Struct.hpp"
+
 #include "Composite/SubElements/Path.hpp"
+#include "Composite/SubElements/Type.hpp"
+#include "Composite/SubElements/Type_Basic.hpp"
+#include "Composite/SubElements/Type_Function.hpp"
+
+
+#include "Tokens/Identifier.hpp"
+#include "Tokens/Keyword.hpp"
+#include "Tokens/Literal.hpp"
 
 
 
@@ -56,16 +68,4 @@ LIST_SOURCE_TREE_TYPES_NAMES
 std::string cmp::ST_Sub_Identifier::getCategoryName(bool plural) const { return plural ? "identifier"  : "identifiers"; } //TODO check if plural is needed
 std::string cmp::ST_Sub_Keyword   ::getCategoryName(bool plural) const { return plural ? "keyword"  : "keywords"; } //TODO check if plural is needed
 
-std::string cmp::ST_Sub_Type      ::getCategoryName(bool plural) const { return plural ? "type path"   : "type paths"; } //TODO check if plural is needed
-
 std::string cmp::ST_Statement     ::getCategoryName(bool plural) const { return plural ? "statement"   : "statements"; } //TODO check if plural is needed
-
-std::string cmp::ST_Module        ::getCategoryName(bool plural) const { return plural ? "module" : "modules"; } //TODO check if plural is needed
-
-std::string cmp::ST_Import        ::getCategoryName(bool plural) const { return plural ? "import directive" : "import directives"; }
-std::string cmp::ST_Export        ::getCategoryName(bool plural) const { return plural ? "export directive" : "export directives"; }
-
-std::string cmp::ST_Variable      ::getCategoryName(bool plural) const { return plural ? "variable definition" : "variable definitions"; }
-std::string cmp::ST_Function      ::getCategoryName(bool plural) const { return plural ? "function definition" : "function definitions"; }
-std::string cmp::ST_Operator      ::getCategoryName(bool plural) const { return plural ? "operator definition" : "operator definitions"; }
-

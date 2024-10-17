@@ -17,6 +17,7 @@ void cmp::Pattern_Elm_Enum::init() {
         re::Path(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(
+            re::EnumElm(),
             re::Alias(),
             re::Enum(),
             re::Struct(),

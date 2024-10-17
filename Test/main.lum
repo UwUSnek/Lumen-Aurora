@@ -23,3 +23,11 @@ alias a.b.test as abtest;
 struct a {
 
 }
+enum b {
+    element_1;
+    element_2;
+    struct c {
+        //nothing
+    }
+    element_3 =;
+}
