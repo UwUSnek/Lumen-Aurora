@@ -12,7 +12,7 @@
 
 namespace cmp {
     struct ST_Enum : public virtual __base_ST_Referable, public virtual __base_ST_Container {
-        ST_Sub_Path *baseType; //FIXME use type path
+        ST_Type *baseType; //FIXME use type path
         //! Enum elements are saved in the children vector
 
         std::string getCategoryName(bool plural = false) const override;

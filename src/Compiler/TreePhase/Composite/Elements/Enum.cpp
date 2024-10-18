@@ -18,7 +18,7 @@ void cmp::Pattern_Elm_Enum::init() {
         tk::Keyword(ReservedTokenId::KEYWORD_ENUM),
         tk::Identifier(),
         tk::Keyword(ReservedTokenId::META_KEYWORD_BASE),
-        re::Path(),
+        re::Type(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(
             re::EnumElm(),
@@ -40,7 +40,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Enum::generateData(std::vector<__base_ST*> cons
 
     // Set custom data
     r->name     = results[1]->asIdentifier();
-    r->baseType = results[3]->asPath();
+    r->baseType = results[3]->asType();
 
     // Add child trees
     for(ulong i = 5; i < results.size() - 1; ++i) r->addChild(results[i]);
