@@ -16,9 +16,9 @@ ulong   cmp::Pattern_Elm_Type_Basic::getCertaintyThreshold() const { return 1; }
 void cmp::Pattern_Elm_Type_Basic::init() {
     __base_Pattern_Composite::__internal_init(
         re::Path(),
-        op::Optional(
-            tk::Keyword(ReservedTokenId::KEYWORD_PTR) //FIXME save the number of pointers instead. int@@@@@ is valid
-        )
+        op::Optional(op::Loop(
+            tk::Keyword(ReservedTokenId::KEYWORD_PTR)
+        ))
     );
 }
 
@@ -29,7 +29,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Type_Basic::generateData(std::vector<__base_ST*
     ST_BasicType* r = new ST_BasicType;
 
     r->path = results[0]->asPath();
-    r->isPointer = results.size() > 1; //FIXME save the number of pointers instead. int@@@@@ is valid
+    r->pointerNum = results.size() - 1;
 
     return dynamic_cast<__base_ST*>(r);
 }

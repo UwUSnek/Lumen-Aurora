@@ -31,7 +31,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> cons
 
     // Set all the identifiers (start from 0 and skip . keyword every iteration)
     for(ulong i = 0; i < results.size(); i += 2) {
-        r->idList.push_back(results[i]->asIdentifier()->s);
+        if(results[i]->isIdentifier()) r->idList.push_back(results[i]->asIdentifier()->s);
     }
 
     // Return

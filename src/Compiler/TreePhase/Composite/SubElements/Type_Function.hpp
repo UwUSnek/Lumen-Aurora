@@ -13,8 +13,8 @@ namespace cmp {
     struct ST_FunctionType : public virtual ST_Type {
         ST_Type              *retType  = nullptr;
         std::vector<ST_Type*> argTypes;
+        ulong pointerNum = 0;
 
-        bool    isPointer = false;
         std::string getCategoryName(bool plural = false) const override;
     };
 

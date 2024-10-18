@@ -15,10 +15,7 @@ ulong   cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const { return 1
 
 void cmp::Pattern_Elm_Type_Function::init() {
     __base_Pattern_Composite::__internal_init(
-        re::Path(),
-        op::Optional(
-            tk::Keyword(ReservedTokenId::KEYWORD_PTR) //FIXME save the number of pointers instead. int@@@@@ is valid
-        ),
+        re::Type(),
         tk::Keyword(ReservedTokenId::KEYWORD_ROUND_L),
         op::Optional(
             re::Type(),
@@ -27,7 +24,10 @@ void cmp::Pattern_Elm_Type_Function::init() {
                 re::Type()
             ))
         ),
-        tk::Keyword(ReservedTokenId::KEYWORD_ROUND_R)
+        tk::Keyword(ReservedTokenId::KEYWORD_ROUND_R),
+        op::Optional(op::Loop(
+            tk::Keyword(ReservedTokenId::KEYWORD_PTR)
+        ))
     );
 }
 
@@ -39,12 +39,16 @@ cmp::__base_ST* cmp::Pattern_Elm_Type_Function::generateData(std::vector<__base_
 
     // Set return type and isPointer
     r->retType = results[0]->asType();
-    if(results[0]->isKeyword()) r->isPointer = results[0]->asKeyword()->id == ReservedTokenId::KEYWORD_PTR; //FIXME save the number of pointers instead. int@@@@@ is valid
 
     // Save parameter types
-    for(ulong i = 2 + r->isPointer; i < results.size() - 1; ++i) {
-        r->argTypes.push_back(results[i]->asType());
+    ulong i;
+    for(i = 1;; ++i) {
+        if(results[i]->isKeyword() && results[i]->asKeyword()->id == ReservedTokenId::KEYWORD_ROUND_R) break;
+        if(results[i]->isType()) r->argTypes.push_back(results[i]->asType());
     }
+
+    // Save pointer number
+    r->pointerNum = results.size() - i - (1 /*don't count the } character*/);
 
     // Return
     return dynamic_cast<__base_ST*>(r);

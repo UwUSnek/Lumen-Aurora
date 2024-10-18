@@ -12,7 +12,7 @@
 namespace cmp {
     struct ST_BasicType : public virtual ST_Type {
         ST_Sub_Path *path = nullptr;
-        bool    isPointer = false;
+        ulong  pointerNum = 0;
         std::string getCategoryName(bool plural = false) const override;
     };
 
