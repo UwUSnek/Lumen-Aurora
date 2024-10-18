@@ -2,9 +2,13 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_EnumElm::getCategoryName(bool plural) const {
-    return plural ? "Enum element" : "Enum element";
-}
+std::string cmp::ST_EnumElm::getCategoryName(bool plural) const { return plural ? "enum element" : "enum elements"; }
+std::string cmp::Pattern_Elm_EnumElm::genDecoratedValue() const { return "Enum element"; }
+ulong   cmp::Pattern_Elm_EnumElm::getCertaintyThreshold() const { return 1; }
+
+
+
+
 
 
 
@@ -31,16 +35,4 @@ cmp::__base_ST* cmp::Pattern_Elm_EnumElm::generateData(std::vector<__base_ST*> c
     // Print debug info and return
     debug((cout++ << "Found enum element " << r->name << "\n")--;)
     return dynamic_cast<__base_ST*>(r);
-}
-
-
-
-
-std::string cmp::Pattern_Elm_EnumElm::genDecoratedValue() const {
-    return "Enum element";
-}
-
-
-ulong cmp::Pattern_Elm_EnumElm::getCertaintyThreshold() const {
-    return 1;
 }

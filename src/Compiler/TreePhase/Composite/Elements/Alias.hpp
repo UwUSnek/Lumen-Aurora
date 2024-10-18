@@ -9,6 +9,7 @@
 
 
 
+
 namespace cmp {
     struct ST_Alias : public virtual __base_ST_Referable {
         ST_Sub_Path *original = nullptr;
@@ -23,8 +24,5 @@ namespace cmp {
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
         std::string genDecoratedValue() const override;
         ulong   getCertaintyThreshold() const override;
-        // virtual bool isChildAllowed(__base_ST* const c) const {
-        //     return !c->isStatement();
-        // }
     };
 }

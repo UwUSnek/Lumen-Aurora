@@ -10,10 +10,4 @@ std::string cmp::Pattern_Keyword::genDecoratedValue() const {
         [&](const auto& pair) { return pair.second == id; }
     )->first + "\"";
 }
-
-
-
-
-ulong cmp::Pattern_Keyword::getCertaintyThreshold() const {
-    return 1;
-}
+ulong cmp::Pattern_Keyword::getCertaintyThreshold() const { return 1; }

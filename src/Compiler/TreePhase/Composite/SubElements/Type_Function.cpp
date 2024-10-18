@@ -2,9 +2,13 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_FunctionType::getCategoryName(bool plural) const {
-    return plural ? "Function Type" : "Function Type";
-}
+std::string cmp::ST_FunctionType::getCategoryName(bool plural) const { return plural ? "function type" : "function types"; }
+std::string cmp::Pattern_Elm_Type_Function::genDecoratedValue() const { return "Function Type"; }
+ulong   cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const { return 1; }
+
+
+
+
 
 
 
@@ -13,7 +17,7 @@ void cmp::Pattern_Elm_Type_Function::init() {
     __base_Pattern_Composite::__internal_init(
         re::Path(),
         op::Optional(
-            tk::Keyword(ReservedTokenId::KEYWORD_PTR)
+            tk::Keyword(ReservedTokenId::KEYWORD_PTR) //FIXME save the number of pointers instead. int@@@@@ is valid
         ),
         tk::Keyword(ReservedTokenId::KEYWORD_ROUND_L),
         op::Optional(
@@ -35,7 +39,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Type_Function::generateData(std::vector<__base_
 
     // Set return type and isPointer
     r->retType = results[0]->asType();
-    if(results[0]->isKeyword()) r->isPointer = results[0]->asKeyword()->id == ReservedTokenId::KEYWORD_PTR;
+    if(results[0]->isKeyword()) r->isPointer = results[0]->asKeyword()->id == ReservedTokenId::KEYWORD_PTR; //FIXME save the number of pointers instead. int@@@@@ is valid
 
     // Save parameter types
     for(ulong i = 2 + r->isPointer; i < results.size() - 1; ++i) {
@@ -44,16 +48,4 @@ cmp::__base_ST* cmp::Pattern_Elm_Type_Function::generateData(std::vector<__base_
 
     // Return
     return dynamic_cast<__base_ST*>(r);
-}
-
-
-
-
-std::string cmp::Pattern_Elm_Type_Function::genDecoratedValue() const {
-    return "Function Type";
-}
-
-
-ulong cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const {
-    return 1;
 }

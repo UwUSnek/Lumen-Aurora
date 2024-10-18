@@ -9,5 +9,7 @@ namespace cmp {
     struct GenerationResult {
         std::vector<__base_ST*> trees;
         bool isComplete;
+
+        ~GenerationResult(){}
     };
 }

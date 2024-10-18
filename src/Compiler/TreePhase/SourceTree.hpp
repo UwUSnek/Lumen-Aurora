@@ -54,10 +54,7 @@ namespace cmp {
         __base_ST* parent; //TODO set module's parent
         //TODO also set the root module's parent to NULL
 
-        // std::vector<__base_PatternElm*> pattern;
 
-
-        // virtual bool isChildAllowed(__base_ST* c)                const { return false; }
         virtual std::string getCategoryName(bool plural = false) const { return ""; }
 
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
@@ -119,11 +116,15 @@ namespace cmp {
         //FIXME )
 
 
-    // Reflection path expression
-    struct ST_Expr_Reflection : public virtual __base_ST {
-        ST_Sub_Path* symbolPath;
-        ST_Sub_Path* reflectionIdList;
-    }; //FIXME parse this in the generic scope parser
+    // // Reflection path expression
+    // struct ST_Expr_Reflection : public virtual __base_ST {
+    //     ST_Sub_Path* symbolPath;
+    //     ST_Sub_Path* reflectionIdList;
+    // }; //FIXME parse this in the generic scope parser
+
+    //TODO
+    //TODO
+    //TODO
 
 
 

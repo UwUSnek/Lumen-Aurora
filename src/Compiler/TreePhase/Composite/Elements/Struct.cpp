@@ -2,9 +2,13 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_Struct::getCategoryName(bool plural) const {
-    return plural ? "struct definition" : "struct definitions";
-}
+std::string cmp::ST_Struct::getCategoryName(bool plural) const { return plural ? "struct definition" : "struct definitions"; }
+std::string cmp::Pattern_Elm_Struct::genDecoratedValue() const { return "Struct definition"; }
+ulong   cmp::Pattern_Elm_Struct::getCertaintyThreshold() const { return 1; }
+
+
+
+
 
 
 
@@ -40,16 +44,4 @@ cmp::__base_ST* cmp::Pattern_Elm_Struct::generateData(std::vector<__base_ST*> co
     // Print debug info and return
     debug((cout++ << "found struct " << r->name->s << "\n")--;)
     return dynamic_cast<__base_ST*>(r);
-}
-
-
-
-
-std::string cmp::Pattern_Elm_Struct::genDecoratedValue() const {
-    return "Struct declaration";
-}
-
-
-ulong cmp::Pattern_Elm_Struct::getCertaintyThreshold() const {
-    return 1;
 }

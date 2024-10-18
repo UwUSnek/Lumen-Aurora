@@ -6,6 +6,10 @@ std::string cmp::ST_Module::getCategoryName(bool plural) const { return plural ?
 
 
 
+
+
+
+
 void cmp::Pattern_Elm_Module::init() {
     __base_Pattern_Composite::__internal_init(
         op::Optional(op::Loop(op::OneOf(

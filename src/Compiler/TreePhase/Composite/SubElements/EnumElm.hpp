@@ -9,6 +9,7 @@
 
 
 
+
 namespace cmp {
     struct ST_EnumElm : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
         std::string name;

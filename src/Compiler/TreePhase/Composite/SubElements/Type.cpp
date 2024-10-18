@@ -2,9 +2,13 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_Type::getCategoryName(bool plural) const {
-    return plural ? "Type Path" : "Type Path";
-}
+std::string cmp::ST_Type::getCategoryName(bool plural) const { return plural ? "type" : "types"; }
+std::string cmp::Pattern_Elm_Type::genDecoratedValue() const { return "Type"; }
+ulong   cmp::Pattern_Elm_Type::getCertaintyThreshold() const { return 1; }
+
+
+
+
 
 
 
@@ -28,16 +32,4 @@ cmp::__base_ST* cmp::Pattern_Elm_Type::generateData(std::vector<__base_ST*> cons
 
     // Return
     return dynamic_cast<__base_ST*>(r);
-}
-
-
-
-
-std::string cmp::Pattern_Elm_Type::genDecoratedValue() const {
-    return "Type Path";
-}
-
-
-ulong cmp::Pattern_Elm_Type::getCertaintyThreshold() const {
-    return 1;
 }
