@@ -9,7 +9,8 @@
             "program": "${workspaceFolder}/Build/alc",
             "args": [
                 "./Test/main.lum",
-                "-m", "./Test/out"
+                "-m", "./Test/out",
+                "--no-status"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

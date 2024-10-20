@@ -136,7 +136,9 @@ void startMonitorThread(std::string fullCommand){
 
 
         // Print status UI
-        printStatusUI(fullCommand, loop, progressBarWidth, delayedIsCompleted);
+        if(cmd::options.printStatus) {
+            printStatusUI(fullCommand, loop, progressBarWidth, delayedIsCompleted);
+        }
 
 
         // Limit output refresh rate to 10fps

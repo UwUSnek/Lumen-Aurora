@@ -17,7 +17,7 @@ void cmp::Pattern_Elm_Enum::init() {
     __base_Pattern_Composite::__internal_init(
         tk::Keyword(ReservedTokenId::KEYWORD_ENUM),
         tk::Identifier(),
-        tk::Keyword(ReservedTokenId::META_KEYWORD_BASE),
+        tk::Keyword(ReservedTokenId::META_KEYWORD_COLON),
         re::Type(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(

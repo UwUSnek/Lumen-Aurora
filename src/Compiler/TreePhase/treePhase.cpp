@@ -10,7 +10,8 @@
 
 debug(
     static std::string genIndentation(int indent) { return cmp::__internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent);   }
-    static void        printFail     (int indent) { (cout++ << genIndentation(indent) << ansi::bold_bright_red   << "[FAIL]   \n")--; }
+    static void        printFail     (int indent) { (cout++ << genIndentation(indent) << ansi::bold_bright_red   << "[FAIL]\n" << ansi::reset)--; }
+    static void        printSuccess  (int indent) { (cout++ << genIndentation(indent) << ansi::bold_bright_green << "[OK]  \n" << ansi::reset)--; }
 )
 
 
@@ -43,6 +44,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             // If the generation succeeds, return the result trees
             //! Optional is not allowed as a direct child of OneOf. No need to check
             if(result->isComplete) {
+                debug(printSuccess(indent);)
                 return result;
             }
 
@@ -88,6 +90,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         }
 
         // Return all the result trees
+        debug(printSuccess(indent);)
         return r;
     }
 
@@ -156,7 +159,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     }
 
 
-//FIXME freeing is breaking stuff
+
 
     // Parse composite patterns
     if(pattern->isComposite()) {
@@ -187,7 +190,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             if(!result->isComplete) {
 
 
-                // Check if all the remaining patterns are optional
+                // Check if the current pattern and all the remaining ones are optional
                 bool allOptional = true;
                 for(ulong k = j; k < p->v.size(); ++k) {
                     if(!p->v[k]->isOptional()) {
@@ -198,12 +201,16 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
                 if(j >= p->getCertaintyThreshold()) { //FIXME check if optionals need to be counted. they might be messing up the threshold detection
-                    if(!allOptional && !optional) {
+                    // if(!allOptional && !optional) {
+                    if(!allOptional) {
 
                         // Find the element that caused the error (skip operators)
                         std::string expectedElementStr;
-                        for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
-                            if(curPattern->isComposite() || curPattern->isToken()) {
+                        // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
+                        //FIXME check if it's always [0] or it can be other indices as well
+                        for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                            // if(curPattern->isComposite() || curPattern->isToken()) {
+                            if(!curPattern->isOperator()) {
                                 expectedElementStr = curPattern->genDecoratedValue();
                                 break;
                             }
@@ -234,6 +241,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         __base_ST* r = p->generateData(genSource);
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
+        debug(printSuccess(indent);)
         return new GenerationResult{{ r }, true };
     }
     //FIXME fix trees' parent pointer not getting set
@@ -256,6 +264,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         __base_ST* r = dynamic_cast<__base_ST*>(new ST_Sub_Keyword(t->getValue_Keyword()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
+        debug(printSuccess(indent);)
         return new GenerationResult{{ r }, true };
     }
 
@@ -276,6 +285,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         __base_ST* r = dynamic_cast<__base_ST*>(new ST_Sub_Identifier(t->getValue_Identifier()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
+        debug(printSuccess(indent);)
         return new GenerationResult{{ r }, true };
     }
 

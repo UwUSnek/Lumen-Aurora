@@ -8,26 +8,28 @@
 
 
 
-enum __Name5_ : uint { enum __Name6_ : ulong{ namespace _namespace1 {      }} }
+// enum __Name5_ : uint { enum __Name6_ : ulong{ namespace _namespace1 {      }} }
 
-enum b : uint  {
-    namespace _namespace2 {
+// enum b : uint  {
+//     namespace _namespace2 {
 
-    }
-}
+//     }
+// }
 
-namespace _namespace3 {}
+// namespace _namespace3 {}
 
-alias a.b.test as abtest;
+// alias a.b.test as abtest;
 
-struct a {
+// struct a {
 
-}
-enum b {
-    element_1;
-    element_2;
-    struct c {
-        //nothing
-    }
-    element_3 =;
-}
+// }
+// enum b {
+//     element_1;
+//     element_2;
+//     struct c {
+//         //nothing
+//     }
+//     element_3 =;
+// }
+// struct a{}
+enum b : namespace.int { }

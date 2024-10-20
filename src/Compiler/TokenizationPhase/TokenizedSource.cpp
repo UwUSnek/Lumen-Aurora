@@ -9,6 +9,7 @@ std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
     { "enum",      ReservedTokenId::KEYWORD_ENUM      },
     { "struct",    ReservedTokenId::KEYWORD_STRUCT    },
     { "const",     ReservedTokenId::KEYWORD_CONST     },
+    { "fn",        ReservedTokenId::KEYWORD_FN        },
     { "auto",      ReservedTokenId::KEYWORD_AUTO      },
     { "typeof",    ReservedTokenId::KEYWORD_TYPEOF    },
     { "alias",     ReservedTokenId::KEYWORD_ALIAS     },
@@ -42,7 +43,7 @@ std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
     { ",",         ReservedTokenId::KEYWORD_COMMA      },
     { ";",         ReservedTokenId::KEYWORD_SEMICOLON  },
     { ".",         ReservedTokenId::KEYWORD_DOT        },
-    { "::",        ReservedTokenId::KEYWORD_REFLECTION },
+    { ":",         ReservedTokenId::META_KEYWORD_COLON }, //TODO update reflection documentation
 
 
 
@@ -58,7 +59,6 @@ std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
     { "as",        ReservedTokenId::META_KEYWORD_AS       },
     { "to",        ReservedTokenId::META_KEYWORD_TO       },
     { "=",         ReservedTokenId::META_KEYWORD_ASSIGN   },
-    { ":",         ReservedTokenId::META_KEYWORD_BASE     },
 
 
 
@@ -66,8 +66,11 @@ std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
     { "false",     ReservedTokenId::TMP_LITERAL_FALSE     },
     { "nan",       ReservedTokenId::TMP_LITERAL_NAN       },
     { "inf",       ReservedTokenId::TMP_LITERAL_INF       },
+    //TODO add null
 };
-
+//FIXME SAVE META KEYWORDS AS IDENTIFIERS? i think
+//FIXME SAVE META KEYWORDS AS IDENTIFIERS? i think
+//FIXME SAVE META KEYWORDS AS IDENTIFIERS? i think
 
 
 

@@ -4,10 +4,11 @@
 
 
 std::string cmp::Pattern_Keyword::genDecoratedValue() const {
-    return "The keyword \"" + std::find_if(
-        reservedTokensMap.begin(),
-        reservedTokensMap.end(),
-        [&](const auto& pair) { return pair.second == id; }
-    )->first + "\"";
+    for (const auto& pair : reservedTokensMap) {
+        if(pair.second == id) return "The keyword \"" + pair.first + "\"";
+    }
+
+    //! Bogus return value for GCC
+    return "";
 }
 ulong cmp::Pattern_Keyword::getCertaintyThreshold() const { return 1; }

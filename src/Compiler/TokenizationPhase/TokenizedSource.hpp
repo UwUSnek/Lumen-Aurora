@@ -9,6 +9,7 @@
     X(KEYWORD_ENUM)             /* enum */                                                                         \
     X(KEYWORD_STRUCT)           /* struct */                                                                       \
     X(KEYWORD_CONST)            /* const */                                                                        \
+    X(KEYWORD_FN)               /* fn */                                                                           \
     X(KEYWORD_AUTO)             /* auto */                                                                         \
     X(KEYWORD_TYPEOF)           /* typeof */                                                                       \
     X(KEYWORD_ALIAS)            /* alias */                                                                        \
@@ -39,21 +40,21 @@
     X(KEYWORD_COMMA)            /* , */                                                                            \
     X(KEYWORD_SEMICOLON)        /* ; */                                                                            \
     X(KEYWORD_DOT)              /* . */                                                                            \
-    X(KEYWORD_REFLECTION)       /* :: //TODO maybe use :? tho it might conflict with the metakeyword*/             \
+    X(KEYWORD_REFLECTION)       /* : */                                                                            \
     \
     \
-    X(META_KEYWORD_TEMPLATE)    /* template */                                                                     \
-    X(META_KEYWORD_LT)          /* < */                                                                            \
-    X(META_KEYWORD_GT)          /* > */                                                                            \
-    X(META_KEYWORD_TYPE)        /* type */                                                                         \
-    X(META_KEYWORD_TARGET)      /* ! */                                                                            \
-    X(META_KEYWORD_ATS)         /* ? */                                                                            \
-    X(META_KEYWORD_WHEN)        /* when */                                                                         \
-    X(META_KEYWORD_PRIORITY)    /* priority */                                                                     \
-    X(META_KEYWORD_AS)          /* as */                                                                           \
-    X(META_KEYWORD_TO)          /* to */                                                                           \
-    X(META_KEYWORD_ASSIGN)      /* = */                                                                            \
-    X(META_KEYWORD_BASE)        /* : */                                                                            \
+    X(META_KEYWORD_TEMPLATE)    /* template */                     /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_LT)          /* < */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_GT)          /* > */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_TYPE)        /* type */                         /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_TARGET)      /* ! */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_ATS)         /* ? */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_WHEN)        /* when */                         /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_PRIORITY)    /* priority */                     /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_AS)          /* as */                           /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_TO)          /* to */                           /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_ASSIGN)      /* = */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_COLON)        /* : */                            /*FIXME check these in identifier patterns */   \
     /* META_KEYWORD_ //TODO : */\
     /* META_KEYWORD_ //TODO & */\
     \

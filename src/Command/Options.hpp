@@ -29,15 +29,14 @@ namespace cmd {
 
 
 
-        //TODO implement these options
         // Output control
         bool printColor = true;
-        bool printDisplay = true;
-        bool printErrors = true;
+        bool printDisplay = true; //TODO implement this option
+        bool printErrors = true;  //TODO implement this option
         bool printStatus = true;
-        bool silent = false;
+        bool silent = false;      //TODO implement this option
 
-        //TODO implement these options
+
         //TODO add optimization options
 
         Options(){}
