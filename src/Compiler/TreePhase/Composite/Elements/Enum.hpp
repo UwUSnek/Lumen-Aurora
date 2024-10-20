@@ -25,7 +25,7 @@ namespace cmp {
     struct Pattern_Elm_Enum : public virtual __base_Pattern_Composite {
         void init();
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
-        std::string genDecoratedValue() const override;
-        ulong   getCertaintyThreshold() const override;
+        std::string genDecoratedValue(bool article) const override;
+        ulong getCertaintyThreshold() const override;
     };
 }

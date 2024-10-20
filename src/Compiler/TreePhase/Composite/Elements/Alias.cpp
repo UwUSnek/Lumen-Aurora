@@ -2,9 +2,21 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_Alias::getCategoryName(bool plural) const { return plural ? "symbol alias" : "symbol aliases"; }
-std::string cmp::Pattern_Elm_Alias::genDecoratedValue() const { return "Symbol Alias"; }
-ulong   cmp::Pattern_Elm_Alias::getCertaintyThreshold() const { return 1; }
+std::string cmp::ST_Alias::getCategoryName(bool plural) const {
+    return plural ? "symbol alias" : "symbol aliases";
+}
+
+std::string cmp::Pattern_Elm_Alias::genDecoratedValue(bool article) const {
+    return article
+        ? "a Symbol Alias Definition"
+        :   "Symbol Alias Definition"
+    ;
+}
+
+ulong cmp::Pattern_Elm_Alias::getCertaintyThreshold() const {
+    return 1;
+}
+
 
 
 

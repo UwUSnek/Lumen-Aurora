@@ -11,7 +11,7 @@ namespace cmp {
             debug(for(auto p : v) if(p->isOptional()) (cout++ << "Optional operator used as direct child of OneOf. This is not allowed.")--;)
         }
 
-        std::string genDecoratedValue() const override;
+        std::string genDecoratedValue(bool article) const override;
         ulong getCertaintyThreshold() const override;
     };
 }

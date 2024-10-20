@@ -85,7 +85,7 @@ namespace cmp {
         #undef X
 
 
-        virtual std::string genDecoratedValue() const = 0;
+        virtual std::string genDecoratedValue(bool article) const = 0;
         virtual ulong getCertaintyThreshold() const = 0;
     };
 

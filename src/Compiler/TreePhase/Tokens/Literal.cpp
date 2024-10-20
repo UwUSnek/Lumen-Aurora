@@ -3,5 +3,13 @@
 
 
 
-std::string cmp::Pattern_Literal::genDecoratedValue() const { return "A Literal"; }
-ulong   cmp::Pattern_Literal::getCertaintyThreshold() const { return 1; }
+std::string cmp::Pattern_Literal::genDecoratedValue(bool article) const {
+    return article
+        ? "a Literal"
+        :   "Literal"
+    ;
+}
+
+ulong   cmp::Pattern_Literal::getCertaintyThreshold() const {
+    return 1;
+}

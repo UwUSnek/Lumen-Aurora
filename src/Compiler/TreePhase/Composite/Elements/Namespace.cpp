@@ -2,9 +2,21 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_Namespace::getCategoryName(bool plural) const { return plural ? "namespace definition" : "namespace definitions"; }
-std::string cmp::Pattern_Elm_Namespace::genDecoratedValue() const { return "Namespace definition"; }
-ulong   cmp::Pattern_Elm_Namespace::getCertaintyThreshold() const { return 1; }
+std::string cmp::ST_Namespace::getCategoryName(bool plural) const {
+    return plural ? "namespace definition" : "namespace definitions";
+}
+
+std::string cmp::Pattern_Elm_Namespace::genDecoratedValue(bool article) const {
+    return article
+        ? "a Namespace Definition"
+        :   "Namespace Definition"
+    ;
+}
+
+ulong   cmp::Pattern_Elm_Namespace::getCertaintyThreshold() const {
+    return 1;
+}
+
 
 
 

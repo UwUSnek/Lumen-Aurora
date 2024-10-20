@@ -32,4 +32,4 @@
 //     element_3 =;
 // }
 // struct a{}
-enum b : namespace.int { }
+enum b : ns.int { }

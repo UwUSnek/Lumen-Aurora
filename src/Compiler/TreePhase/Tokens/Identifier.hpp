@@ -21,7 +21,7 @@ namespace cmp {
     struct Pattern_Identifier : public virtual __base_Pattern_Token {
         void init(){}
 
-        std::string genDecoratedValue() const override;
+        std::string genDecoratedValue(bool article) const override;
         ulong getCertaintyThreshold() const override;
     };
 }

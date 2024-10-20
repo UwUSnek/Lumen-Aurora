@@ -3,9 +3,14 @@
 
 
 
-std::string cmp::Pattern_Keyword::genDecoratedValue() const {
-    for (const auto& pair : reservedTokensMap) {
-        if(pair.second == id) return "The keyword \"" + pair.first + "\"";
+std::string cmp::Pattern_Keyword::genDecoratedValue(bool article) const {
+    if(article) {
+        for (const auto& pair : reservedTokensMap) {
+            if(pair.second == id) return "the Keyword \"" + pair.first + "\"";
+        }
+    }
+    else {
+        return "a Keyword";
     }
 
     //! Bogus return value for GCC

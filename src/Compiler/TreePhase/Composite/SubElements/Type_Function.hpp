@@ -24,7 +24,7 @@ namespace cmp {
     struct Pattern_Elm_Type_Function : public virtual Pattern_Elm_Type {
         void init();
         __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
-        std::string genDecoratedValue() const override;
+        std::string genDecoratedValue(bool article) const override;
         ulong   getCertaintyThreshold() const override;
     };
 }

@@ -24,7 +24,7 @@ namespace cmp {
             id = _id;
         }
 
-        std::string genDecoratedValue() const override;
+        std::string genDecoratedValue(bool article) const override;
         ulong getCertaintyThreshold() const override;
     };
 }

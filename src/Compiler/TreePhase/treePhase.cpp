@@ -163,7 +163,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
     // Parse composite patterns
     if(pattern->isComposite()) {
-        debug((cout++ << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue() << ")\n" << ansi::reset)--;)
+        debug((cout++ << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue(false) << ")\n" << ansi::reset)--;)
         __base_Pattern_Composite* p = pattern->asComposite();
 
         // For each of element of the composite's sequence
@@ -211,17 +211,19 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                         for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
                             // if(curPattern->isComposite() || curPattern->isToken()) {
                             if(!curPattern->isOperator()) {
-                                expectedElementStr = curPattern->genDecoratedValue();
+                                expectedElementStr = curPattern->genDecoratedValue(true);
                                 break;
                             }
                         }
+                        expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+
 
                         // Actually print the error
                         utils::printError(
                             ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                             ElmCoords(b, index, i),
                             ElmCoords(b, i,     i),
-                            "Incomplete " + p->genDecoratedValue() + ".\n" +
+                            "Incomplete " + p->genDecoratedValue(false) + ".\n" +
                             expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                             //FIXME pElm can be an operator - do something about it
                         );

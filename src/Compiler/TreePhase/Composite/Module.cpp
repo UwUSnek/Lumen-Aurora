@@ -1,7 +1,13 @@
 #include "Module.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_Module::getCategoryName(bool plural) const { return plural ? "module" : "modules"; }
+std::string cmp::ST_Module::getCategoryName(bool plural) const {
+    return plural ? "module" : "modules";
+}
+
+std::string cmp::Pattern_Elm_Module::genDecoratedValue(bool article) const {
+    return "" debug("Debug:Module");
+}
 
 
 

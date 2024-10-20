@@ -10,7 +10,7 @@ namespace cmp {
             __base_Pattern_Operator::__internal_init(_v...);
         }
 
-        std::string genDecoratedValue() const override;
+        std::string genDecoratedValue(bool article) const override;
         ulong getCertaintyThreshold() const override;
     };
 }

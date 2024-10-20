@@ -2,9 +2,18 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_FunctionType::getCategoryName(bool plural) const { return plural ? "function type" : "function types"; }
-std::string cmp::Pattern_Elm_Type_Function::genDecoratedValue() const { return "Function Type"; }
-ulong   cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const { return 1; }
+std::string cmp::ST_FunctionType::getCategoryName(bool plural) const {
+    return plural ? "function type" : "function types";
+}
+
+std::string cmp::Pattern_Elm_Type_Function::genDecoratedValue(bool article) const {
+    return "" debug("Debug:TypePathFunction");
+}
+
+ulong   cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const {
+    return 1;
+}
+
 
 
 

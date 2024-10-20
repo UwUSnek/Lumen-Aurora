@@ -2,9 +2,21 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_Struct::getCategoryName(bool plural) const { return plural ? "struct definition" : "struct definitions"; }
-std::string cmp::Pattern_Elm_Struct::genDecoratedValue() const { return "Struct definition"; }
-ulong   cmp::Pattern_Elm_Struct::getCertaintyThreshold() const { return 1; }
+std::string cmp::ST_Struct::getCategoryName(bool plural) const {
+    return plural ? "struct definition" : "struct definitions";
+}
+
+std::string cmp::Pattern_Elm_Struct::genDecoratedValue(bool article) const {
+    return article
+        ? "a Struct Definition"
+        :   "Struct Definition"
+    ;
+}
+
+ulong cmp::Pattern_Elm_Struct::getCertaintyThreshold() const {
+    return 1;
+}
+
 
 
 

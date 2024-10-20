@@ -2,9 +2,18 @@
 #include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
-std::string cmp::ST_BasicType::getCategoryName(bool plural) const { return plural ? "basic type" : "basic types"; }
-std::string cmp::Pattern_Elm_Type_Basic::genDecoratedValue() const { return "Basic Type"; }
-ulong   cmp::Pattern_Elm_Type_Basic::getCertaintyThreshold() const { return 1; }
+std::string cmp::ST_BasicType::getCategoryName(bool plural) const {
+    return plural ? "basic type" : "basic types";
+}
+
+std::string cmp::Pattern_Elm_Type_Basic::genDecoratedValue(bool article) const {
+    return "" debug("Debug:TypePathBasic");
+}
+
+ulong   cmp::Pattern_Elm_Type_Basic::getCertaintyThreshold() const {
+    return 1;
+}
+
 
 
 
