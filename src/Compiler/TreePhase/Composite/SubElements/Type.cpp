@@ -13,7 +13,7 @@ std::string cmp::Pattern_Elm_Type::genDecoratedValue(bool article) const {
     ;
 }
 
-ulong   cmp::Pattern_Elm_Type::getCertaintyThreshold() const {
+ulong cmp::Pattern_Elm_Type::getCertaintyThreshold() const {
     return 1;
 }
 

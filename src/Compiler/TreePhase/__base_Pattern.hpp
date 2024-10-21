@@ -11,40 +11,42 @@
 
 namespace cmp {
     // Base patterns. Doesn't include the root class.
-    #define LIST_PATTERN_BASES_TYPES_NAMES                  \
-        X(__base_Pattern_Token,        Token)               \
-        X(__base_Pattern_Composite,    Composite)           \
-        X(__base_Pattern_Operator,     Operator)
+    #define LIST_PATTERN_BASES_TYPES_NAMES                   \
+        X(__base_Pattern_Token,         Token)               \
+        X(__base_Pattern_Composite,     Composite)           \
+        X(__base_Pattern_Operator,      Operator)
 
     // Pattern operators. These patterns cannot be cached and they can't generate a tree. They are only used to specify the syntax.
-    #define LIST_PATTERN_OPERATOR_TYPES_NAMES               \
-        X(__Pattern_Operator_Loop,     Loop)                \
-        X(__Pattern_Operator_OneOf,    OneOf)               \
-        X(__Pattern_Operator_Optional, Optional)
+    #define LIST_PATTERN_OPERATOR_TYPES_NAMES                \
+        X(__Pattern_Operator_Loop,      Loop)                \
+        X(__Pattern_Operator_OneOf,     OneOf)               \
+        X(__Pattern_Operator_Optional,  Optional)
 
 
     // First-level patterns. These only include single-token patterns.
-    #define LIST_PATTERN_TOKENS_TYPES_NAMES                 \
-        X(Pattern_Keyword,             Keyword)             \
-        X(Pattern_Identifier,          Identifier)          \
-        X(Pattern_Literal,             Literal)
+    #define LIST_PATTERN_TOKENS_TYPES_NAMES                  \
+        X(Pattern_Keyword,              Keyword)             \
+        X(Pattern_Identifier,           Identifier)          \
+        X(Pattern_Literal,              Literal)
 
 
     // Element patterns. These identify actual semantic elements in the code and can generate trees.
-    #define LIST_PATTERN_ELM_TYPES_NAMES                    \
-        X(Pattern_Elm_Path,            Path)                \
-        X(Pattern_Elm_Module,          Module)              \
-        X(Pattern_Elm_Alias,           Alias)               \
-        X(Pattern_Elm_Namespace,       Namespace)           \
+    #define LIST_PATTERN_ELM_TYPES_NAMES                     \
+        X(Pattern_Elm_Path,             Path)                \
+        X(Pattern_Elm_Module,           Module)              \
+        X(Pattern_Elm_Alias,            Alias)               \
+        X(Pattern_Elm_Namespace,        Namespace)           \
         \
-        X(Pattern_Elm_Type,            Type)                \
-        X(Pattern_Elm_Type_Basic,      BasicType)           \
-        X(Pattern_Elm_Type_Function,   FunctionType)        \
+        X(Pattern_Elm_Type,             Type)                \
+        X(Pattern_Elm_Type_Basic,       BasicType)           \
+        X(Pattern_Elm_Type_Function,    FunctionType)        \
         \
-        X(Pattern_Elm_Enum,            Enum)                \
-        X(Pattern_Elm_EnumElm,         EnumElm)             \
+        X(Pattern_Elm_Enum,             Enum)                \
+        X(Pattern_Elm_EnumElm,          EnumElm)             \
         \
-        X(Pattern_Elm_Struct,          Struct)
+        X(Pattern_Elm_Struct,           Struct)              \
+        X(Pattern_Elm_StructElm,        StructElm)           \
+        X(Pattern_Elm_StructElmCluster, StructElmCluster)
 
 
 

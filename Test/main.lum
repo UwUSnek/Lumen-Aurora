@@ -8,29 +8,14 @@
 
 
 
-enum __Name5_ : uint { enum __Name6_ : bool{ namespace _namespace1 {      }} }
-
-// enum b : uint  {
-//     namespace _namespace2 {
-
-//     }
+// enum a : int {
+//     elm = a;
 // }
 
-// namespace _namespace3 {}
-
-// alias a.b.test as abtest;
-
-// struct a {
-
-// }
-// enum b : int {
-//     element_1;
-//     element_2;
-//     struct c {
-//         //nothing
-//     }
-//     element_3 =;
-// }
-// struct a{}
-// enum b : ulong { }
-enum a : int { }
+struct person {
+    str name;
+    str name =;
+    int age, id;
+    int age =, id =;
+    int age, id =;
+    int age =, id;}

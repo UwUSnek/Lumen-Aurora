@@ -10,7 +10,7 @@ std::string cmp::Pattern_Elm_Type_Function::genDecoratedValue(bool article) cons
     return "" debug("Debug:TypePathFunction");
 }
 
-ulong   cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const {
+ulong cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const {
     return 1;
 }
 

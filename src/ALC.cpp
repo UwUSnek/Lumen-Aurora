@@ -9,12 +9,6 @@
 
 //TODO safely make threads terminate instead of killing the process when an error occurs
 //TODO safely make threads terminate instead of killing the process when an error occurs
-//TODO safely make threads terminate instead of killing the process when an error occurs
-//TODO safely make threads terminate instead of killing the process when an error occurs
-//TODO safely make threads terminate instead of killing the process when an error occurs
-//TODO safely make threads terminate instead of killing the process when an error occurs
-//TODO safely make threads terminate instead of killing the process when an error occurs
-//TODO safely make threads terminate instead of killing the process when an error occurs
 
 
 

@@ -225,9 +225,11 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                             ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                             ElmCoords(b, index, i),
                             ElmCoords(b, i,     i),
-                            "Incomplete " + p->genDecoratedValue(false) + ".\n" +
-                            expectedElementStr + " was expected, but " +
-                            ((*b)[i].has_value() ? "the " + (*b)[i]->genDecoratedValue() + " was found instead." : "but the file ends here.") //TODO better wording
+                            "Incomplete " + p->genDecoratedValue(false) +
+                            ((*b)[i].has_value()
+                                ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
+                                : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
+                            )
                         );
                         //FIXME list possible elements when none of a OneOf's choices are found, instead of saying "expected <firstElement>, but..."
                     }
@@ -237,7 +239,6 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                     delete result;
                     return new GenerationResult{{}, false };
                 }
-                //BUG fix errors and normal output not getting fully printed when there is a lot of it.
             }
             delete result;
         }

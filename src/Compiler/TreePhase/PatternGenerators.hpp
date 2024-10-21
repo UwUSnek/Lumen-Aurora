@@ -11,6 +11,8 @@
 #include "Composite/SubElements/EnumElm.hpp"
 
 #include "Composite/Elements/Struct.hpp"
+#include "Composite/SubElements/StructElm.hpp"
+#include "Composite/SubElements/StructElmCluster.hpp"
 
 #include "Composite/SubElements/Path.hpp"
 #include "Composite/SubElements/Type.hpp"

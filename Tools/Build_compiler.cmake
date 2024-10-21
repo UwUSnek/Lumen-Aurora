@@ -54,6 +54,8 @@ add_executable(alc
             ../src/Compiler/TreePhase/Composite/Directives/Export.cpp
             ../src/Compiler/TreePhase/Composite/SubElements/Path.cpp
             ../src/Compiler/TreePhase/Composite/SubElements/EnumElm.cpp
+            ../src/Compiler/TreePhase/Composite/SubElements/StructElm.cpp
+            ../src/Compiler/TreePhase/Composite/SubElements/StructElmCluster.cpp
             ../src/Compiler/TreePhase/Composite/SubElements/Type.cpp
             ../src/Compiler/TreePhase/Composite/SubElements/Type_Basic.cpp
             ../src/Compiler/TreePhase/Composite/SubElements/Type_Function.cpp

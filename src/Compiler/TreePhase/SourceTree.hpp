@@ -15,24 +15,26 @@
 
 namespace cmp {
 
-    #define LIST_SOURCE_TREE_TYPES_NAMES    \
-        X(ST_Sub_Identifier, Identifier)    \
-        X(ST_Sub_Keyword,    Keyword)    \
-        /* X(ST_Sub_Literal, Identifier)    //TODO*/\
+    #define LIST_SOURCE_TREE_TYPES_NAMES         \
+        X(ST_Sub_Identifier,   Identifier)       \
+        X(ST_Sub_Keyword,      Keyword)          \
+        /* X(ST_Sub_Literal,      Identifier)    //TODO*/\
         \
-        X(ST_Sub_Path,       Path)           \
-        X(ST_BasicType,      BasicType)      \
-        X(ST_FunctionType,   FunctionType)   \
-        X(ST_Type,           Type)           \
+        X(ST_Sub_Path,         Path)             \
+        X(ST_BasicType,        BasicType)        \
+        X(ST_FunctionType,     FunctionType)     \
+        X(ST_Type,             Type)             \
         \
-        X(ST_Statement,      Statement)      \
+        X(ST_Statement,        Statement)        \
         \
-        X(ST_Module,         Module)         \
-        X(ST_Namespace,      Namespace)      \
-        X(ST_Enum,           Enum)           \
-        X(ST_EnumElm,        EnumElm)        \
-        X(ST_Struct,         Struct)         \
-        X(ST_Alias,          Alias)
+        X(ST_Module,           Module)           \
+        X(ST_Namespace,        Namespace)        \
+        X(ST_Enum,             Enum)             \
+        X(ST_EnumElm,          EnumElm)          \
+        X(ST_Struct,           Struct)           \
+        X(ST_StructElm,        StructElm)        \
+        X(ST_StructElmCluster, StructElmCluster) \
+        X(ST_Alias,            Alias)
 
 
 
