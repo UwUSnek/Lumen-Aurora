@@ -37,6 +37,7 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
     // Adjust position, clear the console and print the command
     cout << "\033[s";             // Save current cursor position
     cout << "\033[J";             // Clear console from current character to last line
+    cout << std::string(8, '\n');
     cout << "\033[999;999H";      // Move cursor to bottom-left corner
     cout << "\033[8A";            // Move cursor 8 lines up (make space for the status UI)
     if(_isComplete) cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";

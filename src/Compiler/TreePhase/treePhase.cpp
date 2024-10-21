@@ -190,19 +190,21 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             if(!result->isComplete) {
 
 
-                // Check if the current pattern and all the remaining ones are optional
-                bool allOptional = true;
-                for(ulong k = j; k < p->v.size(); ++k) {
-                    if(!p->v[k]->isOptional()) {
-                        allOptional = false;
-                        break;
-                    }
-                }
-
-
                 if(j >= p->getCertaintyThreshold()) { //FIXME check if optionals need to be counted. they might be messing up the threshold detection
+
+                    // // Check if the current pattern and all the remaining ones are optional
+                    // Check if the remaining patterns are optional
+                    // bool allOptional = true;
+                    // for(ulong k = j + 1; k < p->v.size(); ++k) {
+                    //     if(!p->v[k]->isOptional()) {
+                    //         allOptional = false;
+                    //         break;
+                    //     }
+                    // }
+
                     // if(!allOptional && !optional) {
-                    if(!allOptional) {
+                    // if(!allOptional && !pElm->isOptional()) {
+                    if(!pElm->isOptional()) {
 
                         // Find the element that caused the error (skip operators)
                         std::string expectedElementStr;
@@ -224,8 +226,8 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                             ElmCoords(b, index, i),
                             ElmCoords(b, i,     i),
                             "Incomplete " + p->genDecoratedValue(false) + ".\n" +
-                            expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
-                            //FIXME pElm can be an operator - do something about it
+                            expectedElementStr + " was expected, but " +
+                            ((*b)[i].has_value() ? "the " + (*b)[i]->genDecoratedValue() + " was found instead." : "but the file ends here.") //TODO better wording
                         );
                         //FIXME list possible elements when none of a OneOf's choices are found, instead of saying "expected <firstElement>, but..."
                     }
@@ -235,6 +237,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                     delete result;
                     return new GenerationResult{{}, false };
                 }
+                //BUG fix errors and normal output not getting fully printed when there is a lot of it.
             }
             delete result;
         }

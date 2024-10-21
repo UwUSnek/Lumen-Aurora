@@ -7,7 +7,14 @@
 
 
 
-
+//TODO safely make threads terminate instead of killing the process when an error occurs
+//TODO safely make threads terminate instead of killing the process when an error occurs
+//TODO safely make threads terminate instead of killing the process when an error occurs
+//TODO safely make threads terminate instead of killing the process when an error occurs
+//TODO safely make threads terminate instead of killing the process when an error occurs
+//TODO safely make threads terminate instead of killing the process when an error occurs
+//TODO safely make threads terminate instead of killing the process when an error occurs
+//TODO safely make threads terminate instead of killing the process when an error occurs
 
 
 
@@ -248,8 +255,10 @@ void initPhaseData(){
  */
 void mainCheckErrors(){
     if(threadType != ThreadType::MAIN) {
-        cerr << "\nFatal: Error check function was called by a secondary thread. This is a bug and it's the developer's fault.";
+        cerr++;
+        cerr << "\nFatal: Error check function was called by a secondary thread. This is a bug and Lumen's developer is to blame for it.";
         cerr << "\nThe program was not stopped.";
+        cerr--;
     }
     else {
         int exitCode = exitMainRequest.load();

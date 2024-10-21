@@ -2,13 +2,13 @@
 //     */clud/*
 //  */e"test.lum"
 
-//#include/*aa*/  	"../Tests/HugeSource/huge.lum"
+// #include/*aa*/  	"../Tests/HugeSource/huge.lum"
 //alias test3.test as a
 //;
 
 
 
-// enum __Name5_ : uint { enum __Name6_ : ulong{ namespace _namespace1 {      }} }
+enum __Name5_ : uint { enum __Name6_ : bool{ namespace _namespace1 {      }} }
 
 // enum b : uint  {
 //     namespace _namespace2 {
@@ -23,7 +23,7 @@
 // struct a {
 
 // }
-// enum b {
+// enum b : int {
 //     element_1;
 //     element_2;
 //     struct c {
@@ -32,4 +32,5 @@
 //     element_3 =;
 // }
 // struct a{}
-enum b : ns.int { }
+// enum b : ulong { }
+enum a : int { }

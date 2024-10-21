@@ -21,6 +21,22 @@ namespace fs = std::filesystem;
 
 
 
+/*
+-----------------------------------------------------------------------------------------------------
+
+NOTICE: VSCode output
+
+VSCode can sometimes cut off the output if a large amount of lines is printed
+right before the program stops.
+If you need to be able to read it, use a real terminal.
+
+-----------------------------------------------------------------------------------------------------
+*/
+
+
+
+
+
 
 
 
