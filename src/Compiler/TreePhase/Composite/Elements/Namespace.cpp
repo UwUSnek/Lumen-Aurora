@@ -31,6 +31,8 @@ void cmp::Pattern_Elm_Namespace::init() {
         tk::Identifier(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(
+            re::Import(),
+            re::Export(),
             re::Alias(),
             re::Enum(),
             re::Struct(),

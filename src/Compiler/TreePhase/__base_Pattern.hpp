@@ -32,8 +32,11 @@ namespace cmp {
 
     // Element patterns. These identify actual semantic elements in the code and can generate trees.
     #define LIST_PATTERN_ELM_TYPES_NAMES                     \
-        X(Pattern_Elm_Path,             Path)                \
         X(Pattern_Elm_Module,           Module)              \
+        X(Pattern_Elm_Import,           Import)              \
+        X(Pattern_Elm_Export,           Export)              \
+        \
+        X(Pattern_Elm_Path,             Path)                \
         X(Pattern_Elm_Alias,            Alias)               \
         X(Pattern_Elm_Namespace,        Namespace)           \
         \

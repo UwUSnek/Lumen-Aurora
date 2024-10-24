@@ -3,6 +3,8 @@
 
 
 #include "Composite/Module.hpp"
+#include "Composite/Directives/Import.hpp"
+#include "Composite/Directives/Export.hpp"
 
 #include "Composite/Elements/Alias.hpp"
 #include "Composite/Elements/Namespace.hpp"

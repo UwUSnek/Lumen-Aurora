@@ -32,6 +32,8 @@ void cmp::Pattern_Elm_Struct::init() {
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(
             re::StructElmCluster(),
+            re::Import(),
+            re::Export(),
             re::Alias(),
             re::Enum(),
             re::Struct(),

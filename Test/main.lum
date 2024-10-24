@@ -12,10 +12,10 @@
 //     elm = a;
 // }
 
-struct person {
-    str name;
-    str name =;
-    int age, id;
-    int age =, id =;
-    int age, id =;
-    int age =, id;}
+// struct s {
+//     fn(int, float, double, fn(double)) exec=;
+// }
+
+export;
+export a as b;
+export a as b, b as c, d;

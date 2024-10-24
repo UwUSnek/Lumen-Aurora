@@ -33,6 +33,8 @@ void cmp::Pattern_Elm_Enum::init() {
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
         op::Optional(op::Loop(op::OneOf(
             re::EnumElm(),
+            re::Import(),
+            re::Export(),
             re::Alias(),
             re::Enum(),
             re::Struct(),

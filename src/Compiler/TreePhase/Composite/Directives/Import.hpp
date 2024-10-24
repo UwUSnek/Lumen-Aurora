@@ -1,10 +1,28 @@
-// #pragma once
-// #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
-// #include "Compiler/TreePhase/SourceTree.hpp"
+#pragma once
+#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
+#include "Compiler/TreePhase/SourceTree.hpp"
+#include "Compiler/TreePhase/Composite/__base_Pattern_Composite.hpp"
 
 
 
 
-// namespace cmp {
-//     ST_Import* parseImport(TokenizedSource* b, ulong index);
-// }
+
+
+
+
+namespace cmp {
+    struct ST_Import : public virtual __base_ST_Referable {
+        ST_Sub_Path *original = nullptr;
+        std::string getCategoryName(bool plural = false) const override;
+    };
+
+
+
+
+    struct Pattern_Elm_Import : public virtual __base_Pattern_Composite {
+        void init();
+        __base_ST* generateData(std::vector<__base_ST*> const &results) const override;
+        std::string genDecoratedValue(bool article) const override;
+        ulong getCertaintyThreshold() const override;
+    };
+}
