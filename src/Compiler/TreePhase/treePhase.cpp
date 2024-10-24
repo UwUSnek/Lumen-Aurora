@@ -173,7 +173,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             // if(!result->isComplete && !pElm->isOptional()) {
             // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
             if(!result->isComplete) {
-                if(result->trees.size() >= pElm->getCertaintyThreshold()) {
+                if(j >= p->getCertaintyThreshold()) { //FIXME messed up error coords
                     // Find the element that caused the error (walk up the tree and skip operators)
                     std::string parentElementStr;
                     for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
@@ -271,7 +271,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                 // if(!result->isComplete && !pElm->isOptional()) {
                 // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
                 if(!result->isComplete) {
-                    if(result->trees.size() >= pElm->getCertaintyThreshold()) {
+                    if(result->trees.size() >= pElm->getCertaintyThreshold()) { //FIXME idk if this is needed or even correct
                         // Find the element that caused the error (walk up the tree and skip operators)
                         std::string parentElementStr;
                         for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {

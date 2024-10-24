@@ -9,7 +9,7 @@
 
 
 // enum a : int {
-//     elm = a;
+//     elm =;
 // }
 
 // struct s {
@@ -17,10 +17,8 @@
 // }
 // export;
 // export a as b;
-// export a as b, b as c, d;
-import as a;
+export a as b, b as c, d,;
+// import a as a;
 // from math as a import sum.b as test;
 
 //TODO test trailing commas on element clusters. they should print an error
-
-//FIXME first-level import directive is being tested twice

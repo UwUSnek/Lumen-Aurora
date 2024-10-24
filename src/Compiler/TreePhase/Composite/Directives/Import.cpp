@@ -37,7 +37,7 @@ ulong cmp::Pattern_Elm_Import::getCertaintyThreshold() const {
 void cmp::Pattern_Elm_Import::init() {
     __base_Pattern_Composite::__internal_init(
         op::OneOf(
-            op::Sequence(
+            op::Sequence(1,
                 tk::Keyword(ReservedTokenId::KEYWORD_FROM),
                 tk::Identifier(), //FIXME use a string literal
                 op::Optional(1,
@@ -59,7 +59,7 @@ void cmp::Pattern_Elm_Import::init() {
                     )
                 ))
             ),
-            op::Sequence(
+            op::Sequence(1,
                 tk::Keyword(ReservedTokenId::KEYWORD_IMPORT),
                 tk::Identifier(), //FIXME use a string literal
                 op::Optional(1,
