@@ -26,15 +26,15 @@ void cmp::Pattern_Elm_Type_Function::init() {
     __base_Pattern_Composite::__internal_init(
         tk::Keyword(ReservedTokenId::KEYWORD_FN),
         tk::Keyword(ReservedTokenId::KEYWORD_ROUND_L),
-        op::Optional(
+        op::Optional((ulong)-1,
             re::Type(),
-            op::Optional(op::Loop(
+            op::Optional((ulong)-1, op::Loop(
                 tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
                 re::Type()
             ))
         ),
         tk::Keyword(ReservedTokenId::KEYWORD_ROUND_R),
-        op::Optional(op::Loop(
+        op::Optional((ulong)-1, op::Loop(
             tk::Keyword(ReservedTokenId::KEYWORD_PTR)
         ))
     );

@@ -45,6 +45,7 @@ add_executable(alc
         ../src/Compiler/TreePhase/__base_Pattern.cpp
         ../src/Compiler/TreePhase/treePhase.cpp
 
+            ../src/Compiler/TreePhase/Composite/__base_Pattern_Composite.cpp
             ../src/Compiler/TreePhase/Composite/Module.cpp
             ../src/Compiler/TreePhase/Composite/Elements/Namespace.cpp
             ../src/Compiler/TreePhase/Composite/Elements/Enum.cpp
@@ -60,6 +61,7 @@ add_executable(alc
             ../src/Compiler/TreePhase/Composite/SubElements/Type_Basic.cpp
             ../src/Compiler/TreePhase/Composite/SubElements/Type_Function.cpp
 
+            ../src/Compiler/TreePhase/Operators/__base_Pattern_Operator.cpp
             ../src/Compiler/TreePhase/Operators/OperatorLoop.cpp
             ../src/Compiler/TreePhase/Operators/OperatorOneOf.cpp
             ../src/Compiler/TreePhase/Operators/OperatorOptional.cpp

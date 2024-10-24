@@ -61,6 +61,8 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
     // Parse optional operator
+    //FIXME account for custom threshold
+    //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
     if(pattern->isOptional()) {
         debug((cout++ << ansi::bright_black << "Optional\n" << ansi::reset)--;)
         __Pattern_Operator_Optional* p = pattern->asOptional();
@@ -82,11 +84,58 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             // // If the generation failed, mark r as failed and return the elements that were matched so far
             // if(!result->isComplete) {
             // If the generation failed and the element is not optional, mark r as failed and return the elements that were matched so far
-            if(!result->isComplete && !pElm->isOptional()) {
-                debug(printFail(indent);)
-                r->isComplete = false;
-                delete result;
-                return r;
+            // if(!result->isComplete && !pElm->isOptional()) {
+            // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
+            if(!result->isComplete) {
+                // if(result->trees.size() >= pElm->getCertaintyThreshold()) { //BUG prob needs to check if it's optional as well. or something like that
+                if(j >= p->getCertaintyThreshold()) {
+                    // Find the element that caused the error (walk up the tree and skip operators)
+                    std::string parentElementStr;
+                    for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
+                        // if(curPattern->isComposite() || curPattern->isToken()) {
+                        if(!curPattern->isOperator()) {
+                            parentElementStr = curPattern->genDecoratedValue(false);
+                            break;
+                        }
+                    }
+                    parentElementStr[0] = std::toupper(parentElementStr[0]);
+
+
+                    // Find the element that caused the error (skip operators)
+                    std::string expectedElementStr;
+                    // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
+                    //FIXME check if it's always [0] or it can be other indices as well
+                    for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                        // if(curPattern->isComposite() || curPattern->isToken()) {
+                        if(!curPattern->isOperator()) {
+                            expectedElementStr = curPattern->genDecoratedValue(true);
+                            break;
+                        }
+                    }
+                    expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+
+
+                    // Actually print the error
+                    utils::printError(
+                        ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                        ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
+                        ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
+                        "Incomplete " + parentElementStr +
+                        ((*b)[i].has_value()
+                            ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
+                            : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
+                        )
+                    );
+                }
+                else {
+                    // debug(printFail(indent);)
+                    debug(printSuccess(indent);)
+                    // r->isComplete = false;
+                    delete result;
+                    // return r;
+                    delete r;
+                    return new GenerationResult{{}, true };
+                }
             }
             delete result;
         }
@@ -100,6 +149,8 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
     // Parse Sequence operator
+    //FIXME account for custom threshold
+    //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
     if(pattern->isSequence()) {
         debug((cout++ << ansi::bright_black << "Sequence\n" << ansi::reset)--;)
         __Pattern_Operator_Sequence* p = pattern->asSequence();
@@ -119,11 +170,54 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             }
 
             // If the generation failed and the element is not optional, mark r as failed and return the elements that were matched so far
-            if(!result->isComplete && !pElm->isOptional()) {
-                debug(printFail(indent);)
-                r->isComplete = false;
-                delete result;
-                return r;
+            // if(!result->isComplete && !pElm->isOptional()) {
+            // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
+            if(!result->isComplete) {
+                if(result->trees.size() >= pElm->getCertaintyThreshold()) {
+                    // Find the element that caused the error (walk up the tree and skip operators)
+                    std::string parentElementStr;
+                    for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
+                        // if(curPattern->isComposite() || curPattern->isToken()) {
+                        if(!curPattern->isOperator()) {
+                            parentElementStr = curPattern->genDecoratedValue(false);
+                            break;
+                        }
+                    }
+                    parentElementStr[0] = std::toupper(parentElementStr[0]);
+
+
+                    // Find the element that caused the error (skip operators)
+                    std::string expectedElementStr;
+                    // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
+                    //FIXME check if it's always [0] or it can be other indices as well
+                    for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                        // if(curPattern->isComposite() || curPattern->isToken()) {
+                        if(!curPattern->isOperator()) {
+                            expectedElementStr = curPattern->genDecoratedValue(true);
+                            break;
+                        }
+                    }
+                    expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+
+
+                    // Actually print the error
+                    utils::printError(
+                        ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                        ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
+                        ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
+                        "Incomplete " + parentElementStr +
+                        ((*b)[i].has_value()
+                            ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
+                            : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
+                        )
+                    );
+                }
+                else {
+                    debug(printFail(indent);)
+                    r->isComplete = false;
+                    delete result;
+                    return r;
+                }
             }
             delete result;
         }
@@ -174,9 +268,52 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                 }
 
                 // If it fails and the result is not optional, stop parsing
-                if(!result->isComplete && !pElm->isOptional()) {
-                    delete result;
-                    break;
+                // if(!result->isComplete && !pElm->isOptional()) {
+                // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
+                if(!result->isComplete) {
+                    if(result->trees.size() >= pElm->getCertaintyThreshold()) {
+                        // Find the element that caused the error (walk up the tree and skip operators)
+                        std::string parentElementStr;
+                        for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
+                            // if(curPattern->isComposite() || curPattern->isToken()) {
+                            if(!curPattern->isOperator()) {
+                                parentElementStr = curPattern->genDecoratedValue(false);
+                                break;
+                            }
+                        }
+                        parentElementStr[0] = std::toupper(parentElementStr[0]);
+
+
+                        // Find the element that caused the error (skip operators)
+                        std::string expectedElementStr;
+                        // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
+                        //FIXME check if it's always [0] or it can be other indices as well
+                        for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                            // if(curPattern->isComposite() || curPattern->isToken()) {
+                            if(!curPattern->isOperator()) {
+                                expectedElementStr = curPattern->genDecoratedValue(true);
+                                break;
+                            }
+                        }
+                        expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+
+
+                        // Actually print the error
+                        utils::printError(
+                            ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                            ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
+                            ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
+                            "Incomplete " + parentElementStr +
+                            ((*b)[i].has_value()
+                                ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
+                                : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
+                            )
+                        );
+                    }
+                    else {
+                        delete result;
+                        break;
+                    }
                 }
                 delete result;
             }
@@ -243,7 +380,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
                     // if(!allOptional && !optional) {
                     // if(!allOptional && !pElm->isOptional()) {
-                    if(!pElm->isOptional()) {
+                    // if(!pElm->isOptional()) {
 
                         // Find the element that caused the error (skip operators)
                         std::string expectedElementStr;
@@ -271,7 +408,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                             )
                         );
                         //FIXME list possible elements when none of a OneOf's choices are found, instead of saying "expected <firstElement>, but..."
-                    }
+                    // }
                 }
                 else {
                     debug(printFail(indent);)
@@ -296,7 +433,11 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
     // Parse keyword tokens
     if(pattern->isKeyword()) {
-        debug((cout++ << ansi::blue << "Keyword\n" << ansi::reset)--;)
+        debug(
+            std::string keywordId;
+            for(auto const &pair : reservedTokensMap) if(pair.second == pattern->asKeyword()->id) { keywordId = pair.first; break; }
+            (cout++ << ansi::blue << "Keyword " << keywordId << "\n" << ansi::reset)--;
+        )
         Pattern_Keyword* p = pattern->asKeyword();
         std::optional<Token> const &t = (*b)[index];
 

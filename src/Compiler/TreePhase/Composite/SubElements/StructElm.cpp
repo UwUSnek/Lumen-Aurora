@@ -28,7 +28,7 @@ ulong cmp::Pattern_Elm_StructElm::getCertaintyThreshold() const {
 void cmp::Pattern_Elm_StructElm::init() {
     __base_Pattern_Composite::__internal_init(
         tk::Identifier(),
-        op::Optional(
+        op::Optional(1,
             tk::Keyword(ReservedTokenId::META_KEYWORD_ASSIGN)
             //FIXME expression
         )

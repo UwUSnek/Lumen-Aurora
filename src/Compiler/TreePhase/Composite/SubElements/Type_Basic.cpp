@@ -25,7 +25,7 @@ ulong cmp::Pattern_Elm_Type_Basic::getCertaintyThreshold() const {
 void cmp::Pattern_Elm_Type_Basic::init() {
     __base_Pattern_Composite::__internal_init(
         re::Path(),
-        op::Optional(op::Loop(
+        op::Optional((ulong)-1, op::Loop(
             tk::Keyword(ReservedTokenId::KEYWORD_PTR)
         ))
     );

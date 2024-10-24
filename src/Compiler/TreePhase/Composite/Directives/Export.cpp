@@ -28,16 +28,16 @@ ulong cmp::Pattern_Elm_Export::getCertaintyThreshold() const {
 void cmp::Pattern_Elm_Export::init() {
     __base_Pattern_Composite::__internal_init(
         tk::Keyword(ReservedTokenId::KEYWORD_EXPORT),
-        op::Optional(
+        op::Optional((ulong)-1,
             re::Path(),
-            op::Optional(
+            op::Optional(1,
                 tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
                 tk::Identifier()
             ),
-            op::Optional(op::Loop(
+            op::Optional((ulong)-1, op::Loop(
                 tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
                 re::Path(),
-                op::Optional(
+                op::Optional(1,
                     tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
                     tk::Identifier()
                 )
