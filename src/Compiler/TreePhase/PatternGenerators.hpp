@@ -24,6 +24,7 @@
 #include "Operators/OperatorLoop.hpp"
 #include "Operators/OperatorOneOf.hpp"
 #include "Operators/OperatorOptional.hpp"
+#include "Operators/OperatorSequence.hpp"
 
 #include "Tokens/Keyword.hpp"
 #include "Tokens/Identifier.hpp"

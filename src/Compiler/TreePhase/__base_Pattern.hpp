@@ -20,7 +20,8 @@ namespace cmp {
     #define LIST_PATTERN_OPERATOR_TYPES_NAMES                \
         X(__Pattern_Operator_Loop,      Loop)                \
         X(__Pattern_Operator_OneOf,     OneOf)               \
-        X(__Pattern_Operator_Optional,  Optional)
+        X(__Pattern_Operator_Optional,  Optional)            \
+        X(__Pattern_Operator_Sequence,  Sequence)
 
 
     // First-level patterns. These only include single-token patterns.

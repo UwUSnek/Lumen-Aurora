@@ -63,6 +63,7 @@ add_executable(alc
             ../src/Compiler/TreePhase/Operators/OperatorLoop.cpp
             ../src/Compiler/TreePhase/Operators/OperatorOneOf.cpp
             ../src/Compiler/TreePhase/Operators/OperatorOptional.cpp
+            ../src/Compiler/TreePhase/Operators/OperatorSequence.cpp
 
             ../src/Compiler/TreePhase/Tokens/Identifier.cpp
             ../src/Compiler/TreePhase/Tokens/Keyword.cpp

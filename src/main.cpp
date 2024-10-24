@@ -175,3 +175,22 @@ int main(int argc, char* argv[]){
     isComplete.store(true);
     monitorThread.join();
 }
+
+
+
+
+
+
+
+
+
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators

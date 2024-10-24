@@ -11,8 +11,15 @@
 
 
 namespace cmp {
+    struct __internal_ST_Import_Elm {
+        ST_Sub_Path *symbol;
+        std::string name;
+        __internal_ST_Import_Elm(ST_Sub_Path *_symbol) : symbol(_symbol){}
+    };
+
     struct ST_Import : public virtual __base_ST_Referable {
-        ST_Sub_Path *original = nullptr;
+        std::string name;
+        std::vector<__internal_ST_Import_Elm> elms;
         std::string getCategoryName(bool plural = false) const override;
     };
 

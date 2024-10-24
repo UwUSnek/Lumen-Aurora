@@ -15,7 +15,8 @@
 // struct s {
 //     fn(int, float, double, fn(double)) exec=;
 // }
-
-export;
-export a as b;
-export a as b, b as c, d;
+// export;
+// export a as b;
+// export a as b, b as c, d;
+import math as;
+// from math import sum;

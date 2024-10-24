@@ -79,8 +79,47 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                 i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
             }
 
-            // If the generation failed, mark r as failed and return the elements that were matched so far
-            if(!result->isComplete) {
+            // // If the generation failed, mark r as failed and return the elements that were matched so far
+            // if(!result->isComplete) {
+            // If the generation failed and the element is not optional, mark r as failed and return the elements that were matched so far
+            if(!result->isComplete && !pElm->isOptional()) {
+                debug(printFail(indent);)
+                r->isComplete = false;
+                delete result;
+                return r;
+            }
+            delete result;
+        }
+
+        // Return all the result trees
+        debug(printSuccess(indent);)
+        return r;
+    }
+
+
+
+
+    // Parse Sequence operator
+    if(pattern->isSequence()) {
+        debug((cout++ << ansi::bright_black << "Sequence\n" << ansi::reset)--;)
+        __Pattern_Operator_Sequence* p = pattern->asSequence();
+        GenerationResult *r = new GenerationResult{{}, true };
+
+        // For each element of the sequence's sequence
+        for(ulong j = 0; j < p->v.size(); ++j) {
+
+            // Try to generate its tree
+            __base_Pattern* pElm = p->v[j];
+            GenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
+
+            // Save the result trees in r
+            for(ulong k = 0; k < result->trees.size(); ++k) {
+                r->trees.push_back(result->trees[k]);
+                i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+            }
+
+            // If the generation failed and the element is not optional, mark r as failed and return the elements that were matched so far
+            if(!result->isComplete && !pElm->isOptional()) {
                 debug(printFail(indent);)
                 r->isComplete = false;
                 delete result;
