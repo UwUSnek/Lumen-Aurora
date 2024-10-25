@@ -18,7 +18,7 @@ std::string cmp::Pattern_Elm_Module::genDecoratedValue(bool article) const {
 
 void cmp::Pattern_Elm_Module::init() {
     __base_Pattern_Composite::__internal_init(
-        op::Optional((ulong)-1, op::Loop(op::OneOf(
+        op::Optional((ulong)-1, op::Loop((ulong)-1, op::OneOf(
             re::Import(),
             re::Export(),
             re::Alias(),

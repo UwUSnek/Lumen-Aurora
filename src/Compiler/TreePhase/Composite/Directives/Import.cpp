@@ -50,7 +50,7 @@ void cmp::Pattern_Elm_Import::init() {
                     tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
                     tk::Identifier()
                 ),
-                op::Optional((ulong)-1, op::Loop(
+                op::Optional((ulong)-1, op::Loop(1,
                     tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
                     re::Path(),
                     op::Optional(1,

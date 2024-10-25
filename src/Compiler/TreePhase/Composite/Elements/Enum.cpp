@@ -31,7 +31,7 @@ void cmp::Pattern_Elm_Enum::init() {
         tk::Keyword(ReservedTokenId::META_KEYWORD_COLON),
         re::Type(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-        op::Optional((ulong)-1, op::Loop(op::OneOf(
+        op::Optional((ulong)-1, op::Loop((ulong)-1, op::OneOf(
             re::EnumElm(),
             re::Import(),
             re::Export(),

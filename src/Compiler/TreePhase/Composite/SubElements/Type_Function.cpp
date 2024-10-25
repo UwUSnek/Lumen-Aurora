@@ -28,13 +28,13 @@ void cmp::Pattern_Elm_Type_Function::init() {
         tk::Keyword(ReservedTokenId::KEYWORD_ROUND_L),
         op::Optional((ulong)-1,
             re::Type(),
-            op::Optional((ulong)-1, op::Loop(
+            op::Optional((ulong)-1, op::Loop(1,
                 tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
                 re::Type()
             ))
         ),
         tk::Keyword(ReservedTokenId::KEYWORD_ROUND_R),
-        op::Optional((ulong)-1, op::Loop(
+        op::Optional((ulong)-1, op::Loop((ulong)-1,
             tk::Keyword(ReservedTokenId::KEYWORD_PTR)
         ))
     );

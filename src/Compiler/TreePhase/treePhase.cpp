@@ -271,7 +271,11 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                 // if(!result->isComplete && !pElm->isOptional()) {
                 // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
                 if(!result->isComplete) {
-                    if(result->trees.size() >= pElm->getCertaintyThreshold()) { //FIXME idk if this is needed or even correct
+                    if(j >= p->getCertaintyThreshold()) { //FIXME messed up error coords
+                        //BUG loops may need certainty thresholds as well. this is prob whats causing the failse positive
+                        //BUG loops may need certainty thresholds as well. this is prob whats causing the failse positive
+                        //BUG loops may need certainty thresholds as well. this is prob whats causing the failse positive
+                        //BUG loops may need certainty thresholds as well. this is prob whats causing the failse positive
                         // Find the element that caused the error (walk up the tree and skip operators)
                         std::string parentElementStr;
                         for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
@@ -324,7 +328,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
                 // Set generation result and return
                 r->isComplete = l > 0;
-                debug(if(!r->isComplete) printFail(indent);)
+                debug((r->isComplete ? printSuccess : printFail)(indent);)
                 return r;
             }
         }

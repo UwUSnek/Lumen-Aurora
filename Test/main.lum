@@ -17,7 +17,6 @@
 // }
 // export;
 // export a as b;
-export a as b, b as c, d,;
 // import a as a;
 // from math as a import sum.b as test;
 

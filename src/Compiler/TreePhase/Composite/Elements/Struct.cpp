@@ -30,7 +30,7 @@ void cmp::Pattern_Elm_Struct::init() {
         tk::Keyword(ReservedTokenId::KEYWORD_STRUCT),
         tk::Identifier(),
         tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
-        op::Optional((ulong)-1, op::Loop(op::OneOf(
+        op::Optional((ulong)-1, op::Loop((ulong)-1, op::OneOf(
             re::StructElmCluster(),
             re::Import(),
             re::Export(),
