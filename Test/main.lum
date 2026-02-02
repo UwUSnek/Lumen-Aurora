@@ -2,9 +2,9 @@
 //     */clud/*
 //  */e"test.lum"
 
-// #include/*aa*/  	"../Tests/HugeSource/huge.lum"
-//alias test3.test as a
-//;
+//include/*aa*/  	"../Tests/HugeSource/huge3.lum"
+// alias test3.test as a
+// ;
 
 
 
@@ -21,3 +21,11 @@
 // from math as a import sum.b as test;
 
 //TODO test trailing commas on element clusters. they should print an error
+
+namespace a {
+
+}
+fejuwi
+namespace a {a
+
+}
