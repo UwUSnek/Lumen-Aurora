@@ -11,5 +11,6 @@
         "*.json" : "json",
         "*.tcc": "cpp", "*.inc": "cpp"
     },
-    "cmake.sourceDirectory": "/home/Ila/Desktop/Lumen-Aurora/Lumen-Aurora/Tools"
+    "cmake.sourceDirectory": "/home/Ila/Desktop/Lumen-Aurora/Lumen-Aurora/Tools",
+    "figura.librariesFolderPath": "/home/Ila/.local/share/.minecraft/figura/avatars/libraries/"
 }

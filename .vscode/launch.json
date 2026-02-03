@@ -4,7 +4,7 @@
     "configurations": [
         {
             "name": "Debug compiler",
-            "type": "cppdbg",
+            "type": "lldb-dap",
             "request": "launch",
             "program": "${workspaceFolder}/Build/alc",
             "args": [
@@ -14,7 +14,7 @@
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "env": {},
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
@@ -27,18 +27,18 @@
             "miDebuggerPath": "/usr/bin/gdb",
             "logging": {
                 "engineLogging": false
-            },
+            }
         },
         {
             "name": "Debug unit tests",
-            "type": "cppdbg",
+            "type": "lldb-dap",
             "request": "launch",
             "program": "${workspaceFolder}/Tests/tests.out",
             "args": [
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "env": {},
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
@@ -51,7 +51,7 @@
             "miDebuggerPath": "/usr/bin/gdb",
             "logging": {
                 "engineLogging": false
-            },
+            }
         }
     ]
 }
