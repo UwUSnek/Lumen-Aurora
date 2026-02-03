@@ -12,5 +12,6 @@
         "*.tcc": "cpp", "*.inc": "cpp"
     },
     "cmake.sourceDirectory": "/home/Ila/Desktop/Lumen-Aurora/Lumen-Aurora/Tools",
-    "figura.librariesFolderPath": "/home/Ila/.local/share/.minecraft/figura/avatars/libraries/"
+    "figura.librariesFolderPath": "/home/Ila/.local/share/.minecraft/figura/avatars/libraries/",
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/build/compile_commands.json"
 }
