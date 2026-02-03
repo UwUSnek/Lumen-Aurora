@@ -1,10 +1,10 @@
-#include <sstream>
+#include <functional>
 #include "TokenizedSource.hpp"
 
 
 
 
-std::map<std::string, cmp::ReservedTokenId> cmp::reservedTokensMap  = {
+std::map<std::string, cmp::ReservedTokenId, std::less<>> cmp::reservedTokensMap  = {
     { "namespace", ReservedTokenId::KEYWORD_NAMESPACE },
     { "enum",      ReservedTokenId::KEYWORD_ENUM      },
     { "struct",    ReservedTokenId::KEYWORD_STRUCT    },

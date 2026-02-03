@@ -1,5 +1,4 @@
 #include "Type_Function.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_FunctionType::getCategoryName(bool plural) const {
@@ -23,19 +22,20 @@ ulong cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_Type_Function::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
-        tk::Keyword(ReservedTokenId::KEYWORD_FN),
-        tk::Keyword(ReservedTokenId::KEYWORD_ROUND_L),
+        tk::Keyword(KEYWORD_FN),
+        tk::Keyword(KEYWORD_ROUND_L),
         op::Optional((ulong)-1,
             re::Type(),
             op::Optional((ulong)-1, op::Loop(1,
-                tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
+                tk::Keyword(KEYWORD_COMMA),
                 re::Type()
             ))
         ),
-        tk::Keyword(ReservedTokenId::KEYWORD_ROUND_R),
+        tk::Keyword(KEYWORD_ROUND_R),
         op::Optional((ulong)-1, op::Loop((ulong)-1,
-            tk::Keyword(ReservedTokenId::KEYWORD_PTR)
+            tk::Keyword(KEYWORD_PTR)
         ))
     );
 }
@@ -44,7 +44,7 @@ void cmp::Pattern_Elm_Type_Function::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Type_Function::generateData(std::vector<__base_ST*> const &results) const {
-    ST_FunctionType* r = new ST_FunctionType;
+    auto* r = new ST_FunctionType;
 
     // Set return type and isPointer
     r->retType = results[0]->asType();

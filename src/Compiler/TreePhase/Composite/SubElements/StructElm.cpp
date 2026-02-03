@@ -1,5 +1,4 @@
 #include "StructElm.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_StructElm::getCategoryName(bool plural) const {
@@ -39,7 +38,7 @@ void cmp::Pattern_Elm_StructElm::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_StructElm::generateData(std::vector<__base_ST*> const &results) const {
-    ST_StructElm* r = new ST_StructElm();
+    auto* r = new ST_StructElm();
 
     r->name = results[0]->asIdentifier()->s;
     //FIXME expression

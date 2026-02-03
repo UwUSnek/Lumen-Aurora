@@ -1,5 +1,4 @@
 #include "Namespace.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Namespace::getCategoryName(bool plural) const {
@@ -26,10 +25,11 @@ ulong   cmp::Pattern_Elm_Namespace::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_Namespace::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
-        tk::Keyword(ReservedTokenId::KEYWORD_NAMESPACE),
+        tk::Keyword(KEYWORD_NAMESPACE),
         tk::Identifier(),
-        tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+        tk::Keyword(KEYWORD_CURLY_L),
         op::Optional((ulong)-1, op::Loop((ulong)-1, op::OneOf(
             re::Import(),
             re::Export(),
@@ -39,7 +39,7 @@ void cmp::Pattern_Elm_Namespace::init() {
             re::Namespace()
             //FIXME other possible elements
         ))),
-        tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+        tk::Keyword(KEYWORD_CURLY_R)
     );
 }
 
@@ -47,7 +47,7 @@ void cmp::Pattern_Elm_Namespace::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Namespace::generateData(std::vector<__base_ST*> const &results) const {
-    ST_Namespace* r = new ST_Namespace;
+    auto* r = new ST_Namespace;
 
     // Set custom data
     r->name = results[1]->asIdentifier();

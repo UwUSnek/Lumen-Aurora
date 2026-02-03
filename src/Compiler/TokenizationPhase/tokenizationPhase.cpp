@@ -21,8 +21,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
 
         // Detect whitespace and split tokens if any is found
-        ulong wsLen = countWhitespace(b, i);
-        if(wsLen) {
+        if(ulong wsLen = countWhitespace(b, i)) {
             i += wsLen;
             increaseLocalProgress(wsLen);
             continue;
@@ -48,27 +47,27 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
         std::optional<std::string> token = parseAlphanumericToken(b, i);
         if(!token.has_value())     token = parseSymbolicToken(b, i);
         if(token.has_value()) {
-            TokenValue *tokenValue;
+            TokenValue *_tokenValue;
 
             // If the token is a known keyword
-            auto keywordType = reservedTokensMap.find(*token);
-            if(keywordType != reservedTokensMap.end()) {
+            if(auto keywordType = reservedTokensMap.find(*token); keywordType != reservedTokensMap.end()) {
                 switch(keywordType->second) {
-                    case ReservedTokenId::TMP_LITERAL_TRUE:  { tokenValue = new TK_Bool   (true);  break; }
-                    case ReservedTokenId::TMP_LITERAL_FALSE: { tokenValue = new TK_Bool   (false); break; }
-                    case ReservedTokenId::TMP_LITERAL_INF:   { tokenValue = new TK_Double (std::numeric_limits<double>::infinity());  break; }
-                    case ReservedTokenId::TMP_LITERAL_NAN:   { tokenValue = new TK_Double (std::numeric_limits<double>::quiet_NaN()); break; }
-                    default:                                 { tokenValue = new TK_Keyword(keywordType->second); }
+                    using enum cmp::ReservedTokenId;
+                    case TMP_LITERAL_TRUE:  { _tokenValue = new TK_Bool   (true);  break; }
+                    case TMP_LITERAL_FALSE: { _tokenValue = new TK_Bool   (false); break; }
+                    case TMP_LITERAL_INF:   { _tokenValue = new TK_Double (std::numeric_limits<double>::infinity());  break; }
+                    case TMP_LITERAL_NAN:   { _tokenValue = new TK_Double (std::numeric_limits<double>::quiet_NaN()); break; }
+                    default:                { _tokenValue = new TK_Keyword(keywordType->second); }
                 }
             }
 
             // If not, treat it as an identifier
             else {
-                tokenValue = new TK_Identifier(*token);
+                _tokenValue = new TK_Identifier(*token);
             }
 
             // Push token to output array and update buffer index
-            *r += Token(b->str.substr(i, token->length()), tokenValue, *b->meta[i], *b->meta[i + token->length() - 1]);
+            *r += Token(b->str.substr(i, token->length()), _tokenValue, *b->meta[i], *b->meta[i + token->length() - 1]);
             i += token->length();
             increaseLocalProgress(token->length());
             continue;

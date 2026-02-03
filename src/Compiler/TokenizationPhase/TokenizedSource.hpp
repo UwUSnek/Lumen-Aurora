@@ -82,7 +82,7 @@ namespace cmp {
         LIST_RESERVED_TOKENS
         #undef X
     };
-    extern std::map<std::string, ReservedTokenId> reservedTokensMap;
+    extern std::map<std::string, ReservedTokenId, std::less<>> reservedTokensMap;
 
 
 
@@ -102,49 +102,49 @@ namespace cmp {
     // String literal
     struct TK_String : TokenValue {
         std::string v;
-        TK_String(std::string const&_v) : v(_v) {}
+        explicit TK_String(std::string const&_v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
     // Char literal
     struct TK_Char : TokenValue {
         char v;
-        TK_Char(char _v) : v(_v) {}
+        explicit TK_Char(char _v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
     // Ulong literal
     struct TK_Long : TokenValue {
         ulong v;
-        TK_Long(ulong _v) : v(_v) {}
+        explicit TK_Long(ulong _v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
     // Double literal
     struct TK_Double : TokenValue {
         double v;
-        TK_Double(double _v) : v(_v) {}
+        explicit TK_Double(double _v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
     // Boolean literal
     struct TK_Bool : TokenValue {
         bool v;
-        TK_Bool(bool _v) : v(_v) {}
+        explicit TK_Bool(bool _v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
     // Identifier
     struct TK_Identifier : TokenValue {
         std::string v;
-        TK_Identifier(std::string const &_v) : v(_v) {}
+        explicit TK_Identifier(std::string const &_v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
     // Keyword
     struct TK_Keyword : TokenValue {
         ReservedTokenId v;
-        TK_Keyword(ReservedTokenId _v) : v(_v) {}
+        explicit TK_Keyword(ReservedTokenId _v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
@@ -162,7 +162,7 @@ namespace cmp {
         pre::CleanSourceMeta end;       // The index, line, columns and file of the last  character relative to the original source code
 
 
-        Token(std::string _OG_Value, TokenValue *_value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
+        Token(const std::string& _OG_Value, TokenValue *_value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
             OG_Value(_OG_Value),
             value(_value),
             start(_start),
@@ -197,5 +197,5 @@ namespace cmp {
     };
 
 
-    typedef VectorPipe<Token> TokenizedSource;
+    using TokenizedSource = VectorPipe<Token>;
 }

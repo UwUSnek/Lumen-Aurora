@@ -1,5 +1,4 @@
 #include "EnumElm.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_EnumElm::getCategoryName(bool plural) const {
@@ -40,7 +39,7 @@ void cmp::Pattern_Elm_EnumElm::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_EnumElm::generateData(std::vector<__base_ST*> const &results) const {
-    ST_EnumElm* r = new ST_EnumElm();
+    auto* r = new ST_EnumElm();
 
     r->name = results[0]->asIdentifier()->s;
 

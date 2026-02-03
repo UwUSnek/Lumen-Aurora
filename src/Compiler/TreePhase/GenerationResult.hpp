@@ -10,6 +10,6 @@ namespace cmp {
         std::vector<__base_ST*> trees;
         bool isComplete;
 
-        ~GenerationResult(){}
+        ~GenerationResult(){};
     };
 }

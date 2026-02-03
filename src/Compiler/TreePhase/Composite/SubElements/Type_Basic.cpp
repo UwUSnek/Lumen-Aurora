@@ -1,5 +1,4 @@
 #include "Type_Basic.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_BasicType::getCategoryName(bool plural) const {
@@ -35,7 +34,7 @@ void cmp::Pattern_Elm_Type_Basic::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Type_Basic::generateData(std::vector<__base_ST*> const &results) const {
-    ST_BasicType* r = new ST_BasicType;
+    auto* r = new ST_BasicType;
 
     r->path = results[0]->asPath();
     r->pointerNum = results.size() - 1;

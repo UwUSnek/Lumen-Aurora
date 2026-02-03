@@ -1,5 +1,4 @@
 #include "StructElmCluster.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 #include "StructElm.hpp"
 
@@ -42,7 +41,7 @@ void cmp::Pattern_Elm_StructElmCluster::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_StructElmCluster::generateData(std::vector<__base_ST*> const &results) const {
-    ST_StructElmCluster* r = new ST_StructElmCluster();
+    auto* r = new ST_StructElmCluster();
 
     // Save type
     r->type = results[0]->asType();

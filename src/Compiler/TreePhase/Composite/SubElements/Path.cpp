@@ -1,5 +1,4 @@
 #include "Path.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
@@ -39,7 +38,7 @@ void cmp::Pattern_Elm_Path::init(){
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> const &results) const {
-    ST_Sub_Path* r = new ST_Sub_Path;
+    auto* r = new ST_Sub_Path;
 
     // Set all the identifiers (start from 0 and skip . keyword every iteration)
     for(ulong i = 0; i < results.size(); i += 2) {

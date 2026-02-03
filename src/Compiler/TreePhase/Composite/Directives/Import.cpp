@@ -1,5 +1,4 @@
 #include "Import.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Import::getCategoryName(bool plural) const {
@@ -35,40 +34,41 @@ ulong cmp::Pattern_Elm_Import::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_Import::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
         op::OneOf(
             op::Sequence(1,
-                tk::Keyword(ReservedTokenId::KEYWORD_FROM),
+                tk::Keyword(KEYWORD_FROM),
                 tk::Identifier(), //FIXME use a string literal
                 op::Optional(1,
-                    tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+                    tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 ),
-                tk::Keyword(ReservedTokenId::KEYWORD_IMPORT),
+                tk::Keyword(KEYWORD_IMPORT),
                 re::Path(),
                 op::Optional(1,
-                    tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+                    tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 ),
                 op::Optional((ulong)-1, op::Loop(1,
-                    tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
+                    tk::Keyword(KEYWORD_COMMA),
                     re::Path(),
                     op::Optional(1,
-                        tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+                        tk::Keyword(META_KEYWORD_AS),
                         tk::Identifier()
                     )
                 ))
             ),
             op::Sequence(1,
-                tk::Keyword(ReservedTokenId::KEYWORD_IMPORT),
+                tk::Keyword(KEYWORD_IMPORT),
                 tk::Identifier(), //FIXME use a string literal
                 op::Optional(1,
-                    tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+                    tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 )
             )
         ),
-        tk::Keyword(ReservedTokenId::KEYWORD_SEMICOLON)
+        tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
 
@@ -80,7 +80,7 @@ void cmp::Pattern_Elm_Import::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> const &results) const {
-    ST_Import* r = new ST_Import;
+    auto *r = new ST_Import;
     ulong i;
 
 
@@ -95,7 +95,8 @@ cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> co
 
     // Save module path
     r->name = results[1]->asIdentifier()->s; //FIXME use a string literal, remove extension automatically, print error if not a valid identifier
-    ST_Sub_Keyword *w2, *w1 = results[2]->asKeyword();
+    const ST_Sub_Keyword *w2;
+    const ST_Sub_Keyword *w1 = results[2]->asKeyword();
     if(w1->id == ReservedTokenId::KEYWORD_SEMICOLON) goto ret;
 
 
@@ -122,7 +123,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> co
         ++i;
 
         // If the next result element is a semicolon, save the element without renaming and stop parsing
-        ST_Sub_Keyword *kw = results[i]->asKeyword();
+        const ST_Sub_Keyword *kw = results[i]->asKeyword();
         if(kw->id == ReservedTokenId::KEYWORD_SEMICOLON) {
             r->elms.push_back(elm);
             break;

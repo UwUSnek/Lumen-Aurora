@@ -10,7 +10,7 @@ namespace cmp {
         ReservedTokenId id;
         std::string getCategoryName(bool plural = false) const override;
 
-        ST_Sub_Keyword(ReservedTokenId _id) :
+        explicit ST_Sub_Keyword(ReservedTokenId _id) :
             id(_id) {
         }
     };

@@ -10,7 +10,7 @@ namespace cmp {
         std::string s;
         std::string getCategoryName(bool plural = false) const override;
 
-        ST_Sub_Identifier(std::string _s) :
+        explicit ST_Sub_Identifier(std::string _s) :
             s(_s) {
         }
     };

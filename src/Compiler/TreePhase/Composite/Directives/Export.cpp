@@ -1,5 +1,4 @@
 #include "Export.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Export::getCategoryName(bool plural) const {
@@ -51,7 +50,7 @@ void cmp::Pattern_Elm_Export::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Export::generateData(std::vector<__base_ST*> const &results) const {
-    ST_Export* r = new ST_Export;
+    auto *r = new ST_Export;
 
     // Save elements if specified (2nd element is not ;)
     if(!results[1]->isKeyword()) {
@@ -62,7 +61,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Export::generateData(std::vector<__base_ST*> co
             ++i;
 
             // If the next result element is a semicolon, save the element without renaming and stop parsing
-            ST_Sub_Keyword *kw = results[i]->asKeyword();
+            ST_Sub_Keyword const *kw = results[i]->asKeyword();
             if(kw->id == ReservedTokenId::KEYWORD_SEMICOLON) {
                 r->elms.push_back(elm);
                 break;

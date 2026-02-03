@@ -1,5 +1,4 @@
 #include "Alias.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Alias::getCategoryName(bool plural) const {
@@ -39,7 +38,7 @@ void cmp::Pattern_Elm_Alias::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Alias::generateData(std::vector<__base_ST*> const &results) const {
-    ST_Alias* r = new ST_Alias;
+    auto* r = new ST_Alias;
     r->original = results[1]->asPath();
     r->name     = results[3]->asIdentifier();
 

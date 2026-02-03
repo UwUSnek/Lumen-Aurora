@@ -5,8 +5,8 @@
 
 std::string cmp::Pattern_Keyword::genDecoratedValue(bool article) const {
     if(article) {
-        for (const auto& pair : reservedTokensMap) {
-            if(pair.second == id) return "the Keyword \"" + pair.first + "\"";
+        for(const auto& [key, tokenId] : reservedTokensMap) {
+            if(tokenId == id) return "the Keyword \"" + key + "\"";
         }
     }
     else {

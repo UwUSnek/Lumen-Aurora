@@ -1,5 +1,4 @@
 #include "Struct.hpp"
-#include "Utils/errors.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
 
 std::string cmp::ST_Struct::getCategoryName(bool plural) const {
@@ -26,10 +25,11 @@ ulong cmp::Pattern_Elm_Struct::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_Struct::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
-        tk::Keyword(ReservedTokenId::KEYWORD_STRUCT),
+        tk::Keyword(KEYWORD_STRUCT),
         tk::Identifier(),
-        tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+        tk::Keyword(KEYWORD_CURLY_L),
         op::Optional((ulong)-1, op::Loop((ulong)-1, op::OneOf(
             re::StructElmCluster(),
             re::Import(),
@@ -40,7 +40,7 @@ void cmp::Pattern_Elm_Struct::init() {
             re::Namespace()
             //FIXME other possible elements
         ))),
-        tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+        tk::Keyword(KEYWORD_CURLY_R)
     );
 }
 
@@ -48,7 +48,7 @@ void cmp::Pattern_Elm_Struct::init() {
 
 
 cmp::__base_ST* cmp::Pattern_Elm_Struct::generateData(std::vector<__base_ST*> const &results) const {
-    ST_Struct* r = new ST_Struct;
+    auto* r = new ST_Struct;
 
     // Set custom data
     r->name = results[1]->asIdentifier();

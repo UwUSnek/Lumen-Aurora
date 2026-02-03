@@ -66,7 +66,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     if(pattern->isOptional()) {
         debug((cout++ << ansi::bright_black << "Optional\n" << ansi::reset)--;)
         __Pattern_Operator_Optional* p = pattern->asOptional();
-        GenerationResult *r = new GenerationResult{{}, true };
+        auto *r = new GenerationResult{{}, true };
 
         // For each element of the optional's sequence
         for(ulong j = 0; j < p->v.size(); ++j) {
@@ -154,7 +154,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     if(pattern->isSequence()) {
         debug((cout++ << ansi::bright_black << "Sequence\n" << ansi::reset)--;)
         __Pattern_Operator_Sequence* p = pattern->asSequence();
-        GenerationResult *r = new GenerationResult{{}, true };
+        auto *r = new GenerationResult{{}, true };
 
         // For each element of the sequence's sequence
         for(ulong j = 0; j < p->v.size(); ++j) {
@@ -234,7 +234,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     if(pattern->isLoop()) {
         debug((cout++ << ansi::bright_black << "Loop\n" << ansi::reset)--;)
         __Pattern_Operator_Loop* p = pattern->asLoop();
-        GenerationResult *r = new GenerationResult{{}, true };
+        auto *r = new GenerationResult{{}, true };
 
         // Repeat loop sequence until it fails
         for(ulong l = 0;; ++l) {
@@ -340,7 +340,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     // Parse composite patterns
     if(pattern->isComposite()) {
         debug((cout++ << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue(false) << ")\n" << ansi::reset)--;)
-        __base_Pattern_Composite* p = pattern->asComposite();
+        auto* p = pattern->asComposite();
 
         // For each of element of the composite's sequence
         std::vector<__base_ST*> genSource;
@@ -438,7 +438,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
             for(auto const &pair : reservedTokensMap) if(pair.second == pattern->asKeyword()->id) { keywordId = pair.first; break; }
             (cout++ << ansi::blue << "Keyword " << keywordId << "\n" << ansi::reset)--;
         )
-        Pattern_Keyword* p = pattern->asKeyword();
+        const auto* p = pattern->asKeyword();
         std::optional<Token> const &t = (*b)[index];
 
         if(!t.has_value() || !t->isKeyword(p->id)) {
@@ -447,7 +447,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         }
 
         ++i;
-        __base_ST* r = dynamic_cast<__base_ST*>(new ST_Sub_Keyword(t->getValue_Keyword()));
+        auto* r = dynamic_cast<__base_ST*>(new ST_Sub_Keyword(t->getValue_Keyword()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
@@ -468,7 +468,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         }
 
         ++i;
-        __base_ST* r = dynamic_cast<__base_ST*>(new ST_Sub_Identifier(t->getValue_Identifier()));
+        auto* r = dynamic_cast<__base_ST*>(new ST_Sub_Identifier(t->getValue_Identifier()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
