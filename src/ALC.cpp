@@ -14,7 +14,7 @@
 
 
 //! Set by the main function
-VersionNumber versionNumer;
+VersionNumber *versionNumer = nullptr;
 
 
 

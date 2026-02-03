@@ -28,7 +28,7 @@ struct VersionNumber {
     char label;
 
 
-    VersionNumber(){}
+    VersionNumber() = delete;
 
     /**
      * @brief Construct a new Version Number object (Specify a label)
@@ -57,7 +57,7 @@ struct VersionNumber {
         VersionNumber(_platform, _major, _minor, _patch, '\0') {
     }
 };
-extern VersionNumber versionNumer;
+extern VersionNumber *versionNumer;
 
 
 
@@ -105,7 +105,7 @@ extern std::mutex __internal_consoleLock;
 
 class __internal_cout_stream_t : public std::streambuf {
 protected:
-    virtual int overflow(int c) override;
+    int overflow(int c) override;
 };
 extern __internal_cout_stream_t __internal_cout_streambuff;
 extern std::ostream __internal_cout;
@@ -117,13 +117,13 @@ public:
         __internal_cout << val;
         return *this;
     }
-    __internal_cout_stream_t_wrapper &operator++(int dummy) {
-        __internal_consoleLock.lock();
+    __internal_cout_stream_t_wrapper &operator++(int dummy[[maybe_unused]]) {
+        __internal_consoleLock.lock(); // NOSONAR(cpp:S5506)
         return *this;
     }
 
-    __internal_cout_stream_t_wrapper &operator--(int dummy) {
-        __internal_consoleLock.unlock();
+    __internal_cout_stream_t_wrapper &operator--(int dummy[[maybe_unused]]) {
+        __internal_consoleLock.unlock(); // NOSONAR(cpp:S5506)
         return *this;
     }
 };
@@ -134,7 +134,7 @@ extern  __internal_cout_stream_t_wrapper cout;
 
 class __internal_cerr_stream_t : public std::streambuf {
 protected:
-    virtual int overflow(int c) override;
+    int overflow(int c) override;
 };
 extern __internal_cerr_stream_t __internal_cerr_streambuff;
 extern std::ostream __internal_cerr;
@@ -146,13 +146,13 @@ public:
         __internal_cerr << val;
         return *this;
     }
-    __internal_cerr_stream_t_wrapper &operator++(int dummy) {
-        __internal_consoleLock.lock();
+    __internal_cerr_stream_t_wrapper &operator++(int dummy[[maybe_unused]]) {
+        __internal_consoleLock.lock(); // NOSONAR(cpp:S5506)
         return *this;
     }
 
-    __internal_cerr_stream_t_wrapper &operator--(int dummy) {
-        __internal_consoleLock.unlock();
+    __internal_cerr_stream_t_wrapper &operator--(int dummy[[maybe_unused]]) {
+        __internal_consoleLock.unlock(); // NOSONAR(cpp:S5506)
         return *this;
     }
 };
@@ -246,8 +246,8 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
     // Set thread name and type
     threadType = ThreadType::SUBPHASE;
-    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (1 /*Phase number*/) - (3 /*Separator*/));
-    pthread_setname_np(pthread_self(), (std::string("S") + std::to_string(phaseId) + " | " + truncatedName).c_str());
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (1 /*Phase number*/) - (3 /*Separator*/)); //NOSONAR(cpp:S5840)
+    pthread_setname_np(pthread_self(), std::format("S{} | {}", phaseIdTotring(phaseId), truncatedName).c_str());
 
 
     // Init thread counters
@@ -307,7 +307,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, bool isLast, func_t &&f, args_t &&...args) {
 
     //! Subphase and Phase data initialization feedback
-    std::atomic<bool> *isThreadDataInitialized = new std::atomic<bool>(false);
+    auto *isThreadDataInitialized = new std::atomic<bool>(false); //NOSONAR(cpp:S6063)
 
 
     // Start the new thread

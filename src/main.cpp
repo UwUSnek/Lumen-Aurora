@@ -2,8 +2,6 @@
 #include <fstream>
 #include <filesystem>
 #include <thread>
-namespace fs = std::filesystem;
-
 
 #include "ALC.hpp"
 #include "Utils/errors.hpp"
@@ -14,6 +12,9 @@ namespace fs = std::filesystem;
 #include "Command/info.hpp"
 #include "monitorThread.hpp"
 #include "Compiler/TreePhase/SourceTree.hpp"
+
+namespace fs = std::filesystem;
+
 
 
 
@@ -38,7 +39,7 @@ If you need to be able to read it, use a real terminal.
 
 
 
-void writeOutputFile(std::string &code) {
+void writeOutputFile(std::string const &code) {
     // Create directories
     fs::create_directories(fs::path(cmd::options.outputFile).parent_path());
 
@@ -71,7 +72,7 @@ int main(int argc, char* argv[]){
     pthread_setname_np(pthread_self(), "Main Thread");
 
     // Set version number
-    versionNumer = VersionNumber('L', 0, 1, 0, '\0');
+    versionNumer = new VersionNumber('L', 0, 1, 0, '\0'); //NOSONAR(cpp:S4792)
 
 
 
@@ -120,7 +121,7 @@ int main(int argc, char* argv[]){
     f.close();
     totalFiles.fetch_add(1);
     pre::SegmentedCleanSource *preprocessedSourceCode = pre::loadSourceCode(&s, cmd::options.sourceFile);
-    cmp::SourceTree *precompiledModule = nullptr;
+    cmp::SourceTree const *precompiledModule = nullptr;
     // pre::SegmentedCleanSource *convertedCode     = nullptr; //TODO
 
 
@@ -160,9 +161,9 @@ int main(int argc, char* argv[]){
     else {
         preprocessedSourceCode->str.awaitClose(mainCheckErrors);
         preprocessedSourceCode->meta.awaitClose(mainCheckErrors);
-        preprocessedSourceCode->str.sReallocLock.lock();
+        preprocessedSourceCode->str.sReallocLock.lock(); //NOSONAR(cpp:S5506)
         writeOutputFile(*preprocessedSourceCode->str.cpp());
-        preprocessedSourceCode->str.sReallocLock.unlock();
+        preprocessedSourceCode->str.sReallocLock.unlock(); //NOSONAR(cpp:S5506)
     }
 
 

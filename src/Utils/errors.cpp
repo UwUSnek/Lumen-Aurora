@@ -206,7 +206,7 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
  * @param message The error message. This can contain multiple lines.
  *      The error message will be colored red and displayed as bold. ansi::reset will reset to bold red.
  */
-void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_errPos, std::string const &message) {
+  void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_errPos, std::string const &message) {
     printError(errorCode, errType, _errPos, _errPos, message);
 }
 
@@ -217,7 +217,6 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_e
 
 
 
-//FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 //FIXME SHOW MULTIPLE FILES IN THE CODE OUTPUT IF A SECTION IS SPLIT BETWEEN MULTIPLE SOURCE FILES
 /**
  * @brief Stop the program and prints an error to stderr, specifying the error type.
