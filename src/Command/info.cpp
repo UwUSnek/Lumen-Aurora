@@ -14,8 +14,8 @@
 //TODO update compiler executable name
 std::string cmd::getHelpMessage(){
     std::string none______        = ansi::bright_black + " │ ";
-    std::string default1_         = ansi::reset + ansi::fill_magenta + ""         + (cmd::options.printColor ? " " : "█") + ansi::reset + " ";
-    std::string default__________ = ansi::reset + ansi::fill_magenta + " DEFAULT" + (cmd::options.printColor ? " " : "█") + ansi::reset + " ";
+    std::string default1_         = ansi::reset + ansi::fill_magenta + ""         + (cmd::options->printColor ? " " : "█") + ansi::reset + " ";
+    std::string default__________ = ansi::reset + ansi::fill_magenta + " DEFAULT" + (cmd::options->printColor ? " " : "█") + ansi::reset + " ";
 
 
     std::stringstream r;
@@ -68,9 +68,7 @@ std::string cmd::getVersionMessage() {
             << versionNumer->patch
             << (versionNumer->label == '\0' ? "" : std::string(1, versionNumer->label))
             << "\n"
-        // << ansi::bold_magenta << << "Version:" << ansi::reset << "W-0.1.0" //TODO windows build
-        // << ansi::bold_magenta << << "Version:" << ansi::reset << "X-0.1.0" //TODO mac build (prob not gonna happen)
-        << ansi::bold_magenta << "    Build n. │ " << ansi::reset << std::string(const_cast<const char*>(buildNumber)) << "\n"
+        << ansi::bold_magenta << "    Build n. │ " << ansi::reset << const_cast<const char*>(buildNumber) << "\n" //NOSONAR const_cast strips volatile qualifier
         << ansi::bold_magenta << "    Platform │ " << ansi::reset << (versionNumer->platform == 'L' ? "Linux" : "Windows") << "\n" //TODO mac (prob not gonna happen)
     ;
     return r.str();

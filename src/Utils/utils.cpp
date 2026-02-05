@@ -194,7 +194,7 @@ std::string utils::readFile(std::ifstream &f) {
  * @param fileName The path to check.
  * @return The result object containing all the informations.
  */
-utils::PathCheckResult utils::checkPath(std::string const &path) {
+utils::PathCheckResult utils::checkPath(const std::string &path) {
     PathCheckResult r;
     if(access(path.c_str(), F_OK) == 0) {
         r.exists = true;

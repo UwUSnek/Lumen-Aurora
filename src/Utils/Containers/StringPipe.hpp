@@ -1,5 +1,6 @@
 #pragma once
 #include "__base_BufferPipe.hpp"
+#include <mutex>
 
 
 
@@ -25,9 +26,7 @@ protected:
 
 public:
     std::string substr(ulong i, ulong n) {
-        sReallocLock.lock();
-        std::string const &r = cpp()->substr(i, n);
-        sReallocLock.unlock();
-        return r;
+        std::scoped_lock lock(sReallocLock);
+        return cpp()->substr(i, n);
     }
 };

@@ -143,8 +143,8 @@ std::string phaseIdTotring(PhaseID phaseId) {
 
 PhaseData::PhaseData() :
     totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
-    timeStart      (new std::atomic<long>(0)),
-    timeEnd        (new std::atomic<long>(0)) {
+    timeStart    (new std::atomic<long>(0)),
+    timeEnd      (new std::atomic<long>(0)) {
 }
 
 

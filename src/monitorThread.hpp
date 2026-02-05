@@ -4,4 +4,4 @@
 
 
 
-void startMonitorThread(std::string fullCommand);
+void startMonitorThread(const std::string &fullCommand);

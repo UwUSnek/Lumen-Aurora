@@ -1,11 +1,11 @@
 #include <cstring>
 #include <filesystem>
-namespace fs = std::filesystem;
-
 #include "command.hpp"
-#include "ALC.hpp"
+#include "Command/Options.hpp"
 #include "Utils/errors.hpp"
 #include "Utils/ansi.hpp"
+#include "Utils/utils.hpp"
+namespace fs = std::filesystem;
 
 
 
@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 
 
 
-cmd::Options cmd::options = cmd::Options();
+cmd::Options *cmd::options = new Options();
 
 
 
@@ -29,7 +29,7 @@ cmd::Options cmd::options = cmd::Options();
  * @param argv Main function's argv
  * @param DBG_fullCommand The full command as a string. This is exclusively used for error messages and never parsed.
  */
-void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
+void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullCommand){
 
 
 
@@ -41,17 +41,17 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
         std::string o(argv[i]);
         if(o == "--no-color") {
             __internal_no_color = true;
-            options.printColor = false;
+            options->printColor = false;
         }
         else if(o == "--help") {
-            options.isHelp = true;
+            options->isHelp = true;
         }
         else if(o == "--version") {
-            options.isVersion = true;
+            options->isVersion = true;
         }
     }
     if(!__internal_no_color) ansi::enableEscapes();
-    if(options.isHelp || options.isVersion) return;
+    if(options->isHelp || options->isVersion) return;
 
 
 
@@ -74,7 +74,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
                 for(char c : "pmx") if(o[1] == c) {
 
                     // Incompatible output type
-                    ElmCoordsCL currentOutputTypeCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
+                    auto currentOutputTypeCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
                     if(lastOutputTypeCoords.end) {
                         utils::printErrorCL(
                             ERROR_CMD_INCOMPATIBLE_OPTIONS,
@@ -86,7 +86,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
                             DBG_fullCommand
                         );
                     }
-                    options.outputType = c;
+                    options->outputType = c;
                     lastOutputTypeCoords = currentOutputTypeCoords;
 
 
@@ -104,7 +104,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
                     }
 
                     // Valid option
-                    options.outputFile = argv[i];
+                    options->outputFile = argv[i];
                     optionPosition += strlen(argv[i]) + 1;
 
                     break;
@@ -115,7 +115,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
                 for(char c : "lw") if(o[1] == c) {
 
                     // Incompatible target platform
-                    ElmCoordsCL currentTargetPlatformCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
+                    auto currentTargetPlatformCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
                     if(lastTargetPlatformCoords.end) {
                         utils::printErrorCL(
                             ERROR_CMD_INCOMPATIBLE_OPTIONS,
@@ -127,7 +127,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
                             DBG_fullCommand
                         );
                     }
-                    options.outputType = c;
+                    options->outputType = c;
                     lastTargetPlatformCoords = currentTargetPlatformCoords;
 
                     break;
@@ -193,7 +193,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
 
 
                     // Push canonical path to the list and adjust the option position
-                    (c == 'I' ? options.includePaths : options.importPaths).push_back(canonicalPath);
+                    (c == 'I' ? options->includePaths : options->importPaths).push_back(canonicalPath);
                     optionPosition += path.length() + 1;
 
                     break;
@@ -208,17 +208,17 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
                 //! This else-if is only used to let the parser recognize it as a valid option
             }
             else if(o == "--no-display") {
-                options.printDisplay = false;
+                options->printDisplay = false;
             }
             else if(o == "--no-errors") {
-                options.printErrors = false;
+                options->printErrors = false;
             }
             else if(o == "--no-status") {
-                options.printStatus = false;
+                options->printStatus = false;
             }
             else if(o == "--silent") {
-                options.silent = true;
-                options.printStatus = false;
+                options->silent = true;
+                options->printStatus = false;
             }
 
 
@@ -293,7 +293,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
                 );
             }
 
-            options.sourceFile = canonicalPath;
+            options->sourceFile = canonicalPath;
         }
 
 
@@ -305,7 +305,7 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
 
 
     // Print error if no source file is specified
-    if(options.sourceFile.empty()) {
+    if(options->sourceFile.empty()) {
         utils::printErrorCL(
             ERROR_CMD_SOURCE_MISSING,
             ElmCoordsCL(optionPosition - 1, optionPosition - 1),
@@ -321,17 +321,17 @@ void cmd::parseOptions(int argc, char* argv[], std::string DBG_fullCommand){
 
     // Use default type and path if not specified
     //! Outpuut path is tied to the output type option
-    if(options.outputType == '\0') {
-        options.outputFile = options.sourceFile + ".out";
-        options.outputType = 'x';
+    if(options->outputType == '\0') {
+        options->outputFile = options->sourceFile + ".out";
+        options->outputType = 'x';
     }
 
 
 
 
     // Use default target platform if not specified
-    if(options.targetPlatform == '\0') {
-        options.targetPlatform = 'l';
+    if(options->targetPlatform == '\0') {
+        options->targetPlatform = 'l';
     }
 }
 

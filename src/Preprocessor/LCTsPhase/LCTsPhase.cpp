@@ -14,7 +14,7 @@
  * @param index The index to check.
  * @return The number of characters the LCT occupies, or 0 if one was not found.
  */
-ulong checkLct(std::string const *b, ulong index) {
+ulong checkLct(const std::string *b, ulong index) {
 
     if((*b)[index] == '\\') {
         if(b->length() - 1 <= index) return 1;
@@ -30,7 +30,7 @@ ulong checkLct(std::string const *b, ulong index) {
 
 
 
-void pre::startLCTsPhase(std::string const *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
+void pre::startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
     increaseMaxProgress(b->length());
 
 
@@ -62,7 +62,6 @@ void pre::startLCTsPhase(std::string const *b, ulong DBG_filePathIndex, Segmente
     }
 
 
-    // return r;
     r->str.closePipe();
     r->meta.closePipe();
 }

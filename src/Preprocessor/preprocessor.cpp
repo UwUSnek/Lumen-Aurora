@@ -1,11 +1,12 @@
 
 #include "preprocessor.hpp"
 #include "ALC.hpp"
-#include "ElmCoords.hpp"
 #include "LCTsPhase/LCTsPhase.hpp"
 #include "CleanupPhase/cleanupPhase.hpp"
 #include "IncludePhase/includePhase.hpp"
 #include "MacroPhase/macroPhase.hpp"
+#include <functional>
+#include <mutex>
 
 
 
@@ -18,11 +19,13 @@
  * @brief The part of loadSourceCode that does the recursive things.
  *      Waits for the subphases to finish before returning the output.
  */
-pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::string const &filePath, void (*awaitTask)()) {
-    sourceFilePathsLock.lock();
-    sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to check for them before starting the preprocessor
-    ulong pathIndex = sourceFilePaths.size() - 1;
-    sourceFilePathsLock.unlock();
+pre::SegmentedCleanSource* pre::loadSourceCode_loop(const std::string *s, const std::string &filePath, const std::function<void()> &awaitTask) {
+    ulong pathIndex;
+    {
+        std::scoped_lock lock(sourceFilePathsLock);
+        sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to check for them before starting the preprocessor
+        pathIndex = sourceFilePaths.size() - 1;
+    }
 
 
     //FIXME ^automatically fish up cached files if found. loop through them (for now)
@@ -32,9 +35,9 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::s
     //FIXME SAVE INCLUDE STACK
 
 
-    SegmentedCleanSource *r1 = new SegmentedCleanSource();
-    SegmentedCleanSource *r2 = new SegmentedCleanSource();
-    SegmentedCleanSource *r3 = new SegmentedCleanSource();
+    auto *r1 = new SegmentedCleanSource();
+    auto *r2 = new SegmentedCleanSource();
+    auto *r3 = new SegmentedCleanSource();
 
 
     // Start the loop subphases
@@ -62,11 +65,11 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::s
  * @param filePath The path of the original source code file.
  * @return The contents of the source file as a SegmentedCleanSource.
  */
-pre::SegmentedCleanSource* pre::loadSourceCode(std::string const *s, std::string const &filePath) {
+pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::string &filePath) {
 
     // Load and merge all the files
-    SegmentedCleanSource *r3 = loadSourceCode_loop(s, filePath, mainCheckErrors);
-    SegmentedCleanSource *r4 = new SegmentedCleanSource();
+    auto *r3 = loadSourceCode_loop(s, filePath, mainCheckErrors);
+    auto *r4 = new SegmentedCleanSource();
 
 
     // Set the max progress of the compilation phase
@@ -78,7 +81,5 @@ pre::SegmentedCleanSource* pre::loadSourceCode(std::string const *s, std::string
     return r4;
 }
 
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
 //TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
 //TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.

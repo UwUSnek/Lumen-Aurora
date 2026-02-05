@@ -43,10 +43,9 @@ public:
      * @param _s The container to append.
      */
     void operator+=(t const &_s) {
-        sReallocLock.lock();
+        std::scoped_lock lock(sReallocLock);
         __internal_append(_s);
-        len.fetch_add(__internal_get_len(_s));
-        sReallocLock.unlock();
+        len.fetch_add(__internal_get_len(_s), std::memory_order_release);
     }
 
 
@@ -57,10 +56,9 @@ public:
      * @param c The value to add.
      */
     void operator+=(elmt const &c) {
-        sReallocLock.lock();
+        std::scoped_lock lock(sReallocLock);
         __internal_append(c);
-        len.fetch_add(1);
-        sReallocLock.unlock();
+        len.fetch_add(1, std::memory_order_release);
     }
 
 
@@ -75,7 +73,7 @@ public:
      * @return The length of the pipe.
      */
     ulong length() const {
-        return len.load();
+        return len.load(std::memory_order_acquire);
     }
 
 
@@ -84,17 +82,17 @@ public:
     /**
      * @brief Retrieves the element at the requested index and returns a copy of it.
      * @param i The index.
-     * @return A copy of the requested element wrapped in an std::optional, or an empty optional if the pipe was closed before reaching it.
+     * @return A copy of the requested element wrapped in an std::optional, or an empty optional if the pipe was closed before reaching the required size.
      */
     std::optional<elmt> operator[](ulong i) {
         while(len.load() <= i) {
-            if(!__base_Pipe<t>::isOpen() && len.load() <= i) return std::nullopt;
+            if(!__base_Pipe<t>::isOpen() && len.load(std::memory_order_acquire) <= i)  {
+                return std::nullopt;
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
-        sReallocLock.lock();
-        elmt r = __base_Pipe<t>::s[i];
-        sReallocLock.unlock();
-        return r;
+        std::scoped_lock lock(sReallocLock);
+        return __base_Pipe<t>::s[i];
     }
 };

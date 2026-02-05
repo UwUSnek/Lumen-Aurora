@@ -31,5 +31,5 @@ namespace utils {
         bool canWrite = false;
         bool canExec  = false;
     };
-    PathCheckResult checkPath(std::string const &path);
+    PathCheckResult checkPath(const std::string &path);
 }

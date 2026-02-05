@@ -7,6 +7,6 @@
 
 
 namespace pre {
-    std::string             resolveFilePath(std::string const &rawFilePath,         std::string const &curfilePath, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords);
-    std::string validateSelectedIncludePath(std::string const &filePath, utils::PathCheckResult const &checkResult, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords);
+    std::string             resolveFilePath(const std::string &rawFilePath,         const std::string &curfilePath, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords);
+    std::string validateSelectedIncludePath(const std::string &filePath, utils::PathCheckResult const &checkResult, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords);
 }

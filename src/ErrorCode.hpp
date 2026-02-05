@@ -108,27 +108,27 @@ enum ErrorCode : int {
     //                COMPILATION - TREE PHASE                //
     //--------------------------------------------------------//
 
-    ERROR_CMP_UNEXPECTED_TOKEN, // Unexpected token found during tree creation
-    ERROR_CMP_UNEXPECTED_END,   // Code ends before a semantic element's syntax is complete
-    ERROR_CMP_MISSING_TOKEN,   // A token that was expected is missing
+    ERROR_CMP_UNEXPECTED_TOKEN,                 // Unexpected token found during tree creation
+    ERROR_CMP_UNEXPECTED_END,                   // Code ends before a semantic element's syntax is complete
+    ERROR_CMP_MISSING_TOKEN,                    // A token that was expected is missing
 
-    ERROR_CMP_SCOPE_MISSING_INITIATOR,            // Missing {
-    ERROR_CMP_SCOPE_MISSING_TERMINATOR,            // Missing }
-    ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED,   // Target scope cannot contain the element
+    ERROR_CMP_SCOPE_MISSING_INITIATOR,          // Missing {
+    ERROR_CMP_SCOPE_MISSING_TERMINATOR,         // Missing }
+    ERROR_CMP_SCOPE_CHILD_NOT_ALLOWED,          // Target scope cannot contain the element
 
-    ERROR_CMP_PATH_NO_IDENTIFIER,   // No identifier after . keyword
+    ERROR_CMP_PATH_NO_IDENTIFIER,               // No identifier after . keyword
 
 
-    ERROR_CMP_ALIAS_NO_PATH,   // Alias path is missing
-    ERROR_CMP_ALIAS_NO_AS,   // Alias path is missing
-    ERROR_CMP_ALIAS_NO_NAME,   // Alias name is missing
-    ERROR_CMP_ALIAS_NO_TERMINATOR,   // No semicolon
+    ERROR_CMP_ALIAS_NO_PATH,                    // Alias path is missing
+    ERROR_CMP_ALIAS_NO_AS,                      // Alias path is missing
+    ERROR_CMP_ALIAS_NO_NAME,                    // Alias name is missing
+    ERROR_CMP_ALIAS_NO_TERMINATOR,              // No semicolon
 
-    ERROR_CMP_NAMESPACE_NAME_MISSING,  // Scope {} is missing
-    ERROR_CMP_NAMESPACE_SCOPE_MISSING,  // Scope {} is missing
+    ERROR_CMP_NAMESPACE_NAME_MISSING,           // Scope {} is missing
+    ERROR_CMP_NAMESPACE_SCOPE_MISSING,          // Scope {} is missing
 
-    ERROR_CMP_ENUM_NO_NAME, // Enum name is missing
-    ERROR_CMP_ENUM_NO_TYPE, // No : or type path
-    ERROR_CMP_ENUM_ELM_NO_NAME, // Element of enum element cluster has no identifier
-    ERROR_CMP_ENUM_ELM_NO_TERMINATOR, // No semicolon (or no ,)
+    ERROR_CMP_ENUM_NO_NAME,                     // Enum name is missing
+    ERROR_CMP_ENUM_NO_TYPE,                     // No : or type path
+    ERROR_CMP_ENUM_ELM_NO_NAME,                 // Element of enum element cluster has no identifier
+    ERROR_CMP_ENUM_ELM_NO_TERMINATOR,           // No semicolon (or no ,)
 };

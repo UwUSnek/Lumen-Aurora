@@ -6,12 +6,12 @@
 namespace cmd {
     struct Options {
         // Input and output file paths
-        std::string sourceFile;
-        std::string outputFile;
+        std::string sourceFile = "";
+        std::string outputFile = "";
 
         // Include and Import paths
-        std::vector<std::string> includePaths;
-        std::vector<std::string> importPaths;
+        std::vector<std::string> includePaths = std::vector<std::string>();
+        std::vector<std::string> importPaths  = std::vector<std::string>();
 
         // Command overrides
         bool isHelp = false;
@@ -39,7 +39,7 @@ namespace cmd {
 
         //TODO add optimization options
 
-        Options(){}
+        Options() = default;
     };
 }
 

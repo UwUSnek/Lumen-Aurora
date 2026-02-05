@@ -63,7 +63,7 @@ extern VersionNumber *versionNumer;
 
 
 extern std::atomic<int> exitMainRequest;
-void exitMain(int exitCode);
+[[noreturn]] void exitMain(int exitCode);
 
 
 

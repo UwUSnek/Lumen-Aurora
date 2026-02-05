@@ -1,16 +1,19 @@
+
+// A
+
 //#in/*
 //     */clud/*
 //  */e"test.lum"
 
-//include/*aa*/  	"../Tests/HugeSource/huge3.lum"
+#include/*aa*/  	"../Tests/HugeSource/huge.lum"
 // alias test3.test as a
 // ;
 
 
 
-// enum a : int {
-//     elm =;
-// }
+enum a : int {
+    elm =;
+}
 
 // struct s {
 //     fn(int, float, double, fn(double)) exec=;
@@ -26,6 +29,6 @@ namespace a {
 
 }
 fejuwi
-namespace a {a
+namespace a {
 
 }

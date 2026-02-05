@@ -102,7 +102,7 @@ namespace cmp {
     // String literal
     struct TK_String : TokenValue {
         std::string v;
-        explicit TK_String(std::string const&_v) : v(_v) {}
+        explicit TK_String(const std::string&_v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
@@ -137,7 +137,7 @@ namespace cmp {
     // Identifier
     struct TK_Identifier : TokenValue {
         std::string v;
-        explicit TK_Identifier(std::string const &_v) : v(_v) {}
+        explicit TK_Identifier(const std::string &_v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
@@ -178,12 +178,12 @@ namespace cmp {
 
 
 
-        std::string const &getValue_String    () const;
+        const std::string &getValue_String    () const;
         char               getValue_Char      () const;
         ulong              getValue_Long      () const;
         double             getValue_Double    () const;
         bool               getValue_Bool      () const;
-        std::string const &getValue_Identifier() const;
+        const std::string &getValue_Identifier() const;
         ReservedTokenId    getValue_Keyword   () const;
 
         bool isString    () const;

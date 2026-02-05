@@ -21,7 +21,7 @@ namespace fs = std::filesystem;
  * @param filePathCoords The position of the section containing the include file path.
  * @return The canonical path of the specified file.
  */
-std::string pre::resolveFilePath(std::string const &rawFilePath, std::string const &curFilePath, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords) {
+std::string pre::resolveFilePath(const std::string &rawFilePath, const std::string &curFilePath, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords) {
 
     // If the path is an absolute path
     if(rawFilePath[0] == '/') {
@@ -40,13 +40,13 @@ std::string pre::resolveFilePath(std::string const &rawFilePath, std::string con
         std::vector<std::pair<std::string, utils::PathCheckResult>> invalidPaths;
 
         // Check current path
-        std::string const &fullPath = fs::path(curFilePath).parent_path() / rawFilePath;
+        const std::string &fullPath = fs::path(curFilePath).parent_path() / rawFilePath;
         utils::PathCheckResult &&result = utils::checkPath(fullPath);
         (result.exists ? validPaths : invalidPaths).push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
 
         // Check and categorize each include path
-        for(std::string const &dir : cmd::options.includePaths) {
-            std::string const &fullPath = dir + "/" + rawFilePath;
+        for(const std::string &dir : cmd::options->includePaths) {
+            const std::string &fullPath = dir + "/" + rawFilePath;
             utils::PathCheckResult const &result = utils::checkPath(fullPath);
 
             // Skip current file path if one equivalent to it already exists. If not, push it to the correct vector
@@ -125,7 +125,7 @@ std::string pre::resolveFilePath(std::string const &rawFilePath, std::string con
  * @param filePathCoords The position of the section containing the include file path.
  * @return The canonical path of the file at <filePath>.
  */
-std::string pre::validateSelectedIncludePath(std::string const &filePath, utils::PathCheckResult const &checkResult, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords) {
+std::string pre::validateSelectedIncludePath(const std::string &filePath, utils::PathCheckResult const &checkResult, ElmCoords const &relevantCoords, ElmCoords const &filePathCoords) {
 
     // Print an error if the file doesn't exist
     if(!checkResult.exists) {

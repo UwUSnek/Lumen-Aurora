@@ -46,7 +46,8 @@ public:
     /**
      * @brief Makes the thread sleep until the pipe closes.
      */
-    void awaitClose(void (*task)() = [](){}) const {
+    template<typename T = decltype([](){})> //NOSONAR empty lambda body
+    void awaitClose(T task) const {
         while(isOpen()) {
             task();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));

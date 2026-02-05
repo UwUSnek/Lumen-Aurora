@@ -77,8 +77,8 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
 
 
         // Parse text literals
-        /**/            tokenValue =  parseStrLiteral(b, i, &lenOutput);
-        if(!tokenValue) tokenValue = parseCharLiteral(b, i, &lenOutput);
+        /**/            tokenValue = parseDelimitedLiteral(b, i, &lenOutput, DelimitedLiteralType::STRING);
+        if(!tokenValue) tokenValue = parseDelimitedLiteral(b, i, &lenOutput, DelimitedLiteralType::CHAR);
         if(tokenValue) {
             *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput - 1]);
             i += lenOutput;

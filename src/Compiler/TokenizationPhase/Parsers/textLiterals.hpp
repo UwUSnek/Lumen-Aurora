@@ -7,7 +7,11 @@
 
 
 namespace cmp {
-    TokenValue*                     parseStrLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen);
-    TokenValue*                    parseCharLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen);
-    std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ulong index, ulong *rawEscapeLen);
+    enum class DelimitedLiteralType {
+        STRING,
+        CHAR
+    };
+
+    TokenValue*               parseDelimitedLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen, DelimitedLiteralType literalType);
+    std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ulong index, ulong *rawEscapeLen,  DelimitedLiteralType literalType);
 }

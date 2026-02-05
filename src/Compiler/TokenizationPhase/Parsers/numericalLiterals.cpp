@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <sstream>
 #include <cmath>
 #include "numericalLiterals.hpp"
@@ -61,7 +62,7 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, index + 1),
                     std::string("Unknown numerical base prefix \"0") + *c1 + "\".\n" +
-                    "Valid prefixes are \"0b\", \"0o\", \"0d\", \"0x\"."
+                    R"(Valid prefixes are "0b", "0o", "0d", "0x".)"
                 );
             }
         }
@@ -156,7 +157,7 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
  * @param base The numerical base of the value.
  * @return The value as a double.
  */
-double cmp::strToDbl(std::string const &s, uint base) {
+double cmp::strToDbl(const std::string &s, uint base) {
     double r = 0;
 
     // Calculate integer part
@@ -173,7 +174,7 @@ double cmp::strToDbl(std::string const &s, uint base) {
     for(ulong j = i + 1; j < s.length(); ++j) {
         char digit = s[i];
         double value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
-        double fraction = pow(10, j - i); //! 10 for first digit, 100 for second etc...
+        double fraction = pow(10, (double)(j - i)); //! 10 for first digit, 100 for second etc...
         r += value / fraction;
     }
 
@@ -195,17 +196,16 @@ double cmp::strToDbl(std::string const &s, uint base) {
  * @param base The numerical base of the value.
  * @return The value as an unsigned long.
  */
-ulong cmp::strToLng(std::string const &s, uint base) {
+ulong cmp::strToLng(const std::string &s, uint base) {
     ulong r = 0; //FIXME print an error if the value is larger than the max ulong
 
     // Calculate value
-    ulong i;
-    for(i = 0; i < s.length(); ++i) {
-        char digit = s[i];
-        double value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
+    std::ranges::for_each(s, [&](char c){
+        char digit = c;
+        auto value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
         r *= base;
         r += value;
-    }
+    });
 
 
     // Return the calculated value
