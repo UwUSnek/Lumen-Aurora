@@ -29,4 +29,6 @@ public:
         std::scoped_lock lock(sReallocLock);
         return cpp()->substr(i, n);
     }
+
+    ~StringPipe() = default;
 };

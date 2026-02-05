@@ -1,5 +1,3 @@
-#include <iomanip>
-
 #include "SegmentedCleanSource.hpp"
 #include "Utils/utils.hpp"
 

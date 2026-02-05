@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include "Preprocessor/SegmentedCleanSource.hpp"
 #include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 

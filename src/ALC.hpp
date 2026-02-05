@@ -6,6 +6,7 @@
 
 #include "Utils/utils.hpp"
 #include "Utils/DynamicProgressBar.hpp"
+#include "Utils/ThreadManager.hpp"
 
 
 #define PRINT_DEBUG_INFO 1
@@ -246,7 +247,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
     // Set thread name and type
     threadType = ThreadType::SUBPHASE;
-    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - (1 /*Prefix "S"*/) - (1 /*Phase number*/) - (3 /*Separator*/)); //NOSONAR(cpp:S5840)
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - 1 /*Prefix "S"*/ - 1 /*Phase number*/ - 3 /*Separator*/);
     pthread_setname_np(pthread_self(), std::format("S{} | {}", phaseIdTotring(phaseId), truncatedName).c_str());
 
 
@@ -255,43 +256,46 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     totalThreads.fetch_add(1);
 
 
-    // Set max progress pointer
-    phaseDataArrayLock.lock();
-    maxProgress = phaseDataArray[phaseId].totalProgress;
-    phaseDataArrayLock.unlock();
-
-
-    // Init phase starting time if needed
-    phaseDataArrayLock.lock();
-    if(*phaseDataArray[phaseId].timeStart == 0) {
-        phaseDataArray[phaseId].timeStart->store(utils::getEpochMs());
+    { // Set max progress pointer
+        std::scoped_lock lock(phaseDataArrayLock);
+        maxProgress = phaseDataArray[phaseId].totalProgress;
     }
-    phaseDataArrayLock.unlock();
 
 
-    // Init subphase data (not ordered)
-    localProgress = new std::atomic<ulong>(0);
-    subphaseDataArrayLock.lock();
-    subphaseDataArray.push_back(SubphaseData(phaseId, localProgress));
-    subphaseDataArrayLock.unlock();
+    { // Init phase starting time if needed
+        std::scoped_lock lock(phaseDataArrayLock);
+        if(*phaseDataArray[phaseId].timeStart == 0) {
+            phaseDataArray[phaseId].timeStart->store(utils::getEpochMs());
+        }
+    }
 
 
-    // Start the actual function
-    {
+    { // Init subphase data (not ordered)
+        localProgress = new std::atomic<ulong>(0);
+        std::scoped_lock lock(subphaseDataArrayLock);
+        subphaseDataArray.push_back(SubphaseData(phaseId, localProgress));
+    }
+
+
+    { // Start the actual function
         initFeedback->store(true);
         std::forward<func_t>(f)(std::forward<args_t>(args)...);
     }
 
 
-    // Set the ending time if needed
-    phaseDataArrayLock.lock();
-    if(isLast) phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
-    phaseDataArrayLock.unlock();
+    { // Set the ending time if needed
+        std::scoped_lock lock(phaseDataArrayLock);
+        if(isLast) phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
+    }
 
 
     // Update thread counter
     activeThreads.fetch_sub(1);
 }
+
+
+
+
 
 
 
@@ -311,17 +315,12 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
 
 
     // Start the new thread
-    std::thread(
-        [
-            _phaseId = phaseId,
-            _isThreadDataInitialized = isThreadDataInitialized,
-            _isLast = isLast,
-            _f = std::forward<func_t>(f),
-            ..._args = std::forward<args_t>(args)
-        ]() mutable {
-            __internal_subphase_exec(_phaseId, _isLast, _isThreadDataInitialized, std::move(_f), std::move(_args)...);
-        }
-    ).detach();
+    ThreadManager::addThread(std::jthread([&](){
+        __internal_subphase_exec(
+            phaseId, isLast, isThreadDataInitialized,
+            std::forward<func_t>(f), std::forward<args_t>(args)...
+        );}
+    ));
 
 
     // Wait for the feedback before letting the main thread go

@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <vector>
 
 #include "Utils/Containers/StringPipe.hpp"
 #include "Utils/Containers/VectorPipe.hpp"
