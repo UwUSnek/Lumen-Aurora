@@ -8,7 +8,7 @@
 
 
 
-std::string compilerLocation = "./Build/out";
+std::string compilerLocation = "./Build/alc";
 std::string tmpDirLocation   = "/tmp/Lumen-Aurora_UnitTests";
 std::string tmpFileLocatiton = tmpDirLocation + "/src";
 std::string tmpOutputLocatiton = tmpDirLocation + "/out";
