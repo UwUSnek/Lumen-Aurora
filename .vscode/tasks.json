@@ -49,6 +49,38 @@
         },
         {
             "type": "shell",
+            "label": "TEST | Run help command (--help)",
+            "command": "./Build/alc",
+            "args": [
+                "--help",
+            ],
+            "problemMatcher": [],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "showReuseMessage": false
+            }
+        },
+        {
+            "type": "shell",
+            "label": "TEST | Run version command (--version)",
+            "command": "./Build/alc",
+            "args": [
+                "--version",
+            ],
+            "problemMatcher": [],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "showReuseMessage": false
+            }
+        },
+        {
+            "type": "shell",
             "label": "BUILD | Build unit tests",
             "command": "./Tests/Build_tests.sh",
             "args": [],
