@@ -34,8 +34,8 @@ void cmp::Pattern_Elm_Module::init() {
 
 cmp::__base_ST* cmp::Pattern_Elm_Module::generateData(std::vector<__base_ST*> const &results) const {
     auto* r = new ST_Module;
-    for(ulong i = 0; i < results.size(); ++i) {
-        r->addChild(results[i]);
+    for(const auto &child : results) {
+        r->addChild(child);
     }
     return dynamic_cast<__base_ST*>(r);
 }

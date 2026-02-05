@@ -9,9 +9,8 @@
 
 
 namespace cmp {
-    struct __internal_ST_Export_Elm {
+    struct __internal_ST_Export_Elm : public virtual __base_ST_Referable {
         ST_Sub_Path *symbol;
-        std::string name;
         explicit __internal_ST_Export_Elm(ST_Sub_Path *_symbol) : symbol(_symbol){}
     };
 

@@ -11,7 +11,6 @@
 
 namespace cmp {
     struct ST_StructElmCluster : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
-        ST_Type *type;
         std::vector<ST_StructElm*> elms;
         std::string getCategoryName(bool plural = false) const override;
     };

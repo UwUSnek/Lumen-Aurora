@@ -1,5 +1,6 @@
 #pragma once
 #include "Compiler/TreePhase/__base_Pattern.hpp"
+#include <vector>
 
 
 

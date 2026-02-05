@@ -478,6 +478,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
 
+    //TODO
     // if(pattern->isLiteral()) {
     //     __base_Pattern_Token* p = pattern->asLitisLiteral();
 

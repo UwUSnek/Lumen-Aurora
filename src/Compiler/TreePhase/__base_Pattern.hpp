@@ -1,6 +1,4 @@
 #pragma once
-#include "ALC.hpp"
-#include "Compiler/TreePhase/SourceTree.hpp"
 
 
 
@@ -9,6 +7,7 @@
 
 
 
+#include <string>
 namespace cmp {
     // Base patterns. Doesn't include the root class.
     #define LIST_PATTERN_BASES_TYPES_NAMES                   \

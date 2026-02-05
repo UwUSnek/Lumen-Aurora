@@ -1,5 +1,4 @@
 #include "__base_Pattern_Operator.hpp"
-#include "Compiler/TreePhase/PatternGenerators.hpp"
 
 
 

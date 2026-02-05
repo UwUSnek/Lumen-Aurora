@@ -5,8 +5,6 @@
 
 
 
-
-
 // Pattern isType and asType functions
 #define X(type, name) \
     const cmp::type *cmp::__base_Pattern::as##name() const { return dynamic_cast<const type*>(this); } \

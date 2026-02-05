@@ -1,5 +1,5 @@
 #include "__base_Pattern_Composite.hpp"
-#include "Compiler/TreePhase/PatternGenerators.hpp"
+#include "Compiler/TreePhase/Operators/__base_Pattern_Operator.hpp"
 
 
 

@@ -26,11 +26,6 @@ ulong cmp::Pattern_Elm_Import::getCertaintyThreshold() const {
 
 //FIXME fix failed optionals skipping the incomplete match
 //FIXME fix failed optionals skipping the incomplete match
-//FIXME fix failed optionals skipping the incomplete match
-//FIXME fix failed optionals skipping the incomplete match
-//FIXME fix failed optionals skipping the incomplete match
-//FIXME fix failed optionals skipping the incomplete match
-//FIXME fix failed optionals skipping the incomplete match
 
 
 void cmp::Pattern_Elm_Import::init() {
@@ -94,7 +89,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> co
 
 
     // Save module path
-    r->name = results[1]->asIdentifier()->s; //FIXME use a string literal, remove extension automatically, print error if not a valid identifier
+    r->rawPath = results[1]->asIdentifier()->s; //FIXME use a string literal, remove extension automatically, print error if not a valid identifier
     const ST_Sub_Keyword *w2;
     const ST_Sub_Keyword *w1 = results[2]->asKeyword();
     if(w1->id == ReservedTokenId::KEYWORD_SEMICOLON) goto ret;
@@ -105,7 +100,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> co
     // Save alias if specified
     i = 2;
     if(w1->id == ReservedTokenId::META_KEYWORD_AS) {
-        r->name = results[3]->asIdentifier()->s;
+        r->name = results[3]->asIdentifier();
         i += 2; // Skip "as <name>"
     }
     w2 = results[4]->asKeyword();
@@ -137,7 +132,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> co
 
         // If it is "as", rename the current element and save it
         else {
-            elm.name = results[i + 1]->asIdentifier()->s;
+            elm.name = results[i + 1]->asIdentifier();
             i += 2; // Skip to next separator or ;
             r->elms.push_back(elm);
 

@@ -57,7 +57,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Type_Function::generateData(std::vector<__base_
     }
 
     // Save pointer number
-    r->pointerNum = results.size() - i - (1 /*don't count the } character*/);
+    r->pointerNum = results.size() - i - 1 /*don't count the } character*/;
 
     // Return
     return dynamic_cast<__base_ST*>(r);

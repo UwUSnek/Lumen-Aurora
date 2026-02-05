@@ -2,9 +2,7 @@
 #include <vector>
 #include <string>
 
-#include "ALC.hpp"
 #include "Utils/Containers/GenericPipe.hpp"
-#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 
 
 
@@ -74,7 +72,7 @@ namespace cmp {
         #undef X
     };
 
-    typedef GenericPipe<ST_Module*> SourceTree;
+    using SourceTree = GenericPipe<ST_Module *>;
 
 
 
@@ -101,7 +99,6 @@ namespace cmp {
 
     // Expressions
     //! The array of children contains the sub-expressions
-    struct __base_ST_Container;
     struct ST_Expr : public virtual __base_ST_Container {
         std::string getCategoryName(bool plural = false) const override;
     };//FIXME parse this in the generic scope parser

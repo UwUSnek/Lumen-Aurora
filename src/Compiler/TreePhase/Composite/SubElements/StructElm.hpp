@@ -11,7 +11,6 @@
 
 namespace cmp {
     struct ST_StructElm : public virtual __base_ST_Referable, public virtual __base_ST_Typed {
-        std::string name;
         //FIXME add explicit values
         std::string getCategoryName(bool plural = false) const override;
     };

@@ -25,24 +25,25 @@ ulong cmp::Pattern_Elm_Export::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_Export::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
-        tk::Keyword(ReservedTokenId::KEYWORD_EXPORT),
+        tk::Keyword(KEYWORD_EXPORT),
         op::Optional((ulong)-1,
             re::Path(),
             op::Optional(1,
-                tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+                tk::Keyword(META_KEYWORD_AS),
                 tk::Identifier()
             ),
             op::Optional((ulong)-1, op::Loop(1,
-                tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
+                tk::Keyword(KEYWORD_COMMA),
                 re::Path(),
                 op::Optional(1,
-                    tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+                    tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 )
             ))
         ),
-        tk::Keyword(ReservedTokenId::KEYWORD_SEMICOLON)
+        tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
 
@@ -75,7 +76,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Export::generateData(std::vector<__base_ST*> co
 
             // If it is "as", rename the current element and save it
             else {
-                elm.name = results[i + 1]->asIdentifier()->s;
+                elm.name = results[i + 1]->asIdentifier();
                 i += 2; // Skip to next separator or ;
                 r->elms.push_back(elm);
 

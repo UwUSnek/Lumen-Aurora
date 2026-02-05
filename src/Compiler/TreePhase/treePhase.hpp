@@ -3,6 +3,7 @@
 #include "Compiler/TreePhase/SourceTree.hpp"
 #include "Compiler/TreePhase/__base_Pattern.hpp"
 #include "GenerationResult.hpp"
+#include "ALC.hpp"
 
 
 

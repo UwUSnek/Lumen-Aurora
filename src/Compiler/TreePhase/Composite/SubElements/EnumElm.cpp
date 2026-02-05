@@ -41,7 +41,7 @@ void cmp::Pattern_Elm_EnumElm::init() {
 cmp::__base_ST* cmp::Pattern_Elm_EnumElm::generateData(std::vector<__base_ST*> const &results) const {
     auto* r = new ST_EnumElm();
 
-    r->name = results[0]->asIdentifier()->s;
+    r->name = results[0]->asIdentifier();
 
     // Print debug info and return
     debug((cout++ << "Found enum element " << r->name << "\n")--;)

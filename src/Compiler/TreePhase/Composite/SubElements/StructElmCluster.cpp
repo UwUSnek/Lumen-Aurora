@@ -1,6 +1,5 @@
 #include "StructElmCluster.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
-#include "StructElm.hpp"
 
 std::string cmp::ST_StructElmCluster::getCategoryName(bool plural) const {
     return plural ? "struct element" : "struct elements";
@@ -26,14 +25,15 @@ ulong cmp::Pattern_Elm_StructElmCluster::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_StructElmCluster::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
         re::Type(),
         re::StructElm(),
         op::Optional((ulong)-1, op::Loop(1,
-            tk::Keyword(ReservedTokenId::KEYWORD_COMMA),
+            tk::Keyword(KEYWORD_COMMA),
             re::StructElm()
         )),
-        tk::Keyword(ReservedTokenId::KEYWORD_SEMICOLON)
+        tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
 

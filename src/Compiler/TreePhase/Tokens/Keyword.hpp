@@ -1,4 +1,6 @@
 #pragma once
+#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
+#include "Compiler/TreePhase/SourceTree.hpp"
 #include "__base_Pattern_Token.hpp"
 
 
@@ -20,7 +22,7 @@ namespace cmp {
 
     struct Pattern_Keyword : public virtual __base_Pattern_Token {
         ReservedTokenId id;
-        void init(ReservedTokenId _id){
+        void init(ReservedTokenId _id) {
             id = _id;
         }
 

@@ -1,5 +1,4 @@
 #pragma once
-#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
 #include "Compiler/TreePhase/SourceTree.hpp"
 #include "Compiler/TreePhase/Composite/__base_Pattern_Composite.hpp"
 
@@ -11,14 +10,13 @@
 
 
 namespace cmp {
-    struct __internal_ST_Import_Elm {
+    struct __internal_ST_Import_Elm : public virtual __base_ST_Referable {
         ST_Sub_Path *symbol;
-        std::string name;
-        __internal_ST_Import_Elm(ST_Sub_Path *_symbol) : symbol(_symbol){}
+        explicit __internal_ST_Import_Elm(ST_Sub_Path *_symbol) : symbol(_symbol){}
     };
 
     struct ST_Import : public virtual __base_ST_Referable {
-        std::string name;
+        std::string rawPath;
         std::vector<__internal_ST_Import_Elm> elms;
         std::string getCategoryName(bool plural = false) const override;
     };

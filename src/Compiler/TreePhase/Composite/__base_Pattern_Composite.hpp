@@ -1,4 +1,5 @@
 #pragma once
+#include "Compiler/TreePhase/SourceTree.hpp"
 #include "Compiler/TreePhase/__base_Pattern.hpp"
 #include "ALC.hpp"
 
@@ -29,7 +30,7 @@ namespace cmp {
                 }
                 cout << "\n";
                 cout--;
-            );
+            )
         }
 
         // virtual bool isChildAllowed(__base_ST* const child) const = 0;

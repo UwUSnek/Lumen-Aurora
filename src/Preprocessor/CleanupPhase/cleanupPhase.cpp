@@ -17,16 +17,14 @@ void pre::startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
     while(b->str[i].has_value()) {
 
         // Skip comments
-        ulong commentLen = measureComment(b->str, i);
-        if(commentLen) {
+        if(ulong commentLen = measureComment(b->str, i); commentLen) {
             i += commentLen;
             increaseLocalProgress(commentLen);
             continue;
         }
 
         // Skip (and preserve) literals
-        ulong literalLen = saveLiteral(b, i, r);
-        if(literalLen) {
+        if(ulong literalLen = saveLiteral(b, i, r); literalLen) {
             i += literalLen;
             continue;
         }

@@ -40,7 +40,7 @@ void cmp::Pattern_Elm_StructElm::init() {
 cmp::__base_ST* cmp::Pattern_Elm_StructElm::generateData(std::vector<__base_ST*> const &results) const {
     auto* r = new ST_StructElm();
 
-    r->name = results[0]->asIdentifier()->s;
+    r->name = results[0]->asIdentifier();
     //FIXME expression
 
     // Print debug info and return

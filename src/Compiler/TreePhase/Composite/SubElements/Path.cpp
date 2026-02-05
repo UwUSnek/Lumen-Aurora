@@ -28,7 +28,7 @@ void cmp::Pattern_Elm_Path::init(){
     __base_Pattern_Composite::__internal_init(
         tk::Identifier(),
         op::Optional((ulong)-1, op::Loop(1,
-            tk::Keyword(ReservedTokenId::KEYWORD_DOT),
+            tk::Keyword(ReservedTokenId::KEYWORD_DOT), //FIXME add reflection paths
             tk::Identifier()
         ))
     );

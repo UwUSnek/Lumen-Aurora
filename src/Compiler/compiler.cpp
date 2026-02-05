@@ -18,8 +18,8 @@ cmp::SourceTree* cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b
     //! Max progress is calculted and set by preprocessor subpahses
 
     // Create subphase buffers
-    TokenizedSource *r1 = new TokenizedSource();
-    SourceTree      *r2 = new SourceTree();
+    auto *r1 = new TokenizedSource();
+    auto *r2 = new SourceTree();
 
     // Start subphases
     startSubphaseAsync(Compilation, false, startTokenizationPhase, b, r1);
