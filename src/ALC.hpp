@@ -170,8 +170,10 @@ extern  __internal_cerr_stream_t_wrapper cerr;
 //TODO make this more readable, maybe group stuff in namespaces
 
 #define LIST_PHASE_ID   \
-    X(Preprocessing)    \
-    X(Compilation)      \
+    X(Preprocessing_A)    \
+    X(Preprocessing_B)    \
+    X(Compilation_A)      \
+    X(Compilation_B)      \
     X(Optimization)     \
     X(Conversion)       \
     X(NUM)              \

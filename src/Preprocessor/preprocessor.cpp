@@ -41,9 +41,12 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(const std::string *s, const 
 
 
     // Start the loop subphases
-    startSubphaseAsync(Preprocessing, false, startLCTsPhase,     s, pathIndex, r1);
-    startSubphaseAsync(Preprocessing, false, startCleanupPhase, r1,            r2);
-    startSubphaseAsync(Preprocessing, false, startIncludePhase, r2,            r3);
+    // startSubphaseAsync(Preprocessing, false, startLCTsPhase,     s, pathIndex, r1);
+    // startSubphaseAsync(Preprocessing, false, startCleanupPhase, r1,            r2);
+    // startSubphaseAsync(Preprocessing, false, startIncludePhase, r2,            r3);
+    startSubphaseAsync(Preprocessing_A, true, startLCTsPhase,     s, pathIndex, r1);
+    startSubphaseAsync(Preprocessing_A, true, startCleanupPhase, r1,            r2);
+    startSubphaseAsync(Preprocessing_A, true, startIncludePhase, r2,            r3);
 
 
     // Wait for the subphases to finish, then update the max progress of the next phase and return the output buffer
@@ -73,11 +76,12 @@ pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::
 
 
     // Set the max progress of the compilation phase
-    increaseMaxProgress(Compilation, r3->str.length());
+    increaseMaxProgress(Preprocessing_B, r3->str.length());
 
 
     // Start the macro replacment phase and return the output
-    startSubphaseAsync(Preprocessing, true, startMacroPhase, r3, r4);
+    // startSubphaseAsync(Preprocessing, true, startMacroPhase, r3, r4);
+    startSubphaseAsync(Preprocessing_B, true, startMacroPhase, r3, r4);
     return r4;
 }
 
