@@ -1,16 +1,12 @@
 #include <fstream>
 #include <cstring>
-#include <filesystem>
-namespace fs = std::filesystem;
-
 #include "ALC.hpp"
-#include "Command/command.hpp"
-#include "Utils/ansi.hpp"
 #include "Utils/errors.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "includePhase.hpp"
 #include "Preprocessor/CleanupPhase/cleanupPhase.hpp"
 #include "pathSolver.hpp"
+
 
 
 
@@ -26,8 +22,7 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
 
 
         // Skip (and preserve) literals
-        ulong literalLen = saveLiteral(b, i, r);
-        if(literalLen) {
+        if(ulong literalLen = saveLiteral(b, i, r); literalLen) {
             i += literalLen;
             continue;
         }
@@ -72,7 +67,7 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
 
                         // Copy file contents and metadata
                         std::ifstream actualFile(actualFilePath);
-                        std::string* fileContents = new std::string(utils::readFile(actualFile));
+                        const std::string* fileContents = new std::string(utils::readFile(actualFile));
                         //FIXME add a function that reads a file and saves it in a global array so they don't go out of scope
                         actualFile.close();
 
@@ -141,7 +136,7 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
 
 
 
-//! Manual regex because std doesn't support my custom pipe.
+//! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b->str[i:]
 void pre::parseIncludeStatementName(ulong index, pre::SegmentedCleanSource *b, std::string &match) {
     std::string tmp;
@@ -173,7 +168,7 @@ void pre::parseIncludeStatementName(ulong index, pre::SegmentedCleanSource *b, s
 
 
 
-//! Manual regex because std doesn't support my custom pipe.
+//! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b->str[i:]
 void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, std::string &filePathMatch) {
     std::string tmp;

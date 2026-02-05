@@ -1,11 +1,10 @@
 #include <filesystem>
-namespace fs = std::filesystem;
-
 #include "pathSolver.hpp"
 #include "Command/command.hpp"
 #include "Utils/ansi.hpp"
 #include "Utils/errors.hpp"
 
+namespace fs = std::filesystem;
 
 
 
@@ -42,27 +41,27 @@ std::string pre::resolveFilePath(const std::string &rawFilePath, const std::stri
         // Check current path
         const std::string &fullPath = fs::path(curFilePath).parent_path() / rawFilePath;
         utils::PathCheckResult &&result = utils::checkPath(fullPath);
-        (result.exists ? validPaths : invalidPaths).push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
+        (result.exists ? validPaths : invalidPaths).emplace_back(fullPath, result);
 
         // Check and categorize each include path
         for(const std::string &dir : cmd::options->includePaths) {
-            const std::string &fullPath = dir + "/" + rawFilePath;
-            utils::PathCheckResult const &result = utils::checkPath(fullPath);
+            const std::string &_fullPath = dir + "/" + rawFilePath;
+            utils::PathCheckResult const &_result = utils::checkPath(_fullPath);
 
             // Skip current file path if one equivalent to it already exists. If not, push it to the correct vector
-            if(result.exists) {
-                std::string canonical = fs::canonical(fullPath);
+            if(_result.exists) {
+                std::string canonical = fs::canonical(_fullPath);
                 for(int i = 0;; ++i) {
                     if(i < validPaths.size() && canonical == validPaths[i].first) {
                         break;
                     }
                     if(i >= validPaths.size()) { //! Checking -1 makes it overflow and loop forever
-                        validPaths.push_back(std::pair<std::string, utils::PathCheckResult>(canonical, result));
+                        validPaths.emplace_back(canonical, _result);
                         break;
                     }
                 }
             }
-            else invalidPaths.push_back(std::pair<std::string, utils::PathCheckResult>(fullPath, result));
+            else invalidPaths.emplace_back(_fullPath, _result);
         }
 
 
@@ -70,7 +69,7 @@ std::string pre::resolveFilePath(const std::string &rawFilePath, const std::stri
         if(validPaths.empty()) {
             std::string invalidPathsList = ansi::reset;
             for(ulong i = 0; i < invalidPaths.size(); ++i) {
-                invalidPathsList += "\n    " + std::to_string(i + 1) + ". \"" + ansi::white + invalidPaths[i].first + ansi::reset + "\"";
+                invalidPathsList += std::format("\n    {}. \"{}\"", std::to_string(i + 1), ansi::white + invalidPaths[i].first + ansi::reset);
             }
             printError(
                 ErrorCode::ERROR_PRE_PATH_NOT_FOUND,
@@ -86,7 +85,7 @@ std::string pre::resolveFilePath(const std::string &rawFilePath, const std::stri
         if(validPaths.size() > 1) {
             std::string validPathsList = ansi::reset;
             for(ulong i = 0; i < validPaths.size(); ++i) {
-                validPathsList += "\n    " + std::to_string(i + 1) + ". \"" + ansi::white + validPaths[i].first + ansi::reset + "\"";
+                validPathsList += std::format("\n    {}. \"{}\"", std::to_string(i + 1), ansi::white + validPaths[i].first + ansi::reset);
             }
             printError(
                 ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,
