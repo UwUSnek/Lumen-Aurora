@@ -76,9 +76,46 @@ static void printStatusUI(std::string &fullCommand, ulong loop, const int progre
             ;
         }
     }
-    phaseDataArrayLock.unlock();
 
 
+//TODO add something to Lumen that can replace the ANSI escape sequences.
+//TODO ^ more readable code, easier to use. escape sequences will still be available.
+
+
+static void printStatusUI(const std::string &fullCommand, ulong loop, const int progressBarWidth, const bool _isComplete) {
+    cout++;
+
+    // Adjust position, clear the console and print the command
+    cout << "\033[s";             // Save current cursor position
+    cout << "\033[J";             // Clear console from current character to last line
+    cout << std::string(8, '\n');
+    cout << "\033[999;999H";      // Move cursor to bottom-left corner
+    cout << "\033[8A";            // Move cursor 8 lines up (make space for the status UI)
+    if(_isComplete) {
+        cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
+    }
+    else {
+        const long loadingWidth = 6;
+        const long loadingPos = (long)loop / 2 % ((loadingWidth - 1) * 2);  // 0 to 9
+        const long loadingPosWrapped = loadingPos < (loadingWidth - 1) ? loadingPos : ((loadingWidth - 1) * 2) - loadingPos;
+        const char *loadingStr = loadingPosWrapped == 0 ? "╸" : (loadingPosWrapped == (loadingWidth - 1) ? "╺" : (loadingPos < (loadingWidth - 1) ? "╼" : "╾"));
+        cout << ansi::reset << "\n" << "Building " << ansi::bright_black;
+        for(long i = 0; i < loadingWidth; i++) {
+            if(i == loadingPosWrapped) cout << ansi::white << loadingStr << ansi::bright_black;
+            else cout << "─";
+        }
+    }
+
+
+
+
+    // Print the status of each phase, in order
+    {
+        std::scoped_lock lock(phaseDataArrayLock);
+        for(ulong i = 0; i < phaseDataArray.size(); ++i) {
+            renderProgressBar(i, progressBarWidth);
+        }
+    }
 
 
     // Print info line
