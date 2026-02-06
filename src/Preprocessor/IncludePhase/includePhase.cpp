@@ -2,6 +2,7 @@
 #include <cstring>
 #include "ALC.hpp"
 #include "Utils/errors.hpp"
+#include "Utils/ansi.hpp"
 #include "Preprocessor/preprocessor.hpp"
 #include "includePhase.hpp"
 #include "Preprocessor/CleanupPhase/cleanupPhase.hpp"
@@ -12,7 +13,7 @@
 
 
 
-void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::__internal_startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
 
     ulong i = 0; // The character index relative to the current file, not including included files
     while(b->str[i].has_value()) {
@@ -88,7 +89,8 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
                         relevantCoords,
                         filePathCoords,
                         "Empty file path in include statement.\n"
-                        "A file path must be specified."
+                        "A file path must be specified.",
+                        true //TODO recovery system. skip to the first token that makes sense
                     );
                 }
 
@@ -106,7 +108,8 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
                     relevantCoords,
                     (!b->str[j].has_value()) ? relevantCoords : ElmCoords(b, j, j),
                     "Missing file path in include statement.\n"
-                    "A valid file path was expected, but could not be found."
+                    "A valid file path was expected, but could not be found.",
+                    true //TODO recovery system. skip to the first token that makes sense
                 );
             }
 
@@ -120,13 +123,6 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
             ++i;
         }
     }
-
-
-
-
-    // return r;
-    r->str.closePipe();
-    r->meta.closePipe();
 }
 
 
@@ -193,7 +189,8 @@ void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, s
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(b, index, i - 1),
                 ElmCoords(b, i - 1, i - 1),
-                "Standard module name is missing a closing \">\" character." //! Copy incomplete string error message
+                "Standard module name is missing a closing \">\" character.", //! Copy incomplete string error message
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
 
@@ -204,7 +201,8 @@ void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, s
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(b, index, i - 1),
                 ElmCoords(b, i - 1, i - 1),
-                "Standard module name is missing a closing \">\" character." //! Copy incomplete string error message
+                "Standard module name is missing a closing \">\" character.", //! Copy incomplete string error message
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
         else if(last != '\\' && c == (type == '<' ? '>' : '"')) {
@@ -217,5 +215,32 @@ void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, s
             ++i;
             last = c;
         }
+    }
+}
+
+
+
+
+
+
+
+
+
+void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+
+    // Try to execute the subphase
+    try {
+        __internal_startIncludePhase(b, r);
+        r->str.closePipe();
+        r->meta.closePipe();
+    }
+
+    // If errors occur, close the return pipes and return safely
+    // This lets any dependant subphase join and the main thread exit the program
+    catch(const FatalErrorException&) {
+        r->str.closePipe();
+        r->meta.closePipe();
+        std::scoped_lock lock(phaseDataArrayLock);
+        phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red);
     }
 }

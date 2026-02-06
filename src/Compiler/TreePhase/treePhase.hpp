@@ -9,6 +9,7 @@
 
 
 namespace cmp {
-    GenerationResult *generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool optional debug(, int indent));
-    void startTreePhase(TokenizedSource *b, SourceTree *r);
+    TreeGenerationResult *generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool optional debug(, int indent));
+    void __internal_startTreePhase(TokenizedSource *b, SourceTree *r);
+    void            startTreePhase(TokenizedSource *b, SourceTree *r);
 }

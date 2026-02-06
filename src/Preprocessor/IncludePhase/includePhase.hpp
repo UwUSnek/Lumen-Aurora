@@ -5,7 +5,9 @@
 
 
 namespace pre {
-    void startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r);
+    void __internal_startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r);
+    void            startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r);
+
     void parseIncludeStatementName(ulong index, pre::SegmentedCleanSource *b, std::string &match);
     void parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, std::string &filePathMatch);
 }

@@ -1,4 +1,5 @@
 #include "treePhase.hpp"
+#include "ALC.hpp"
 #include "Utils/errors.hpp"
 #include "Utils/ansi.hpp"
 #include "Compiler/TreePhase/PatternGenerators.hpp"
@@ -21,7 +22,7 @@ debug(
 
 
 
-cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool optional debug(, int indent)) {
+cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool optional debug(, int indent)) {
     ulong i = index;
     debug((cout++ << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ")--;)
 
@@ -34,12 +35,12 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         __Pattern_Operator_OneOf* p = pattern->asOneOf();
 
         // For each element of the OneOf's sequence
-        GenerationResult* max = nullptr;
+        TreeGenerationResult* max = nullptr;
         for(ulong j = 0; j < p->v.size(); ++j) {
 
             // Try to generate its tree
             __base_Pattern* pElm = p->v[j];
-            GenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
+            TreeGenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
 
             // If the generation succeeds, return the result trees
             //! Optional is not allowed as a direct child of OneOf. No need to check
@@ -66,14 +67,14 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     if(pattern->isOptional()) {
         debug((cout++ << ansi::bright_black << "Optional\n" << ansi::reset)--;)
         __Pattern_Operator_Optional* p = pattern->asOptional();
-        auto *r = new GenerationResult{{}, true };
+        auto *r = new TreeGenerationResult{{}, true };
 
         // For each element of the optional's sequence
         for(ulong j = 0; j < p->v.size(); ++j) {
 
             // Try to generate its tree
             __base_Pattern* pElm = p->v[j];
-            GenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
+            TreeGenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
 
             // Save the result trees in r
             for(ulong k = 0; k < result->trees.size(); ++k) {
@@ -124,7 +125,8 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                         ((*b)[i].has_value()
                             ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                             : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
-                        )
+                        ),
+                        true //TODO recovery system. skip to the first token that makes sense
                     );
                 }
                 else {
@@ -134,7 +136,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                     delete result;
                     // return r;
                     delete r;
-                    return new GenerationResult{{}, true };
+                    return new TreeGenerationResult{{}, true };
                 }
             }
             delete result;
@@ -154,14 +156,14 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     if(pattern->isSequence()) {
         debug((cout++ << ansi::bright_black << "Sequence\n" << ansi::reset)--;)
         __Pattern_Operator_Sequence* p = pattern->asSequence();
-        auto *r = new GenerationResult{{}, true };
+        auto *r = new TreeGenerationResult{{}, true };
 
         // For each element of the sequence's sequence
         for(ulong j = 0; j < p->v.size(); ++j) {
 
             // Try to generate its tree
             __base_Pattern* pElm = p->v[j];
-            GenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
+            TreeGenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
 
             // Save the result trees in r
             for(ulong k = 0; k < result->trees.size(); ++k) {
@@ -209,7 +211,8 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                         ((*b)[i].has_value()
                             ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                             : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
-                        )
+                        ),
+                        true //TODO recovery system. skip to the first token that makes sense
                     );
                 }
                 else {
@@ -234,7 +237,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
     if(pattern->isLoop()) {
         debug((cout++ << ansi::bright_black << "Loop\n" << ansi::reset)--;)
         __Pattern_Operator_Loop* p = pattern->asLoop();
-        auto *r = new GenerationResult{{}, true };
+        auto *r = new TreeGenerationResult{{}, true };
 
         // Repeat loop sequence until it fails
         for(ulong l = 0;; ++l) {
@@ -245,7 +248,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
                 // Try to generate its tree
                 __base_Pattern* pElm = p->v[j];
-                GenerationResult *result = generateTree(pElm, b, i, optional debug(, indent + 1));
+                TreeGenerationResult *result = generateTree(pElm, b, i, optional debug(, indent + 1));
 
 
                 //               |                                 |
@@ -307,8 +310,13 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                             ((*b)[i].has_value()
                                 ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                                 : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
-                            )
+                            ),
+                            true //TODO recovery system. skip to the first token that makes sense
                         );
+                        //FIXME list possible elements when none of a OneOf's choices are found, instead of saying "expected <firstElement>, but..."
+
+                        //FIXME "Incomplete Module. Found unexpected Identifier "idk" //TODO this is already printed
+                        //FIXME "Only one of these is allowed: Struct definition, Import directive, Export directive, Routine definition"
                     }
                     else {
                         delete result;
@@ -331,7 +339,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
         //! Bogus return value to silence GCC
-        return new GenerationResult{{ (__base_ST*)0xDEAD }, false };
+        return new TreeGenerationResult{{ (__base_ST*)0xDEAD }, false };
     }
 
 
@@ -348,7 +356,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
             // Try to generate its tree
             __base_Pattern* pElm = p->v[j];
-            GenerationResult *result = generateTree(pElm, b, i, optional debug(, indent + 1));
+            TreeGenerationResult *result = generateTree(pElm, b, i, optional debug(, indent + 1));
 
             // Save the result trees in genSource and update i
             for(ulong k = 0; k < result->trees.size(); ++k) {
@@ -405,15 +413,19 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
                             ((*b)[i].has_value()
                                 ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                                 : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
-                            )
+                            ),
+                            true //TODO recovery system. skip to the first token that makes sense
                         );
                         //FIXME list possible elements when none of a OneOf's choices are found, instead of saying "expected <firstElement>, but..."
+
+                        //FIXME "Incomplete Module. Found unexpected Identifier "idk" //TODO this is already printed
+                        //FIXME "Only one of these is allowed: Struct definition, Import directive, Export directive, Routine definition"
                     // }
                 }
                 else {
                     debug(printFail(indent);)
                     delete result;
-                    return new GenerationResult{{}, false };
+                    return new TreeGenerationResult{{}, false };
                 }
             }
             delete result;
@@ -424,7 +436,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return new GenerationResult{{ r }, true };
+        return new TreeGenerationResult{{ r }, true };
     }
     //FIXME fix trees' parent pointer not getting set
 
@@ -443,7 +455,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
         if(!t.has_value() || !t->isKeyword(p->id)) {
             debug(printFail(indent);)
-            return new GenerationResult{{}, false};
+            return new TreeGenerationResult{{}, false};
         }
 
         ++i;
@@ -451,7 +463,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return new GenerationResult{{ r }, true };
+        return new TreeGenerationResult{{ r }, true };
     }
 
 
@@ -464,7 +476,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
         if(!t.has_value() || !t->isIdentifier()) {
             debug(printFail(indent);)
-            return new GenerationResult{{}, false};
+            return new TreeGenerationResult{{}, false};
         }
 
         ++i;
@@ -472,7 +484,7 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return new GenerationResult{{ r }, true };
+        return new TreeGenerationResult{{ r }, true };
     }
 
 
@@ -488,7 +500,20 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
     //! Bogus return value to silence GCC
-    return new GenerationResult{{ (__base_ST*)0xDEAD }, false };
+    return new TreeGenerationResult{{ (__base_ST*)0xDEAD }, false };
+}
+
+
+
+
+
+
+
+
+void cmp::__internal_startTreePhase(TokenizedSource *b, SourceTree *r) {
+    const auto &moduleTree = generateTree(re::Module(), b, 0, false debug(, 0));
+    *r->cpp() = dynamic_cast<ST_Module*>(moduleTree->trees[0]);
+    // b->awaitClose([](){}); //BUG this works but it shouldn't be necessary
 }
 
 
@@ -499,8 +524,20 @@ cmp::GenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSourc
 
 
 void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
-    *r->cpp() = dynamic_cast<ST_Module*>(generateTree(re::Module(), b, 0, false debug(, 0))->trees[0]);
-    r->closePipe();
+
+    // Try to execute the subphase
+    try {
+        __internal_startTreePhase(b, r);
+        r->closePipe();
+    }
+
+    // If errors occur, close the return pipe and return safely
+    // This lets any dependant subphase join and the main thread exit the program
+    catch(const FatalErrorException&) {
+        r->closePipe();
+        std::scoped_lock lock(phaseDataArrayLock);
+        phaseDataArray[Compilation_B].totalProgress->setProgressColor(ansi::red);
+    }
 }
 //TODO put const everywhere it's needed
 //FIXME free (delete) all the unnecessary GenerationResult s

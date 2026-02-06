@@ -1,5 +1,6 @@
 #include "ALC.hpp"
 #include "LCTsPhase.hpp"
+#include "Utils/ansi.hpp"
 
 
 
@@ -30,7 +31,7 @@ ulong checkLct(const std::string *b, ulong index) {
 
 
 
-void pre::startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
+void pre::__internal_startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
     increaseMaxProgress(b->length());
 
 
@@ -60,8 +61,29 @@ void pre::startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, Segmente
             ++c;
         }
     }
+}
 
 
-    r->str.closePipe();
-    r->meta.closePipe();
+
+
+
+
+
+void pre::startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
+
+    // Try to execute the subphase
+    try {
+        __internal_startLCTsPhase(b, DBG_filePathIndex, r);
+        r->str.closePipe();
+        r->meta.closePipe();
+    }
+
+    // If errors occur, close the return pipes and return safely
+    // This lets any dependant subphase join and the main thread exit the program
+    catch(const FatalErrorException&) {
+        r->str.closePipe();
+        r->meta.closePipe();
+        std::scoped_lock lock(phaseDataArrayLock);
+        phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red);
+    }
 }

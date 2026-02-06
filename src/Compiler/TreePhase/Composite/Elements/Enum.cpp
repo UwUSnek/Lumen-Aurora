@@ -24,12 +24,13 @@ ulong   cmp::Pattern_Elm_Enum::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_Enum::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
-        tk::Keyword(ReservedTokenId::KEYWORD_ENUM),
+        tk::Keyword(KEYWORD_ENUM),
         tk::Identifier(),
-        tk::Keyword(ReservedTokenId::META_KEYWORD_COLON),
+        tk::Keyword(META_KEYWORD_COLON),
         re::Type(),
-        tk::Keyword(ReservedTokenId::KEYWORD_CURLY_L),
+        tk::Keyword(KEYWORD_CURLY_L),
         op::Optional((ulong)-1, op::Loop((ulong)-1, op::OneOf(
             re::EnumElm(),
             re::Import(),
@@ -40,7 +41,7 @@ void cmp::Pattern_Elm_Enum::init() {
             re::Namespace()
             //FIXME other possible elements
         ))),
-        tk::Keyword(ReservedTokenId::KEYWORD_CURLY_R)
+        tk::Keyword(KEYWORD_CURLY_R)
     );
 }
 

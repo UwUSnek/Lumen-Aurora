@@ -85,7 +85,7 @@ public:
      * @return A copy of the requested element wrapped in an std::optional, or an empty optional if the pipe was closed before reaching the required size.
      */
     std::optional<elmt> operator[](ulong i) {
-        while(len.load() <= i) {
+        while(len.load(std::memory_order_acquire) <= i) {
             if(!__base_Pipe<t>::isOpen() && len.load(std::memory_order_acquire) <= i)  {
                 return std::nullopt;
             }

@@ -6,5 +6,6 @@
 
 
 namespace cmp {
-    void startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r);
+    void __internal_startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r);
+    void            startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r);
 }

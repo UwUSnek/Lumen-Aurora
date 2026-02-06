@@ -77,7 +77,8 @@ std::string pre::resolveFilePath(const std::string &rawFilePath, const std::stri
                 relevantCoords,
                 filePathCoords,
                 "Could not open file \"" + rawFilePath + "\": no such file or directory.\n" +
-                "Paths tried: " + invalidPathsList
+                "Paths tried: " + invalidPathsList,
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
 
@@ -93,7 +94,8 @@ std::string pre::resolveFilePath(const std::string &rawFilePath, const std::stri
                 relevantCoords,
                 filePathCoords,
                 "Ambiguous file path \"" + rawFilePath + "\".\n" +
-                "Files that match this path: " + validPathsList
+                "Files that match this path: " + validPathsList,
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
 
@@ -135,7 +137,8 @@ std::string pre::validateSelectedIncludePath(const std::string &filePath, utils:
             filePathCoords,
             "Could not open file \"" + filePath + "\": no such file or directory.\n" +
             "File path was interpreted as: \"" + ansi::white + filePath + ansi::reset + "\".\n" +
-            "Make sure that the path is correct and the file exists."
+            "Make sure that the path is correct and the file exists.",
+            true //TODO recovery system. skip to the first token that makes sense
         );
     }
 
@@ -148,7 +151,8 @@ std::string pre::validateSelectedIncludePath(const std::string &filePath, utils:
             relevantCoords,
             filePathCoords,
             "Could not open file \"" + filePath + "\": no read permission.\n" +
-            "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\"."
+            "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\".",
+            true //TODO recovery system. skip to the first token that makes sense
         );
     }
 
@@ -160,7 +164,8 @@ std::string pre::validateSelectedIncludePath(const std::string &filePath, utils:
             relevantCoords,
             filePathCoords,
             "Could not include the specified path: \"" + filePath + "\" is a directory.\n" +
-            "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\"."
+            "File path was interpreted as: \"" + ansi::white + actualFilePath + ansi::reset + "\".",
+            true //TODO recovery system. skip to the first token that makes sense
         );
     }
 

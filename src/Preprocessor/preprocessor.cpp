@@ -19,7 +19,7 @@
  * @brief The part of loadSourceCode that does the recursive things.
  *      Waits for the subphases to finish before returning the output.
  */
-pre::SegmentedCleanSource* pre::loadSourceCode_loop(const std::string *s, const std::string &filePath, const std::function<void()> &awaitTask) {
+pre::SegmentedCleanSource* pre::loadSourceCode_loop(const std::string *s, const std::string &filePath, const std::function<bool()> &awaitTask) {
     ulong pathIndex;
     {
         std::scoped_lock lock(sourceFilePathsLock);
@@ -44,9 +44,12 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(const std::string *s, const 
     // startSubphaseAsync(Preprocessing, false, startLCTsPhase,     s, pathIndex, r1);
     // startSubphaseAsync(Preprocessing, false, startCleanupPhase, r1,            r2);
     // startSubphaseAsync(Preprocessing, false, startIncludePhase, r2,            r3);
-    startSubphaseAsync(Preprocessing_A, true, startLCTsPhase,     s, pathIndex, r1);
-    startSubphaseAsync(Preprocessing_A, true, startCleanupPhase, r1,            r2);
-    startSubphaseAsync(Preprocessing_A, true, startIncludePhase, r2,            r3);
+    // startLCTsPhase(s, pathIndex, r1); //TODO
+    startSubphaseAsync(Preprocessing_A, false, startLCTsPhase,     s, pathIndex, r1);
+    // startCleanupPhase(r1, r2); //TODO
+    startSubphaseAsync(Preprocessing_A, false, startCleanupPhase, r1,            r2);
+    // startIncludePhase(r2, r3); //TODO
+    startSubphaseAsync(Preprocessing_A, false, startIncludePhase, r2,            r3);
 
 
     // Wait for the subphases to finish, then update the max progress of the next phase and return the output buffer
@@ -82,6 +85,8 @@ pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::
     // Start the macro replacment phase and return the output
     // startSubphaseAsync(Preprocessing, true, startMacroPhase, r3, r4);
     startSubphaseAsync(Preprocessing_B, true, startMacroPhase, r3, r4);
+    // r4->str.awaitClose([](){}); //BUG this works, but it shouldn't be necessary
+    // r4->meta.awaitClose([](){}); //BUG this works, but it shouldn't be necessary
     return r4;
 }
 

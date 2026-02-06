@@ -1,4 +1,4 @@
-BIG_2_FILE
+namespace BIG_2_FILE{}
 #include "./big3.lum"
 #include "./big3.lum"
 #include   "big3.lum"

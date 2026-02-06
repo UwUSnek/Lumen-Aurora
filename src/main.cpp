@@ -1,3 +1,4 @@
+#include <mutex>
 #include <string>
 #include <fstream>
 #include <filesystem>
@@ -54,7 +55,8 @@ void writeOutputFile(const std::string &code) {
         utils::printErrorGeneric(
             ErrorCode::ERROR_OUTPUT_CANNOT_CREATE,
             "Could not write output file \"" + cmd::options->outputFile + "\".\n" +
-            "Output path was interpreted as: \"" + ansi::white + fs::canonical(cmd::options->outputFile).string() + ansi::reset + "\".\n"
+            "Output path was interpreted as: \"" + ansi::white + fs::canonical(cmd::options->outputFile).string() + ansi::reset + "\".\n",
+            true
         );
     }
 }
@@ -106,7 +108,7 @@ int main(int argc, char* argv[]){
 
 
     // Start monitor thread
-    std::thread monitorThread(startMonitorThread, fullCommand);
+    ThreadManager::addThread(std::jthread(startMonitorThread, fullCommand));
 
 
     // Initialize phase data
@@ -127,6 +129,7 @@ int main(int argc, char* argv[]){
 
     if(compileModule) {
         // Compilation
+        // preprocessedSourceCode->str.awaitClose([](){});
         precompiledModule = cmp::compilePreprocessedSourceCode(preprocessedSourceCode);
 
 
@@ -153,24 +156,30 @@ int main(int argc, char* argv[]){
     // Write output file
     if(compileExec) {
         //TODO write exec
+        // if(exitMainRequest.load()) goto skip_file_output; //TODO
     }
     else if(compileModule) {
         precompiledModule->awaitClose(mainCheckErrors);
+        if(exitMainRequest.load()) goto skip_file_output;
         //TODO write module
     }
     else {
         preprocessedSourceCode->str.awaitClose(mainCheckErrors);
         preprocessedSourceCode->meta.awaitClose(mainCheckErrors);
-        preprocessedSourceCode->str.sReallocLock.lock(); //NOSONAR(cpp:S5506)
+        if(exitMainRequest.load()) goto skip_file_output;
+
+        std::scoped_lock lock(preprocessedSourceCode->str.sReallocLock);
         writeOutputFile(*preprocessedSourceCode->str.cpp());
-        preprocessedSourceCode->str.sReallocLock.unlock(); //NOSONAR(cpp:S5506)
     }
 
 
 
-    // Join monitor thread
-    isComplete.store(true);
-    monitorThread.join();
+    // Join subphase and monitor threads
+    //! isComplete signals them that the main is ready to return
+    skip_file_output:
+    isComplete.store(true, std::memory_order_release);
+    ThreadManager::joinAll();
+    return exitMainRequest.load();
 }
 
 

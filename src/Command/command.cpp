@@ -83,6 +83,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             "Incompatible options: " +
                             DBG_fullCommand.substr(currentOutputTypeCoords.start, currentOutputTypeCoords.end - currentOutputTypeCoords.start) + " option used with " +
                             DBG_fullCommand.substr(   lastOutputTypeCoords.start,    lastOutputTypeCoords.end    - lastOutputTypeCoords.start),
+                            true, //TODO recovery system? if possible.
                             DBG_fullCommand
                         );
                     }
@@ -99,6 +100,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             ElmCoordsCL(optionPosition, optionPosition + o.length()),
                             "Missing output path after " + o + " option.\n" +
                             "An output path must be specified.",
+                            true, //TODO recovery system? if possible.
                             DBG_fullCommand
                         );
                     }
@@ -124,6 +126,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             "Incompatible options: " +
                             DBG_fullCommand.substr(currentTargetPlatformCoords.start, currentTargetPlatformCoords.end - currentTargetPlatformCoords.start) + " option used with " +
                             DBG_fullCommand.substr(   lastTargetPlatformCoords.start,    lastTargetPlatformCoords.end    - lastTargetPlatformCoords.start),
+                            true, //TODO recovery system? if possible.
                             DBG_fullCommand
                         );
                     }
@@ -148,6 +151,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             optionCoords,
                             "Missing i" + w + "path after " + o + " option.\n"
                             "A path to a directory must be specified.",
+                            true, //TODO recovery system? if possible.
                             DBG_fullCommand
                         );
                     }
@@ -162,6 +166,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "Could not find directory \"" + path + "\".\n" +
                             "Current working directory is: \"" + ansi::white + fs::current_path().string() + ansi::reset + "\".",
+                            true, //TODO recovery system? if possible.
                             DBG_fullCommand
                         );
                     }
@@ -175,6 +180,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "The specified i" + w + " path \"" + path + "\" is not a directory.\n" +
                             "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                            true, //TODO recovery system? if possible.
                             DBG_fullCommand
                         );
                     }
@@ -187,6 +193,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "The specified i" + w + " directory \"" + path + "\" cannot be used: no read permission.\n" +
                             "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                            true, //TODO recovery system? if possible.
                             DBG_fullCommand
                         );
                     }
@@ -232,6 +239,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
                     cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
                     "Unknown command line option \"" + ansi::white + o + ansi::reset + "\".",
+                    true, //TODO recovery system? if possible.
                     DBG_fullCommand
                 );
             }
@@ -250,6 +258,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     currentSourceCoords,
                     "Multiple source files specified.\n"
                     "Only one at a time is allowed.",
+                    true, //TODO recovery system? if possible.
                     DBG_fullCommand
                 );
                 lastSourceCoords = currentSourceCoords;
@@ -264,6 +273,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     currentSourceCoords,
                     "Could not find source file \"" + o + "\".\n" +
                     "Current working directory is: \"" + ansi::white + fs::current_path().string() + ansi::reset + "\".",
+                    true, //TODO recovery system? if possible.
                     DBG_fullCommand
                 );
             }
@@ -277,6 +287,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     currentSourceCoords,
                     "The specified source file path \"" + o + "\" is a directory.\n" +
                     "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                    true, //TODO recovery system? if possible.
                     DBG_fullCommand
                 );
             }
@@ -289,6 +300,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     currentSourceCoords,
                     "Could not open source file \"" + o + "\": no read permission.\n" +
                     "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
+                    true, //TODO recovery system? if possible.
                     DBG_fullCommand
                 );
             }
@@ -312,6 +324,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
             ElmCoordsCL(optionPosition - 1, optionPosition - 1),
             "Source code path is missing.\n"
             "A path to the input source code must be specified.",
+            true, //TODO recovery system? if possible.
             DBG_fullCommand
         );
     }

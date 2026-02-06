@@ -61,8 +61,8 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
                     ERROR_CMP_LITERAL_BASE_INVALID,
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, index + 1),
-                    std::string("Unknown numerical base prefix \"0") + *c1 + "\".\n" +
-                    R"(Valid prefixes are "0b", "0o", "0d", "0x".)"
+                    std::string("Unknown numerical base prefix \"0") + *c1 + "\".\n" + R"(Valid prefixes are "0b", "0o", "0d", "0x".)",
+                    true //TODO recovery system. skip to the first token that makes sense
                 );
             }
         }
@@ -99,7 +99,8 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
                         ElmCoords(b, index, i - 1),
                         ElmCoords(b, i, i),
                         "Duplicate radix point in " + baseName + " literal.\n"
-                        "Only one is allowed."
+                        "Only one is allowed.",
+                        true //TODO recovery system. skip to the first token that makes sense
                     );
                 }
                 r << *c;
@@ -112,7 +113,8 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, i),
                     ElmCoords(b, i, i),
-                    std::string("Invalid digit \"") + *c + "\" in " + baseName + " literal.\n"
+                    std::string("Invalid digit \"") + *c + "\" in " + baseName + " literal.\n",
+                    true //TODO recovery system. skip to the first token that makes sense
                 );
             }
             else break;
@@ -126,7 +128,8 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
             ElmCoords(b, index, index + 1),
             ElmCoords(b, index + 2, index + 2),
             "Missing digits in " + baseName + " literal.\n"
-            "At least 1 digit is required."
+            "At least 1 digit is required.",
+            true //TODO recovery system. skip to the first token that makes sense
         );
     }
 

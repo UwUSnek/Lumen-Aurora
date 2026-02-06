@@ -6,10 +6,10 @@
 
 
 namespace cmp {
-    struct GenerationResult {
+    struct TreeGenerationResult {
         std::vector<__base_ST*> trees;
         bool isComplete;
 
-        ~GenerationResult(){};
+        ~TreeGenerationResult(){};
     };
 }

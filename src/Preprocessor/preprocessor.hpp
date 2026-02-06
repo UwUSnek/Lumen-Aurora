@@ -8,6 +8,15 @@
 
 
 namespace pre {
-    SegmentedCleanSource* loadSourceCode_loop(const std::string *s, const std::string &filePath, const std::function<void()> &awaitTask = [](){}); //NOSONAR empty lambda
-    SegmentedCleanSource*      loadSourceCode(const std::string *s, const std::string &filePath);
+
+    SegmentedCleanSource* loadSourceCode_loop(
+        const std::string *s,
+        const std::string &filePath,
+        const std::function<bool()> &awaitTask = [](){ return true; }
+    );
+
+    SegmentedCleanSource* loadSourceCode(
+        const std::string *s,
+        const std::string &filePath
+    );
 }

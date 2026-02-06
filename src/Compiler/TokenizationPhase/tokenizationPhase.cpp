@@ -1,5 +1,6 @@
 #include "ALC.hpp"
 #include "tokenizationPhase.hpp"
+#include "Utils/ansi.hpp"
 #include "Utils/errors.hpp"
 
 #include "whitespaceCounter.hpp"
@@ -14,7 +15,7 @@
 
 
 
-void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r) {
+void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r) {
 
     ulong i = 0;
     while(b->str[i].has_value()) {
@@ -95,11 +96,33 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
             utils::ErrType::COMPILER,
             ElmCoords(b, i, i),
             std::string("Invalid character '") + *b->str[i] + "'.\n" +
-            "This character is not allowed within Lumen or Aurora source code."
+            "This character is not allowed within Lumen or Aurora source code.",
+            true //TODO recovery system. skip to the first token that makes sense
         );
         //FIXME ^ decode multi byte characters to print them in the error
     }
+}
 
 
-    r->closePipe();
+
+
+
+
+
+
+void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r) {
+
+    // Try to execute the subphase
+    try {
+        __internal_startTokenizationPhase(b, r);
+        r->closePipe();
+    }
+
+    // If errors occur, close the return pipe and return safely
+    // This lets any dependant subphase join and the main thread exit the program
+    catch(const FatalErrorException&) {
+        r->closePipe();
+        std::scoped_lock lock(phaseDataArrayLock);
+        phaseDataArray[Compilation_A].totalProgress->setProgressColor(ansi::red);
+    }
 }

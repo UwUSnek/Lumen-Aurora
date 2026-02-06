@@ -11,7 +11,7 @@
 
 
 
-void pre::startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::__internal_startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
 
     ulong i = 0;
     while(b->str[i].has_value()) {
@@ -37,10 +37,6 @@ void pre::startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
         r->meta += *b->meta[i];
         ++i;
     }
-
-
-    r->str.closePipe();
-    r->meta.closePipe();
 }
 
 
@@ -151,7 +147,8 @@ ulong pre::saveLiteral(SegmentedCleanSource *b, ulong index, SegmentedCleanSourc
                 utils::ErrType::PREPROCESSOR,
                 ElmCoords(b, index, lastI),
                 ElmCoords(b, lastI, lastI),
-                std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing " + (literalType == '"' ? "\"" : "'") + " character."
+                std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing " + (literalType == '"' ? "\"" : "'") + " character.",
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
         else if(b->str[i] == '\n') {
@@ -162,7 +159,8 @@ ulong pre::saveLiteral(SegmentedCleanSource *b, ulong index, SegmentedCleanSourc
                 ElmCoords(b, index, lastI),
                 ElmCoords(b, lastI, lastI),
                 std::string(literalType == '"' ? "String" : "Char") + " literal is missing a closing " + (literalType == '"' ? "\"" : "'") + " character.\n" +
-                "If you wish to include a newline character in the literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\"."
+                "If you wish to include a newline character in the literal, use the escape sequence \"" + ansi::bold_cyan + "\\n" + ansi::reset + "\".",
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
 
@@ -176,4 +174,30 @@ ulong pre::saveLiteral(SegmentedCleanSource *b, ulong index, SegmentedCleanSourc
 
 
     return i - index;
+}
+
+
+
+
+
+
+
+
+void pre::startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+
+    // Try to execute the subphase
+    try {
+        __internal_startCleanupPhase(b, r);
+        r->str.closePipe();
+        r->meta.closePipe();
+    }
+
+    // If errors occur, close the return pipes and return safely
+    // This lets any dependant subphase join and the main thread exit the program
+    catch(const FatalErrorException&) {
+        r->str.closePipe();
+        r->meta.closePipe();
+        std::scoped_lock lock(phaseDataArrayLock);
+        phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red);
+    }
 }

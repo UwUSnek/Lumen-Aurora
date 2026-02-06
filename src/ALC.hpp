@@ -7,8 +7,10 @@
 #include "Utils/utils.hpp"
 #include "Utils/DynamicProgressBar.hpp"
 #include "Utils/ThreadManager.hpp"
+#include "FatalErrorException.hpp"
 
 
+//FIXME actually control this from somewhere
 #define PRINT_DEBUG_INFO 1
 
 #if PRINT_DEBUG_INFO == 1
@@ -64,7 +66,7 @@ extern VersionNumber *versionNumer;
 
 
 extern std::atomic<int> exitMainRequest;
-[[noreturn]] void exitMain(int exitCode);
+void exitMain(int exitCode);
 
 
 
@@ -317,11 +319,10 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
 
 
     // Start the new thread
-    ThreadManager::addThread(std::jthread([&](){
-        __internal_subphase_exec(
-            phaseId, isLast, isThreadDataInitialized,
-            std::forward<func_t>(f), std::forward<args_t>(args)...
-        );}
+    ThreadManager::addThread(std::jthread(
+        [phaseId = phaseId, isLast = isLast, isThreadDataInitialized = isThreadDataInitialized, f = f, ...args = args](){
+            __internal_subphase_exec(phaseId, isLast, isThreadDataInitialized, f, args...);
+        }
     ));
 
 
@@ -341,4 +342,4 @@ void initPhaseData();
 //TODO move all newline prints to the beginning of the strings.
 //TODO this is only for consistency reasons
 
-void mainCheckErrors();
+bool mainCheckErrors();

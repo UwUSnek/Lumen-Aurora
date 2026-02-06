@@ -1,5 +1,6 @@
 #include "macroPhase.hpp"
 #include "ALC.hpp"
+#include "Utils/ansi.hpp"
 
 
 
@@ -8,7 +9,7 @@
 
 
 
-void pre::startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
+void pre::__internal_startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
     ulong i = 0;
     while(b->str[i].has_value()) {
         r->str  += *b->str[i];
@@ -19,8 +20,30 @@ void pre::startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
         // decreaseMaxProgress(Compilation, definition length); //TODO
         // decreaseMaxProgress(Compilation, call length); //TODO
     }
+}
 
 
-    r->str.closePipe();
-    r->meta.closePipe();
+
+
+
+
+
+
+void pre::startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
+
+    // Try to execute the subphase
+    try {
+        __internal_startMacroPhase(b, r);
+        r->str.closePipe();
+        r->meta.closePipe();
+    }
+
+    // If errors occur, close the return pipe sand return safely
+    // This lets any dependant subphase join and the main thread exit the program
+    catch(const FatalErrorException&) {
+        r->str.closePipe();
+        r->meta.closePipe();
+        std::scoped_lock lock(phaseDataArrayLock);
+        phaseDataArray[Preprocessing_B].totalProgress->setProgressColor(ansi::red);
+    }
 }

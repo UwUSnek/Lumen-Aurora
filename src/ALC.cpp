@@ -1,8 +1,12 @@
+#include <atomic>
+#include <cstdlib>
 #include <iostream>
+#include <mutex>
 #include <vector>
 
 #include "ALC.hpp"
 #include "Utils/ansi.hpp"
+#include "FatalErrorException.hpp"
 
 
 
@@ -24,16 +28,22 @@ std::atomic<int> exitMainRequest(0);
 
 
 /**
- * @brief Stops the current thread and makes the main thread exit.
+ * @brief Signals the main thread there is an issue by throwing a FatalErrorException
+ *      (which one of the parent functions is expected to catch). This makes it available for joining.
+ *
  *      This function does NOT prevent other threads from printing to the console while it is being executed.
  *      External synchronization is required.
+ *
  *      If the current thread is the main thread, this is equivalent to calling exit()
  */
 void exitMain(int exitCode) {
-    if(threadType == ThreadType::MAIN) exit(exitCode);
+    if(threadType == ThreadType::MAIN) {
+        std::exit(exitCode);
+    }
     else {
         exitMainRequest.store(exitCode);
-        while(true) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        // while(!isComplete.load(std::memory_order_acquire)) std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        throw(FatalErrorException(exitCode));
     }
 }
 
@@ -71,7 +81,7 @@ thread_local ThreadType threadType = ThreadType::UNKNOWN;
 
 
 //FIXME detect all the files before processing them to make progress more reliable
-// Becomes true after the output file gets written and closed
+// Becomes true when the main thread is ready to return.
 std::atomic<bool> isComplete(false);
 
 
@@ -95,7 +105,7 @@ std::mutex __internal_consoleLock;
 int __internal_cout_stream_t::overflow(int c) {
     if (c != EOF) {
         if (c == '\n') std::cout << "\033[K";
-        std::cout.put(c);
+        std::cout.put(c); //NOSONAR
     }
     return c;
 }
@@ -110,7 +120,7 @@ __internal_cout_stream_t_wrapper cout;
 int __internal_cerr_stream_t::overflow(int c) {
     if (c != EOF) {
         if (c == '\n') std::cerr << "\033[K";
-        std::cerr.put(c);
+        std::cerr.put(c); //NOSONAR
     }
     return c;
 }
@@ -131,8 +141,8 @@ __internal_cerr_stream_t_wrapper cerr;
 
 
 std::string phaseIdTotring(PhaseID phaseId) {
-    static const char* names[] = {
-        #define X(e) #e,
+    static const std::vector<std::string> names = {
+        #define X(e) std::string(#e),
         LIST_PHASE_ID
         #undef X
     };
@@ -191,9 +201,8 @@ void decreaseMaxProgress(ulong n) {
  * @param n The amount of progress steps to add.
  */
 void increaseMaxProgress(PhaseID phaseId, ulong n) {
-    phaseDataArrayLock.lock();
+    std::scoped_lock lock(phaseDataArrayLock);
     phaseDataArray[phaseId].totalProgress->increaseMax(n);
-    phaseDataArrayLock.unlock();
 };
 
 /**
@@ -201,9 +210,8 @@ void increaseMaxProgress(PhaseID phaseId, ulong n) {
  * @param n The amount of progress steps to subtract.
  */
 void decreaseMaxProgress(PhaseID phaseId, ulong n) {
-    phaseDataArrayLock.lock();
+    std::scoped_lock lock(phaseDataArrayLock);
     phaseDataArray[phaseId].totalProgress->decreaseMax(n);
-    phaseDataArrayLock.unlock();
 };
 
 /**
@@ -211,9 +219,8 @@ void decreaseMaxProgress(PhaseID phaseId, ulong n) {
  * @param n The max progress value.
  */
 ulong fetchMaxProgress(PhaseID phaseId) {
-    phaseDataArrayLock.lock();
+    std::scoped_lock lock(phaseDataArrayLock);
     ulong r = phaseDataArray[phaseId].totalProgress->max.load();
-    phaseDataArrayLock.unlock();
     return r;
 };
 
@@ -230,10 +237,9 @@ ulong fetchMaxProgress(PhaseID phaseId) {
  *      This function MUST be called ONCE before starting any of the subphses
  */
 void initPhaseData(){
+    std::scoped_lock lock(phaseDataArrayLock);
     for(ulong i = 0; i < PhaseID::NUM; ++i) {
-        phaseDataArrayLock.lock();
-        phaseDataArray.push_back(PhaseData());
-        phaseDataArrayLock.unlock();
+        phaseDataArray.emplace_back();
     }
 }
 
@@ -243,21 +249,20 @@ void initPhaseData(){
 
 
 /**
- * @brief Checks if other threads have generated errors and stops the program if that's the case.
+ * @brief Checks if other threads have generated errors.
  *      This function can ONLY be called from the MAIN thread.
  *      Calling it from any other thread will break the compiler.
+ * @return False if other threads have generated an error, true otherwise.
  */
-void mainCheckErrors(){
+bool mainCheckErrors(){
     if(threadType != ThreadType::MAIN) {
         cerr++;
         cerr << "\nFatal: Error check function was called by a secondary thread. This is a bug and Lumen's developer is to blame for it.";
         cerr << "\nThe program was not stopped.";
         cerr--;
+        return false;
     }
     else {
-        int exitCode = exitMainRequest.load();
-        if(exitCode) {
-            std::exit(exitCode);
-        }
+        return !exitMainRequest.load();
     }
 }

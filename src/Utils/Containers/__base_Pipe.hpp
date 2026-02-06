@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <functional>
 #include <thread>
 #include <chrono>
 
@@ -44,12 +45,13 @@ public:
 
 
     /**
-     * @brief Makes the thread sleep until the pipe closes.
+     * @brief Makes the thread sleep until the pipe closes or the provided function returns false.
+     * @param task The task to run at each iteration. If this returns false, awaitClose returns instantly.
+     *     The caller is responsible for error codes and messages. awaitClose provides no error handling.
      */
-    template<typename T = decltype([](){})> //NOSONAR empty lambda body
-    void awaitClose(T task) const {
+    void awaitClose(const std::function<bool()> &task) const { //NOSONAR
         while(isOpen()) {
-            task();
+            if(!task()) return;
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }

@@ -25,7 +25,7 @@ struct DynamicProgressBar {
 
 public:
     DynamicProgressBar() = delete;
-    DynamicProgressBar(ulong _max, std::string _progressColor, std::string _missingColor) :
+    DynamicProgressBar(ulong _max, const std::string &_progressColor, const std::string &_missingColor) :
         progress(0),
         max(_max),
         progressColor(_progressColor),
@@ -39,4 +39,9 @@ public:
 
     void render(int terminalWidth) const;
     // bool isComplete() const { return progress.load() >= max.load(); }
+
+
+    void setProgressColor(const std::string_view &newProgressColor) {
+        progressColor = newProgressColor;
+    }
 };

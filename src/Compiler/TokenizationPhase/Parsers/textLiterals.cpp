@@ -66,7 +66,8 @@ cmp::TokenValue* cmp::parseDelimitedLiteral(pre::SegmentedCleanSource *b, ulong 
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
                 ElmCoords(b, i - 1, i - 1),
-                std::format("{} literal is missing a closing {} character.", getLiteralName(literalType), delimiter)
+                std::format("{} literal is missing a closing {} character.", getLiteralName(literalType), delimiter),
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
         else if(c == '\n') {
@@ -80,7 +81,8 @@ cmp::TokenValue* cmp::parseDelimitedLiteral(pre::SegmentedCleanSource *b, ulong 
                     "If you wish to include a newline character in the literal, use the escape sequence \"{}\".",
                     getLiteralName(literalType), delimiter,
                     ansi::bold_cyan + "\\n" + ansi::reset
-                )
+                ),
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
 
@@ -121,7 +123,8 @@ cmp::TokenValue* cmp::parseDelimitedLiteral(pre::SegmentedCleanSource *b, ulong 
                 ElmCoords(b, index, i - 1),
                 ElmCoords(b, index + 1, i - 2),
                 "Char literal contains more than one byte. This is not allowed.\n"
-                "If you wish to store strings or a multi-byte Unicode character, you can use a string literal."
+                "If you wish to store strings or a multi-byte Unicode character, you can use a string literal.",
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
 
@@ -131,7 +134,8 @@ cmp::TokenValue* cmp::parseDelimitedLiteral(pre::SegmentedCleanSource *b, ulong 
                 ERROR_CMP_CHAR_EMPTY,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
-                "Char literal cannot be empty."
+                "Char literal cannot be empty.",
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
     }
@@ -187,7 +191,8 @@ std::optional<std::string> cmp::decodeEscapeSequence(pre::SegmentedCleanSource *
                 ERROR_CMP_ESCAPE_INVALID,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
-                "Invalid escape sequence \"" + ansi::white + "\\" + *c + ansi::reset + "\"."
+                "Invalid escape sequence \"" + ansi::white + "\\" + *c + ansi::reset + "\".",
+                true //TODO recovery system. skip to the first token that makes sense
             );
         }
 
@@ -233,7 +238,8 @@ std::optional<std::string> cmp::decodeEscapeSequence(pre::SegmentedCleanSource *
                     std::format(
                         "Missing hexadecimal digits after Unicode codepoint escape sequence.\nExactly {} digits are required.",
                         expectedDigits
-                    )
+                    ),
+                    true //TODO recovery system. skip to the first token that makes sense
                 );
             }
             else if(codepoint.length() < expectedDigits) {
@@ -246,7 +252,8 @@ std::optional<std::string> cmp::decodeEscapeSequence(pre::SegmentedCleanSource *
                         "Missing hexadecimal digits in Unicode codepoint escape sequence.\n{} were expected, but only {} could be found.",
                         expectedDigits,
                         codepoint.length()
-                    )
+                    ),
+                    true //TODO recovery system. skip to the first token that makes sense
                 );
             }
 
@@ -274,7 +281,8 @@ std::optional<std::string> cmp::decodeEscapeSequence(pre::SegmentedCleanSource *
             ERROR_CMP_UNEXPECTED_END,
             utils::ErrType::COMPILER,
             ElmCoords(b, index, i - 1),
-            std::format("Unexpected end of file in escape sequence of {} literal.", getLiteralName(literalType))
+            std::format("Unexpected end of file in escape sequence of {} literal.", getLiteralName(literalType)),
+            true //TODO recovery system. skip to the first token that makes sense
         );
     }
 

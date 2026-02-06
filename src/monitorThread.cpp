@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <atomic>
 #include <functional>
 #include <mutex>
 #include <vector>
@@ -75,7 +76,12 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
     cout << "\033[999;999H";      // Move cursor to bottom-left corner
     cout << "\033[8A";            // Move cursor 8 lines up (make space for the status UI)
     if(_isComplete) {
-        cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
+        if(exitMainRequest.load()) {
+            cout << ansi::bold_bright_red << "\n" << fullCommand << ansi::reset << " completed with errors.";
+        }
+        else {
+            cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
+        }
     }
     else {
         const long loadingWidth = 6;
@@ -102,7 +108,14 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
 
 
     // Print info line
-    if(_isComplete) cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options->outputFile).string() << ansi::bold_bright_green << "\".\n";
+    if(_isComplete) {
+        if(exitMainRequest.load()) {
+            cout << ansi::bold_bright_red << "\n\n    Errors were detected. Skipping file output.";
+        }
+        else {
+            cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options->outputFile).string() << ansi::bold_bright_green << "\".\n";
+        }
+    }
     else {
         cout << "\n\n    ";
         cout << ansi::bold_bright_green << "t: " << ansi::reset << activeThreads.load() << "/" << totalThreads.load() << "  |  ";
@@ -136,7 +149,7 @@ void startMonitorThread(const std::string &fullCommand){
     int progressBarWidth;
     bool delayedIsCompleted;
     do {
-        delayedIsCompleted = isComplete.load(); //! Delay completion detection by 1 iteration to allow the last frame to be fully printed before returning
+        delayedIsCompleted = isComplete.load(std::memory_order_acquire); //! Delay completion detection by 1 iteration to allow the last frame to be fully printed before returning
 
 
         // Collect local progresses and update the progress bar

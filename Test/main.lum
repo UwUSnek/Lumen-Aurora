@@ -5,30 +5,31 @@
 //     */clud/*
 //  */e"test.lum"
 
+// broken code test <- this should fail
 #include/*aa*/  	"../Tests/HugeSource/huge.lum"
 // alias test3.test as a
 // ;
 
 
 
-enum a : int {
-    elm =;
-}
-
-// struct s {
-//     fn(int, float, double, fn(double)) exec=;
+// enum a : int {
+//     elm =;
 // }
-// export;
-// export a as b;
-// import a as a;
-// from math as a import sum.b as test;
 
-//TODO test trailing commas on element clusters. they should print an error
+// // struct s {
+// //     fn(int, float, double, fn(double)) exec=;
+// // }
+// // export;
+// // export a as b;
+// // import a as a;
+// // from math as a import sum.b as test;
 
-namespace a {
+// //TODO test trailing commas on element clusters. they should print an error
 
-}
-fejuwi
-namespace a {
+// namespace a {
 
-}
+// }
+// fejuwi
+// namespace a {
+
+// }
