@@ -23,8 +23,8 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
 
         // Detect whitespace and split tokens if any is found
         if(ulong wsLen = countWhitespace(b, i)) {
-            i += wsLen;
             increaseLocalProgress(wsLen);
+            i += wsLen;
             continue;
         }
 
@@ -35,9 +35,10 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
         ulong lenOutput;
         TokenValue *tokenValue = parseNumericalLiteral(b, i, &lenOutput);
         if(tokenValue) {
+            increaseMaxProgress(Compiler_TreeCreation, 1);
+            increaseLocalProgress(lenOutput);
             *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput - 1]);
             i += lenOutput;
-            increaseLocalProgress(lenOutput);
             continue;
         }
 
@@ -68,22 +69,24 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
             }
 
             // Push token to output array and update buffer index
+            increaseMaxProgress(Compiler_TreeCreation, 1);
+            increaseLocalProgress(token->length());
             *r += Token(b->str.substr(i, token->length()), _tokenValue, *b->meta[i], *b->meta[i + token->length() - 1]);
             i += token->length();
-            increaseLocalProgress(token->length());
             continue;
         }
 
 
 
 
-        // Parse text literals
+        // Parse delimited literals
         /**/            tokenValue = parseDelimitedLiteral(b, i, &lenOutput, DelimitedLiteralType::STRING);
         if(!tokenValue) tokenValue = parseDelimitedLiteral(b, i, &lenOutput, DelimitedLiteralType::CHAR);
         if(tokenValue) {
+            increaseMaxProgress(Compiler_TreeCreation, 1);
+            increaseLocalProgress(lenOutput);
             *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput - 1]);
             i += lenOutput;
-            increaseLocalProgress(lenOutput);
             continue;
         }
 
@@ -123,6 +126,6 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
     catch(const FatalErrorException&) {
         r->closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Compilation_A].totalProgress->setProgressColor(ansi::red);
+        phaseDataArray[Compiler_Tokenization].totalProgress->setProgressColor(ansi::red);
     }
 }

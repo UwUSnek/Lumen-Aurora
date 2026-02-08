@@ -18,13 +18,18 @@ void pre::__internal_startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSo
 
         // Skip comments
         if(ulong commentLen = measureComment(b->str, i); commentLen) {
-            i += commentLen;
+            decreaseMaxProgress(Preprocessor_Macros, commentLen);
+            decreaseMaxProgress(Compiler_Tokenization, commentLen);
             increaseLocalProgress(commentLen);
+            i += commentLen;
             continue;
         }
 
         // Skip (and preserve) literals
         if(ulong literalLen = saveLiteral(b, i, r); literalLen) {
+            decreaseMaxProgress(Preprocessor_Macros, literalLen);
+            decreaseMaxProgress(Compiler_Tokenization, literalLen);
+            increaseLocalProgress(literalLen);
             i += literalLen;
             continue;
         }
@@ -33,6 +38,7 @@ void pre::__internal_startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSo
         // FIXME
 
         // Save normal characters
+        increaseLocalProgress(1);
         r->str  += *b->str[i];
         r->meta += *b->meta[i];
         ++i;
@@ -198,6 +204,6 @@ void pre::startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
         r->str.closePipe();
         r->meta.closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red);
+        // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }
 }

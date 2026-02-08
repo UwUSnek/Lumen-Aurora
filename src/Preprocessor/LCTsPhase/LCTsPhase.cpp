@@ -15,7 +15,7 @@
  * @param index The index to check.
  * @return The number of characters the LCT occupies, or 0 if one was not found.
  */
-ulong checkLct(const std::string *b, ulong index) {
+ulong checkLct(StringPipe *b, ulong index) {
 
     if((*b)[index] == '\\') {
         if(b->length() - 1 <= index) return 1;
@@ -31,29 +31,34 @@ ulong checkLct(const std::string *b, ulong index) {
 
 
 
-void pre::__internal_startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
-    increaseMaxProgress(b->length());
+void pre::__internal_startLCTsPhase(StringPipe *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
+    // increaseMaxProgress(b->length());
 
 
     ulong i = 0;        // The current index relative to the raw data
     ulong c = 0;        // The current column number relative to the raw data
     ulong l = 0;        // The current line number relative to the raw data
-    while(i < b->length()) {
+    // while(i < b->length()) {
+    while((*b)[i].has_value()) {
 
         // Skip LCTs
         ulong lct = checkLct(b, i);
         if(lct) {
+            decreaseMaxProgress(Preprocessor_Cleanup, lct);
+            decreaseMaxProgress(Preprocessor_Macros, lct);
+            decreaseMaxProgress(Compiler_Tokenization, lct);
+            increaseLocalProgress(lct);
             i += lct;
             c += lct;
-            increaseLocalProgress(lct);
             ++l;
         }
 
         // Push normal characters
         else {
-            r->str  += (*b)[i];
+            increaseLocalProgress(1);
+            r->str  += (*b)[i].value();
             r->meta += CleanSourceMeta(i, l, c, DBG_filePathIndex);
-            if(b->at(i) == '\n') {
+            if((*b)[i] == '\n') {
                 ++l;
                 c = 0;
             }
@@ -69,7 +74,7 @@ void pre::__internal_startLCTsPhase(const std::string *b, ulong DBG_filePathInde
 
 
 
-void pre::startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
+void pre::startLCTsPhase(StringPipe *b, ulong DBG_filePathIndex, SegmentedCleanSource *r) {
 
     // Try to execute the subphase
     try {
@@ -84,6 +89,6 @@ void pre::startLCTsPhase(const std::string *b, ulong DBG_filePathIndex, Segmente
         r->str.closePipe();
         r->meta.closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red);
+        // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }
 }

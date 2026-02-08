@@ -12,11 +12,10 @@
 void pre::__internal_startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
     ulong i = 0;
     while(b->str[i].has_value()) {
+        increaseLocalProgress(1);
         r->str  += *b->str[i];
         r->meta += *b->meta[i];
-
         ++i;
-        increaseLocalProgress(1);
         // decreaseMaxProgress(Compilation, definition length); //TODO
         // decreaseMaxProgress(Compilation, call length); //TODO
     }
@@ -44,6 +43,6 @@ void pre::startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
         r->str.closePipe();
         r->meta.closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Preprocessing_B].totalProgress->setProgressColor(ansi::red);
+        // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }
 }

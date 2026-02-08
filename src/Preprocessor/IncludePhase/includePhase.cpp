@@ -1,6 +1,8 @@
 #include <fstream>
 #include <cstring>
+#include <mutex>
 #include "ALC.hpp"
+#include "Utils/Containers/StringPipe.hpp"
 #include "Utils/errors.hpp"
 #include "Utils/ansi.hpp"
 #include "Preprocessor/preprocessor.hpp"
@@ -13,7 +15,7 @@
 
 
 
-void pre::__internal_startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::__internal_startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r, StringPipe *rawCode) {
 
     ulong i = 0; // The character index relative to the current file, not including included files
     while(b->str[i].has_value()) {
@@ -68,15 +70,26 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSo
 
                         // Copy file contents and metadata
                         std::ifstream actualFile(actualFilePath);
-                        const std::string* fileContents = new std::string(utils::readFile(actualFile));
+                        // const std::string* fileContents = new std::string();
                         //FIXME add a function that reads a file and saves it in a global array so they don't go out of scope
-                        actualFile.close();
-
+                        // actualFile.close();
+                        // totalFiles.fetch_add(1);
+                        // SegmentedCleanSource *preprocessedCode = loadSourceCode_loop(fileContents, actualFilePath); //TODO remove
+                        std::string fileCode = utils::readFile(actualFile);
+                        decreaseMaxProgress(Preprocessor_LCT,      k - i);
+                        decreaseMaxProgress(Preprocessor_Cleanup,  k - i);
+                        decreaseMaxProgress(Preprocessor_Macros,   k - i);
+                        decreaseMaxProgress(Compiler_Tokenization, k - i);
+                        increaseMaxProgress(Preprocessor_LCT,      fileCode.length());
+                        increaseMaxProgress(Preprocessor_Cleanup,  fileCode.length());
+                        increaseMaxProgress(Preprocessor_Macros,   fileCode.length());
+                        increaseMaxProgress(Compiler_Tokenization, fileCode.length());
+                        (*rawCode) += fileCode;
                         totalFiles.fetch_add(1);
-                        SegmentedCleanSource *preprocessedCode = loadSourceCode_loop(fileContents, actualFilePath);
-                        //! .awaitClose() is called by loadSourceCode_loop()
-                        r->str  += *preprocessedCode->str.cpp();
-                        r->meta += *preprocessedCode->meta.cpp();
+                        // //! .awaitClose() is called by loadSourceCode_loop() //TODO remove
+
+                        // r->str  += *preprocessedCode->str.cpp();
+                        // r->meta += *preprocessedCode->meta.cpp();
                     }
                 }
 
@@ -118,6 +131,7 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSo
 
         // If not, copy normal characters and increase index counter
         else {
+            increaseLocalProgress(1);
             r->str  += *b->str[i];
             r->meta += *b->meta[i];
             ++i;
@@ -226,11 +240,12 @@ void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, s
 
 
 
-void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r, StringPipe* rawCode) {
 
     // Try to execute the subphase
     try {
-        __internal_startIncludePhase(b, r);
+        __internal_startIncludePhase(b, r, rawCode);
+        rawCode->closePipe();
         r->str.closePipe();
         r->meta.closePipe();
     }
@@ -241,6 +256,6 @@ void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
         r->str.closePipe();
         r->meta.closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red);
+        // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }
 }

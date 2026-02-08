@@ -39,7 +39,7 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
 
     cout
         << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black)
-        << "\n    " << std::right << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ ";
+        << "\n    " << std::left << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ ";
 
     if(isPhaseComplete) {
         cout

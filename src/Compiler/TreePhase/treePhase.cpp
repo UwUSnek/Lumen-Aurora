@@ -80,6 +80,9 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
             for(ulong k = 0; k < result->trees.size(); ++k) {
                 r->trees.push_back(result->trees[k]);
                 i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                // increaseLocalProgress(progress);
+                // i += progress;
             }
 
             // // If the generation failed, mark r as failed and return the elements that were matched so far
@@ -169,6 +172,9 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
             for(ulong k = 0; k < result->trees.size(); ++k) {
                 r->trees.push_back(result->trees[k]);
                 i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                // increaseLocalProgress(progress);
+                // i += progress;
             }
 
             // If the generation failed and the element is not optional, mark r as failed and return the elements that were matched so far
@@ -267,6 +273,9 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                     for(ulong k = 0; k < result->trees.size(); ++k) {
                         r->trees.push_back(result->trees[k]);
                         i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                        // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                        // increaseLocalProgress(progress);
+                        // i += progress;
                     }
                 }
 
@@ -360,8 +369,11 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
             // Save the result trees in genSource and update i
             for(ulong k = 0; k < result->trees.size(); ++k) {
-                i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
                 genSource.push_back(result->trees[k]);
+                i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
+                // increaseLocalProgress(progress);
+                // i += progress;
             }
 
 
@@ -458,6 +470,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
             return new TreeGenerationResult{{}, false};
         }
 
+        increaseLocalProgress(1);
         ++i;
         auto* r = dynamic_cast<__base_ST*>(new ST_Sub_Keyword(t->getValue_Keyword()));
         r->tokenBgn = index;
@@ -479,6 +492,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
             return new TreeGenerationResult{{}, false};
         }
 
+        increaseLocalProgress(1);
         ++i;
         auto* r = dynamic_cast<__base_ST*>(new ST_Sub_Identifier(t->getValue_Identifier()));
         r->tokenBgn = index;
@@ -536,7 +550,7 @@ void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
     catch(const FatalErrorException&) {
         r->closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Compilation_B].totalProgress->setProgressColor(ansi::red);
+        phaseDataArray[Compiler_TreeCreation].totalProgress->setProgressColor(ansi::red);
     }
 }
 //TODO put const everywhere it's needed
