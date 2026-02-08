@@ -1,10 +1,10 @@
 
 #include "preprocessor.hpp"
 #include "ALC.hpp"
-#include "LCTsPhase/LCTsPhase.hpp"
-#include "CleanupPhase/cleanupPhase.hpp"
-#include "IncludePhase/includePhase.hpp"
-#include "MacroPhase/macroPhase.hpp"
+#include "Phases/LCTs/LCTsPhase.hpp"
+#include "Phases/Cleanup/cleanupPhase.hpp"
+#include "Phases/Include/includePhase.hpp"
+#include "Phases/Macros/macroPhase.hpp"
 #include "Utils/Containers/StringPipe.hpp"
 #include <functional>
 #include <mutex>

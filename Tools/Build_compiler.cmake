@@ -22,54 +22,67 @@ add_executable(alc
     ../src/Command/command.cpp
     ../src/Command/info.cpp
 
-
-    ../src/Preprocessor/preprocessor.cpp
-    ../src/Preprocessor/SegmentedCleanSource.cpp
+    #../src/Preprocessor
+        ../src/Preprocessor/preprocessor.cpp
+        ../src/Preprocessor/SegmentedCleanSource.cpp
         ../src/Preprocessor/ElmCoords.cpp
-        ../src/Preprocessor/LCTsPhase/LCTsPhase.cpp
-        ../src/Preprocessor/CleanupPhase/cleanupPhase.cpp
-        ../src/Preprocessor/IncludePhase/includePhase.cpp
-            ../src/Preprocessor/IncludePhase/pathSolver.cpp
-        ../src/Preprocessor/MacroPhase/macroPhase.cpp
+            #../src/Preprocessor/Phases
+                #../src/Preprocessor/Phases/LCTs
+                    ../src/Preprocessor/Phases/LCTs/LCTsPhase.cpp
+                #../src/Preprocessor/Phases/Cleanup
+                    ../src/Preprocessor/Phases/Cleanup/cleanupPhase.cpp
+                #../src/Preprocessor/Phases/Include
+                    ../src/Preprocessor/Phases/Include/includePhase.cpp
+                    ../src/Preprocessor/Phases/Include/pathSolver.cpp
+                #../src/Preprocessor/Phases/Macros
+                    ../src/Preprocessor/Phases/Macros/macroPhase.cpp
 
 
-    ../src/Compiler/compiler.cpp
-        ../src/Compiler/TokenizationPhase/TokenizedSource.cpp
-        ../src/Compiler/TokenizationPhase/tokenizationPhase.cpp
-            ../src/Compiler/TokenizationPhase/Parsers/keywordsIdentifiers.cpp
-            ../src/Compiler/TokenizationPhase/Parsers/textLiterals.cpp
-            ../src/Compiler/TokenizationPhase/Parsers/numericalLiterals.cpp
-            ../src/Compiler/TokenizationPhase/whitespaceCounter.cpp
-
-        ../src/Compiler/TreePhase/SourceTree.cpp
-        ../src/Compiler/TreePhase/__base_Pattern.cpp
-        ../src/Compiler/TreePhase/treePhase.cpp
-
-            ../src/Compiler/TreePhase/Composite/__base_Pattern_Composite.cpp
-            ../src/Compiler/TreePhase/Composite/Module.cpp
-            ../src/Compiler/TreePhase/Composite/Elements/Namespace.cpp
-            ../src/Compiler/TreePhase/Composite/Elements/Enum.cpp
-            ../src/Compiler/TreePhase/Composite/Elements/Struct.cpp
-            ../src/Compiler/TreePhase/Composite/Elements/Alias.cpp
-            ../src/Compiler/TreePhase/Composite/Directives/Import.cpp
-            ../src/Compiler/TreePhase/Composite/Directives/Export.cpp
-            ../src/Compiler/TreePhase/Composite/SubElements/Path.cpp
-            ../src/Compiler/TreePhase/Composite/SubElements/EnumElm.cpp
-            ../src/Compiler/TreePhase/Composite/SubElements/StructElm.cpp
-            ../src/Compiler/TreePhase/Composite/SubElements/StructElmCluster.cpp
-            ../src/Compiler/TreePhase/Composite/SubElements/Type.cpp
-            ../src/Compiler/TreePhase/Composite/SubElements/Type_Basic.cpp
-            ../src/Compiler/TreePhase/Composite/SubElements/Type_Function.cpp
-
-            ../src/Compiler/TreePhase/Operators/__base_Pattern_Operator.cpp
-            ../src/Compiler/TreePhase/Operators/OperatorLoop.cpp
-            ../src/Compiler/TreePhase/Operators/OperatorOneOf.cpp
-            ../src/Compiler/TreePhase/Operators/OperatorOptional.cpp
-            ../src/Compiler/TreePhase/Operators/OperatorSequence.cpp
-
-            ../src/Compiler/TreePhase/Tokens/Identifier.cpp
-            ../src/Compiler/TreePhase/Tokens/Keyword.cpp
-            ../src/Compiler/TreePhase/Tokens/Literal.cpp
+    #../src/Compiler
+        ../src/Compiler/compiler.cpp
+            #../src/Compiler/Phases
+                #../src/Compiler/Phases/Tokenization
+                    ../src/Compiler/Phases/Tokenization/tokenizationPhase.cpp
+                    ../src/Compiler/Phases/Tokenization/TokenizedSource.cpp
+                    #../src/Compiler/Phases/Tokenization/Parsers
+                        ../src/Compiler/Phases/Tokenization/Parsers/keywordsIdentifiers.cpp
+                        ../src/Compiler/Phases/Tokenization/Parsers/textLiterals.cpp
+                        ../src/Compiler/Phases/Tokenization/Parsers/numericalLiterals.cpp
+../src/Compiler/Phases/Tokenization/whitespaceCounter.cpp
+                #../src/Compiler/Phases/Tree
+                    ../src/Compiler/Phases/Tree/treePhase.cpp
+                    ../src/Compiler/Phases/Tree/SourceTree.cpp
+                #../src/Compiler/Phases/Tree/Patterns
+                    ../src/Compiler/Phases/Tree/Patterns/__base_Pattern.cpp
+                    #../src/Compiler/Phases/Tree/Patterns/Composite
+                        ../src/Compiler/Phases/Tree/Patterns/Composite/__base_Pattern_Composite.cpp
+                        ../src/Compiler/Phases/Tree/Patterns/Composite/Module.cpp
+                        #../src/Compiler/Phases/Tree/Patterns/Composite/Elements
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/Elements/Namespace.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/Elements/Enum.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/Elements/Struct.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/Elements/Alias.cpp
+                        #../src/Compiler/Phases/Tree/Patterns/Composite/Directives
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/Directives/Import.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/Directives/Export.cpp
+                        #../src/Compiler/Phases/Tree/Patterns/Composite/SubElements
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/SubElements/Path.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/SubElements/EnumElm.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/SubElements/StructElm.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/SubElements/StructElmCluster.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/SubElements/Type.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/SubElements/Type_Basic.cpp
+                            ../src/Compiler/Phases/Tree/Patterns/Composite/SubElements/Type_Function.cpp
+                    #../src/Compiler/Phases/Tree/Patterns/Operators
+                        ../src/Compiler/Phases/Tree/Patterns/Operators/__base_Pattern_Operator.cpp
+                        ../src/Compiler/Phases/Tree/Patterns/Operators/OperatorLoop.cpp
+                        ../src/Compiler/Phases/Tree/Patterns/Operators/OperatorOneOf.cpp
+                        ../src/Compiler/Phases/Tree/Patterns/Operators/OperatorOptional.cpp
+                        ../src/Compiler/Phases/Tree/Patterns/Operators/OperatorSequence.cpp
+                    #../src/Compiler/Phases/Tree/Patterns/Tokens
+                        ../src/Compiler/Phases/Tree/Patterns/Tokens/Identifier.cpp
+                        ../src/Compiler/Phases/Tree/Patterns/Tokens/Keyword.cpp
+                        ../src/Compiler/Phases/Tree/Patterns/Tokens/Literal.cpp
 )
 
 

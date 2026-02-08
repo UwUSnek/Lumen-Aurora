@@ -12,7 +12,7 @@
 #include "Compiler/compiler.hpp"
 #include "Command/info.hpp"
 #include "monitorThread.hpp"
-#include "Compiler/TreePhase/SourceTree.hpp"
+#include "Compiler/Phases/Tree/SourceTree.hpp"
 
 namespace fs = std::filesystem;
 

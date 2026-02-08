@@ -1,7 +1,7 @@
 #include "ALC.hpp"
 #include "compiler.hpp"
-#include "TokenizationPhase/tokenizationPhase.hpp"
-#include "TreePhase/treePhase.hpp"
+#include "Phases/Tokenization/tokenizationPhase.hpp"
+#include "Phases/Tree/treePhase.hpp"
 
 
 
