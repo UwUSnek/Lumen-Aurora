@@ -8,6 +8,7 @@
 #include "ALC.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
+#include "Utils/format.hpp"
 
 namespace fs = std::filesystem;
 
@@ -45,9 +46,9 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
         cout
             << ansi::reset
             << std::left << std::setw(9 /*MM:ss.mmm*/ + sizeof(" time elapsed") - 1)
-            << (utils::formatMilliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) + " time elapsed")
+            << (format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) + " time elapsed")
             << ansi::bright_black << " │ " << ansi::reset
-            << bar->max.load() << " steps"
+            << format::amount(bar->max.load()) << " steps"
         ;
     }
     else {
@@ -56,7 +57,7 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
         cout
             << ansi::bright_black << "│ " << ansi::reset
             << std::left << std::setw(9 /*MM:ss.mmm*/)
-            << utils::formatMilliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0)
+            << format::milliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0)
         ;
     }
 }

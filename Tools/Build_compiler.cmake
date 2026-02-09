@@ -25,6 +25,7 @@ add_executable(alc
         ../src/Utils/ansi.cpp
         ../src/Utils/errors.cpp
         ../src/Utils/DynamicProgressBar.cpp
+        ../src/Utils/format.cpp
 
 
     #../src/Command
