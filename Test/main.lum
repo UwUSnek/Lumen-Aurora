@@ -1,12 +1,12 @@
 
 // A
+#include/*aa*/  	"../Tests/HugeSource/huge.lum"
 
 //#in/*
 //     */clud/*
 //  */e"test.lum"
 
 // broken code test <- this should fail
-#include/*aa*/  	"../Tests/HugeSource/huge.lum"
 // alias test3.test as a
 // ;
 

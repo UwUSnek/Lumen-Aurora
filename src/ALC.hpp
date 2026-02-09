@@ -7,7 +7,6 @@
 #include "Utils/utils.hpp"
 #include "Utils/DynamicProgressBar.hpp"
 #include "Utils/ThreadManager.hpp"
-#include "FatalErrorException.hpp"
 
 
 //FIXME actually control this from somewhere
@@ -172,9 +171,9 @@ extern  __internal_cerr_stream_t_wrapper cerr;
 //TODO make this more readable, maybe group stuff in namespaces
 
 #define LIST_PHASE_ID          \
+    X(Preprocessor_Includes)   \
     X(Preprocessor_LCT)        \
     X(Preprocessor_Cleanup)    \
-    X(Preprocessor_Includes)   \
     X(Preprocessor_Macros)     \
     X(Compiler_Tokenization)   \
     X(Compiler_TreeCreation)   \
