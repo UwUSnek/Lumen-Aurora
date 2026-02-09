@@ -40,6 +40,7 @@ void pre::__internal_startLCTsPhase(SegmentedCleanSource *b, SegmentedCleanSourc
             increaseLocalProgress(1);
             r->str  += b->str[i].value();
             r->meta += b->meta[i].value();
+            ++i;
         }
 
         //! Macro definitions and invocations cannot paste LCTs.
