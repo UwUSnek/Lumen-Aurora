@@ -1,8 +1,8 @@
-#include "ALC.hpp"
+#include "Main/ALC.hpp"
 #include "tokenizationPhase.hpp"
-#include "FatalErrorException.hpp"
+#include "Main/FatalErrorException.hpp"
 #include "Utils/ansi.hpp"
-#include "Utils/errors.hpp"
+#include "Main/errors.hpp"
 
 #include "Misc/whitespaceCounter.hpp"
 #include "Parsers/keywordsIdentifiers.hpp"

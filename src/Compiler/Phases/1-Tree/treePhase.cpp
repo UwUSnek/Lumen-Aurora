@@ -1,7 +1,7 @@
 #include "treePhase.hpp"
-#include "ALC.hpp"
-#include "FatalErrorException.hpp"
-#include "Utils/errors.hpp"
+#include "Main/ALC.hpp"
+#include "Main/FatalErrorException.hpp"
+#include "Main/errors.hpp"
 #include "Utils/ansi.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 

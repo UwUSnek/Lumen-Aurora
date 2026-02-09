@@ -1,10 +1,10 @@
 #include <string>
 #include <vector>
-#include "ALC.hpp"
+#include "Main/ALC.hpp"
 #include <filesystem>
 namespace fs = std::filesystem;
 
-#include "ErrorCode.hpp"
+#include "Main/ErrorCode.hpp"
 #include "Utils/ansi.hpp"
 #include "UnitTest.hpp"
 

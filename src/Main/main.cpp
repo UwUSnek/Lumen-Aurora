@@ -4,8 +4,8 @@
 #include <filesystem>
 #include <thread>
 
-#include "ALC.hpp"
-#include "Utils/errors.hpp"
+#include "Main/ALC.hpp"
+#include "Main/errors.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"

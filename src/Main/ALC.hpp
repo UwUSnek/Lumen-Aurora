@@ -195,7 +195,6 @@ std::string phaseIdTotring(PhaseID phaseId);
 
 struct PhaseData {
     DynamicProgressBar *totalProgress;
-    // std::atomic<ulong> *activeSubphases;
     std::atomic<long>  *timeStart;
     std::atomic<long>  *timeEnd;
 
@@ -315,7 +314,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
  * @param args The list of arguments to pass to <f>.
  *      All arguments are passed to the new thread by value.
  */
-template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, bool isLast, func_t &&f, args_t &&...args) {
+template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, bool isLast, const func_t &f, const args_t& ...args) {
 
     //! Subphase and Phase data initialization feedback
     auto *isThreadDataInitialized = new std::atomic<bool>(false); //NOSONAR(cpp:S6063)

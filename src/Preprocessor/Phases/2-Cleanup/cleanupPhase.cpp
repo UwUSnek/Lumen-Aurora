@@ -1,7 +1,7 @@
-#include "ALC.hpp"
+#include "Main/ALC.hpp"
 
 #include "cleanupPhase.hpp"
-#include "FatalErrorException.hpp"
+#include "Main/FatalErrorException.hpp"
 #include "Misc/TextLiteralCounter.hpp"
 #include "Misc/CommentCounter.hpp"
 

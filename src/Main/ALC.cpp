@@ -4,9 +4,9 @@
 #include <mutex>
 #include <vector>
 
-#include "ALC.hpp"
+#include "Main/ALC.hpp"
 #include "Utils/ansi.hpp"
-#include "FatalErrorException.hpp"
+#include "Main/FatalErrorException.hpp"
 
 
 
@@ -29,14 +29,14 @@ std::atomic<int> exitMainRequest(0);
 
 /**
  * @brief Signals the main thread there is an issue by throwing a FatalErrorException
- *      (which one of the parent functions is expected to catch). This makes it available for joining.
+ *     (which one of the parent functions is expected to catch). This makes it available for joining.
  *
- *      This function does NOT prevent other threads from printing to the console while it is being executed.
- *      External synchronization is required.
+ *     This function does NOT prevent other threads from printing to the console while it is being executed.
+ *     External synchronization is required.
  *
- *      If the current thread is the main thread, this is equivalent to calling exit()
+ *     If the current thread is the main thread, this is equivalent to calling exit()
  */
-void exitMain(int exitCode) {
+void exitMain(int exitCode) { //NOSONAR
     if(threadType == ThreadType::MAIN) {
         std::exit(exitCode);
     }
@@ -80,7 +80,6 @@ thread_local ThreadType threadType = ThreadType::UNKNOWN;
 
 
 
-//FIXME detect all the files before processing them to make progress more reliable
 // Becomes true when the main thread is ready to return.
 std::atomic<bool> isComplete(false);
 
@@ -227,11 +226,6 @@ ulong fetchMaxProgress(PhaseID phaseId) {
 
 
 
-
-
-
-
-
 /**
  * @brief initializes the data of each phase.
  *      This function MUST be called ONCE before starting any of the subphses
@@ -242,8 +236,6 @@ void initPhaseData(){
         phaseDataArray.emplace_back();
     }
 }
-
-
 
 
 

@@ -1,5 +1,5 @@
-#include "ALC.hpp"
-#include "FatalErrorException.hpp"
+#include "Main/ALC.hpp"
+#include "Main/FatalErrorException.hpp"
 #include "Misc/LctCounter.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
 #include "LCTsPhase.hpp"
@@ -18,10 +18,7 @@
 
 
 void pre::__internal_startLCTsPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
-    // increaseMaxProgress(b->length());
 
-
-    // while(i < b->length()) {
     ulong i = 0;
     while(b->str[i].has_value()) {
 

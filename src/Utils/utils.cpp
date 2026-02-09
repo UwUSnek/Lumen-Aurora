@@ -1,19 +1,12 @@
+#include "utils.hpp"
 #include <string>
-#include "ALC.hpp"
-#include <regex>
 #include <fstream>
-#include <cstring>
 #include <filesystem>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
 namespace fs = std::filesystem;
 
-#include "ALC.hpp"
-#include "utils.hpp"
-#include "ansi.hpp"
-#include "errors.hpp"
-#include "Preprocessor/ElmCoords.hpp"
-#include "Preprocessor/preprocessor.hpp"
 
 
 

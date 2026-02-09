@@ -1,7 +1,7 @@
 #include "textLiterals.hpp"
 #include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Utils/ansi.hpp"
-#include "Utils/errors.hpp"
+#include "Main/errors.hpp"
 
 
 

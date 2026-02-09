@@ -2,7 +2,7 @@
 #include <filesystem>
 #include "command.hpp"
 #include "Command/Options.hpp"
-#include "Utils/errors.hpp"
+#include "Main/errors.hpp"
 #include "Utils/ansi.hpp"
 #include "Utils/utils.hpp"
 namespace fs = std::filesystem;

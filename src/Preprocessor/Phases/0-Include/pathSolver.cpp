@@ -2,7 +2,7 @@
 #include "pathSolver.hpp"
 #include "Command/command.hpp"
 #include "Utils/ansi.hpp"
-#include "Utils/errors.hpp"
+#include "Main/errors.hpp"
 
 namespace fs = std::filesystem;
 

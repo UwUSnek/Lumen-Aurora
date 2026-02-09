@@ -1,6 +1,6 @@
 #include "macroPhase.hpp"
-#include "ALC.hpp"
-#include "FatalErrorException.hpp"
+#include "Main/ALC.hpp"
+#include "Main/FatalErrorException.hpp"
 #include "Utils/ansi.hpp"
 
 

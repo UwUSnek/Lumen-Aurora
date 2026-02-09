@@ -1,10 +1,10 @@
 #include <regex>
 #include <fstream>
 
-#include "errors.hpp"
+#include "Main/errors.hpp"
 #include "Utils/format.hpp"
-#include "ansi.hpp"
-#include "ALC.hpp"
+#include "Utils/ansi.hpp"
+#include "Main/ALC.hpp"
 
 //FIXME REWRITE THIS WHOLE THING
 //FIXME REWRITE THIS WHOLE THING

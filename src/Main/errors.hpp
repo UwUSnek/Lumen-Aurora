@@ -1,5 +1,5 @@
 #pragma once
-#include "ErrorCode.hpp"
+#include "Main/ErrorCode.hpp"
 #include "Preprocessor/ElmCoords.hpp"
 #include "Command/CommandCoords.hpp"
 

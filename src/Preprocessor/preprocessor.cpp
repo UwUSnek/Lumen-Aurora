@@ -1,6 +1,6 @@
 
 #include "preprocessor.hpp"
-#include "ALC.hpp"
+#include "Main/ALC.hpp"
 #include "Preprocessor/Phases/0-Include/includePhase.hpp"
 #include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
 #include "Preprocessor/Phases/1-LCTs/LCTsPhase.hpp"
@@ -62,6 +62,3 @@ pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::
     // Wait for the phases to finish and return the output buffer
     return r4;
 }
-
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.

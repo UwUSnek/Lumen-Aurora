@@ -5,7 +5,7 @@
 #include <vector>
 #include <filesystem>
 #include "monitorThread.hpp"
-#include "ALC.hpp"
+#include "Main/ALC.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
 #include "Utils/format.hpp"

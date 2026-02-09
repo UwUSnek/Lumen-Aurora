@@ -11,9 +11,12 @@ add_executable(alc
 
 
 #../src
-    ../src/ALC.cpp
-    ../src/monitorThread.cpp
-    ../src/main.cpp
+
+    #../src/Main
+        ../src/Main/ALC.cpp
+        ../src/Main/monitorThread.cpp
+        ../src/Main/main.cpp
+        ../src/Main/errors.cpp
 
 
     #../src/Generated
@@ -23,7 +26,6 @@ add_executable(alc
     #../src/utils
         ../src/Utils/utils.cpp
         ../src/Utils/ansi.cpp
-        ../src/Utils/errors.cpp
         ../src/Utils/DynamicProgressBar.cpp
         ../src/Utils/format.cpp
 

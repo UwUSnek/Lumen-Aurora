@@ -1,4 +1,4 @@
-#include "ALC.hpp"
+#include "Main/ALC.hpp"
 #include "compiler.hpp"
 #include "Compiler/Phases/0-Tokenization/tokenizationPhase.hpp"
 #include "Compiler/Phases/1-Tree/treePhase.hpp"

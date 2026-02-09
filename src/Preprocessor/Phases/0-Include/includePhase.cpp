@@ -1,9 +1,9 @@
 #include <fstream>
 #include <cstring>
 #include <mutex>
-#include "ALC.hpp"
-#include "ErrorCode.hpp"
-#include "FatalErrorException.hpp"
+#include "Main/ALC.hpp"
+#include "Main/ErrorCode.hpp"
+#include "Main/FatalErrorException.hpp"
 #include "Misc/CommentCounter.hpp"
 #include "Misc/LctCounter.hpp"
 #include "Misc/TextLiteralCounter.hpp"
@@ -11,7 +11,7 @@
 #include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
 #include "Utils/Containers/StringPipe.hpp"
-#include "Utils/errors.hpp"
+#include "Main/errors.hpp"
 #include "includePhase.hpp"
 #include "pathSolver.hpp"
 
