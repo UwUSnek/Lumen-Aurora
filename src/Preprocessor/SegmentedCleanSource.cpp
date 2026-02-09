@@ -1,5 +1,5 @@
 #include "SegmentedCleanSource.hpp"
-#include "Utils/utils.hpp"
+#include "Utils/format.hpp"
 
 
 
@@ -9,7 +9,7 @@ std::string pre::SegmentedCleanSource::toString() {
 
     for(ulong i = 0; i < str.length(); ++i) {
         char c = *str[i];
-        r << utils::formatChar(c, meta[i]->c, true);
+        r << format::whitespace(c, meta[i]->c, true);
         if(c == '\n') r << "\n";
     }
 

@@ -1,7 +1,7 @@
 #include "ALC.hpp"
 #include "compiler.hpp"
-#include "TokenizationPhase/tokenizationPhase.hpp"
-#include "TreePhase/treePhase.hpp"
+#include "Compiler/Phases/0-Tokenization/tokenizationPhase.hpp"
+#include "Compiler/Phases/1-Tree/treePhase.hpp"
 
 
 
@@ -24,8 +24,8 @@ cmp::SourceTree* cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b
     // Start subphases
     // startSubphaseAsync(Compilation, false, startTokenizationPhase, b, r1);
     // startSubphaseAsync(Compilation, true, startTreePhase,        r1, r2); //FIXME set islast to false and use true in the subphase that's actually last
-    startSubphaseAsync(Compilation_A, true, startTokenizationPhase, b, r1);
-    startSubphaseAsync(Compilation_B, true, startTreePhase,        r1, r2); //FIXME set islast to false and use true in the subphase that's actually last
+    startSubphaseAsync(Compiler_Tokenization, true, startTokenizationPhase, b, r1);
+    startSubphaseAsync(Compiler_TreeCreation, true, startTreePhase,        r1, r2); //FIXME set islast to false and use true in the subphase that's actually last
 
     return r2;
 }

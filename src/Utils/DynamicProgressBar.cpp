@@ -1,7 +1,7 @@
 #include "ALC.hpp"
 #include <iomanip>
 
-#include "Utils/utils.hpp"
+#include "Utils/format.hpp"
 #include "Utils/ansi.hpp"
 #include "DynamicProgressBar.hpp"
 
@@ -44,9 +44,9 @@ void DynamicProgressBar::render(int consoleWidth) const {
     // Reset colors and print value
     cout << ansi::reset <<
         " " <<
-        std::right << std::setw(valueWidth) << utils::shortenInteger(_progress) <<
+        std::right << std::setw(valueWidth) << format::shortenInteger(_progress) <<
         "/" <<
-        std::left << std::setw(valueWidth) << utils::shortenInteger(_max) <<
+        std::left << std::setw(valueWidth) << format::shortenInteger(_max) <<
         " "
     ;
 }

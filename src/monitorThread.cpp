@@ -8,6 +8,7 @@
 #include "ALC.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
+#include "Utils/format.hpp"
 
 namespace fs = std::filesystem;
 
@@ -39,15 +40,15 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
 
     cout
         << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black)
-        << "\n    " << std::right << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ ";
+        << "\n    " << std::left << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ ";
 
     if(isPhaseComplete) {
         cout
             << ansi::reset
-            << std::left << std::setw(9 /*MM:ss.mmm*/ + sizeof(" time elapsed") - 1)
-            << (utils::formatMilliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) + " time elapsed")
+            << std::left << std::setw(9 /*MM:ss.mmm*/ + sizeof(" time elapsed") - 1) //FIXME subtract pipe waiting times from this
+            << (format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) + " time elapsed") //FIXME subtract pipe waiting times from this
             << ansi::bright_black << " │ " << ansi::reset
-            << bar->max.load() << " steps"
+            << format::amount(bar->max.load()) << " steps"
         ;
     }
     else {
@@ -56,7 +57,7 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
         cout
             << ansi::bright_black << "│ " << ansi::reset
             << std::left << std::setw(9 /*MM:ss.mmm*/)
-            << utils::formatMilliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0)
+            << format::milliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0) //FIXME subtract pipe waiting times from this
         ;
     }
 }

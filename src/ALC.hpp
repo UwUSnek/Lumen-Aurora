@@ -7,11 +7,10 @@
 #include "Utils/utils.hpp"
 #include "Utils/DynamicProgressBar.hpp"
 #include "Utils/ThreadManager.hpp"
-#include "FatalErrorException.hpp"
 
 
 //FIXME actually control this from somewhere
-#define PRINT_DEBUG_INFO 1
+#define PRINT_DEBUG_INFO 0
 
 #if PRINT_DEBUG_INFO == 1
     #define debug(...) __VA_ARGS__
@@ -171,13 +170,15 @@ extern  __internal_cerr_stream_t_wrapper cerr;
 
 //TODO make this more readable, maybe group stuff in namespaces
 
-#define LIST_PHASE_ID   \
-    X(Preprocessing_A)    \
-    X(Preprocessing_B)    \
-    X(Compilation_A)      \
-    X(Compilation_B)      \
-    X(Optimization)     \
-    X(Conversion)       \
+#define LIST_PHASE_ID          \
+    X(Preprocessor_Includes)   \
+    X(Preprocessor_LCT)        \
+    X(Preprocessor_Cleanup)    \
+    X(Preprocessor_Macros)     \
+    X(Compiler_Tokenization)   \
+    X(Compiler_TreeCreation)   \
+    X(Compiler_Optimization)   \
+    X(Compiler_Conversion)     \
     X(NUM)              \
     // ^ The number of phases, not including this enum value.
 

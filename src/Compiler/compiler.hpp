@@ -1,6 +1,6 @@
 #pragma once
 #include "Preprocessor/SegmentedCleanSource.hpp"
-#include "Compiler/TreePhase/SourceTree.hpp"
+#include "Compiler/Phases/1-Tree/SourceTree.hpp"
 
 
 

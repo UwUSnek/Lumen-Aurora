@@ -1,10 +1,10 @@
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
-#include "huge2.lum"
+namespace HUGE_2_FILE_a { #include "huge2.lum" }
+namespace HUGE_2_FILE_b { #include "huge2.lum" }
+namespace HUGE_2_FILE_c { #include "huge2.lum" }
+namespace HUGE_2_FILE_d { #include "huge2.lum" }
+namespace HUGE_2_FILE_e { #include "huge2.lum" }
+namespace HUGE_2_FILE_f { #include "huge2.lum" }
+namespace HUGE_2_FILE_g { #include "huge2.lum" }
+namespace HUGE_2_FILE_h { #include "huge2.lum" }
+namespace HUGE_2_FILE_i { #include "huge2.lum" }
+namespace HUGE_2_FILE_k { #include "huge2.lum" }

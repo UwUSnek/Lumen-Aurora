@@ -14,14 +14,7 @@ namespace utils {
 
 
     int getConsoleWidth();
-
-    std::string formatChar(char c, ulong col, bool useColor = false);
-    std::string shortenInteger(ulong n);
-    std::string formatMilliseconds(long n);
-
     std::string readFile(std::ifstream &f);
-
-
 
 
     struct PathCheckResult {

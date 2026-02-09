@@ -1,6 +1,6 @@
 #include "ElmCoords.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
-#include "Compiler/TokenizationPhase/TokenizedSource.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 
 
 

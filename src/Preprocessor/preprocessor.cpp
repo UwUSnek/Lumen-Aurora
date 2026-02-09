@@ -1,11 +1,11 @@
 
 #include "preprocessor.hpp"
 #include "ALC.hpp"
-#include "LCTsPhase/LCTsPhase.hpp"
-#include "CleanupPhase/cleanupPhase.hpp"
-#include "IncludePhase/includePhase.hpp"
-#include "MacroPhase/macroPhase.hpp"
-#include <functional>
+#include "Preprocessor/Phases/0-Include/includePhase.hpp"
+#include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
+#include "Preprocessor/Phases/1-LCTs/LCTsPhase.hpp"
+#include "Preprocessor/Phases/2-Cleanup/cleanupPhase.hpp"
+#include "Preprocessor/Phases/3-Macros/macroPhase.hpp"
 #include <mutex>
 
 
@@ -16,10 +16,12 @@
 
 
 /**
- * @brief The part of loadSourceCode that does the recursive things.
- *      Waits for the subphases to finish before returning the output.
+ * @brief Load the source code, including all of the files included by it and processes any preprocessor directives.
+ * @param s The source code as a string.
+ * @param filePath The path of the original source code file.
+ * @return The contents of the source file as a SegmentedCleanSource.
  */
-pre::SegmentedCleanSource* pre::loadSourceCode_loop(const std::string *s, const std::string &filePath, const std::function<bool()> &awaitTask) {
+pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::string &filePath) {
     ulong pathIndex;
     {
         std::scoped_lock lock(sourceFilePathsLock);
@@ -34,59 +36,30 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(const std::string *s, const 
     //FIXME CHECK CIRCULAR DEPENDENCIES
     //FIXME SAVE INCLUDE STACK
 
+    // Load raw code of the root file
+    auto *r0 = new SegmentedCleanSource();
+    generateMetadata(*s, r0, pathIndex);
 
+
+    // Create pipes
     auto *r1 = new SegmentedCleanSource();
     auto *r2 = new SegmentedCleanSource();
     auto *r3 = new SegmentedCleanSource();
-
-
-    // Start the loop subphases
-    // startSubphaseAsync(Preprocessing, false, startLCTsPhase,     s, pathIndex, r1);
-    // startSubphaseAsync(Preprocessing, false, startCleanupPhase, r1,            r2);
-    // startSubphaseAsync(Preprocessing, false, startIncludePhase, r2,            r3);
-    // startLCTsPhase(s, pathIndex, r1); //TODO
-    startSubphaseAsync(Preprocessing_A, false, startLCTsPhase,     s, pathIndex, r1);
-    // startCleanupPhase(r1, r2); //TODO
-    startSubphaseAsync(Preprocessing_A, false, startCleanupPhase, r1,            r2);
-    // startIncludePhase(r2, r3); //TODO
-    startSubphaseAsync(Preprocessing_A, false, startIncludePhase, r2,            r3);
-
-
-    // Wait for the subphases to finish, then update the max progress of the next phase and return the output buffer
-    r3-> str.awaitClose(awaitTask); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
-    r3->meta.awaitClose(awaitTask); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
-    return r3;
-}
-
-
-
-
-
-
-
-
-/**
- * @brief Load the source code, including all of the files included by it and processes any preprocessor directives.
- * @param b The source code as a string.
- * @param filePath The path of the original source code file.
- * @return The contents of the source file as a SegmentedCleanSource.
- */
-pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::string &filePath) {
-
-    // Load and merge all the files
-    auto *r3 = loadSourceCode_loop(s, filePath, mainCheckErrors);
     auto *r4 = new SegmentedCleanSource();
 
+    // Include all files
+    //TODO add a command line option to disable waiting for all the includes.
+    //TODO This option will make progress calculation less reliable and remove some features that need all the files to be known, but will speed up compilation
+    startSubphaseAsync(Preprocessor_Includes, true, startIncludePhase, r0, r1);
+    r1->str.awaitClose(mainCheckErrors);
+    r1->meta.awaitClose(mainCheckErrors);
 
-    // Set the max progress of the compilation phase
-    increaseMaxProgress(Preprocessing_B, r3->str.length());
+    // Start the other phases
+    startSubphaseAsync(Preprocessor_LCT,      true, startLCTsPhase,    r1, r2);
+    startSubphaseAsync(Preprocessor_Cleanup,  true, startCleanupPhase, r2, r3);
+    startSubphaseAsync(Preprocessor_Macros,   true, startMacroPhase,   r3, r4);
 
-
-    // Start the macro replacment phase and return the output
-    // startSubphaseAsync(Preprocessing, true, startMacroPhase, r3, r4);
-    startSubphaseAsync(Preprocessing_B, true, startMacroPhase, r3, r4);
-    // r4->str.awaitClose([](){}); //BUG this works, but it shouldn't be necessary
-    // r4->meta.awaitClose([](){}); //BUG this works, but it shouldn't be necessary
+    // Wait for the phases to finish and return the output buffer
     return r4;
 }
 

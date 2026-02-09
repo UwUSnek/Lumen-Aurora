@@ -1,8 +1,8 @@
 #include <regex>
-#include <filesystem>
 #include <fstream>
 
 #include "errors.hpp"
+#include "Utils/format.hpp"
 #include "ansi.hpp"
 #include "ALC.hpp"
 
@@ -57,7 +57,7 @@ static bool isWhitespace(char c) {
  * @param coords The coordinates.
  * @return The trimmed coordinates.
  */
-static inline ElmCoords trimCoords(std::string s, ElmCoords coords) {
+static inline ElmCoords trimCoords(const std::string &s, const ElmCoords &coords) {
     ulong end     = std::min(coords.end,   s.length());
     ulong start   = std::min(coords.start, s.length());
     ulong curLine = coords.lineNum;
@@ -83,7 +83,7 @@ static inline ElmCoords trimCoords(std::string s, ElmCoords coords) {
  * @param coords The coordinates.
  * @return The trimmed coordinates.
  */
-static inline cmd::ElmCoordsCL trimCoords(std::string fullCommand, cmd::ElmCoordsCL coords) {
+static inline cmd::ElmCoordsCL trimCoords(const std::string &fullCommand, const cmd::ElmCoordsCL &coords) {
     ulong end = coords.end;
     ulong start = coords.start;
 
@@ -180,7 +180,7 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
         }
 
         // Actually print the formatted character
-        cerr << utils::formatChar(fullCommand[i], i, true);
+        cerr << format::whitespace(fullCommand[i], i, true);
     }
 
 
@@ -314,7 +314,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
             // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
             if(s[i] != '\0') {
-                cerr << formatChar(s[i], col, false);
+                cerr << format::whitespace(s[i], col, false);
                 ++col;
                 if(s[i] == '\n') {
                     col = 0;
