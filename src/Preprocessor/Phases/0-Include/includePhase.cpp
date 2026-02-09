@@ -22,7 +22,7 @@
 
 
 
-void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanSource *r, ulong DBG_filePathIndex) {
+void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanSource *r) {
 
 
     // Clean the code, saving the result in a temporary buffer. Skip validation checks
@@ -142,7 +142,7 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanS
 
 
                         // Append file data to r and process its includes recursively
-                        __internal_startIncludePhase(fileCode, r, newFilePathIndex);
+                        __internal_startIncludePhase(fileCode, r);
                     }
                 }
 
@@ -292,12 +292,11 @@ void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, s
 
 
 
-void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r, ulong DBG_filePathIndex) {
+void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
 
     // Try to execute the subphase
     try {
-        __internal_startIncludePhase(b, r, DBG_filePathIndex);
-        // rawCode->closePipe();
+        __internal_startIncludePhase(b, r);
         r->str.closePipe();
         r->meta.closePipe();
     }

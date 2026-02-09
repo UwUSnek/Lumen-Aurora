@@ -6,8 +6,6 @@
 #include "Preprocessor/Phases/1-LCTs/LCTsPhase.hpp"
 #include "Preprocessor/Phases/2-Cleanup/cleanupPhase.hpp"
 #include "Preprocessor/Phases/3-Macros/macroPhase.hpp"
-#include "Utils/Containers/StringPipe.hpp"
-#include <functional>
 #include <mutex>
 
 
@@ -43,40 +41,26 @@ pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::
     generateMetadata(*s, r0, pathIndex);
 
 
-    // Start the loop subphases
-    // startSubphaseAsync(Preprocessing, false, startLCTsPhase,     s, pathIndex, r1);
-    // startSubphaseAsync(Preprocessing, false, startCleanupPhase, r1,            r2);
-    // startSubphaseAsync(Preprocessing, false, startIncludePhase, r2,            r3);
-    // startLCTsPhase(s, pathIndex, r1); //TODO
-
-    // Start phases
+    // Create pipes
     auto *r1 = new SegmentedCleanSource();
     auto *r2 = new SegmentedCleanSource();
     auto *r3 = new SegmentedCleanSource();
     auto *r4 = new SegmentedCleanSource();
-    startSubphaseAsync(Preprocessor_Includes, true, startIncludePhase, r0, r1, pathIndex);
+
+    // Include all files
+    //TODO add a command line option to disable waiting for all the includes.
+    //TODO This option will make progress calculation less reliable and remove some features that need all the files to be known, but will speed up compilation
+    startSubphaseAsync(Preprocessor_Includes, true, startIncludePhase, r0, r1);
+    r1->str.awaitClose(mainCheckErrors);
+    r1->meta.awaitClose(mainCheckErrors);
+
+    // Start the other phases
     startSubphaseAsync(Preprocessor_LCT,      true, startLCTsPhase,    r1, r2);
     startSubphaseAsync(Preprocessor_Cleanup,  true, startCleanupPhase, r2, r3);
     startSubphaseAsync(Preprocessor_Macros,   true, startMacroPhase,   r3, r4);
 
-
     // Wait for the phases to finish and return the output buffer
-    r3-> str.awaitClose(mainCheckErrors); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
-    r3->meta.awaitClose(mainCheckErrors); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
     return r4;
-
-
-    // Load and merge all the files
-
-
-    // Set the max progress of the compilation phase
-
-
-    // Start the macro replacment phase and return the output
-    // startSubphaseAsync(Preprocessing, true, startMacroPhase, r3, r4);
-    // r4->str.awaitClose([](){}); //BUG this works, but it shouldn't be necessary
-    // r4->meta.awaitClose([](){}); //BUG this works, but it shouldn't be necessary
-    // return r4;
 }
 
 //TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.

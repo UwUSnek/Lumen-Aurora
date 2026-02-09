@@ -1,4 +1,5 @@
 namespace HUGE_2_FILE_a { #include "huge4.lum" }
 namespace HUGE_2_FILE_b { #include "huge4.lum" }
 namespace HUGE_2_FILE_c { #include "huge4.lum" }
+// error test
 namespace HUGE_2_FILE_d { #include "huge4.lum" }

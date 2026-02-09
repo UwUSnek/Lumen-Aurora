@@ -45,8 +45,8 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
     if(isPhaseComplete) {
         cout
             << ansi::reset
-            << std::left << std::setw(9 /*MM:ss.mmm*/ + sizeof(" time elapsed") - 1)
-            << (format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) + " time elapsed")
+            << std::left << std::setw(9 /*MM:ss.mmm*/ + sizeof(" time elapsed") - 1) //FIXME subtract pipe waiting times from this
+            << (format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) + " time elapsed") //FIXME subtract pipe waiting times from this
             << ansi::bright_black << " │ " << ansi::reset
             << format::amount(bar->max.load()) << " steps"
         ;
@@ -57,7 +57,7 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
         cout
             << ansi::bright_black << "│ " << ansi::reset
             << std::left << std::setw(9 /*MM:ss.mmm*/)
-            << format::milliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0)
+            << format::milliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0) //FIXME subtract pipe waiting times from this
         ;
     }
 }
