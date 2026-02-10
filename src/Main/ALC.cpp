@@ -7,6 +7,7 @@
 #include "Main/ALC.hpp"
 #include "Utils/ansi.hpp"
 #include "Main/FatalErrorException.hpp"
+#include "Utils/console.hpp"
 
 
 
@@ -82,52 +83,6 @@ thread_local ThreadType threadType = ThreadType::UNKNOWN;
 
 // Becomes true when the main thread is ready to return.
 std::atomic<bool> isComplete(false);
-
-
-
-
-
-
-
-
-
-
-
-
-// A mutex that controls the console output.
-// This allows multiple threads to write multiple messages at once without being interrupted.
-std::mutex __internal_consoleLock;
-
-
-
-
-int __internal_cout_stream_t::overflow(int c) {
-    if (c != EOF) {
-        if (c == '\n') std::cout << "\033[K";
-        std::cout.put(c); //NOSONAR
-    }
-    return c;
-}
-__internal_cout_stream_t __internal_cout_streambuff;
-std::ostream __internal_cout(&__internal_cout_streambuff);
-__internal_cout_stream_t_wrapper cout;
-
-
-
-
-
-int __internal_cerr_stream_t::overflow(int c) {
-    if (c != EOF) {
-        if (c == '\n') std::cerr << "\033[K";
-        std::cerr.put(c); //NOSONAR
-    }
-    return c;
-}
-__internal_cerr_stream_t __internal_cerr_streambuff;
-std::ostream __internal_cerr(&__internal_cerr_streambuff);
-__internal_cerr_stream_t_wrapper cerr;
-
-
 
 
 
@@ -248,10 +203,10 @@ void initPhaseData(){
  */
 bool mainCheckErrors(){
     if(threadType != ThreadType::MAIN) {
-        cerr++;
-        cerr << "\nFatal: Error check function was called by a secondary thread. This is a bug and Lumen's developer is to blame for it.";
-        cerr << "\nThe program was not stopped.";
-        cerr--;
+        console::cerr++;
+        console::cerr << "\nFatal: Error check function was called by a secondary thread. This is a bug and Lumen's developer is to blame for it.";
+        console::cerr << "\nThe program was not stopped.";
+        console::cerr--;
         return false;
     }
     else {

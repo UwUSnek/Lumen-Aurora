@@ -8,10 +8,12 @@
 #include "Main/ALC.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
+#include "Utils/console.hpp"
 #include "Utils/format.hpp"
 
 namespace fs = std::filesystem;
-
+using namespace console;
+static const uint timeElapsedStrLen = 12;
 
 
 
@@ -38,27 +40,30 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
     const bool isPhaseActive   = phaseDataArray[i].timeStart->load() > 0;
     const auto bar = phaseDataArray[i].totalProgress;
 
-    cout
-        << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black)
-        << "\n    " << std::left << std::setw(maxPhaseNameLen) << phaseIdTotring((PhaseID)i) << " │ ";
-
+    cout << std::format(
+        "{}"
+        "\n    {:<{}} │ ",
+        isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black,
+        phaseIdTotring((PhaseID)i), maxPhaseNameLen
+    );
     if(isPhaseComplete) {
-        cout
-            << ansi::reset
-            << std::left << std::setw(9 /*MM:ss.mmm*/ + sizeof(" time elapsed") - 1) //FIXME subtract pipe waiting times from this
-            << (format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load()) + " time elapsed") //FIXME subtract pipe waiting times from this
-            << ansi::bright_black << " │ " << ansi::reset
-            << format::amount(bar->max.load()) << " steps"
-        ;
+        cout << std::format(
+            "{}{:<{}} {}│{} {} steps", // MM:ss.mmm
+            ansi::reset,
+            format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load(), true), timeElapsedStrLen,
+            ansi::bright_black, ansi::reset,
+            format::amount(bar->max.load())
+            //FIXME subtract pipe waiting times from this
+        );
     }
     else {
-        static const uint timeElapsedStrLen = 9;
         bar->render((int)(-3 /*Separator*/ + progressBarWidth - 2 /*Separator*/ - timeElapsedStrLen - 4 /*right margin*/));
-        cout
-            << ansi::bright_black << "│ " << ansi::reset
-            << std::left << std::setw(9 /*MM:ss.mmm*/)
-            << format::milliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0) //FIXME subtract pipe waiting times from this
-        ;
+        cout << std::format(
+            "{}│{} {:<{}}", // MM:ss.mmm
+            ansi::bright_black, ansi::reset,
+            format::milliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0, true), timeElapsedStrLen
+            //FIXME subtract pipe waiting times from this
+        );
     }
 }
 
@@ -68,21 +73,30 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
 
 
 static void printStatusUI(const std::string &fullCommand, ulong loop, const int progressBarWidth, const bool _isComplete) {
+    bool hasError = exitMainRequest.load();
     cout++;
 
-    // Adjust position, clear the console and print the command
-    cout << "\033[s";             // Save current cursor position
-    cout << "\033[J";             // Clear console from current character to last line
-    cout << std::string(8, '\n');
-    cout << "\033[999;999H";      // Move cursor to bottom-left corner
-    cout << "\033[8A";            // Move cursor 8 lines up (make space for the status UI)
+
+    // Adjust position and clear the console
+    cout << std::format(
+        "\033[s"             // Save current cursor position
+        "\033[J"             // Clear console from current character to last line
+        "{}"
+        "\033[999;999H"      // Move cursor to bottom-left corner
+        "\033[8A",           // Move cursor 8 lines up (make space for the status UI)
+        std::string(8, '\n')
+    );
+
+
+    // Print the command
     if(_isComplete) {
-        if(exitMainRequest.load()) {
-            cout << ansi::bold_bright_red << "\n" << fullCommand << ansi::reset << " completed with errors.";
-        }
-        else {
-            cout << ansi::bold_bright_green << "\n" << fullCommand << ansi::reset << " completed successfully.";
-        }
+        cout << std::format(
+            "\n{}{}{} completed {}.",
+            hasError ? ansi::bold_bright_red : ansi::bold_bright_green,
+            fullCommand,
+            ansi::reset,
+            hasError ? "with errors" : "successfully"
+        );
     }
     else {
         const long loadingWidth = 6;
@@ -97,8 +111,6 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
     }
 
 
-
-
     // Print the status of each phase, in order
     {
         std::scoped_lock lock(phaseDataArrayLock);
@@ -110,19 +122,26 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
 
     // Print info line
     if(_isComplete) {
-        if(exitMainRequest.load()) {
-            cout << ansi::bold_bright_red << "\n\n    Errors were detected. Skipping file output.";
-        }
-        else {
-            cout << ansi::bold_bright_green << "\n\n    Output written to \"" << ansi::reset << fs::canonical(cmd::options->outputFile).string() << ansi::bold_bright_green << "\".\n";
-        }
+        cout << std::format(
+            "\n"
+            "\n    {}{}",
+            hasError ? ansi::bold_bright_red : ansi::bold_bright_green,
+            hasError ? "Errors were detected. Skipping file output." : std::format(
+                "Output written to \"{}{}{}\"."
+                "\n",
+                ansi::reset, fs::canonical(cmd::options->outputFile).string(), ansi::bold_bright_green
+            )
+        );
     }
     else {
-        cout << "\n\n    ";
-        cout << ansi::bold_bright_green << "t: " << ansi::reset << activeThreads.load() << "/" << totalThreads.load() << "  |  ";
-        cout << ansi::bold_bright_green << "f: " << ansi::reset << totalFiles.load() << "  |  ";
-        cout << ansi::bold_bright_green << "m: " << ansi::reset << totalModules.load();
-        cout << "\n";
+        cout << std::format(
+            "\n"
+            "\n    {}t: {}{}/{}  |  {}f: {}{}  |  {}m: {}{}"
+            "\n",
+            ansi::bold_bright_green, ansi::reset, activeThreads.load(), totalThreads.load(),
+            ansi::bold_bright_green, ansi::reset, totalFiles   .load(),
+            ansi::bold_bright_green, ansi::reset, totalModules .load()
+        );
     }
 
 

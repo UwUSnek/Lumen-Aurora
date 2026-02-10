@@ -51,8 +51,9 @@ ptr<pre::SegmentedCleanSource> pre::loadSourceCode(const std::string &s, const s
     startSubphaseAsync(PhaseID::Preprocessor_Includes, true, startIncludePhase, r0, r1);
     // r1->str.awaitClose(mainCheckErrors);
     // r1->meta.awaitClose(mainCheckErrors);
-    //TODO add a command line option to disable waiting for all the includes.
-    //TODO This option will make progress calculation less reliable and remove some features that need all the files to be known, but will speed up compilation
+    //TODO add a command line option to run one phase at a time.
+    //TODO This option will make progress calculation more reliable but significantly slow down compilation times.
+    //TODO It might help with debugging
 
     // Start the other phases
     startSubphaseAsync(PhaseID::Preprocessor_LCT,      true, startLCTsPhase,    r1, r2);

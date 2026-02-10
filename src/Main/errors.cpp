@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "Main/errors.hpp"
+#include "Utils/console.hpp"
 #include "Utils/format.hpp"
 #include "Utils/ansi.hpp"
 #include "Main/ALC.hpp"
@@ -15,6 +16,8 @@
 
 
 static const auto RESET_CODE_SEARCH_REGEX = std::regex("\033\\[0m");
+using namespace console;
+
 
 
 
@@ -102,7 +105,7 @@ static inline cmd::ElmCoordsCL trimCoords(const std::string &fullCommand, const 
  * @param n The number of the line. They start from 0, but the shown number is automatically increased by 1 to make it consistent with text exitors.
  */
 static inline void printLineNum(ulong n) {
-    cerr << std::format(
+    console::cerr << std::format(
         "\n{}{}{:>8} │ ",
         ansi::reset, ansi::bold_black, n + 1
     );
@@ -129,6 +132,11 @@ static inline void printLineNum(ulong n) {
 
 //TODO comment
 void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, const bool fatal) {
+
+    // Suppress error if other errors have occurred before it
+    if(exitMainRequest.load()) return;
+
+
     cerr++;
     cerr << std::format(
         "{}Error:"
@@ -156,8 +164,10 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
 
 //TODO comment
 void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, const std::string &message, const bool fatal, const std::string &fullCommand) {
-    cmd::ElmCoordsCL const &relPos = trimCoords(fullCommand, _relPos);
-    cmd::ElmCoordsCL const &errPos = trimCoords(fullCommand, _errPos);
+
+    // Suppress error if other errors have occurred before it
+    if(exitMainRequest.load()) return;
+
 
     cerr++;
     cerr << std::format(
@@ -169,6 +179,8 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
 
     // Print full command and highlight relevant section and error
     const char* lastColor;
+    cmd::ElmCoordsCL const &relPos = trimCoords(fullCommand, _relPos);
+    cmd::ElmCoordsCL const &errPos = trimCoords(fullCommand, _errPos);
     for(ulong i = 0; i < fullCommand.length(); ++i) {
 
         // Calculate current color based on the current character index and print it if it differs form the last one
@@ -242,6 +254,11 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
  * @param fatal Whether the error was fatal or it can be recovered from. If true, calls exitMain().
  */
 void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_relPos, ElmCoords const &_errPos, const std::string &message, const bool fatal) {
+
+    // Suppress error if other errors have occurred before it
+    if(exitMainRequest.load()) return;
+
+
     std::string relFilePath;
     std::string errFilePath;
     {
