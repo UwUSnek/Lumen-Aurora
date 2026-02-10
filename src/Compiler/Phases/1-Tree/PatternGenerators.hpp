@@ -59,12 +59,12 @@ namespace cmp {
             template<class ...t> type *name(t... subPatterns) {                                           \
                 if(!__internal_cache_##name) {                                                            \
                     __internal_cache_##name = __internal_forwardNew<type>();                              \
-                    debug((cout++ << "allocated   " << __internal_cache_##name << " | "#name << "\n")--;) \
+                    debug(cout << "allocated   " << __internal_cache_##name << " | "#name << "\n";)       \
                     __internal_forwardInit<type>(__internal_cache_##name);                                \
-                    debug((cout++ << "initialized " << __internal_cache_##name << " | "#name << "\n")--;) \
+                    debug(cout << "initialized " << __internal_cache_##name << " | "#name << "\n";)       \
                 }                                                                                         \
                 else {                                                                                    \
-                    debug((cout++ << "found       " << __internal_cache_##name << " | "#name << "\n")--;) \
+                    debug(cout << "found       " << __internal_cache_##name << " | "#name << "\n";)       \
                 }                                                                                         \
                 return __internal_cache_##name;                                                           \
             }
@@ -82,7 +82,7 @@ namespace cmp {
             template<class ...t> type *name(t... subPatterns) {                 \
                 type* r = re::__internal_forwardNew<type>();                    \
                 re::__internal_forwardInit<type, t...>(r, subPatterns...);      \
-                debug((cout++ << "created     " << r << " | "#name << "\n")--;) \
+                debug(cout << "created     " << r << " | "#name << "\n";)       \
                 return r;                                                       \
             }
         LIST_PATTERN_OPERATOR_TYPES_NAMES
@@ -98,7 +98,7 @@ namespace cmp {
             template<class ...t> type *name(t... expectedValue) {               \
                 type* r = re::__internal_forwardNew<type>();                    \
                 re::__internal_forwardInit<type, t...>(r, expectedValue...);    \
-                debug((cout++ << "created     " << r << " | "#name << "\n")--;) \
+                debug(cout << "created     " << r << " | "#name << "\n";)       \
                 return r;                                                       \
             }
         LIST_PATTERN_TOKENS_TYPES_NAMES

@@ -1,10 +1,12 @@
 #include "console.hpp"
 #include <iostream>
+#include <mutex>
 
 
 // A mutex that controls the console output.
 // This allows multiple threads to write multiple messages at once without being interrupted.
-std::mutex console::__internal_consoleLock;
+//! A recursive mutex is used to allow manual locking with ++ and -- operators on top of the automatic per-call locking.
+std::recursive_mutex console::__internal_consoleLock;
 
 
 

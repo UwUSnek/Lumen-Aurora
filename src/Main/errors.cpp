@@ -137,7 +137,6 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
     if(exitMainRequest.load()) return;
 
 
-    cerr++;
     cerr << std::format(
         "{}Error:"
         "\n    {}"
@@ -149,7 +148,6 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
             ansi::bold_red
         )
     );
-    cerr--;
 
     // Stop the program if needed
     cerr << ansi::reset;

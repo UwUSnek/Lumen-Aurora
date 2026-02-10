@@ -92,15 +92,15 @@ int main(int argc, char* argv[]){
     // Parse command line options
     cmd::parseOptions(argc, argv, fullCommand);
     if(cmd::options->isHelp) {
-        (console::cout++ << cmd::getHelpMessage())--;
+        console::cout << cmd::getHelpMessage();
         exit(0);
     }
     if(cmd::options->isVersion) {
-        (console::cout++ << cmd::getVersionMessage())--;
+        console::cout << cmd::getVersionMessage();
         exit(0);
     }
 
-    (console::cout++ <<"Executing command \"" << ansi::bold_white << fullCommand << ansi::reset << "\"...\n\n")--;
+    console::cout << "Executing command \"" << ansi::bold_white << fullCommand << ansi::reset << "\"...\n\n";
     bool compileModule  = cmd::options->outputType == 'x' || cmd::options->outputType == 'm';
     bool compileExec    = cmd::options->outputType == 'x';
 

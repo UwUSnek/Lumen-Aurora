@@ -45,6 +45,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_EnumElm::generateData(std::vector<ptr<__bas
     r->name = results[0]->asIdentifier();
 
     // Print debug info and return
-    debug((cout++ << "Found enum element " << r->name << "\n")--;)
+    debug(cout << "Found enum element " << r->name << "\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

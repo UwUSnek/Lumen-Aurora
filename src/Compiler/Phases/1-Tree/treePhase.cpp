@@ -12,8 +12,8 @@
 
 debug(
     static std::string genIndentation(int indent) { return cmp::__internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent);   }
-    static void        printFail     (int indent) { (cout++ << genIndentation(indent) << ansi::bold_bright_red   << "[FAIL]\n" << ansi::reset)--; }
-    static void        printSuccess  (int indent) { (cout++ << genIndentation(indent) << ansi::bold_bright_green << "[OK]  \n" << ansi::reset)--; }
+    static void        printFail     (int indent) { cout << genIndentation(indent) << ansi::bold_bright_red   << "[FAIL]\n" << ansi::reset; }
+    static void        printSuccess  (int indent) { cout << genIndentation(indent) << ansi::bold_bright_green << "[OK]  \n" << ansi::reset; }
 )
 
 
@@ -25,14 +25,14 @@ debug(
 
 ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource> b, ulong index, bool optional debug(, int indent)) {
     ulong i = index;
-    debug((cout++ << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ")--;)
+    debug(cout << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ";)
 
 
 
 
     // Parse OneOf operator
     if(pattern->isOneOf()) {
-        debug((cout++ << ansi::bright_black << "One Of\n" << ansi::reset)--;)
+        debug(cout << ansi::bright_black << "One Of\n" << ansi::reset;)
         auto p = pattern->asOneOf();
 
         // For each element of the OneOf's sequence
@@ -66,7 +66,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
     //FIXME account for custom threshold
     //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
     if(pattern->isOptional()) {
-        debug((cout++ << ansi::bright_black << "Optional\n" << ansi::reset)--;)
+        debug(cout << ansi::bright_black << "Optional\n" << ansi::reset;)
         __Pattern_Operator_Optional* p = pattern->asOptional();
         auto r = newptr<TreeGenerationResult>(0, true );
 
@@ -155,7 +155,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
     //FIXME account for custom threshold
     //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
     if(pattern->isSequence()) {
-        debug((cout++ << ansi::bright_black << "Sequence\n" << ansi::reset)--;)
+        debug(cout << ansi::bright_black << "Sequence\n" << ansi::reset;)
         __Pattern_Operator_Sequence* p = pattern->asSequence();
         auto r = newptr<TreeGenerationResult>(0, true );
 
@@ -237,7 +237,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
     // Parse Loop operator
     if(pattern->isLoop()) {
-        debug((cout++ << ansi::bright_black << "Loop\n" << ansi::reset)--;)
+        debug(cout << ansi::bright_black << "Loop\n" << ansi::reset;)
         __Pattern_Operator_Loop* p = pattern->asLoop();
         auto r = newptr<TreeGenerationResult>(0, true );
 
@@ -350,7 +350,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
     // Parse composite patterns
     if(pattern->isComposite()) {
-        debug((cout++ << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue(false) << ")\n" << ansi::reset)--;)
+        debug(cout << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue(false) << ")\n" << ansi::reset;)
         auto* p = pattern->asComposite();
 
         // For each of element of the composite's sequence
@@ -452,7 +452,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
         debug(
             std::string keywordId;
             for(auto const &pair : reservedTokensMap) if(pair.second == pattern->asKeyword()->id) { keywordId = pair.first; break; }
-            (cout++ << ansi::blue << "Keyword " << keywordId << "\n" << ansi::reset)--;
+            cout << ansi::blue << "Keyword " << keywordId << "\n" << ansi::reset;
         )
         const auto* p = pattern->asKeyword();
         std::optional<Token> const &t = (*b)[index];
@@ -476,7 +476,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
     // Parse identifier tokens
     if(pattern->isIdentifier()) {
-        debug((cout++ << ansi::blue << "Identifier\n" << ansi::reset)--;)
+        debug(cout << ansi::blue << "Identifier\n" << ansi::reset;)
         std::optional<Token> const &t = (*b)[index];
 
         if(!t.has_value() || !t->isIdentifier()) {

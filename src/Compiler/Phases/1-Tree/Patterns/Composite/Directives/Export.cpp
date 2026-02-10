@@ -90,6 +90,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Export::generateData(std::vector<ptr<__base
         }
     }
 
-    debug((cout++ << "found export directive\n")--;)
+    debug(cout << "found export directive\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

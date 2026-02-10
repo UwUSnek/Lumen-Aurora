@@ -44,6 +44,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Alias::generateData(std::vector<ptr<__base_
     r->original = results[1]->asPath();
     r->name     = results[3]->asIdentifier();
 
-    debug((cout++ << "found alias " << r->name->s << "\n")--;)
+    debug(cout << "found alias " << r->name->s << "\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

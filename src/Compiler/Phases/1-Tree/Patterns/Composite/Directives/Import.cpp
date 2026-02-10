@@ -150,7 +150,7 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Import::generateData(std::vector<ptr<__base
 
     // Print debug info and return value
     ret:
-    debug((cout++ << "found import directive\n")--;)
+    debug(cout << "found import directive\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }
 

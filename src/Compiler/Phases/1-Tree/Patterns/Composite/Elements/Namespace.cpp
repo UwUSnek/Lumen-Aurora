@@ -57,6 +57,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Namespace::generateData(std::vector<ptr<__b
     for(ulong i = 5; i < results.size() - 1; ++i) r->addChild(results[i]);
 
     // Print debug info and return
-    debug((cout++ << "found namespace " << r->name->s << "\n")--;)
+    debug(cout << "found namespace " << r->name->s << "\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

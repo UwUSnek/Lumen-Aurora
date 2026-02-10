@@ -6,7 +6,7 @@
 
 
 namespace console {
-    extern std::mutex __internal_consoleLock;
+    extern std::recursive_mutex __internal_consoleLock;
 
 
 
@@ -21,7 +21,7 @@ namespace console {
     class __internal_cout_stream_t_wrapper {
     public:
         template<typename T> __internal_cout_stream_t_wrapper &operator<<(const T& val) {
-            // std::scoped_lock lock(__internal_consoleLock);
+            std::scoped_lock lock(__internal_consoleLock);
             __internal_cout << val;
             return *this;
         }
@@ -50,7 +50,7 @@ namespace console {
     class __internal_cerr_stream_t_wrapper {
     public:
         template<typename T> __internal_cerr_stream_t_wrapper &operator<<(const T& val) {
-            // std::scoped_lock lock(__internal_consoleLock);
+            std::scoped_lock lock(__internal_consoleLock);
             __internal_cerr << val;
             return *this;
         }
