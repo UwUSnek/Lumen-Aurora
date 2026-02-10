@@ -75,7 +75,7 @@ void pre::startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSourc
     catch(const FatalErrorException&) {
         r->str.closePipe();
         r->meta.closePipe();
-        std::scoped_lock lock(phaseDataArrayLock);
+        // std::scoped_lock lock(phaseDataArrayLock);
         // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }
 }

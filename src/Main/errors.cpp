@@ -1,3 +1,4 @@
+#include <mutex>
 #include <regex>
 #include <fstream>
 
@@ -6,36 +7,27 @@
 #include "Utils/ansi.hpp"
 #include "Main/ALC.hpp"
 
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
-//FIXME REWRITE THIS WHOLE THING
 
 
 
+
+
+
+
+static const auto RESET_CODE_SEARCH_REGEX = std::regex("\033\\[0m");
+
+
+
+std::string utils::getErrTypeName(ErrType type) {
+    switch(type) {
+        case ErrType::COMPILER     : return "Compilation";
+        case ErrType::PREPROCESSOR : return "Preprocessing";
+        //TODO add the other types
+
+        //! Bogus default case so the C++ compiler doesn't cry about it
+        default: return "";
+    }
+}
 
 
 
@@ -106,11 +98,14 @@ static inline cmd::ElmCoordsCL trimCoords(const std::string &fullCommand, const 
 /**
  * @brief Prints a formatted line indicator and colors it black.
  *      The color is NOT reset after. The caller function will have to manually change it back.
-*      This function is NOT thread safe. Use a mutex to ensure other threads don't print at the same time.
-    * @param n The number of the line. They start from 0, but the shown number is automatically increased by 1 to make it consistent with text exitors.
-    */
+ *      This function is NOT thread safe. Use a mutex to ensure other threads don't print at the same time.
+ * @param n The number of the line. They start from 0, but the shown number is automatically increased by 1 to make it consistent with text exitors.
+ */
 static inline void printLineNum(ulong n) {
-    cerr << ansi::reset << ansi::bold_black << "\n" << std::right << std::setw(8) << n + 1 << " │ ";
+    cerr << std::format(
+        "\n{}{}{:>8} │ ",
+        ansi::reset, ansi::bold_black, n + 1
+    );
 }
 
 
@@ -135,19 +130,21 @@ static inline void printLineNum(ulong n) {
 //TODO comment
 void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, const bool fatal) {
     cerr++;
-
-    cerr << ansi::bold_red;
-    cerr << "Error:";
-
-    // Print the actual error after indenting it by 4 spaces
-    cerr
-        << ansi::bold_red
-        << "\n    "
-        << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red)
-        << "\n";
+    cerr << std::format(
+        "{}Error:"
+        "\n    {}"
+        "\n",
+        ansi::bold_red,
+        std::regex_replace(
+            std::regex_replace(message, std::regex("\n"), "\n    "),
+            RESET_CODE_SEARCH_REGEX,
+            ansi::bold_red
+        )
+    );
     cerr--;
 
     // Stop the program if needed
+    cerr << ansi::reset;
     if(fatal) exitMain((int)errorCode);
 }
 
@@ -161,20 +158,25 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
 void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, const std::string &message, const bool fatal, const std::string &fullCommand) {
     cmd::ElmCoordsCL const &relPos = trimCoords(fullCommand, _relPos);
     cmd::ElmCoordsCL const &errPos = trimCoords(fullCommand, _errPos);
-    cerr++;
 
-    cerr << ansi::bold_red;
-    cerr << "Could not parse command:\n";
+    cerr++;
+    cerr << std::format(
+        "{}Could not parse command:"
+        "\n    ",
+        ansi::bold_red
+    );
 
 
     // Print full command and highlight relevant section and error
     const char* lastColor;
-    cerr << "    ";
     for(ulong i = 0; i < fullCommand.length(); ++i) {
 
         // Calculate current color based on the current character index and print it if it differs form the last one
-        const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
-        if(curColor != lastColor) {
+        if(const char* curColor = (
+            (i >= errPos.start && i <= errPos.end) ? ansi::bold_red : (
+            (i >= relPos.start && i <= relPos.end) ? ansi::magenta :
+            /**/                                     ansi::bright_black)
+        ).c_str(); curColor != lastColor) {
             cerr << curColor;
             lastColor = curColor;
         }
@@ -185,11 +187,21 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
 
 
     // Print the actual error after indenting it by 4 spaces
-    cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+    cerr << std::format(
+        "\n"
+        "\n    {}{}"
+        "\n",
+        ansi::bold_red,
+        std::regex_replace(
+            std::regex_replace(message, std::regex("\n"), "\n    "),
+            RESET_CODE_SEARCH_REGEX, ansi::bold_red
+        )
+    );
     cerr--;
 
 
     // Stop the program if needed
+    cerr << ansi::reset;
     if(fatal) exitMain((int)errorCode);
 }
 
@@ -230,28 +242,36 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
  * @param fatal Whether the error was fatal or it can be recovered from. If true, calls exitMain().
  */
 void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_relPos, ElmCoords const &_errPos, const std::string &message, const bool fatal) {
-    sourceFilePathsLock.lock();
-    std::string relFilePath = sourceFilePaths[_relPos.filePathIndex];
-    std::string errFilePath = sourceFilePaths[_errPos.filePathIndex];
-    sourceFilePathsLock.unlock();
+    std::string relFilePath;
+    std::string errFilePath;
+    {
+        std::scoped_lock lock(sourceFilePathsLock);
+        relFilePath = sourceFilePaths[_relPos.filePathIndex];
+        errFilePath = sourceFilePaths[_errPos.filePathIndex];
+    }
 
     cerr++;
-    cerr << ansi::bold_red;
+    cerr << std::format(
+        "{}{} error:",
+        ansi::bold_red,
+        getErrTypeName(errType)
+    );
+    cerr--;
 
-    // Print error type and location
-    if(errType == ErrType::PREPROCESSOR) cerr << "Preprocessor";
-    if(errType == ErrType::COMPILER)     cerr << "Compilation";
-    cerr << " error:\n";
 
 
     // Check original file
-    std::ifstream f(errFilePath);
-    if(!f.is_open()) {
+    cerr++;
+    if(std::ifstream f(errFilePath); !f.is_open()) {
 
         // Print location
         if(errFilePath.length()) {
-            cerr << "    File │ " << ansi::reset << errFilePath << ansi::bright_black << " (source file unavailable)\n" << ansi::reset;
-            cerr << "    Line │ " << ansi::reset << _errPos.lineNum + 1;
+            cerr << std::format(
+                "\n{}    File │ {}{}{} (source file unavailable){}"
+                "\n{}    Line │ {}{}{}",
+                ansi::bold_red, ansi::reset, errFilePath, ansi::bright_black, ansi::reset,
+                ansi::bold_red, ansi::reset, _errPos.lineNum + 1, ansi::reset
+            );
         }
     }
     else {
@@ -261,7 +281,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
         f.close();
         ElmCoords const &relPos = trimCoords(s, _relPos);
         ElmCoords const &errPos = trimCoords(s, _errPos);
-        ulong curLine = std::min(relPos.lineNum, errPos.lineNum); curLine -= !!curLine;
+        ulong curLine = std::min(relPos.lineNum, errPos.lineNum); curLine -= !!curLine; //NOSONAR
         ulong i       = std::min(relPos.start,   errPos.start);
         do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
         do --i; while(i != (ulong)-1L && s[i] != '\n'); if(i == (ulong)-1) i = 0;
@@ -271,10 +291,16 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
         // Print location
         ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
         if(errFilePath.length()) {
-            cerr << "    File │ " << ansi::reset << errFilePath << ansi::bold_red << "\n";
-            cerr << "    Line │ " << ansi::reset;
-            if(errHeight == 0) cerr << errPos.lineNum + 1;
-            else               cerr << "From " << errPos.lineNum + 1 << " to " << errPos.lineNum + errHeight + 1;
+            cerr << std::format(
+                "\n{}    File │ {}{}{}"
+                "\n{}    Line │ {}{}{}",
+                ansi::bold_red, ansi::reset, errFilePath, ansi::reset,
+                ansi::bold_red, ansi::reset,
+                errHeight == 0
+                    ? std::format("{}", errPos.lineNum + 1)
+                    : std::format("From {} to {}", errPos.lineNum + 1, errPos.lineNum + errHeight + 1),
+                ansi::reset
+            );
         }
 
 
@@ -334,10 +360,20 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
     // Print the actual error after indenting it by 4 spaces
-    cerr << ansi::bold_red << "\n\n    " << std::regex_replace(std::regex_replace(message, std::regex("\n"), "\n    "), std::regex("\033\\[0m"), ansi::bold_red) << "\n";
+    cerr << std::format(
+        "\n"
+        "\n    {}"
+        "\n",
+        std::regex_replace(
+            std::regex_replace(message, std::regex("\n"), "\n    "),
+            RESET_CODE_SEARCH_REGEX,
+            ansi::bold_red
+        )
+    );
     cerr--;
 
 
     // Stop the program if needed
+    cerr << ansi::reset;
     if(fatal) exitMain((int)errorCode);
 }

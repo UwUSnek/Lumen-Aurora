@@ -136,7 +136,7 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource> b
             }
 
             // Convert the codepoint
-            unsigned char utfValue[5];
+            unsigned char utfValue[5]; //NOSONAR
             //TODO check errors from the function
             //TODO modify decoder to remove unnecessary checks already performed by the parser
             utf8decode((const utf8chr_t*)(codepoint.c_str()), utfValue);
@@ -230,10 +230,7 @@ ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource> b, ulo
         }
 
         // Escape sequences
-        // ulong oldRLen = r.tellp();
         ulong rawEscapeLen;
-        // // The length of the scape sequence as written in the source code
-        // ulong utf_escapeLen = r.str.length() - oldRLen;                             // The length of the UTF-8 representation of the escape sequence
         if(const auto &decodedEscape = decodeEscapeSequence(b, i, &rawEscapeLen, literalType); decodedEscape.has_value()) {
             r << *decodedEscape;
             i += rawEscapeLen;

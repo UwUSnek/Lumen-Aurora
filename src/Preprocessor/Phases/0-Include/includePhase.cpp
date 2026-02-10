@@ -13,6 +13,7 @@
 #include "Utils/Containers/StringPipe.hpp"
 #include "Main/errors.hpp"
 #include "includePhase.hpp"
+#include "Utils/ansi.hpp"
 #include "pathSolver.hpp"
 
 
@@ -307,6 +308,6 @@ void pre::startIncludePhase(ptr<SegmentedCleanSource> b, ptr< SegmentedCleanSour
         r->str.closePipe();
         r->meta.closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
+        phaseDataArray[(int)PhaseID::Preprocessor_Includes].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }
 }

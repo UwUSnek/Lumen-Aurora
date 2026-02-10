@@ -12,6 +12,8 @@ namespace utils {
         COMPILER
     };
 
+    std::string getErrTypeName(ErrType type);
+
     void printErrorGeneric(ErrorCode errorCode,                                                                                    const std::string &message, const bool fatal);
     void      printErrorCL(ErrorCode errorCode,                  cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, const std::string &message, const bool fatal, const std::string &fullCommand);
     void        printError(ErrorCode errorCode, ErrType errType,                                       ElmCoords   const &_errPos, const std::string &message, const bool fatal);
