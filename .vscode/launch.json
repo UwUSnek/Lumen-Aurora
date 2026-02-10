@@ -9,6 +9,9 @@
             "program": "${workspaceFolder}/Build/alc",
             "args": [
                 "./Test/main.lum",
+                "-I", "./Tests/BigSource",
+                "-I", "./Tests/HugeSource",
+                "-I", "./Tests/Includes",
                 "-m", "./Test/out",
                 "--no-status"
             ],

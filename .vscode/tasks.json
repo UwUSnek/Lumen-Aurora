@@ -36,6 +36,9 @@
             "command": "./Build/alc",
             "args": [
                 "./Test/main.lum",
+                "-I", "./Tests/BigSource",
+                "-I", "./Tests/HugeSource",
+                "-I", "./Tests/Includes",
                 "-m", "./Test/out"
             ],
             "problemMatcher": [],
