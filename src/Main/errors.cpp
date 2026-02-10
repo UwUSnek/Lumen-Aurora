@@ -379,8 +379,9 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
     // Print the actual error after indenting it by 4 spaces
     cerr << std::format(
         "\n"
-        "\n    {}"
+        "\n    {}{}"
         "\n",
+        ansi::bold_red,
         std::regex_replace(
             std::regex_replace(message, std::regex("\n"), "\n    "),
             RESET_CODE_SEARCH_REGEX,
