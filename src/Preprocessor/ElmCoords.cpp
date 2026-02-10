@@ -22,8 +22,8 @@ ElmCoords::ElmCoords(ptr<pre::SegmentedCleanSource> source, ulong _start, ulong 
 
     filePathIndex = source->meta[actual_start]->f;
     lineNum       = source->meta[actual_start]->l;
-    start         = actual_start;
-    end           = actual_end;
+    start         = source->meta[actual_start]->i;
+    end           = source->meta[actual_end]->i;
 }
 
 
