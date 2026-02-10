@@ -5,6 +5,5 @@
 
 
 namespace cmp {
-    // std::atomic<bool> isCompilationProgressInitialized = false;
-    SourceTree* compilePreprocessedSourceCode(pre::SegmentedCleanSource* b); //TODO fix return type and value
+    ptr<SourceTree> compilePreprocessedSourceCode(ptr<pre::SegmentedCleanSource> b);
 }

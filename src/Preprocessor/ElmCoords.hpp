@@ -1,6 +1,7 @@
 #pragma once
 #include "Preprocessor/SegmentedCleanSource.hpp"
 #include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
+#include "Utils/ptr.hpp"
 
 
 
@@ -36,6 +37,6 @@ struct ElmCoords {
         overflow(_overflow) {
     }
 
-    ElmCoords(pre::SegmentedCleanSource *source, ulong _start, ulong _end);
-    ElmCoords(cmp::TokenizedSource      *source, ulong _start, ulong _end);
+    ElmCoords(ptr<pre::SegmentedCleanSource> source, ulong _start, ulong _end);
+    ElmCoords(ptr<cmp::TokenizedSource>      source, ulong _start, ulong _end);
 };

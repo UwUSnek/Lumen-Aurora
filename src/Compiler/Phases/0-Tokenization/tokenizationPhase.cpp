@@ -1,7 +1,6 @@
 #include "Main/ALC.hpp"
 #include "tokenizationPhase.hpp"
 #include "Main/FatalErrorException.hpp"
-#include "Utils/ansi.hpp"
 #include "Main/errors.hpp"
 
 #include "Misc/whitespaceCounter.hpp"
@@ -16,7 +15,7 @@
 
 
 
-void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r) {
+void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, ptr<TokenizedSource> r) {
 
     ulong i = 0;
     while(b->str[i].has_value()) {
@@ -34,9 +33,9 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
 
         // Parse numerical literlas
         ulong lenOutput;
-        TokenValue *tokenValue = parseNumericalLiteral(b, i, &lenOutput);
+        auto tokenValue = parseNumericalLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            increaseMaxProgress(Compiler_TreeCreation, 1);
+            increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
             increaseLocalProgress(lenOutput);
             *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput - 1]);
             i += lenOutput;
@@ -50,27 +49,27 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
         std::optional<std::string> token = parseAlphanumericToken(b, i);
         if(!token.has_value())     token = parseSymbolicToken(b, i);
         if(token.has_value()) {
-            TokenValue *_tokenValue;
+            ptr<TokenValue> _tokenValue;
 
             // If the token is a known keyword
             if(auto keywordType = reservedTokensMap.find(*token); keywordType != reservedTokensMap.end()) {
                 switch(keywordType->second) {
                     using enum cmp::ReservedTokenId;
-                    case TMP_LITERAL_TRUE:  { _tokenValue = new TK_Bool   (true);  break; }
-                    case TMP_LITERAL_FALSE: { _tokenValue = new TK_Bool   (false); break; }
-                    case TMP_LITERAL_INF:   { _tokenValue = new TK_Double (std::numeric_limits<double>::infinity());  break; }
-                    case TMP_LITERAL_NAN:   { _tokenValue = new TK_Double (std::numeric_limits<double>::quiet_NaN()); break; }
-                    default:                { _tokenValue = new TK_Keyword(keywordType->second); }
+                    case TMP_LITERAL_TRUE:  { _tokenValue = newptr<TK_Bool   >(true);  break; }
+                    case TMP_LITERAL_FALSE: { _tokenValue = newptr<TK_Bool   >(false); break; }
+                    case TMP_LITERAL_INF:   { _tokenValue = newptr<TK_Double >(std::numeric_limits<double>::infinity());  break; }
+                    case TMP_LITERAL_NAN:   { _tokenValue = newptr<TK_Double >(std::numeric_limits<double>::quiet_NaN()); break; }
+                    default:                { _tokenValue = newptr<TK_Keyword>(keywordType->second); }
                 }
             }
 
             // If not, treat it as an identifier
             else {
-                _tokenValue = new TK_Identifier(*token);
+                _tokenValue = newptr<TK_Identifier>(token.value());
             }
 
             // Push token to output array and update buffer index
-            increaseMaxProgress(Compiler_TreeCreation, 1);
+            increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
             increaseLocalProgress(token->length());
             *r += Token(b->str.substr(i, token->length()), _tokenValue, *b->meta[i], *b->meta[i + token->length() - 1]);
             i += token->length();
@@ -84,7 +83,7 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
         /**/            tokenValue = parseTextLiteral(b, i, &lenOutput, TextLiteralType::STRING);
         if(!tokenValue) tokenValue = parseTextLiteral(b, i, &lenOutput, TextLiteralType::CHAR);
         if(tokenValue) {
-            increaseMaxProgress(Compiler_TreeCreation, 1);
+            increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
             increaseLocalProgress(lenOutput);
             *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput - 1]);
             i += lenOutput;
@@ -96,7 +95,7 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
 
         // Print an error if none of the parsers could detect anything (current character is invalid)
         utils::printError(
-            ERROR_CMP_CHARACTER_INVALID,
+            ErrorCode::ERROR_CMP_CHARACTER_INVALID,
             utils::ErrType::COMPILER,
             ElmCoords(b, i, i),
             std::string("Invalid character '") + *b->str[i] + "'.\n" +
@@ -114,7 +113,7 @@ void cmp::__internal_startTokenizationPhase(pre::SegmentedCleanSource *b, Tokeni
 
 
 
-void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *r) {
+void cmp::startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, ptr<TokenizedSource> r) {
 
     // Try to execute the subphase
     try {
@@ -126,7 +125,7 @@ void cmp::startTokenizationPhase(pre::SegmentedCleanSource *b, TokenizedSource *
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
         r->closePipe();
-        std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Compiler_Tokenization].totalProgress->setProgressColor(ansi::red);
+        // std::scoped_lock lock(phaseDataArrayLock);
+        // phaseDataArray[(int)PhaseID::Compiler_Tokenization].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
     }
 }

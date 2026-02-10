@@ -3,20 +3,21 @@
 #include <string>
 
 #include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Utils/ptr.hpp"
 
 
 
 
 namespace pre {
 
-    SegmentedCleanSource* loadSourceCode_loop(
-        const std::string *s,
+    ptr<SegmentedCleanSource> loadSourceCode_loop(
+        const std::string &s,
         const std::string &filePath,
         const std::function<bool()> &awaitTask = [](){ return true; }
     );
 
-    SegmentedCleanSource* loadSourceCode(
-        const std::string *s,
+    ptr<SegmentedCleanSource> loadSourceCode(
+        const std::string &s,
         const std::string &filePath
     );
 }

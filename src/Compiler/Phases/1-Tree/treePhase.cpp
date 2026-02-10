@@ -2,8 +2,8 @@
 #include "Main/ALC.hpp"
 #include "Main/FatalErrorException.hpp"
 #include "Main/errors.hpp"
-#include "Utils/ansi.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 
 
@@ -23,7 +23,7 @@ debug(
 
 
 
-cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedSource *b, ulong index, bool optional debug(, int indent)) {
+ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource> b, ulong index, bool optional debug(, int indent)) {
     ulong i = index;
     debug((cout++ << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ")--;)
 
@@ -33,15 +33,15 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
     // Parse OneOf operator
     if(pattern->isOneOf()) {
         debug((cout++ << ansi::bright_black << "One Of\n" << ansi::reset)--;)
-        __Pattern_Operator_OneOf* p = pattern->asOneOf();
+        auto p = pattern->asOneOf();
 
         // For each element of the OneOf's sequence
-        TreeGenerationResult* max = nullptr;
+        ptr<TreeGenerationResult> max = nullptr;
         for(ulong j = 0; j < p->v.size(); ++j) {
 
             // Try to generate its tree
-            __base_Pattern* pElm = p->v[j];
-            TreeGenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
+            auto pElm = p->v[j];
+            auto result = generateTree(pElm, b, i, true debug(, indent + 1));
 
             // If the generation succeeds, return the result trees
             //! Optional is not allowed as a direct child of OneOf. No need to check
@@ -68,14 +68,14 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
     if(pattern->isOptional()) {
         debug((cout++ << ansi::bright_black << "Optional\n" << ansi::reset)--;)
         __Pattern_Operator_Optional* p = pattern->asOptional();
-        auto *r = new TreeGenerationResult{{}, true };
+        auto r = newptr<TreeGenerationResult>(0, true );
 
         // For each element of the optional's sequence
         for(ulong j = 0; j < p->v.size(); ++j) {
 
             // Try to generate its tree
-            __base_Pattern* pElm = p->v[j];
-            TreeGenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
+            auto pElm = p->v[j];
+            auto result = generateTree(pElm, b, i, true debug(, indent + 1));
 
             // Save the result trees in r
             for(ulong k = 0; k < result->trees.size(); ++k) {
@@ -110,7 +110,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                     std::string expectedElementStr;
                     // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
                     //FIXME check if it's always [0] or it can be other indices as well
-                    for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                    for(auto curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
                         // if(curPattern->isComposite() || curPattern->isToken()) {
                         if(!curPattern->isOperator()) {
                             expectedElementStr = curPattern->genDecoratedValue(true);
@@ -122,7 +122,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
                     // Actually print the error
                     utils::printError(
-                        ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                        ErrorCode::ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                         ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
                         ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
                         "Incomplete " + parentElementStr +
@@ -137,13 +137,10 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                     // debug(printFail(indent);)
                     debug(printSuccess(indent);)
                     // r->isComplete = false;
-                    delete result;
                     // return r;
-                    delete r;
-                    return new TreeGenerationResult{{}, true };
+                    return newptr<TreeGenerationResult>(0, true );
                 }
             }
-            delete result;
         }
 
         // Return all the result trees
@@ -160,14 +157,14 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
     if(pattern->isSequence()) {
         debug((cout++ << ansi::bright_black << "Sequence\n" << ansi::reset)--;)
         __Pattern_Operator_Sequence* p = pattern->asSequence();
-        auto *r = new TreeGenerationResult{{}, true };
+        auto r = newptr<TreeGenerationResult>(0, true );
 
         // For each element of the sequence's sequence
         for(ulong j = 0; j < p->v.size(); ++j) {
 
             // Try to generate its tree
-            __base_Pattern* pElm = p->v[j];
-            TreeGenerationResult *result = generateTree(pElm, b, i, true debug(, indent + 1));
+            auto pElm = p->v[j];
+            auto result = generateTree(pElm, b, i, true debug(, indent + 1));
 
             // Save the result trees in r
             for(ulong k = 0; k < result->trees.size(); ++k) {
@@ -199,7 +196,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                     std::string expectedElementStr;
                     // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
                     //FIXME check if it's always [0] or it can be other indices as well
-                    for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                    for(auto curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
                         // if(curPattern->isComposite() || curPattern->isToken()) {
                         if(!curPattern->isOperator()) {
                             expectedElementStr = curPattern->genDecoratedValue(true);
@@ -211,7 +208,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
                     // Actually print the error
                     utils::printError(
-                        ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                        ErrorCode::ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                         ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
                         ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
                         "Incomplete " + parentElementStr +
@@ -225,11 +222,9 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                 else {
                     debug(printFail(indent);)
                     r->isComplete = false;
-                    delete result;
                     return r;
                 }
             }
-            delete result;
         }
 
         // Return all the result trees
@@ -244,7 +239,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
     if(pattern->isLoop()) {
         debug((cout++ << ansi::bright_black << "Loop\n" << ansi::reset)--;)
         __Pattern_Operator_Loop* p = pattern->asLoop();
-        auto *r = new TreeGenerationResult{{}, true };
+        auto r = newptr<TreeGenerationResult>(0, true );
 
         // Repeat loop sequence until it fails
         for(ulong l = 0;; ++l) {
@@ -254,8 +249,8 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
             for(j = 0; j < p->v.size(); ++j) {
 
                 // Try to generate its tree
-                __base_Pattern* pElm = p->v[j];
-                TreeGenerationResult *result = generateTree(pElm, b, i, optional debug(, indent + 1));
+                auto pElm = p->v[j];
+                auto result = generateTree(pElm, b, i, optional debug(, indent + 1));
 
 
                 //               |                                 |
@@ -301,7 +296,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                         std::string expectedElementStr;
                         // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
                         //FIXME check if it's always [0] or it can be other indices as well
-                        for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                        for(auto curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
                             // if(curPattern->isComposite() || curPattern->isToken()) {
                             if(!curPattern->isOperator()) {
                                 expectedElementStr = curPattern->genDecoratedValue(true);
@@ -313,7 +308,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
                         // Actually print the error
                         utils::printError(
-                            ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                            ErrorCode::ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                             ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
                             ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
                             "Incomplete " + parentElementStr +
@@ -329,11 +324,9 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                         //FIXME "Only one of these is allowed: Struct definition, Import directive, Export directive, Routine definition"
                     }
                     else {
-                        delete result;
                         break;
                     }
                 }
-                delete result;
             }
 
 
@@ -349,7 +342,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
 
         //! Bogus return value to silence GCC
-        return new TreeGenerationResult{{ (__base_ST*)0xDEAD }, false };
+        return newptr<TreeGenerationResult>(0, false );
     }
 
 
@@ -361,12 +354,12 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
         auto* p = pattern->asComposite();
 
         // For each of element of the composite's sequence
-        std::vector<__base_ST*> genSource;
+        std::vector<ptr<__base_ST>> genSource;
         for(ulong j = 0; j < p->v.size(); ++j) {
 
             // Try to generate its tree
-            __base_Pattern* pElm = p->v[j];
-            TreeGenerationResult *result = generateTree(pElm, b, i, optional debug(, indent + 1));
+            auto pElm = p->v[j];
+            auto result = generateTree(pElm, b, i, optional debug(, indent + 1));
 
             // Save the result trees in genSource and update i
             for(ulong k = 0; k < result->trees.size(); ++k) {
@@ -407,7 +400,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                         std::string expectedElementStr;
                         // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
                         //FIXME check if it's always [0] or it can be other indices as well
-                        for(__base_Pattern* curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
+                        for(auto curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
                             // if(curPattern->isComposite() || curPattern->isToken()) {
                             if(!curPattern->isOperator()) {
                                 expectedElementStr = curPattern->genDecoratedValue(true);
@@ -419,7 +412,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
                         // Actually print the error
                         utils::printError(
-                            ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
+                            ErrorCode::ERROR_CMP_UNEXPECTED_TOKEN, utils::ErrType::COMPILER,
                             ElmCoords(b, index, i),
                             ElmCoords(b, i,     i),
                             "Incomplete " + p->genDecoratedValue(false) +
@@ -437,19 +430,17 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
                 }
                 else {
                     debug(printFail(indent);)
-                    delete result;
-                    return new TreeGenerationResult{{}, false };
+                    return newptr<TreeGenerationResult>(0, false );
                 }
             }
-            delete result;
         }
 
         // Generate the tree of the composite element and set its beginning and end indices, then return it as the sole result
-        __base_ST* r = p->generateData(genSource);
+        auto r = p->generateData(genSource);
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return new TreeGenerationResult{{ r }, true };
+        return newptr<TreeGenerationResult>(std::vector<typeof r>{ r }, true );
     }
     //FIXME fix trees' parent pointer not getting set
 
@@ -468,16 +459,16 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
         if(!t.has_value() || !t->isKeyword(p->id)) {
             debug(printFail(indent);)
-            return new TreeGenerationResult{{}, false};
+            return newptr<TreeGenerationResult>(0, false);
         }
 
         increaseLocalProgress(1);
         ++i;
-        auto* r = dynamic_cast<__base_ST*>(new ST_Sub_Keyword(t->getValue_Keyword()));
+        auto r = std::dynamic_pointer_cast<__base_ST>(newptr<ST_Sub_Keyword>(t->getValue_Keyword()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return new TreeGenerationResult{{ r }, true };
+        return newptr<TreeGenerationResult>(std::vector<typeof r>{ r }, true );
     }
 
 
@@ -490,16 +481,16 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
         if(!t.has_value() || !t->isIdentifier()) {
             debug(printFail(indent);)
-            return new TreeGenerationResult{{}, false};
+            return newptr<TreeGenerationResult>(0, false);
         }
 
         increaseLocalProgress(1);
         ++i;
-        auto* r = dynamic_cast<__base_ST*>(new ST_Sub_Identifier(t->getValue_Identifier()));
+        auto r = std::dynamic_pointer_cast<__base_ST>(newptr<ST_Sub_Identifier>(t->getValue_Identifier()));
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return new TreeGenerationResult{{ r }, true };
+        return newptr<TreeGenerationResult>(std::vector<typeof r>{ r }, true );
     }
 
 
@@ -515,7 +506,7 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
 
     //! Bogus return value to silence GCC
-    return new TreeGenerationResult{{ (__base_ST*)0xDEAD }, false };
+    return newptr<TreeGenerationResult>(0, false );
 }
 
 
@@ -525,10 +516,9 @@ cmp::TreeGenerationResult *cmp::generateTree(__base_Pattern* pattern, TokenizedS
 
 
 
-void cmp::__internal_startTreePhase(TokenizedSource *b, SourceTree *r) {
-    const auto &moduleTree = generateTree(re::Module(), b, 0, false debug(, 0));
-    *r->cpp() = dynamic_cast<ST_Module*>(moduleTree->trees[0]);
-    // b->awaitClose([](){}); //BUG this works but it shouldn't be necessary
+void cmp::__internal_startTreePhase(ptr<TokenizedSource> b, ptr<SourceTree> r) {
+    const auto moduleTree = generateTree(re::Module(), b, 0, false debug(, 0));
+    *r->cpp() = std::dynamic_pointer_cast<ST_Module>(moduleTree->trees[0]);
 }
 
 
@@ -538,7 +528,7 @@ void cmp::__internal_startTreePhase(TokenizedSource *b, SourceTree *r) {
 
 
 
-void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
+void cmp::startTreePhase(ptr<TokenizedSource> b, ptr<SourceTree> r) {
 
     // Try to execute the subphase
     try {
@@ -550,9 +540,7 @@ void cmp::startTreePhase(TokenizedSource *b, SourceTree *r) {
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
         r->closePipe();
-        std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[Compiler_TreeCreation].totalProgress->setProgressColor(ansi::red);
+        // std::scoped_lock lock(phaseDataArrayLock);
+        // phaseDataArray[Compiler_TreeCreation].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
     }
 }
-//TODO put const everywhere it's needed
-//FIXME free (delete) all the unnecessary GenerationResult s

@@ -1,5 +1,6 @@
 #include "Enum.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Enum::getCategoryName(bool plural) const {
     return plural ? "enum definition" : "enum definitions";
@@ -48,8 +49,8 @@ void cmp::Pattern_Elm_Enum::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Enum::generateData(std::vector<__base_ST*> const &results) const {
-    auto * r = new ST_Enum;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Enum::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Enum>();
 
     // Set custom data
     r->name     = results[1]->asIdentifier();
@@ -60,5 +61,5 @@ cmp::__base_ST* cmp::Pattern_Elm_Enum::generateData(std::vector<__base_ST*> cons
 
     // Print debug info and return
     debug((cout++ << "found enum " << r->name->s << "\n")--;)
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

@@ -36,7 +36,7 @@ static int const maxPhaseNameLen = [] {
 static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
     const bool isPhaseComplete = phaseDataArray[i].timeEnd  ->load() > 0;
     const bool isPhaseActive   = phaseDataArray[i].timeStart->load() > 0;
-    const DynamicProgressBar *bar = phaseDataArray[i].totalProgress;
+    const auto bar = phaseDataArray[i].totalProgress;
 
     cout
         << (isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black)
@@ -138,7 +138,7 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
 
 
 
-void startMonitorThread(const std::string &fullCommand){
+void startMonitorThread(const std::string fullCommand){ //NOSONAR
     const ulong interval = 100;
 
     // Set thread name and type
@@ -157,7 +157,7 @@ void startMonitorThread(const std::string &fullCommand){
         {
             std::scoped_lock lock(subphaseDataArrayLock, phaseDataArrayLock);
             for(auto const& e : subphaseDataArray) {
-                phaseDataArray[e.phaseId].totalProgress->increase(e.localProgress->exchange(0));
+                phaseDataArray[(ulong)e.phaseId].totalProgress->increase(e.localProgress->exchange(0));
             }
         }
 

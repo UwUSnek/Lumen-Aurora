@@ -12,7 +12,7 @@
 
 
 
-void pre::__internal_startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
 
     ulong i = 0;
     while(b->str[i].has_value()) {
@@ -20,8 +20,8 @@ void pre::__internal_startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSo
 
         // Skip (and remove) comments
         if(ulong commentLen = misc::measureComment(b->str, i); commentLen) {
-            decreaseMaxProgress(Preprocessor_Macros, commentLen);
-            decreaseMaxProgress(Compiler_Tokenization, commentLen);
+            decreaseMaxProgress(PhaseID::Preprocessor_Macros,   commentLen);
+            decreaseMaxProgress(PhaseID::Compiler_Tokenization, commentLen);
             increaseLocalProgress(commentLen);
             i += commentLen;
             continue;
@@ -61,7 +61,7 @@ void pre::__internal_startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSo
 
 
 
-void pre::startCleanupPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
 
     // Try to execute the subphase
     try {

@@ -22,7 +22,7 @@
 
 
 
-void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanSource *r) {
+void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<SegmentedCleanSource> r) {
 
 
     // Clean the code, saving the result in a temporary buffer. Skip validation checks
@@ -30,7 +30,7 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanS
     //! Performance overhead is negligible.
     ulong i  = 0; // b0 index
     ulong ii = 0; // b  index (clean)
-    auto *b = new SegmentedCleanSource();
+    auto b = newptr<SegmentedCleanSource>();
     auto skipped = std::vector<ulong>(b0->str.length(), 0); //! Oversized. Extra elements are simply not used. Initialize to all 0s
     while(b0->str[i].has_value()) {
 
@@ -112,7 +112,7 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanS
 
 
                         // Read and prepare code from the file
-                        auto *fileCode = new SegmentedCleanSource();
+                        auto fileCode = newptr<SegmentedCleanSource>();
                         totalFiles.fetch_add(1);
                         sourceFilePaths.push_back(actualFilePath);
                         auto newFilePathIndex = sourceFilePaths.size() - 1;
@@ -120,11 +120,11 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanS
 
 
                         // Update phase progress data
-                        increaseMaxProgress(Preprocessor_Includes, fileCode->str.length()); //! Self
-                        increaseMaxProgress(Preprocessor_LCT,      fileCode->str.length());
-                        increaseMaxProgress(Preprocessor_Cleanup,  fileCode->str.length());
-                        increaseMaxProgress(Preprocessor_Macros,   fileCode->str.length());
-                        increaseMaxProgress(Compiler_Tokenization, fileCode->str.length());
+                        increaseMaxProgress(PhaseID::Preprocessor_Includes, fileCode->str.length()); //! Self
+                        increaseMaxProgress(PhaseID::Preprocessor_LCT,      fileCode->str.length());
+                        increaseMaxProgress(PhaseID::Preprocessor_Cleanup,  fileCode->str.length());
+                        increaseMaxProgress(PhaseID::Preprocessor_Macros,   fileCode->str.length());
+                        increaseMaxProgress(PhaseID::Compiler_Tokenization, fileCode->str.length());
 
 
                         // Increase index (skip include and file path)
@@ -135,10 +135,10 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanS
                         }
                         ii = k;
                         increaseLocalProgress(i - old_i);
-                        decreaseMaxProgress(Preprocessor_LCT,      i - old_i);
-                        decreaseMaxProgress(Preprocessor_Cleanup,  i - old_i);
-                        decreaseMaxProgress(Preprocessor_Macros,   i - old_i);
-                        decreaseMaxProgress(Compiler_Tokenization, i - old_i);
+                        decreaseMaxProgress(PhaseID::Preprocessor_LCT,      i - old_i);
+                        decreaseMaxProgress(PhaseID::Preprocessor_Cleanup,  i - old_i);
+                        decreaseMaxProgress(PhaseID::Preprocessor_Macros,   i - old_i);
+                        decreaseMaxProgress(PhaseID::Compiler_Tokenization, i - old_i);
 
 
                         // Append file data to r and process its includes recursively
@@ -200,7 +200,7 @@ void pre::__internal_startIncludePhase(SegmentedCleanSource *b0, SegmentedCleanS
 
 //! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b->str[i:]
-void pre::parseIncludeStatementName(ulong index, pre::SegmentedCleanSource *b, std::string &match) {
+void pre::parseIncludeStatementName(ulong index, ptr<SegmentedCleanSource> b, std::string &match) {
     std::string tmp;
     ulong nameLen = sizeof("#include") - 1;
     ulong i = index + nameLen;
@@ -232,7 +232,7 @@ void pre::parseIncludeStatementName(ulong index, pre::SegmentedCleanSource *b, s
 
 //! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b->str[i:]
-void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, std::string &filePathMatch) {
+void pre::parseIncludeStatementPath(ulong index, ptr<SegmentedCleanSource> b, std::string &filePathMatch) {
     std::string tmp;
 
     char type;
@@ -292,7 +292,7 @@ void pre::parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource *b, s
 
 
 
-void pre::startIncludePhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::startIncludePhase(ptr<SegmentedCleanSource> b, ptr< SegmentedCleanSource> r) {
 
     // Try to execute the subphase
     try {

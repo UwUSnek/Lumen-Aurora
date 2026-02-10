@@ -77,7 +77,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     auto currentOutputTypeCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
                     if(lastOutputTypeCoords.end) {
                         utils::printErrorCL(
-                            ERROR_CMD_INCOMPATIBLE_OPTIONS,
+                            ErrorCode::ERROR_CMD_INCOMPATIBLE_OPTIONS,
                             lastOutputTypeCoords,
                             currentOutputTypeCoords,
                             "Incompatible options: " +
@@ -95,7 +95,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     ++i;
                     if(i >= argc) {
                         utils::printErrorCL(
-                            ERROR_CMD_NO_OUTPUT_FILE,
+                            ErrorCode::ERROR_CMD_NO_OUTPUT_FILE,
                             ElmCoordsCL(optionPosition, optionPosition + o.length()),
                             ElmCoordsCL(optionPosition, optionPosition + o.length()),
                             "Missing output path after " + o + " option.\n" +
@@ -120,7 +120,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     auto currentTargetPlatformCoords = ElmCoordsCL(optionPosition, optionPosition + 2);
                     if(lastTargetPlatformCoords.end) {
                         utils::printErrorCL(
-                            ERROR_CMD_INCOMPATIBLE_OPTIONS,
+                            ErrorCode::ERROR_CMD_INCOMPATIBLE_OPTIONS,
                             lastTargetPlatformCoords,
                             currentTargetPlatformCoords,
                             "Incompatible options: " +
@@ -146,7 +146,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     ++i;
                     if(i >= argc) {
                         utils::printErrorCL(
-                            c == 'I' ? ERROR_CMD_INCLUDE_PATH_MISSING : ERROR_CMD_IMPORT_PATH_MISSING,
+                            c == 'I' ? ErrorCode::ERROR_CMD_INCLUDE_PATH_MISSING : ErrorCode::ERROR_CMD_IMPORT_PATH_MISSING,
                             optionCoords,
                             optionCoords,
                             "Missing i" + w + "path after " + o + " option.\n"
@@ -161,7 +161,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     utils::PathCheckResult result = utils::checkPath(argv[i]);
                     if(!result.exists) {
                         utils::printErrorCL(
-                            c == 'I' ? ERROR_CMD_INCLUDE_PATH_NOT_FOUND : ERROR_CMD_IMPORT_PATH_NOT_FOUND,
+                            c == 'I' ? ErrorCode::ERROR_CMD_INCLUDE_PATH_NOT_FOUND : ErrorCode::ERROR_CMD_IMPORT_PATH_NOT_FOUND,
                             optionCoords,
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "Could not find directory \"" + path + "\".\n" +
@@ -175,7 +175,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     std::string canonicalPath = fs::canonical(path);
                     if(!result.isDir) {
                         utils::printErrorCL(
-                            c == 'I' ? ERROR_CMD_INCLUDE_PATH_IS_FILE : ERROR_CMD_IMPORT_PATH_IS_FILE,
+                            c == 'I' ? ErrorCode::ERROR_CMD_INCLUDE_PATH_IS_FILE : ErrorCode::ERROR_CMD_IMPORT_PATH_IS_FILE,
                             optionCoords,
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "The specified i" + w + " path \"" + path + "\" is not a directory.\n" +
@@ -188,7 +188,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     // If it has no read permission, print an error
                     if(!result.canRead) {
                         utils::printErrorCL(
-                            c == 'I' ? ERROR_CMD_INCLUDE_PATH_NO_PERMISSION : ERROR_CMD_IMPORT_PATH_NO_PERMISSION,
+                            c == 'I' ? ErrorCode::ERROR_CMD_INCLUDE_PATH_NO_PERMISSION : ErrorCode::ERROR_CMD_IMPORT_PATH_NO_PERMISSION,
                             optionCoords,
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "The specified i" + w + " directory \"" + path + "\" cannot be used: no read permission.\n" +
@@ -235,7 +235,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                 //TODO look for similar existing options and suggest them
                 //TODO add a list of possible intended options that aren't necessarily close by value
                 utils::printErrorCL(
-                    ERROR_CMD_UNKNOWN_OPTION,
+                    ErrorCode::ERROR_CMD_UNKNOWN_OPTION,
                     cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
                     cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
                     "Unknown command line option \"" + ansi::white + o + ansi::reset + "\".",
@@ -253,7 +253,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
             cmd::ElmCoordsCL currentSourceCoords(optionPosition, optionPosition + o.length());
             if(lastSourceCoords.end > 0) {
                 utils::printErrorCL(
-                    ERROR_CMD_MULTIPLE_SOURCES,
+                    ErrorCode::ERROR_CMD_MULTIPLE_SOURCES,
                     lastSourceCoords,
                     currentSourceCoords,
                     "Multiple source files specified.\n"
@@ -268,7 +268,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
             utils::PathCheckResult result = utils::checkPath(o);
             if(!result.exists) {
                 utils::printErrorCL(
-                    ERROR_CMD_SOURCE_INVALID,
+                    ErrorCode::ERROR_CMD_SOURCE_INVALID,
                     currentSourceCoords,
                     currentSourceCoords,
                     "Could not find source file \"" + o + "\".\n" +
@@ -282,7 +282,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
             std::string canonicalPath = fs::canonical(o);
             if(result.isDir) {
                 utils::printErrorCL(
-                    ERROR_CMD_INCLUDE_PATH_IS_FILE,
+                    ErrorCode::ERROR_CMD_INCLUDE_PATH_IS_FILE,
                     currentSourceCoords,
                     currentSourceCoords,
                     "The specified source file path \"" + o + "\" is a directory.\n" +
@@ -295,7 +295,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
             // Print error if the source doesnt have read permission
             if(!result.canRead) {
                 utils::printErrorCL(
-                    ERROR_CMD_SOURCE_INVALID,
+                    ErrorCode::ERROR_CMD_SOURCE_INVALID,
                     currentSourceCoords,
                     currentSourceCoords,
                     "Could not open source file \"" + o + "\": no read permission.\n" +
@@ -319,7 +319,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
     // Print error if no source file is specified
     if(options->sourceFile.empty()) {
         utils::printErrorCL(
-            ERROR_CMD_SOURCE_MISSING,
+            ErrorCode::ERROR_CMD_SOURCE_MISSING,
             ElmCoordsCL(optionPosition - 1, optionPosition - 1),
             ElmCoordsCL(optionPosition - 1, optionPosition - 1),
             "Source code path is missing.\n"

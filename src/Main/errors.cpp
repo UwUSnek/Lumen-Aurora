@@ -148,7 +148,7 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
     cerr--;
 
     // Stop the program if needed
-    if(fatal) exitMain(errorCode);
+    if(fatal) exitMain((int)errorCode);
 }
 
 
@@ -190,7 +190,7 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
 
 
     // Stop the program if needed
-    if(fatal) exitMain(errorCode);
+    if(fatal) exitMain((int)errorCode);
 }
 
 
@@ -339,5 +339,5 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
     // Stop the program if needed
-    if(fatal) exitMain(errorCode);
+    if(fatal) exitMain((int)errorCode);
 }

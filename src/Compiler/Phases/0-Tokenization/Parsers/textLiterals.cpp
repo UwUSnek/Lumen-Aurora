@@ -48,7 +48,7 @@ const char* getLiteralName(const cmp::TextLiteralType literalType) {
  * @param literalType The type of literal this escape sequence is part of. This affects error messages.
  * @return The string value of the translated escape sequence, expressed in the UTF-8 format, or nullopt if one was not found.
  */
-std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ulong index, ulong *rawEscapeLen, cmp::TextLiteralType literalType) {
+std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource> b, ulong index, ulong *rawEscapeLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
 
     // Return if there is no escape sequence
@@ -66,7 +66,7 @@ std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ul
         // Invalid escape sequences
         default: {
             utils::printError(
-                ERROR_CMP_ESCAPE_INVALID,
+                ErrorCode::ERROR_CMP_ESCAPE_INVALID,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
                 "Invalid escape sequence \"" + ansi::white + "\\" + *c + ansi::reset + "\".",
@@ -109,7 +109,7 @@ std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ul
             // Check bad length
             if(codepoint.empty()) {
                 utils::printError(
-                    ERROR_CMP_ESCAPE_U_EMPTY,
+                    ErrorCode::ERROR_CMP_ESCAPE_U_EMPTY,
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, index + 1),
                     ElmCoords(b, index + 2, i - 1), //FIXME check if this is visible and works well when at the end of the file //FIXME ^ debug it and check that the idices don't segfault
@@ -122,7 +122,7 @@ std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ul
             }
             else if(codepoint.length() < expectedDigits) {
                 utils::printError(
-                    *c == 'u' ? ERROR_CMP_ESCAPE_U4_MISSING : ERROR_CMP_ESCAPE_U8_MISSING,
+                    *c == 'u' ? ErrorCode::ERROR_CMP_ESCAPE_U4_MISSING : ErrorCode::ERROR_CMP_ESCAPE_U8_MISSING,
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, index + 1),
                     ElmCoords(b, index + 2, i - 1), //FIXME CHECK IF THIS WORKS IF AT THE END OF THE FILE (it should) //FIXME ^ debug it and check that the idices don't segfault
@@ -156,7 +156,7 @@ std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ul
     // Print an error for unexpected end of file
     else {
         utils::printError(
-            ERROR_CMP_UNEXPECTED_END,
+            ErrorCode::ERROR_CMP_UNEXPECTED_END,
             utils::ErrType::COMPILER,
             ElmCoords(b, index, i - 1),
             std::format("Unexpected end of file in escape sequence of {} literal.", getLiteralName(literalType)),
@@ -184,7 +184,7 @@ std::optional<std::string> decodeEscapeSequence(pre::SegmentedCleanSource *b, ul
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal, or nullopt if one was not found.
  */
-cmp::TokenValue* cmp::parseTextLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen, cmp::TextLiteralType literalType) {
+ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource> b, ulong index, ulong *rawLiteralLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
     const char delimiter = literalType == cmp::TextLiteralType::STRING ? '"' : '\'';
     if(const auto &c0 = b->str[index]; !c0.has_value() || c0 != delimiter) {
@@ -205,7 +205,7 @@ cmp::TokenValue* cmp::parseTextLiteral(pre::SegmentedCleanSource *b, ulong index
         // Missing closing sequence
         if(!c.has_value()) {
             utils::printError(
-                ERROR_CMP_STRING_INCOMPLETE_0,
+                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_0,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
                 ElmCoords(b, i - 1, i - 1),
@@ -215,7 +215,7 @@ cmp::TokenValue* cmp::parseTextLiteral(pre::SegmentedCleanSource *b, ulong index
         }
         else if(c == '\n') {
             utils::printError(
-                ERROR_CMP_STRING_INCOMPLETE_n,
+                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_n,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
                 ElmCoords(b, i - 1, i - 1),
@@ -261,7 +261,7 @@ cmp::TokenValue* cmp::parseTextLiteral(pre::SegmentedCleanSource *b, ulong index
         // Detect non-escaped character sequences longer than 1 byte
         if(r.tellp() > 1) {
             utils::printError(
-                ERROR_CMP_CHAR_LONG,
+                ErrorCode::ERROR_CMP_CHAR_LONG,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
                 ElmCoords(b, index + 1, i - 2),
@@ -274,7 +274,7 @@ cmp::TokenValue* cmp::parseTextLiteral(pre::SegmentedCleanSource *b, ulong index
         // Detect empty literals
         if(r.tellp() == 0) {
             utils::printError(
-                ERROR_CMP_CHAR_EMPTY,
+                ErrorCode::ERROR_CMP_CHAR_EMPTY,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
                 "Char literal cannot be empty.",
@@ -290,9 +290,9 @@ cmp::TokenValue* cmp::parseTextLiteral(pre::SegmentedCleanSource *b, ulong index
     *rawLiteralLen = i - index;
     if(literalType == cmp::TextLiteralType::STRING) {
         std::string rStr = r.str();
-        return new TK_String(rStr.substr(1, rStr.length() - 2));
+        return newptr<TK_String>(rStr.substr(1, rStr.length() - 2));
     }
     else {
-        return new TK_Char(r.str()[0]);
+        return newptr<TK_Char>(r.str()[0]);
     }
 }

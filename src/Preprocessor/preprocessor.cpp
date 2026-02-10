@@ -21,7 +21,7 @@
  * @param filePath The path of the original source code file.
  * @return The contents of the source file as a SegmentedCleanSource.
  */
-pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::string &filePath) {
+ptr<pre::SegmentedCleanSource> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
     ulong pathIndex;
     {
         std::scoped_lock lock(sourceFilePathsLock);
@@ -37,27 +37,27 @@ pre::SegmentedCleanSource* pre::loadSourceCode(const std::string *s, const std::
     //FIXME SAVE INCLUDE STACK
 
     // Load raw code of the root file
-    auto *r0 = new SegmentedCleanSource();
-    generateMetadata(*s, r0, pathIndex);
+    auto r0 = newptr<SegmentedCleanSource>();
+    generateMetadata(s, r0, pathIndex);
 
 
     // Create pipes
-    auto *r1 = new SegmentedCleanSource();
-    auto *r2 = new SegmentedCleanSource();
-    auto *r3 = new SegmentedCleanSource();
-    auto *r4 = new SegmentedCleanSource();
+    auto r1 = newptr<SegmentedCleanSource>();
+    auto r2 = newptr<SegmentedCleanSource>();
+    auto r3 = newptr<SegmentedCleanSource>();
+    auto r4 = newptr<SegmentedCleanSource>();
 
     // Include all files
+    startSubphaseAsync(PhaseID::Preprocessor_Includes, true, startIncludePhase, r0, r1);
+    // r1->str.awaitClose(mainCheckErrors);
+    // r1->meta.awaitClose(mainCheckErrors);
     //TODO add a command line option to disable waiting for all the includes.
     //TODO This option will make progress calculation less reliable and remove some features that need all the files to be known, but will speed up compilation
-    startSubphaseAsync(Preprocessor_Includes, true, startIncludePhase, r0, r1);
-    r1->str.awaitClose(mainCheckErrors);
-    r1->meta.awaitClose(mainCheckErrors);
 
     // Start the other phases
-    startSubphaseAsync(Preprocessor_LCT,      true, startLCTsPhase,    r1, r2);
-    startSubphaseAsync(Preprocessor_Cleanup,  true, startCleanupPhase, r2, r3);
-    startSubphaseAsync(Preprocessor_Macros,   true, startMacroPhase,   r3, r4);
+    startSubphaseAsync(PhaseID::Preprocessor_LCT,      true, startLCTsPhase,    r1, r2);
+    startSubphaseAsync(PhaseID::Preprocessor_Cleanup,  true, startCleanupPhase, r2, r3);
+    startSubphaseAsync(PhaseID::Preprocessor_Macros,   true, startMacroPhase,   r3, r4);
 
     // Wait for the phases to finish and return the output buffer
     return r4;

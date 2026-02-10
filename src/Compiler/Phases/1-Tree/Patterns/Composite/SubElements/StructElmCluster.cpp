@@ -1,5 +1,6 @@
 #include "StructElmCluster.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_StructElmCluster::getCategoryName(bool plural) const {
     return plural ? "struct element" : "struct elements";
@@ -40,17 +41,17 @@ void cmp::Pattern_Elm_StructElmCluster::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_StructElmCluster::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = new ST_StructElmCluster();
+ptr<cmp::__base_ST> cmp::Pattern_Elm_StructElmCluster::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_StructElmCluster>();
 
     // Save type
     r->type = results[0]->asType();
 
     // Save individual elements
     for(ulong i = 1; i < results.size(); i += 2) {
-        r->elms.push_back(dynamic_cast<ST_StructElm*>(results[i]));
+        r->elms.push_back(std::dynamic_pointer_cast<ST_StructElm>(results[i]));
     }
 
     // Print debug info and return
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

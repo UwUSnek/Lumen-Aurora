@@ -1,5 +1,6 @@
 #include "Import.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Import::getCategoryName(bool plural) const {
     return plural ? "import directive" : "importe directives";
@@ -74,8 +75,8 @@ void cmp::Pattern_Elm_Import::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> const &results) const {
-    auto *r = new ST_Import;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Import::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Import>();
     ulong i;
 
 
@@ -150,7 +151,7 @@ cmp::__base_ST* cmp::Pattern_Elm_Import::generateData(std::vector<__base_ST*> co
     // Print debug info and return value
     ret:
     debug((cout++ << "found import directive\n")--;)
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }
 
 

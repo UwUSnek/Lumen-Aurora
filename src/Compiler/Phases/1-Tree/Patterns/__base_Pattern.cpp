@@ -1,5 +1,4 @@
 #include "__base_Pattern.hpp"
-#include "Utils/ansi.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 
 

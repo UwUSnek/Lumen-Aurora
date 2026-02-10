@@ -1,5 +1,6 @@
 #include "Struct.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Struct::getCategoryName(bool plural) const {
     return plural ? "struct definition" : "struct definitions";
@@ -47,8 +48,8 @@ void cmp::Pattern_Elm_Struct::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Struct::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = new ST_Struct;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Struct::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Struct>();
 
     // Set custom data
     r->name = results[1]->asIdentifier();
@@ -58,5 +59,5 @@ cmp::__base_ST* cmp::Pattern_Elm_Struct::generateData(std::vector<__base_ST*> co
 
     // Print debug info and return
     debug((cout++ << "found struct " << r->name->s << "\n")--;)
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

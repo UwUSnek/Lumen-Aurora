@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Utils/Containers/GenericPipe.hpp"
+#include "Utils/ptr.hpp"
 
 
 
@@ -72,7 +73,7 @@ namespace cmp {
         #undef X
     };
 
-    using SourceTree = GenericPipe<ST_Module *>;
+    using SourceTree = GenericPipe<ptr<ST_Module>>;
 
 
 
@@ -86,9 +87,9 @@ namespace cmp {
 
     // Base struct for every first-pass semantic element
     struct __base_ST_Container : public virtual __base_ST {
-        std::vector<__base_ST*> children;
+        std::vector<ptr<__base_ST>> children;
 
-        void addChild(__base_ST* c) {
+        void addChild(ptr<__base_ST> c) {
             children.push_back(c);
             c->parent = this;
         }

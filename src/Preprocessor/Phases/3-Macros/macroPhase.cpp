@@ -1,7 +1,6 @@
 #include "macroPhase.hpp"
 #include "Main/ALC.hpp"
 #include "Main/FatalErrorException.hpp"
-#include "Utils/ansi.hpp"
 
 
 
@@ -10,7 +9,7 @@
 
 
 
-void pre::__internal_startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
+void pre::__internal_startMacroPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r){
     ulong i = 0;
     while(b->str[i].has_value()) {
 
@@ -38,7 +37,7 @@ void pre::__internal_startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSour
 
 
 
-void pre::startMacroPhase(SegmentedCleanSource *b, SegmentedCleanSource *r){
+void pre::startMacroPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r){
 
     // Try to execute the subphase
     try {

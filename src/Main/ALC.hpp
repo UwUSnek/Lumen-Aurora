@@ -7,6 +7,7 @@
 #include "Utils/utils.hpp"
 #include "Utils/DynamicProgressBar.hpp"
 #include "Utils/ThreadManager.hpp"
+#include "Utils/ptr.hpp"
 
 
 //FIXME actually control this from somewhere
@@ -185,7 +186,7 @@ extern  __internal_cerr_stream_t_wrapper cerr;
 
 // Identifies the phases of the compilation progress
 // Phases must be declared in order. Update phaseIdToString after changing this enum.
-enum PhaseID : ulong {
+enum class PhaseID : ulong {
     #define X(e) e,
     LIST_PHASE_ID
     #undef X
@@ -194,9 +195,9 @@ std::string phaseIdTotring(PhaseID phaseId);
 
 
 struct PhaseData {
-    DynamicProgressBar *totalProgress;
-    std::atomic<long>  *timeStart;
-    std::atomic<long>  *timeEnd;
+    ptr<DynamicProgressBar> totalProgress;
+    ptr<std::atomic<long>>  timeStart;
+    ptr<std::atomic<long>>  timeEnd;
 
     PhaseData();
 };
@@ -214,9 +215,9 @@ struct SubphaseData {
     PhaseID phaseId;
 
     //! pointers avoid having to lock and unlock every time an element is accessed by a subphase thread
-    std::atomic<ulong>*                         localProgress;
+    ptr<std::atomic<ulong>> localProgress;
 
-    SubphaseData(PhaseID _phaseId, std::atomic<ulong>* _localProgress) :
+    SubphaseData(PhaseID _phaseId, ptr<std::atomic<ulong>> _localProgress) :
         phaseId(_phaseId),
         localProgress(_localProgress) {
     }
@@ -227,9 +228,9 @@ extern std::vector<SubphaseData> subphaseDataArray;
 extern std::mutex                subphaseDataArrayLock;
 
 // Per-thread data
-extern thread_local std::atomic<ulong>* localProgress;
+extern thread_local ptr<std::atomic<ulong>> localProgress;
+extern thread_local ptr<DynamicProgressBar> maxProgress;
 void increaseLocalProgress(ulong n);
-extern thread_local DynamicProgressBar* maxProgress;
 void increaseMaxProgress(ulong n);
 void decreaseMaxProgress(ulong n);
 
@@ -247,7 +248,7 @@ ulong fetchMaxProgress(PhaseID phaseId);
 #define MAX_THR_NAME_LEN 15
 
 
-template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, std::atomic<bool> *initFeedback, func_t &&f, args_t &&...args) {
+template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID phaseId, bool isLast, ptr<std::atomic<bool>> initFeedback, func_t &&f, args_t &&...args) {
 
     // Set thread name and type
     threadType = ThreadType::SUBPHASE;
@@ -264,22 +265,22 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
     { // Set max progress pointer
         std::scoped_lock lock(phaseDataArrayLock);
-        maxProgress = phaseDataArray[phaseId].totalProgress;
+        maxProgress = phaseDataArray[(ulong)phaseId].totalProgress;
     }
 
 
     { // Init phase starting time if needed
         std::scoped_lock lock(phaseDataArrayLock);
-        if(*phaseDataArray[phaseId].timeStart == 0) {
-            phaseDataArray[phaseId].timeStart->store(utils::getEpochMs());
+        if(*phaseDataArray[(ulong)phaseId].timeStart == 0) {
+            phaseDataArray[(ulong)phaseId].timeStart->store(utils::getEpochMs());
         }
     }
 
 
     { // Init subphase data (not ordered)
-        localProgress = new std::atomic<ulong>(0);
+        localProgress = newptr<std::atomic<ulong>>(0);
         std::scoped_lock lock(subphaseDataArrayLock);
-        subphaseDataArray.push_back(SubphaseData(phaseId, localProgress));
+        subphaseDataArray.emplace_back(phaseId, localProgress);
     }
 
 
@@ -291,7 +292,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
     { // Set the ending time if needed
         std::scoped_lock lock(phaseDataArrayLock);
-        if(isLast) phaseDataArray[phaseId].timeEnd->store(utils::getEpochMs());
+        if(isLast) phaseDataArray[(ulong)phaseId].timeEnd->store(utils::getEpochMs());
     }
 
 
@@ -317,7 +318,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId, bool isLast, const func_t &f, const args_t& ...args) {
 
     //! Subphase and Phase data initialization feedback
-    auto *isThreadDataInitialized = new std::atomic<bool>(false); //NOSONAR(cpp:S6063)
+    auto isThreadDataInitialized = newptr<std::atomic<bool>>(false);
 
 
     // Start the new thread
@@ -334,7 +335,6 @@ template<class func_t, class... args_t> void startSubphaseAsync(PhaseID phaseId,
     while(!isThreadDataInitialized->load()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    delete isThreadDataInitialized;
 }
 
 void initPhaseData();

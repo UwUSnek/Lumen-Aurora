@@ -10,7 +10,7 @@
 
 //FIXME rename segmentedcleansource to something better.
 //FIXME it's just source code with metadata
-void pre::generateMetadata(std::string rawCode, SegmentedCleanSource* r, ulong DBG_filePathIndex) {
+void pre::generateMetadata(std::string rawCode, ptr<SegmentedCleanSource> r, ulong DBG_filePathIndex) {
     ulong i = 0; // The current character index. Starts from 0
     ulong c = 0; // The current column number.   Starts from 0
     ulong l = 0; // The current line number.     Starts from 0

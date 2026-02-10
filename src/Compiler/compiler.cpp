@@ -10,22 +10,15 @@
 
 
 
-cmp::SourceTree* cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b) { //TODO fix return type and value
-
-    // Set max progress (updated dynamically by preprocessor threads whenever they remove stuff after merging the files) //TODO remove comment
-    // increaseMaxProgress(fetchMaxProgress(Preprocessing) * 2); //FIXME use *n for n subphases //TODO remove comment
-    // increaseMaxProgress(Compilation, fetchMaxProgress(Preprocessing) * 1); //TODO remove comment
-    //! Max progress is calculted and set by preprocessor subpahses
+ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::SegmentedCleanSource> b) { //TODO fix return type and value
 
     // Create subphase buffers
-    auto *r1 = new TokenizedSource();
-    auto *r2 = new SourceTree();
+    auto r1 = newptr<TokenizedSource>();
+    auto r2 = newptr<SourceTree>();
 
     // Start subphases
-    // startSubphaseAsync(Compilation, false, startTokenizationPhase, b, r1);
-    // startSubphaseAsync(Compilation, true, startTreePhase,        r1, r2); //FIXME set islast to false and use true in the subphase that's actually last
-    startSubphaseAsync(Compiler_Tokenization, true, startTokenizationPhase, b, r1);
-    startSubphaseAsync(Compiler_TreeCreation, true, startTreePhase,        r1, r2); //FIXME set islast to false and use true in the subphase that's actually last
+    startSubphaseAsync(PhaseID::Compiler_Tokenization, true, startTokenizationPhase, b, r1);
+    startSubphaseAsync(PhaseID::Compiler_TreeCreation, true, startTreePhase,        r1, r2);
 
     return r2;
 }

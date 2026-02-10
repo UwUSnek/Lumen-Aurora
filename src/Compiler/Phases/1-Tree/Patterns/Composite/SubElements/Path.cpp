@@ -1,5 +1,6 @@
 #include "Path.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
     return plural ? "symbol path" : "symbol paths";
@@ -37,8 +38,8 @@ void cmp::Pattern_Elm_Path::init(){
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = new ST_Sub_Path;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Path::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Sub_Path>();
 
     // Set all the identifiers (start from 0 and skip . keyword every iteration)
     for(ulong i = 0; i < results.size(); i += 2) {
@@ -46,5 +47,5 @@ cmp::__base_ST* cmp::Pattern_Elm_Path::generateData(std::vector<__base_ST*> cons
     }
 
     // Return
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

@@ -145,15 +145,15 @@ std::string phaseIdTotring(PhaseID phaseId) {
         LIST_PHASE_ID
         #undef X
     };
-    return names[phaseId];
+    return names[(ulong)phaseId];
 }
 
 
 
 PhaseData::PhaseData() :
-    totalProgress(new DynamicProgressBar(0, ansi::bright_green, ansi::bright_black)),
-    timeStart    (new std::atomic<long>(0)),
-    timeEnd      (new std::atomic<long>(0)) {
+    totalProgress(newptr<DynamicProgressBar>(0, ansi::bright_green, ansi::bright_black)),
+    timeStart    (newptr<std::atomic<long>>(0)),
+    timeEnd      (newptr<std::atomic<long>>(0)) {
 }
 
 
@@ -163,8 +163,8 @@ std::mutex             phaseDataArrayLock;
 std::vector<SubphaseData> subphaseDataArray;
 std::mutex                subphaseDataArrayLock;
 
-thread_local std::atomic<ulong>* localProgress = nullptr;
-thread_local DynamicProgressBar*   maxProgress = nullptr;
+thread_local ptr<std::atomic<ulong>> localProgress = nullptr;
+thread_local ptr<DynamicProgressBar>   maxProgress = nullptr;
 
 
 /**
@@ -201,7 +201,7 @@ void decreaseMaxProgress(ulong n) {
  */
 void increaseMaxProgress(PhaseID phaseId, ulong n) {
     std::scoped_lock lock(phaseDataArrayLock);
-    phaseDataArray[phaseId].totalProgress->increaseMax(n);
+    phaseDataArray[(ulong)phaseId].totalProgress->increaseMax(n);
 };
 
 /**
@@ -210,7 +210,7 @@ void increaseMaxProgress(PhaseID phaseId, ulong n) {
  */
 void decreaseMaxProgress(PhaseID phaseId, ulong n) {
     std::scoped_lock lock(phaseDataArrayLock);
-    phaseDataArray[phaseId].totalProgress->decreaseMax(n);
+    phaseDataArray[(ulong)phaseId].totalProgress->decreaseMax(n);
 };
 
 /**
@@ -219,7 +219,7 @@ void decreaseMaxProgress(PhaseID phaseId, ulong n) {
  */
 ulong fetchMaxProgress(PhaseID phaseId) {
     std::scoped_lock lock(phaseDataArrayLock);
-    ulong r = phaseDataArray[phaseId].totalProgress->max.load();
+    ulong r = phaseDataArray[(ulong)phaseId].totalProgress->max.load();
     return r;
 };
 
@@ -232,7 +232,7 @@ ulong fetchMaxProgress(PhaseID phaseId) {
  */
 void initPhaseData(){
     std::scoped_lock lock(phaseDataArrayLock);
-    for(ulong i = 0; i < PhaseID::NUM; ++i) {
+    for(ulong i = 0; i < (ulong)PhaseID::NUM; ++i) {
         phaseDataArray.emplace_back();
     }
 }

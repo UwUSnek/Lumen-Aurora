@@ -1,13 +1,13 @@
 #pragma once
-
-
-
-
-
-
-
-
 #include <string>
+
+
+
+
+
+
+
+
 namespace cmp {
     // Base patterns. Doesn't include the root class.
     #define LIST_PATTERN_BASES_TYPES_NAMES                   \

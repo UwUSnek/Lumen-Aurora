@@ -1,5 +1,6 @@
 #include "Module.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Module::getCategoryName(bool plural) const {
     return plural ? "module" : "modules";
@@ -35,12 +36,12 @@ void cmp::Pattern_Elm_Module::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Module::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = new ST_Module;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Module::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Module>();
     for(const auto &child : results) {
         r->addChild(child);
     }
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }
 
 

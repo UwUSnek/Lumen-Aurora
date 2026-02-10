@@ -1,5 +1,6 @@
 #include "Type_Function.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_FunctionType::getCategoryName(bool plural) const {
     return plural ? "function type" : "function types";
@@ -43,8 +44,8 @@ void cmp::Pattern_Elm_Type_Function::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Type_Function::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = new ST_FunctionType;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Type_Function::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_FunctionType>();
 
     // Set return type and isPointer
     r->retType = results[0]->asType();
@@ -60,5 +61,5 @@ cmp::__base_ST* cmp::Pattern_Elm_Type_Function::generateData(std::vector<__base_
     r->pointerNum = results.size() - i - 1 /*don't count the } character*/;
 
     // Return
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

@@ -1,8 +1,8 @@
+#include "Preprocessor/Phases/1-LCTs/LCTsPhase.hpp"
 #include "Main/ALC.hpp"
 #include "Main/FatalErrorException.hpp"
 #include "Misc/LctCounter.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
-#include "LCTsPhase.hpp"
 
 
 
@@ -17,7 +17,7 @@
 
 
 
-void pre::__internal_startLCTsPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::__internal_startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
 
     ulong i = 0;
     while(b->str[i].has_value()) {
@@ -25,8 +25,9 @@ void pre::__internal_startLCTsPhase(SegmentedCleanSource *b, SegmentedCleanSourc
         // Skip LCTs
         ulong lct = misc::measureLct(b->str, i);
         if(lct) {
-            decreaseMaxProgress(Preprocessor_Cleanup, lct);
-            decreaseMaxProgress(Preprocessor_Macros, lct);
+            using enum PhaseID;
+            decreaseMaxProgress(Preprocessor_Cleanup,  lct);
+            decreaseMaxProgress(Preprocessor_Macros,   lct);
             decreaseMaxProgress(Compiler_Tokenization, lct);
             increaseLocalProgress(lct);
             i += lct;
@@ -52,7 +53,7 @@ void pre::__internal_startLCTsPhase(SegmentedCleanSource *b, SegmentedCleanSourc
 
 
 
-void pre::startLCTsPhase(SegmentedCleanSource *b, SegmentedCleanSource *r) {
+void pre::startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
 
     // Try to execute the subphase
     try {

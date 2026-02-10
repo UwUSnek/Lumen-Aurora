@@ -7,7 +7,7 @@
 
 
 
-enum ErrorCode : int {
+enum class ErrorCode : int {
     //--------------------------------------------------------//
     //                     GENERIC ERRORS                     //
     //--------------------------------------------------------//
@@ -18,9 +18,6 @@ enum ErrorCode : int {
 
     ERROR_PATH_IS_DIRECTORY,                    // Path is a directory
     ERROR_PATH_CANNOT_OPEN,                     // File cannot be opened (either missing or no permissions)
-
-
-
 
 
 
@@ -52,10 +49,6 @@ enum ErrorCode : int {
 
 
 
-
-
-
-
     //--------------------------------------------------------//
     //                      PREPROCESSOR                      //
     //--------------------------------------------------------//
@@ -66,10 +59,6 @@ enum ErrorCode : int {
     ERROR_PRE_PATH_NOT_FOUND,                   // Included file doesn't exist
     ERROR_PRE_PATH_NO_PERMISSION,               // Included file has no read permission
     ERROR_PRE_PATH_AMBIGUOUS,                   // Included path can point to multiple files in different include paths
-
-
-
-
 
 
 
@@ -96,10 +85,6 @@ enum ErrorCode : int {
     ERROR_CMP_LITERAL_BASE_INVALID,             // Invalid base prefix (not 0b, 0o, 0d or 0x)
     ERROR_CMP_LITERAL_DIGITS_MISSING,           // No digits fuond afer base prefix
     ERROR_CMP_LITERAL_DIGITS_INVALID,           // Digit is not allowed by the numerical base
-
-
-
-
 
 
 

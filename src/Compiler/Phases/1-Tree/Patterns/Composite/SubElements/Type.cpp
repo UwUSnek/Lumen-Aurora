@@ -1,5 +1,6 @@
 #include "Type.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Type::getCategoryName(bool plural) const {
     return plural ? "type" : "types";
@@ -38,9 +39,9 @@ void cmp::Pattern_Elm_Type::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Type::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = results[0]->asType();
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Type::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = std::dynamic_pointer_cast<ST_Type>(results[0]);
 
     // Return
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

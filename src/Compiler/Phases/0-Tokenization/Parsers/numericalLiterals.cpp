@@ -15,7 +15,7 @@
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal token, or nullptr if one was not found.
  */
-cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong index, ulong *rawLiteralLen) {
+ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource> b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
     std::optional<char> const &c0 = b->str[index];
     if(!c0.has_value() || !std::isdigit(*c0)) { //! inf, nan, true and false are checked by the keyword parser
@@ -58,7 +58,7 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
             }
             default: {
                 utils::printError(
-                    ERROR_CMP_LITERAL_BASE_INVALID,
+                    ErrorCode::ERROR_CMP_LITERAL_BASE_INVALID,
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, index + 1),
                     std::string("Unknown numerical base prefix \"0") + *c1 + "\".\n" + R"(Valid prefixes are "0b", "0o", "0d", "0x".)",
@@ -94,7 +94,7 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
             else if(c == '.') {
                 if(isFloat) {
                     utils::printError(
-                        ERROR_CMP_LITERAL_DIGITS_MISSING,
+                        ErrorCode::ERROR_CMP_LITERAL_DIGITS_MISSING,
                         utils::ErrType::COMPILER,
                         ElmCoords(b, index, i - 1),
                         ElmCoords(b, i, i),
@@ -109,7 +109,7 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
             }
             else if(std::isalnum(*c)) {
                 utils::printError(
-                    ERROR_CMP_LITERAL_DIGITS_INVALID,
+                    ErrorCode::ERROR_CMP_LITERAL_DIGITS_INVALID,
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, i),
                     ElmCoords(b, i, i),
@@ -123,7 +123,7 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
     }
     if(r.tellp() == 0) {
         utils::printError(
-            ERROR_CMP_LITERAL_DIGITS_MISSING,
+            ErrorCode::ERROR_CMP_LITERAL_DIGITS_MISSING,
             utils::ErrType::COMPILER,
             ElmCoords(b, index, index + 1),
             ElmCoords(b, index + 2, index + 2),
@@ -139,11 +139,11 @@ cmp::TokenValue* cmp::parseNumericalLiteral(pre::SegmentedCleanSource *b, ulong 
     // Set the raw lenght and return the value
     *rawLiteralLen = i - index;
     if(isFloat) {
-        return new TK_Double(strToDbl(r.str(), base));
+        return newptr<TK_Double>(strToDbl(r.str(), base));
     }
     else {
         std::string debug = r.str(); //TODO REMOVE
-        return new TK_Long(strToLng(r.str(), base));
+        return newptr<TK_Long>(strToLng(r.str(), base));
     }
 }
 

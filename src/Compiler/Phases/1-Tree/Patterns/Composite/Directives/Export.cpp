@@ -1,5 +1,6 @@
 #include "Export.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Export::getCategoryName(bool plural) const {
     return plural ? "export directive" : "exporte directives";
@@ -50,8 +51,8 @@ void cmp::Pattern_Elm_Export::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Export::generateData(std::vector<__base_ST*> const &results) const {
-    auto *r = new ST_Export;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Export::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Export>();
 
     // Save elements if specified (2nd element is not ;)
     if(!results[1]->isKeyword()) {
@@ -90,5 +91,5 @@ cmp::__base_ST* cmp::Pattern_Elm_Export::generateData(std::vector<__base_ST*> co
     }
 
     debug((cout++ << "found export directive\n")--;)
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

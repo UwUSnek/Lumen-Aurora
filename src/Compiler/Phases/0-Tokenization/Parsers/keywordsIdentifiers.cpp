@@ -16,7 +16,7 @@
  * @param b The source code buffer.
  * @param index The starting index.
  */
-std::optional<std::string> cmp::parseAlphanumericToken(pre::SegmentedCleanSource *b, ulong index){
+std::optional<std::string> cmp::parseAlphanumericToken(ptr<pre::SegmentedCleanSource> b, ulong index){
     std::stringstream r;
     std::optional<char> c = b->str[index];
     if(!isAlphanumericCharFirst(*c)) return std::nullopt;
@@ -69,7 +69,7 @@ bool cmp::isAlphanumericChar(std::optional<char> const &c) {
  * @param b The source code buffer.
  * @param index The starting index.
  */
-std::optional<std::string> cmp::parseSymbolicToken(pre::SegmentedCleanSource *b, ulong index){
+std::optional<std::string> cmp::parseSymbolicToken(ptr<pre::SegmentedCleanSource> b, ulong index){
     std::stringstream r;
     if(isCharReserved(*b->str[index])) {
         return std::string(1, *b->str[index]);

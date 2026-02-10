@@ -1,5 +1,6 @@
 #include "Type_Basic.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_BasicType::getCategoryName(bool plural) const {
     return plural ? "basic type" : "basic types";
@@ -34,11 +35,11 @@ void cmp::Pattern_Elm_Type_Basic::init() {
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Type_Basic::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = new ST_BasicType;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Type_Basic::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_BasicType>();
 
     r->path = results[0]->asPath();
     r->pointerNum = results.size() - 1;
 
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

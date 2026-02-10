@@ -1,5 +1,6 @@
 #include "Alias.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include <memory>
 
 std::string cmp::ST_Alias::getCategoryName(bool plural) const {
     return plural ? "symbol alias" : "symbol aliases";
@@ -25,23 +26,24 @@ ulong cmp::Pattern_Elm_Alias::getCertaintyThreshold() const {
 
 
 void cmp::Pattern_Elm_Alias::init() {
+    using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
-        tk::Keyword(ReservedTokenId::KEYWORD_ALIAS),
+        tk::Keyword(KEYWORD_ALIAS),
         re::Path(),
-        tk::Keyword(ReservedTokenId::META_KEYWORD_AS),
+        tk::Keyword(META_KEYWORD_AS),
         tk::Identifier(),
-        tk::Keyword(ReservedTokenId::KEYWORD_SEMICOLON)
+        tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
 
 
 
 
-cmp::__base_ST* cmp::Pattern_Elm_Alias::generateData(std::vector<__base_ST*> const &results) const {
-    auto* r = new ST_Alias;
+ptr<cmp::__base_ST> cmp::Pattern_Elm_Alias::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Alias>();
     r->original = results[1]->asPath();
     r->name     = results[3]->asIdentifier();
 
     debug((cout++ << "found alias " << r->name->s << "\n")--;)
-    return dynamic_cast<__base_ST*>(r);
+    return std::dynamic_pointer_cast<__base_ST>(r);
 }

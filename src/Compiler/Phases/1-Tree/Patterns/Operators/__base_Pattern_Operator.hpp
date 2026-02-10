@@ -8,7 +8,7 @@
 namespace cmp {
     struct __base_Pattern_Operator : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
-        __base_Pattern *parent;
+        __base_Pattern* parent;
 
         void initParentReferences();
         template<class ...t> void __internal_init(t... _v) {

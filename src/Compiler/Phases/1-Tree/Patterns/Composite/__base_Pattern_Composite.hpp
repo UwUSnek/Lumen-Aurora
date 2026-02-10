@@ -34,6 +34,6 @@ namespace cmp {
         }
 
         // virtual bool isChildAllowed(__base_ST* const child) const = 0;
-        virtual __base_ST* generateData(std::vector<__base_ST*> const &parsedElements) const = 0;
+        virtual ptr<__base_ST> generateData(std::vector<ptr<__base_ST>> const &parsedElements) const = 0;
     };
 }
