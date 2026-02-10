@@ -20,7 +20,7 @@ namespace format {
 
     [[nodiscard]] std::string whitespace(char c, ulong col, bool useColor = false);
     [[nodiscard]] std::string shortenInteger(ulong n);
-    [[nodiscard]] std::string milliseconds(long n);
+    [[nodiscard]] std::string milliseconds(long n, bool unit = false);
 
     [[nodiscard]] std::string formatSize(unsigned long bytes, SizeUnits unit);
     [[nodiscard]] std::string formatSize(unsigned long bytes, SizeUnits unit, SizeLabelType labelType);

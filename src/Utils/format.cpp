@@ -156,31 +156,40 @@ std::string format::shortenInteger(unsigned long n) {
  *      If the duration is less than 0ms, the output strings will contain "    0.000"
  *      Unnecessary leading zeroes and separators are replaced by space characters.
  * @param milliseconds The number of milliseconds.
+ * @param unit If true, appends the appropriate unit suffix (ms/s/hrs) to the output.
  * @return The string representation of <n>.
- *      The maximum length of the returned string is 9 characters.
+ *      The maximum length of the returned string is 9 characters (12 with unit).
  */
-std::string format::milliseconds(long _ms) {
+
+std::string format::milliseconds(long _ms, bool unit) {
     if(_ms < 0) _ms = 0;
 
-
+    // Hours
     if(_ms > 3599999) {
         float hrs = (float)_ms / 3600000.0f;
-        return std::format("{:.1f} hrs", hrs);
+        return std::format("{:.1f}{}", hrs, unit ? "hrs" : "");
     }
-    else {
+
+    // Minutes:seconds.milliseconds
+    else if(_ms >= 60000) {
         long min = _ms / 60000;
         long sec = _ms / 1000 % 60;
+        long ms =  _ms % 1000;
+        return std::format("{}:{:02}.{:03}{}", min, sec, ms, unit ? "min" : "");
+    }
+
+    // Seconds.milliseconds
+    else if(_ms >= 1000) {
+        long sec = _ms / 1000;
         long ms = _ms % 1000;
+        return std::format("{}.{:03}{}", sec, ms, unit ? "s" : "");
+    }
 
-
-        if(min > 0) {
-            return std::format("{}:{:02}.{:03}", min, sec, ms);
-        } else {
-            return std::format("{}.{:03}", sec, ms);
-        }
+    // Milliseconds
+    else {
+        return std::format("{}{}", _ms, unit ? "ms" : "");
     }
 }
-
 
 
 
