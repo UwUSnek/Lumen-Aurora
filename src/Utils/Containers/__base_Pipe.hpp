@@ -20,7 +20,13 @@ private:
 
 protected:
     t s;
-    __base_Pipe(){}
+    __base_Pipe() = default;
+
+    template<class ...u>
+    explicit __base_Pipe(u &&...args)
+        requires(!(std::same_as<std::remove_cvref_t<u>, __base_Pipe> || ...)) :
+        s(std::forward<u>(args)...) {
+    }
 
 
 

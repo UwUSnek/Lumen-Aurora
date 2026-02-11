@@ -32,7 +32,13 @@ protected:
 
 public:
     std::mutex sReallocLock;
-    __base_BufferPipe() {}
+    __base_BufferPipe() = default;
+
+    template<class ...u>
+    explicit __base_BufferPipe(u &&...args)
+        requires(!(std::same_as<std::remove_cvref_t<u>, __base_BufferPipe> || ...)) :
+        __base_Pipe<t>(std::forward<u>(args)...) {
+    }
 
 
 

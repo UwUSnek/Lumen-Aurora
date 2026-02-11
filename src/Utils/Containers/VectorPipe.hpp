@@ -21,6 +21,18 @@ protected:
     ulong __internal_get_len(const std::vector<t> &e) override { return e.size(); }
     void   __internal_append(const std::vector<t> &e) override { __base_BufferPipe<std::vector<t>, t>::s.insert(__base_BufferPipe<std::vector<t>, t>::s.end(), e.begin(), e.end()); }
     void   __internal_append(const t &e)              override { __base_BufferPipe<std::vector<t>, t>::s.push_back(e); }
+
+
 public:
+    VectorPipe() = default;
+
+    explicit VectorPipe(ulong capacity) :
+        __base_BufferPipe<std::vector<t>, t>(capacity){
+    }
+
+    explicit VectorPipe(ulong capacity, t value) :
+        __base_BufferPipe<std::vector<t>, t>(capacity, value){
+    }
+
     virtual ~VectorPipe() = default;
 };

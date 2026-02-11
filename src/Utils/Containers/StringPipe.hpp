@@ -25,10 +25,21 @@ protected:
 
 
 public:
+    StringPipe() = default;
+
+    explicit StringPipe(ulong capacity) {
+        s.reserve(capacity);
+    }
+
+    explicit StringPipe(ulong size, char _char) :
+        __base_BufferPipe<std::string, char>(size, _char) {
+    }
+
+
     std::string substr(ulong i, ulong n) {
         std::scoped_lock lock(sReallocLock);
         return cpp()->substr(i, n);
     }
 
-    ~StringPipe() = default;
+    virtual ~StringPipe() = default;
 };
