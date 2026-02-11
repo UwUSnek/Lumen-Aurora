@@ -105,6 +105,7 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
 
                     // If it is an actual file
                     else {
+                        using enum PhaseID;
 
                         // Calculate the actual file path and open the file
                         std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[b->meta[j]->f], relevantCoords, filePathCoords);
@@ -121,11 +122,11 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
 
 
                         // Update phase progress data
-                        increaseMaxProgress(PhaseID::Preprocessor_Includes, fileCode->str.length()); //! Self
-                        increaseMaxProgress(PhaseID::Preprocessor_LCT,      fileCode->str.length());
-                        increaseMaxProgress(PhaseID::Preprocessor_Cleanup,  fileCode->str.length());
-                        increaseMaxProgress(PhaseID::Preprocessor_Macros,   fileCode->str.length());
-                        increaseMaxProgress(PhaseID::Compiler_Tokenization, fileCode->str.length());
+                        increaseMaxProgress(Preprocessor_Includes, fileCode->str.length()); //! Self
+                        increaseMaxProgress(Preprocessor_LCT,      fileCode->str.length());
+                        increaseMaxProgress(Preprocessor_Cleanup,  fileCode->str.length());
+                        increaseMaxProgress(Preprocessor_Macros,   fileCode->str.length());
+                        increaseMaxProgress(Compiler_Tokenization, fileCode->str.length());
 
 
                         // Increase index (skip include and file path)
@@ -136,10 +137,10 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
                         }
                         ii = k;
                         increaseLocalProgress(i - old_i);
-                        decreaseMaxProgress(PhaseID::Preprocessor_LCT,      i - old_i);
-                        decreaseMaxProgress(PhaseID::Preprocessor_Cleanup,  i - old_i);
-                        decreaseMaxProgress(PhaseID::Preprocessor_Macros,   i - old_i);
-                        decreaseMaxProgress(PhaseID::Compiler_Tokenization, i - old_i);
+                        decreaseMaxProgress(Preprocessor_LCT,      i - old_i);
+                        decreaseMaxProgress(Preprocessor_Cleanup,  i - old_i);
+                        decreaseMaxProgress(Preprocessor_Macros,   i - old_i);
+                        decreaseMaxProgress(Compiler_Tokenization, i - old_i);
 
 
                         // Append file data to r and process its includes recursively
