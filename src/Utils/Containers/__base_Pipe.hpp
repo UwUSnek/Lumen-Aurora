@@ -14,12 +14,12 @@
 template<class t> struct __base_Pipe {
 private:
     std::atomic<bool> _isOpen = true;
+    t s;
 
 
 
 
 protected:
-    t s;
     __base_Pipe() = default;
 
     template<class ...u>

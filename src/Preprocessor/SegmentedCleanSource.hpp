@@ -1,7 +1,5 @@
 #pragma once
 #include <string>
-
-#include "Utils/Containers/StringPipe.hpp"
 #include "Utils/Containers/VectorPipe.hpp"
 
 
@@ -46,19 +44,13 @@ namespace pre {
      *      If the original file is available, it allows every character of the code to be traced back to its original position.
      */
     struct SegmentedCleanSource : VectorPipe<CleanSourceElm> {
-        // void pre::SegmentedCleanSource::operator+=(SegmentedCleanSource b);
 
         std::string substr(ulong index, ulong len);
-
-        // std::optional<CleanSourceElm> get(ulong index);
-        // std::optional<CleanSourceElm> operator[](ulong index);
-        // std::optional<char> str(ulong index);
-        // std::optional<CleanSourceMeta> meta(ulong index);
+        bool strcmp(ulong i, const char* str);
+        bool strcmp(ulong i, const std::string &str);
 
 
         SegmentedCleanSource() = default;
-        explicit SegmentedCleanSource(ulong capacity) :
-            VectorPipe<CleanSourceElm>(capacity) {
-        }
+        using VectorPipe::VectorPipe;
     };
 }

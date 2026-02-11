@@ -1,6 +1,6 @@
 #pragma once
 #include "__base_BufferPipe.hpp"
-#include <mutex>
+#include <cstring>
 
 
 
@@ -19,16 +19,16 @@
  */
 struct StringPipe : public __base_BufferPipe<std::string, char> {
 protected:
-    ulong __internal_get_len(const std::string &e) override { return e.length(); }
-    void   __internal_append(const std::string &e) override { s.append(e); }
-    void   __internal_append(const char &e)        override { s.push_back(e); }
+    ulong __internal_get_len(const std::string &e) override { auto lock = scoped_lock(); return e.length(); }
+    void   __internal_append(const std::string &e) override { auto lock = scoped_lock(); cpp()->append(e); }
+    void   __internal_append(const char &e)        override { auto lock = scoped_lock(); cpp()->push_back(e); }
 
 
 public:
     StringPipe() = default;
 
     explicit StringPipe(ulong capacity) {
-        s.reserve(capacity);
+        cpp()->reserve(capacity);
     }
 
     explicit StringPipe(ulong size, char _char) :
@@ -37,8 +37,20 @@ public:
 
 
     std::string substr(ulong i, ulong n) {
-        std::scoped_lock lock(sReallocLock);
+        auto lock = scoped_lock();
         return cpp()->substr(i, n);
+    }
+
+
+    bool strcmp(ulong i, const char* str) {
+        auto lock = scoped_lock();
+        return std::strcmp(cpp()->c_str() + i, str);
+    }
+
+
+    bool strcmp(ulong i, const std::string &str) {
+        //! Scoped lock is created by the override
+        return strcmp(i, str.c_str()); //NOSONAR
     }
 
     virtual ~StringPipe() = default;

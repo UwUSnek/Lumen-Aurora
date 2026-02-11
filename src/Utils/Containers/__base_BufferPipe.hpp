@@ -16,6 +16,7 @@
 template <class t, class elmt> struct __base_BufferPipe : public __base_Pipe<t> {
 private:
     std::atomic<ulong> len = 0;
+    std::mutex sReallocLock;
 
 
 protected:
@@ -24,14 +25,34 @@ protected:
     virtual void   __internal_append(elmt const &e) = 0;
 
 
-
-
+    /**
+     * @brief A struct that acts as a scoped lock for __base_BufferPipe's reallocation operations.
+     * Instances of this struct will keep the mutex locked while alive and release it once destroyed.
+     */
+    struct scoped_lock_t {
+    private:
+        std::unique_lock<std::mutex> lock_;
+    public:
+        explicit scoped_lock_t(__base_BufferPipe& parent)
+            : lock_(parent.sReallocLock) {
+        }
+    };
 
 
 
 
 public:
-    std::mutex sReallocLock;
+
+    /**
+     * @brief Creates a scoped lock that stops other threads from reallocating this pipe's buffer.
+     * This should be used each time the buffer is accessed without the thread-safe methods provided by the pipe.
+     * @return The scoped lock. The lock is released once this goes out of scope.
+     */
+    scoped_lock_t scoped_lock() {
+        return scoped_lock_t(*this);
+    }
+
+
     __base_BufferPipe() = default;
 
     template<class ...u>

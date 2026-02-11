@@ -18,9 +18,18 @@
  */
 template<class t> struct VectorPipe : public __base_BufferPipe<std::vector<t>, t> {
 protected:
-    ulong __internal_get_len(const std::vector<t> &e) override { return e.size(); }
-    void   __internal_append(const std::vector<t> &e) override { __base_BufferPipe<std::vector<t>, t>::s.insert(__base_BufferPipe<std::vector<t>, t>::s.end(), e.begin(), e.end()); }
-    void   __internal_append(const t &e)              override { __base_BufferPipe<std::vector<t>, t>::s.push_back(e); }
+    ulong __internal_get_len(const std::vector<t> &e) override {
+        auto lock = this->scoped_lock();
+        return e.size();
+    }
+    void __internal_append(const std::vector<t> &e) override {
+        auto lock = this->scoped_lock();
+        __base_BufferPipe<std::vector<t>, t>::s.insert(__base_BufferPipe<std::vector<t>, t>::s.end(), e.begin(), e.end());
+    }
+    void __internal_append(const t &e) override {
+        auto lock = this->scoped_lock();
+        __base_BufferPipe<std::vector<t>, t>::s.push_back(e);
+    }
 
 
 public:
@@ -30,8 +39,8 @@ public:
         __base_BufferPipe<std::vector<t>, t>(capacity){
     }
 
-    explicit VectorPipe(ulong capacity, t value) :
-        __base_BufferPipe<std::vector<t>, t>(capacity, value){
+    explicit VectorPipe(ulong size, t value) :
+        __base_BufferPipe<std::vector<t>, t>(size, value){
     }
 
     virtual ~VectorPipe() = default;
