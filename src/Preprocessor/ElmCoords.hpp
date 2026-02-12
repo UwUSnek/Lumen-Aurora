@@ -40,13 +40,13 @@ struct ElmCoords {
 
 
 
-    ElmCoords(ptr<pre::SegmentedCleanSource<false>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
+    ElmCoords(ptr<pre::AnnotatedSource<false>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
     ElmCoords(ptr<cmp::TokenizedSource<false>>      source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
 
 
 
 
-    template<bool sr> ElmCoords(pre::SegmentedCleanSource<sr> &source, ulong _start, ulong _end) {
+    template<bool sr> ElmCoords(pre::AnnotatedSource<sr> &source, ulong _start, ulong _end) {
         if(source.length() == 0) {
             filePathIndex = 0;
             lineNum       = 0;

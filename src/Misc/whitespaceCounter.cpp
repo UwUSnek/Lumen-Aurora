@@ -14,7 +14,7 @@
  * @param index The starting index.
  * @return The amount of whitespace characters found. 0 if no whitespace was found.
  */
-ulong misc::countWhitespace(pre::SegmentedCleanSource<false> &b, ulong index) {
+ulong misc::countWhitespace(pre::AnnotatedSource<false> &b, ulong index) {
     ulong i = index;
     while(b[i] && isWhitespaceChar(b[i]->c)) {
         ++i;

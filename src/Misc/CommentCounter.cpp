@@ -17,7 +17,7 @@
  * @return The length of the comment, including the length of the opening and closing character sequences (not \0 or \n).
  *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
  */
-ulong misc::measureComment(pre::SegmentedCleanSource<false> &b, ulong index) {
+ulong misc::measureComment(pre::AnnotatedSource<false> &b, ulong index) {
     if(b[index]->c != '/') return 0;
 
 

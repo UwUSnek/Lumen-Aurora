@@ -6,6 +6,6 @@
 
 
 namespace pre {
-    void __internal_startCleanupPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r);
-    void            startCleanupPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r);
+    void __internal_startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r);
+    void            startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r);
 }

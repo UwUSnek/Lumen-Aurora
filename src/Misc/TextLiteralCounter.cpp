@@ -15,7 +15,7 @@
  * @param index The index at which the literal starts.
  * @return The length of the literal, including the opening and closing character sequences, or 0 if none was found.
  */
-ulong misc::measureTextLiteral(pre::SegmentedCleanSource<false> &b, ulong index) {
+ulong misc::measureTextLiteral(pre::AnnotatedSource<false> &b, ulong index) {
     if(b[index]) return 0;
     char literalType = b[index]->c;
     if(literalType != '"' && literalType != '\'') return 0;

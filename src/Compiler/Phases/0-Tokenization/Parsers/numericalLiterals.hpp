@@ -5,7 +5,7 @@
 
 
 namespace cmp {
-    ptr<TokenValue> parseNumericalLiteral(ptr<pre::SegmentedCleanSource<false>> b, ulong index, ulong *rawLiteralLen);
+    ptr<TokenValue> parseNumericalLiteral(ptr<pre::AnnotatedSource<false>> b, ulong index, ulong *rawLiteralLen);
     double strToDbl(const std::string &s, uint base);
     ulong  strToLng(const std::string &s, uint base);
 }

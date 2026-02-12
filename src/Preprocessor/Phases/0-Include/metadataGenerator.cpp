@@ -10,7 +10,7 @@
 
 //FIXME rename segmentedcleansource to something better.
 //FIXME it's just source code with metadata
-void pre::generateMetadata(const std::string &rawCode, ptr<SegmentedCleanSource<false>> r, ulong DBG_filePathIndex) {
+void pre::generateMetadata(const std::string &rawCode, ptr<AnnotatedSource<false>> r, ulong DBG_filePathIndex) {
     ulong i = 0; // The current character index. Starts from 0
     ulong c = 0; // The current column number.   Starts from 0
     ulong l = 0; // The current line number.     Starts from 0
@@ -20,9 +20,9 @@ void pre::generateMetadata(const std::string &rawCode, ptr<SegmentedCleanSource<
     while(i < rawCode.length()) {
 
         // Save the metadata in the return pipe
-        *r += CleanSourceElm(
+        *r += AnnotatedSourceElm(
             rawCode[i],
-            CleanSourceMeta(i, l, c, DBG_filePathIndex)
+            AnnotatedSourceMeta(i, l, c, DBG_filePathIndex)
         );
 
         // Calculate metadata for the next character

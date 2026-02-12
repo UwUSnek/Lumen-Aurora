@@ -17,7 +17,7 @@
 
 
 
-ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::SegmentedCleanSource<false>> b) { //TODO fix return type and value
+ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::AnnotatedSource<false>> b) { //TODO fix return type and value
 
     // Create subphase buffers
     auto r1 = newptr<TokenizedSource<false>>(COMPILER_BUFFER_SIZE);

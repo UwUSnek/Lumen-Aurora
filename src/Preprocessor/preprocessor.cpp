@@ -18,7 +18,7 @@
  * @param filePath The path of the original source code file.
  * @return The contents of the source file as a SegmentedCleanSource.
  */
-ptr<pre::SegmentedCleanSource<false>> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
+ptr<pre::AnnotatedSource<false>> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
     ulong pathIndex;
     {
         std::scoped_lock lock(sourceFilePathsLock);
@@ -34,14 +34,14 @@ ptr<pre::SegmentedCleanSource<false>> pre::loadSourceCode(const std::string &s, 
     //FIXME SAVE INCLUDE STACK
 
     // Load raw code of the root file
-    auto r0 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
+    auto r0 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
     generateMetadata(s, r0, pathIndex);
 
     // Create pipes
-    auto r1 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
-    auto r2 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
-    auto r3 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
-    auto r4 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r1 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r2 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r3 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r4 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
 
     // Include all files
     startSubphaseAsync(PhaseID::Preprocessor_Includes, true, startIncludePhase, r0, r1);

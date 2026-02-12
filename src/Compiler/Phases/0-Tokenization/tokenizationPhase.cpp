@@ -15,7 +15,7 @@
 
 
 
-void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<false>> b, ptr<TokenizedSource<false>> r) {
+void cmp::__internal_startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, ptr<TokenizedSource<false>> r) {
 
     ulong i = 0;
     while((*b)[i]) {
@@ -115,7 +115,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<false>
 
 
 
-void cmp::startTokenizationPhase(ptr<pre::SegmentedCleanSource<false>> b, ptr<TokenizedSource<false>> r) {
+void cmp::startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, ptr<TokenizedSource<false>> r) {
 
     // Try to execute the subphase
     try {

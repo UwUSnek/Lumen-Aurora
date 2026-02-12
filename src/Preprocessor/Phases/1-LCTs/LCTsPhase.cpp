@@ -17,7 +17,7 @@
 
 
 
-void pre::__internal_startLCTsPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r) {
+void pre::__internal_startLCTsPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
 
     ulong i = 0;
     while((*b)[i]) {
@@ -52,7 +52,7 @@ void pre::__internal_startLCTsPhase(ptr<SegmentedCleanSource<false>> b, ptr<Segm
 
 
 
-void pre::startLCTsPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r) {
+void pre::startLCTsPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
 
     // Try to execute the subphase
     try {

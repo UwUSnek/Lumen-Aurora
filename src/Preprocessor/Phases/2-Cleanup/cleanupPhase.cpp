@@ -12,7 +12,7 @@
 
 
 
-void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r) {
+void pre::__internal_startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
 
     ulong i = 0;
     while((*b)[i]) {
@@ -59,7 +59,7 @@ void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource<false>> b, ptr<S
 
 
 
-void pre::startCleanupPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r) {
+void pre::startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
 
     // Try to execute the subphase
     try {

@@ -6,7 +6,9 @@
 
 
 
-
+//TODO rename phase to "line assesment" or "line merging / something else"
+//TODO \newline -> Line Continuation Token
+//TODO \\newline -> Line Junction Token
 
 /**
  * @brief Calculates the length of the Line Continuation Token that strarts at index <index>.
@@ -16,7 +18,10 @@
  * @param index The index to check.
  * @return The number of characters the LCT occupies, or 0 if one was not found.
  */
-ulong misc::measureLct(pre::SegmentedCleanSource<false> &b, ulong index) {
+ulong misc::measureLct(pre::AnnotatedSource<false> &b, ulong index) {
+
+    // Measure leading whitespace (for LCTs)
+
     auto c0 = b[index];
     auto c1 = b[index + 1];
 

@@ -5,5 +5,5 @@
 
 
 namespace cmp {
-    ptr<SourceTree> compilePreprocessedSourceCode(ptr<pre::SegmentedCleanSource<false>> b);
+    ptr<SourceTree> compilePreprocessedSourceCode(ptr<pre::AnnotatedSource<false>> b);
 }

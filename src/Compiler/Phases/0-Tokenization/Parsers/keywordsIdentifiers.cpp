@@ -17,7 +17,7 @@
  * @param index The starting index.
  * @return The string value of the token, or an empty string if one was not found.
  */
-std::string cmp::parseAlphanumericToken(ptr<pre::SegmentedCleanSource<false>> b, ulong index){
+std::string cmp::parseAlphanumericToken(ptr<pre::AnnotatedSource<false>> b, ulong index){
 
     // Check and store first character
     const auto c0 = (*b)[index];
@@ -74,7 +74,7 @@ bool cmp::isAlphanumericChar(const char c) {
  * @param index The starting index.
  * @return The string value of the identifier, or an empty string if one was not found.
  */
-std::string cmp::parseSymbolicIdentifier(ptr<pre::SegmentedCleanSource<false>> b, ulong index){
+std::string cmp::parseSymbolicIdentifier(ptr<pre::AnnotatedSource<false>> b, ulong index){
     //! Creating an empty string every time this fails is prob faster than creating a stringstream.
     //! Short string concatenation overhead is negligible
     //! Checking the first character before allocating would be better, but that makes the code less maintainable.
@@ -99,7 +99,7 @@ std::string cmp::parseSymbolicIdentifier(ptr<pre::SegmentedCleanSource<false>> b
  * @param index The starting index.
  * @return The string value of the keyword, or an empty string if one was not found.
  */
-std::string cmp::parseSymbolicKeyword(ptr<pre::SegmentedCleanSource<false>> b, ulong index){
+std::string cmp::parseSymbolicKeyword(ptr<pre::AnnotatedSource<false>> b, ulong index){
     const auto c = (*b)[index];
     if(!c || !isCharReserved(*c)) return "";
     return std::string(1, *c);

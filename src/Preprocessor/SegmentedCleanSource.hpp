@@ -10,16 +10,16 @@ namespace pre {
     /**
      * @brief A structure that contains informations about a single character
      */
-    struct CleanSourceMeta {
+    struct AnnotatedSourceMeta {
         ulong i;               // The original index of the character in the str buffer
         ulong l;               // The original   line number of the character in the str buffer (starts from 0)
         ulong c;               // The original column number of the character in the str buffer (starts from 0)
         ulong f;               // The index of the original file of the character in the str buffer
 
 
-        CleanSourceMeta() = delete;
-        CleanSourceMeta(const CleanSourceMeta &meta) = default;
-        CleanSourceMeta(ulong _i, ulong _l, ulong _c, ulong _f) :
+        AnnotatedSourceMeta() = delete;
+        AnnotatedSourceMeta(const AnnotatedSourceMeta &meta) = default;
+        AnnotatedSourceMeta(ulong _i, ulong _l, ulong _c, ulong _f) :
             i(_i),
             l(_l),
             c(_c),
@@ -30,14 +30,14 @@ namespace pre {
 
 
 
-    struct CleanSourceElm {
+    struct AnnotatedSourceElm {
         char c;
-        CleanSourceMeta meta;
+        AnnotatedSourceMeta meta;
 
 
-        CleanSourceElm() = delete;
-        CleanSourceElm(const CleanSourceElm& elm) = default;
-        CleanSourceElm(const char _c, const CleanSourceMeta& _meta) :
+        AnnotatedSourceElm() = delete;
+        AnnotatedSourceElm(const AnnotatedSourceElm& elm) = default;
+        AnnotatedSourceElm(const char _c, const AnnotatedSourceMeta& _meta) :
             c(_c),
             meta(_meta) {
         }
@@ -55,7 +55,7 @@ namespace pre {
         }
 
         //! Intentionally not explicit
-        //! CleanSourceElm implicitly should be convertible to chars to make the code more readable
+        //! AnnotatedSourceElm implicitly should be convertible to chars to make the code more readable
         operator char() const { //NOSONAR
             return c;
         }
@@ -70,16 +70,9 @@ namespace pre {
      *      It retains informations about any removed portion of code.
      *      If the original file is available, it allows every character of the code to be traced back to its original position.
      */
-    template<bool safeRealloc=true> struct SegmentedCleanSource : VectorPipe<CleanSourceElm, safeRealloc> {
+    template<bool safeRealloc=true> struct AnnotatedSource : VectorPipe<AnnotatedSourceElm, safeRealloc> {
 
 
-        // std::string substr(ulong index, ulong len) requires(safeRealloc == true) {
-        //     auto lock = this->scoped_lock();
-        //     return __internal_finalizeSubstr(index, len);
-        // }
-        // std::string substr(ulong index, ulong len) requires(safeRealloc == false) {
-        //     return __internal_finalizeSubstr(index, len);
-        // }
         std::string substr(ulong index, ulong len) {
 
             // Create result string with specified capacity and calculate end index
@@ -100,15 +93,7 @@ namespace pre {
 
 
 
-        // bool strcmp(ulong index, const char* str) requires(safeRealloc == true) {
-        //     auto lock = this->scoped_lock();
-        //     return __internal_finalizeStrcmp(index, str);
-        // }
-        // bool strcmp(ulong index, const char* str) requires(safeRealloc == false) {
-        //     return __internal_finalizeStrcmp(index, str);
-        // }
         bool strcmp(ulong index, const char* str) {
-        // bool __internal_finalizeStrcmp(ulong index, const char* str) {
 
             // For each character of the pipe (starting at the specified index) and the string (starting at index 0)
             for(ulong i = 0;; ++i) {
@@ -134,7 +119,7 @@ namespace pre {
         }
 
 
-        SegmentedCleanSource() = delete;
-        using VectorPipe<CleanSourceElm, safeRealloc>::VectorPipe;
+        AnnotatedSource() = delete;
+        using VectorPipe<AnnotatedSourceElm, safeRealloc>::VectorPipe;
     };
 }

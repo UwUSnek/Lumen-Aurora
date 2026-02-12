@@ -5,5 +5,5 @@
 
 
 namespace misc {
-    ulong measureLct(pre::SegmentedCleanSource<false> &b, ulong index);
+    ulong measureLct(pre::AnnotatedSource<false> &b, ulong index);
 }

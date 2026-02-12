@@ -5,5 +5,5 @@
 
 
 namespace misc {
-    ulong measureComment(pre::SegmentedCleanSource<false> &b, ulong index);
+    ulong measureComment(pre::AnnotatedSource<false> &b, ulong index);
 }
