@@ -198,5 +198,6 @@ namespace cmp {
     };
 
 
-    using TokenizedSource = VectorPipe<Token>;
+    template<bool safeRealloc=true>
+    using TokenizedSource = VectorPipe<Token, safeRealloc>;
 }

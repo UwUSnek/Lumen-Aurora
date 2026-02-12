@@ -15,13 +15,17 @@
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal token, or nullptr if one was not found.
  */
-ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource> b, ulong index, ulong *rawLiteralLen) {
+ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
-    std::optional<char> const &c0 = b->str[index];
-    if(!c0.has_value() || !std::isdigit(*c0)) { //! inf, nan, true and false are checked by the keyword parser
+
+
+    // Check first character
+    const auto c0 = (*b)[index];
+    if(!c0 || !std::isdigit(*c0)) {
         *rawLiteralLen = 0;
         return nullptr;
     }
+    //! inf, nan, true and false are checked by the keyword parser
 
 
 
@@ -31,8 +35,8 @@ ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource> b
     std::string baseName;
     bool (*isDigitValid)(char);
     ulong i;
-    std::optional<char> const &c1 = b->str[index + 1];
-    if(c0 == '0' && c1.has_value() && std::isalpha(*c1)) {
+    const auto c1 = (*b)[index + 1];
+    if(*c0 == '0' && c1 && std::isalpha(*c1)) {
         i = index + 2;
         switch(*c1) {
             case 'b': {
@@ -61,7 +65,7 @@ ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource> b
                     ErrorCode::ERROR_CMP_LITERAL_BASE_INVALID,
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, index + 1),
-                    std::string("Unknown numerical base prefix \"0") + *c1 + "\".\n" + R"(Valid prefixes are "0b", "0o", "0d", "0x".)",
+                    std::string("Unknown numerical base prefix \"0") + **c1 + "\".\n" + R"(Valid prefixes are "0b", "0o", "0d", "0x".)",
                     true //TODO recovery system. skip to the first token that makes sense
                 );
             }
@@ -81,11 +85,11 @@ ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource> b
     // Parse the string and check its digits
     bool isFloat = false;
     while(true) {
-        std::optional<char> const &c = b->str[i];
-        if(c.has_value()) {
+        if((*b)[i]) {
+            const char c = (*b)[i]->c;
             // if(pattern.find(*c)) {
-            if(isDigitValid(*c)) {
-                r << *c;
+            if(isDigitValid(c)) {
+                r << c;
                 ++i;
             }
             else if(c == '_') {
@@ -103,17 +107,17 @@ ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource> b
                         true //TODO recovery system. skip to the first token that makes sense
                     );
                 }
-                r << *c;
+                r << c;
                 isFloat = true;
                 ++i;
             }
-            else if(std::isalnum(*c)) {
+            else if(std::isalnum(c)) {
                 utils::printError(
                     ErrorCode::ERROR_CMP_LITERAL_DIGITS_INVALID,
                     utils::ErrType::COMPILER,
                     ElmCoords(b, index, i),
                     ElmCoords(b, i, i),
-                    std::string("Invalid digit \"") + *c + "\" in " + baseName + " literal.\n",
+                    std::string("Invalid digit \"") + c + "\" in " + baseName + " literal.\n",
                     true //TODO recovery system. skip to the first token that makes sense
                 );
             }

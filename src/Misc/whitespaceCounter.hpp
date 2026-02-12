@@ -1,10 +1,10 @@
 #pragma once
-#include "Utils/Containers/StringPipe.hpp"
+#include "Preprocessor/SegmentedCleanSource.hpp"
 
 
 
 
 namespace misc {
-    ulong countWhitespace(StringPipe &b, ulong index);
-    bool  isWhitespaceChar(std::optional<char> const &c);
+    ulong countWhitespace(pre::SegmentedCleanSource<true> &b, ulong index);
+    bool  isWhitespaceChar(const char &c);
 }

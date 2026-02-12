@@ -10,10 +10,10 @@
 
 
 
-ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::SegmentedCleanSource> b) { //TODO fix return type and value
+ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::SegmentedCleanSource<true>> b) { //TODO fix return type and value
 
     // Create subphase buffers
-    auto r1 = newptr<TokenizedSource>();
+    auto r1 = newptr<TokenizedSource<true>>();
     auto r2 = newptr<SourceTree>();
 
     // Start subphases

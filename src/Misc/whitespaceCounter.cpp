@@ -1,5 +1,5 @@
 #include "whitespaceCounter.hpp"
-#include "Utils/Containers/StringPipe.hpp"
+#include "Preprocessor/SegmentedCleanSource.hpp"
 
 
 
@@ -14,15 +14,17 @@
  * @param index The starting index.
  * @return The amount of whitespace characters found. 0 if no whitespace was found.
  */
-ulong misc::countWhitespace(StringPipe &b, ulong index) {
+ulong misc::countWhitespace(pre::SegmentedCleanSource<true> &b, ulong index) {
     ulong i = index;
-    while(isWhitespaceChar(b[i])) ++i;
+    while(b[i] && isWhitespaceChar(b[i]->c)) {
+        ++i;
+    }
     return i - index;
 }
 
 
-bool misc::isWhitespaceChar(std::optional<char> const &c) {
-    return c.has_value() && (c == ' ' || c == '\t' || c == '\n');
+bool misc::isWhitespaceChar(char const &c) {
+    return c == ' ' || c == '\t' || c == '\n';
 }
 
 

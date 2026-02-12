@@ -12,14 +12,14 @@
 
 
 
-void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
+void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r) {
 
     ulong i = 0;
-    while(b->str[i].has_value()) {
+    while((*b)[i]) {
 
 
         // Skip (and remove) comments
-        if(ulong commentLen = misc::measureComment(b->str, i); commentLen) {
+        if(ulong commentLen = misc::measureComment(*b, i); commentLen) {
             decreaseMaxProgress(PhaseID::Preprocessor_Macros,   commentLen);
             decreaseMaxProgress(PhaseID::Compiler_Tokenization, commentLen);
             increaseLocalProgress(commentLen);
@@ -29,11 +29,10 @@ void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<Segmente
 
 
         // Skip (and preserve) literals
-        if(auto literalLen = misc::measureTextLiteral(b->str, i); literalLen) {
+        if(auto literalLen = misc::measureTextLiteral(*b, i); literalLen) {
             increaseLocalProgress(literalLen);
             for(int j = 0; j < literalLen; ++j) {
-                r->str  += b->str [i + j].value();
-                r->meta += b->meta[i + j].value();
+                *r += *(*b)[i + j];
             }
             i += literalLen;
             continue;
@@ -48,8 +47,7 @@ void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<Segmente
 
         // Save normal characters
         increaseLocalProgress(1);
-        r->str  += *b->str[i];
-        r->meta += *b->meta[i];
+        *r += *(*b)[i];
         ++i;
     }
 }
@@ -61,20 +59,18 @@ void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<Segmente
 
 
 
-void pre::startCleanupPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
+void pre::startCleanupPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r) {
 
     // Try to execute the subphase
     try {
         __internal_startCleanupPhase(b, r);
-        r->str.closePipe();
-        r->meta.closePipe();
+        r->closePipe();
     }
 
     // If errors occur, close the return pipes and return safely
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
-        r->str.closePipe();
-        r->meta.closePipe();
+        r->closePipe();
         // std::scoped_lock lock(phaseDataArrayLock);
         // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }

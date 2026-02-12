@@ -10,7 +10,6 @@
 #include "Misc/whitespaceCounter.hpp"
 #include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
-#include "Utils/Containers/StringPipe.hpp"
 #include "Main/errors.hpp"
 #include "includePhase.hpp"
 #include "Utils/ansi.hpp"
@@ -23,7 +22,108 @@
 
 
 
-void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<SegmentedCleanSource> r) {
+static constexpr const char* INCLUDE_TEXT = "#include";
+
+//! Manual regex because std doesn't support the custom pipe.
+//! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b[i:]
+static std::string parseIncludeStatementName(ulong index, pre::SegmentedCleanSource<true> &b) {
+
+    // Check include statement text
+    std::string r;
+    if(b.strcmp(index, INCLUDE_TEXT)) {
+        r += INCLUDE_TEXT;
+    }
+    else return "";
+
+
+    //FIXME what even is the point of this?
+    //FIXME delete this if not needed. only check the actual statement name
+    // Check and store specified include path
+    ulong i = index + strlen(INCLUDE_TEXT);
+    while(true) {
+        char c = b[i]->c;
+        if(std::isdigit(c) || std::isalpha(c) || c == '_') {
+            r += c;
+            ++i;
+        }
+        else break;
+    }
+    return r;
+}
+
+
+
+
+
+
+
+
+//! Manual regex because std doesn't support the custom pipe.
+//! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b[i:]
+static std::string parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource<true> &b) {
+    std::string r;
+
+
+    // Check if the first character is a < or " and store it. Return an empty string otherwise
+    char type;
+    ulong i = index;
+    if(b[i]) {
+        type = b[i]->c;
+        if(type == '<' || type == '"') {
+            r += type;
+            ++i;
+        }
+        else return "";
+    }
+    else return "";
+
+
+    // Loop through the path, print errors if the string ends unexpectedly. Compose and return the path otherwise
+    char last = type;
+    while(true) {
+        if(!b[i]) {
+            utils::printError(
+                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_0,
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(b, index, i - 1),
+                ElmCoords(b, i - 1, i - 1),
+                "Standard module name is missing a closing \">\" character.", //! Copy incomplete string error message
+                true //TODO recovery system. skip to the first token that makes sense
+            );
+        }
+
+        char c = b[i]->c;
+        if(c == '\n') {
+            utils::printError(
+                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_n,
+                utils::ErrType::PREPROCESSOR,
+                ElmCoords(b, index, i - 1),
+                ElmCoords(b, i - 1, i - 1),
+                "Standard module name is missing a closing \">\" character.", //! Copy incomplete string error message
+                true //TODO recovery system. skip to the first token that makes sense
+            );
+        }
+        else if(last != '\\' && c == (type == '<' ? '>' : '"')) {
+            r += c;
+            return r;
+        }
+        else {
+            r += c;
+            ++i;
+            last = c;
+        }
+    }
+    return r;
+}
+
+
+
+
+
+
+
+
+void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource<true>> b0, ptr<SegmentedCleanSource<true>> r) {
 
 
     // Clean the code, saving the result in a temporary buffer. Skip validation checks
@@ -31,19 +131,18 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
     //! Performance overhead is negligible.
     ulong i  = 0; // b0 index
     ulong ii = 0; // b  index (clean)
-    auto b = newptr<SegmentedCleanSource>();
-    auto skipped = std::vector<ulong>(b0->str.length(), 0); //! Oversized. Extra elements are simply not used. Initialize to all 0s
-    while(b0->str[i].has_value()) {
+    auto b = newptr<SegmentedCleanSource<true>>();
+    auto skipped = std::vector<ulong>(b0->length(), 0); //! Oversized. Extra elements are simply not used. Initialize to all 0s
+    while((*b0)[i]) {
 
         // Measure text to skip
-        ulong        skipLen = misc::measureLct        (b0->str, i);  // Skip (and preserve) LCTs
-        if(!skipLen) skipLen = misc::measureComment    (b0->str, i);  // Skip (and preserve) comments
-        if(!skipLen) skipLen = misc::measureTextLiteral(b0->str, i);  // Skip (and preserve) literals
+        ulong        skipLen = misc::measureLct        (*b0, i);  // Skip (and preserve) LCTs
+        if(!skipLen) skipLen = misc::measureComment    (*b0, i);  // Skip (and preserve) comments
+        if(!skipLen) skipLen = misc::measureTextLiteral(*b0, i);  // Skip (and preserve) literals
                                                                       // Skip (and preserve) macro definitions and invocations //FIXME
         // FIXME
         // #define name...\n     // Can include anything, including " and '
         // #name(...)            // Can include valid indentifiers, valid tokens, and `-limited parameters (which can contain anything)
-
 
 
         // Skip it and store the amount of skipped characters
@@ -55,16 +154,14 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
 
         // Save character if not to be skipped
         else {
-            b->str  += b0->str [i].value();
-            b->meta += b0->meta[i].value();
+            *b += *(*b0)[i];
             ++ii;
             ++i;
         }
     }
 
     // Close temporary pipe so the next step won't get stuck waiting for it forever
-    b->str .closePipe();
-    b->meta.closePipe();
+    b->closePipe();
 
 
 
@@ -72,21 +169,19 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
     // Loop through the cleaned code
     i  = 0; // b0 index
     ii = 0; // b  index (clean)
-    while(b->str[ii].has_value()) {
-        std::string match;
-        std::string filePathMatch;
+    while((*b)[ii]) {
 
         // If an include directive is detected, replace it with the preprocessed contents of the file
-        parseIncludeStatementName(ii, b, match); //FIXME allow comments and LCTs inside of the include statement and path
+        std::string match = parseIncludeStatementName(ii, *b); //FIXME allow comments and LCTs inside of the include statement and path
         if(!match.empty()) {
             ulong j = ii + match.length();
             ElmCoords relevantCoords(b, ii, j - 1);
 
             // Skip whitespace if present
-            j += misc::countWhitespace(b->str, j);
+            j += misc::countWhitespace(*b, j);
 
             // Detect specified file path
-            parseIncludeStatementPath(j, b, filePathMatch);
+            std::string filePathMatch = parseIncludeStatementPath(j, *b);
             if(!filePathMatch.empty()) {
                 ulong k = j + filePathMatch.length();
                 ElmCoords filePathCoords(b, j, k - 1);
@@ -108,13 +203,13 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
                         using enum PhaseID;
 
                         // Calculate the actual file path and open the file
-                        std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[b->meta[j]->f], relevantCoords, filePathCoords);
+                        std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[(*b)[j]->meta.f], relevantCoords, filePathCoords);
                         std::ifstream actualFile(actualFilePath);
                         //FIXME add a function that reads a file and saves it in a global array so they don't go out of scope
 
 
                         // Read and prepare code from the file
-                        auto fileCode = newptr<SegmentedCleanSource>();
+                        auto fileCode = newptr<SegmentedCleanSource<true>>();
                         totalFiles.fetch_add(1);
                         sourceFilePaths.push_back(actualFilePath);
                         auto newFilePathIndex = sourceFilePaths.size() - 1;
@@ -122,11 +217,11 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
 
 
                         // Update phase progress data
-                        increaseMaxProgress(Preprocessor_Includes, fileCode->str.length()); //! Self
-                        increaseMaxProgress(Preprocessor_LCT,      fileCode->str.length());
-                        increaseMaxProgress(Preprocessor_Cleanup,  fileCode->str.length());
-                        increaseMaxProgress(Preprocessor_Macros,   fileCode->str.length());
-                        increaseMaxProgress(Compiler_Tokenization, fileCode->str.length());
+                        increaseMaxProgress(Preprocessor_Includes, fileCode->length()); //! Self
+                        increaseMaxProgress(Preprocessor_LCT,      fileCode->length());
+                        increaseMaxProgress(Preprocessor_Cleanup,  fileCode->length());
+                        increaseMaxProgress(Preprocessor_Macros,   fileCode->length());
+                        increaseMaxProgress(Compiler_Tokenization, fileCode->length());
 
 
                         // Increase index (skip include and file path)
@@ -169,7 +264,7 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
                     ErrorCode::ERROR_PRE_NO_PATH,
                     utils::ErrType::PREPROCESSOR,
                     relevantCoords,
-                    (!b->str[j].has_value()) ? relevantCoords : ElmCoords(b, j, j),
+                    (!(*b)[j]) ? relevantCoords : ElmCoords(b, j, j),
                     "Missing file path in include statement.\n"
                     "A valid file path was expected, but could not be found.",
                     true //TODO recovery system. skip to the first token that makes sense
@@ -183,8 +278,7 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
         else {
             const ulong old_i = i;
             for(ulong l = 0; l < 1 + skipped[ii]; ++l) {
-                r->str  += b0->str [i].value();
-                r->meta += b0->meta[i].value();
+                *r += *(*b0)[i];
                 ++i;
             }
             increaseLocalProgress(i - old_i);
@@ -200,114 +294,19 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource> b0, ptr<Segment
 
 
 
-//! Manual regex because std doesn't support the custom pipe.
-//! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b->str[i:]
-void pre::parseIncludeStatementName(ulong index, ptr<SegmentedCleanSource> b, std::string &match) {
-    std::string tmp;
-    ulong nameLen = sizeof("#include") - 1;
-    ulong i = index + nameLen;
-    if(b->str[i].has_value()) {
-        if(!strncmp(b->str.cpp()->c_str() + index, "#include", nameLen)) {
-            tmp += "#include";
-        }
-        else return;
-    }
-    else return;
-    match = tmp;
 
-    while(true) {
-        char c = *b->str[i];
-        if(std::isdigit(c) || std::isalpha(c) || c == '_') {
-            match += c;
-            ++i;
-        }
-        else break;
-    }
-}
-
-
-
-
-
-
-
-
-//! Manual regex because std doesn't support the custom pipe.
-//! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b->str[i:]
-void pre::parseIncludeStatementPath(ulong index, ptr<SegmentedCleanSource> b, std::string &filePathMatch) {
-    std::string tmp;
-
-    char type;
-    ulong i = index;
-    if(b->str[i].has_value()) {
-        type = *b->str[i];
-        if(type == '<' || type == '"') {
-            tmp += type;
-            ++i;
-        }
-        else return;
-    }
-    else return;
-
-    char last = type;
-    while(true) {
-        if(!b->str[i].has_value()) {
-            utils::printError(
-                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_0,
-                utils::ErrType::PREPROCESSOR,
-                ElmCoords(b, index, i - 1),
-                ElmCoords(b, i - 1, i - 1),
-                "Standard module name is missing a closing \">\" character.", //! Copy incomplete string error message
-                true //TODO recovery system. skip to the first token that makes sense
-            );
-        }
-
-        char c = *b->str[i];
-        if(c == '\n') {
-            utils::printError(
-                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_n,
-                utils::ErrType::PREPROCESSOR,
-                ElmCoords(b, index, i - 1),
-                ElmCoords(b, i - 1, i - 1),
-                "Standard module name is missing a closing \">\" character.", //! Copy incomplete string error message
-                true //TODO recovery system. skip to the first token that makes sense
-            );
-        }
-        else if(last != '\\' && c == (type == '<' ? '>' : '"')) {
-            tmp += c;
-            filePathMatch = tmp;
-            return;
-        }
-        else {
-            tmp += c;
-            ++i;
-            last = c;
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-void pre::startIncludePhase(ptr<SegmentedCleanSource> b, ptr< SegmentedCleanSource> r) {
+void pre::startIncludePhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r) {
 
     // Try to execute the subphase
     try {
         __internal_startIncludePhase(b, r);
-        r->str.closePipe();
-        r->meta.closePipe();
+        r->closePipe();
     }
 
     // If errors occur, close the return pipes and return safely
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
-        r->str.closePipe();
-        r->meta.closePipe();
+        r->closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
         phaseDataArray[(int)PhaseID::Preprocessor_Includes].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }

@@ -1,4 +1,3 @@
-#include <mutex>
 #include <string>
 #include <fstream>
 #include <filesystem>
@@ -124,7 +123,7 @@ int main(int argc, char* argv[]){
     std::string s = utils::readFile(f);
     f.close();
     totalFiles.fetch_add(1);
-    ptr<pre::SegmentedCleanSource> preprocessedSourceCode = pre::loadSourceCode(s, cmd::options->sourceFile);
+    ptr<pre::SegmentedCleanSource<true>> preprocessedSourceCode = pre::loadSourceCode(s, cmd::options->sourceFile);
     ptr<cmp::SourceTree> precompiledModule = nullptr;
     // pre::SegmentedCleanSource *convertedCode     = nullptr; //TODO
 
@@ -166,12 +165,11 @@ int main(int argc, char* argv[]){
         //TODO write module
     }
     else {
-        preprocessedSourceCode->str.awaitClose(mainCheckErrors);
-        preprocessedSourceCode->meta.awaitClose(mainCheckErrors);
+        preprocessedSourceCode->awaitClose(mainCheckErrors);
         if(exitMainRequest.load()) goto skip_file_output;
 
-        std::scoped_lock lock(preprocessedSourceCode->str.sReallocLock);
-        writeOutputFile(*preprocessedSourceCode->str.cpp());
+        auto lock = preprocessedSourceCode->scoped_lock();
+        writeOutputFile(preprocessedSourceCode->substr(0, preprocessedSourceCode->length()));
     }
 
 

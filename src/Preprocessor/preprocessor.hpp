@@ -10,13 +10,13 @@
 
 namespace pre {
 
-    ptr<SegmentedCleanSource> loadSourceCode_loop(
+    ptr<SegmentedCleanSource<true>> loadSourceCode_loop(
         const std::string &s,
         const std::string &filePath,
         const std::function<bool()> &awaitTask = [](){ return true; }
     );
 
-    ptr<SegmentedCleanSource> loadSourceCode(
+    ptr<SegmentedCleanSource<true>> loadSourceCode(
         const std::string &s,
         const std::string &filePath
     );

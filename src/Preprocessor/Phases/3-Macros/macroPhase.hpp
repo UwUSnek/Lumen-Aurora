@@ -6,6 +6,6 @@
 
 
 namespace pre {
-    void __internal_startMacroPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r);
-    void            startMacroPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r);
+    void __internal_startMacroPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r);
+    void            startMacroPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r);
 }

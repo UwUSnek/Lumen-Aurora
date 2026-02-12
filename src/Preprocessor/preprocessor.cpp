@@ -21,7 +21,7 @@
  * @param filePath The path of the original source code file.
  * @return The contents of the source file as a SegmentedCleanSource.
  */
-ptr<pre::SegmentedCleanSource> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
+ptr<pre::SegmentedCleanSource<true>> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
     ulong pathIndex;
     {
         std::scoped_lock lock(sourceFilePathsLock);
@@ -37,15 +37,15 @@ ptr<pre::SegmentedCleanSource> pre::loadSourceCode(const std::string &s, const s
     //FIXME SAVE INCLUDE STACK
 
     // Load raw code of the root file
-    auto r0 = newptr<SegmentedCleanSource>();
+    auto r0 = newptr<SegmentedCleanSource<true>>();
     generateMetadata(s, r0, pathIndex);
 
-
+    SegmentedCleanSource<true>(5UL);
     // Create pipes
-    auto r1 = newptr<SegmentedCleanSource>();
-    auto r2 = newptr<SegmentedCleanSource>();
-    auto r3 = newptr<SegmentedCleanSource>();
-    auto r4 = newptr<SegmentedCleanSource>();
+    auto r1 = newptr<SegmentedCleanSource<true>>();
+    auto r2 = newptr<SegmentedCleanSource<true>>();
+    auto r3 = newptr<SegmentedCleanSource<true>>();
+    auto r4 = newptr<SegmentedCleanSource<true>>();
 
     // Include all files
     startSubphaseAsync(PhaseID::Preprocessor_Includes, true, startIncludePhase, r0, r1);

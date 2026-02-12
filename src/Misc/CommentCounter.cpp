@@ -1,4 +1,5 @@
 #include "CommentCounter.hpp"
+#include "Preprocessor/SegmentedCleanSource.hpp"
 
 
 
@@ -16,19 +17,25 @@
  * @return The length of the comment, including the length of the opening and closing character sequences (not \0 or \n).
  *     If the buffer doesn't contain a comment that starts at index <index>, 0 is returned.
  */
-ulong misc::measureComment(StringPipe &b, ulong index) {
-    if(b[index] != '/') return 0;
+ulong misc::measureComment(pre::SegmentedCleanSource<true> &b, ulong index) {
+    if(b[index]->c != '/') return 0;
 
 
-    char last = *b[index];
+    char last = b[index]->c;
     char commType = '\0'; // '\0' if unknow, '/' if single line, '*' if multiline
     ulong i = index + 1;
     while(true) {
 
+        // Single character closing sequences (End of file or single line comments)
+        if(!b[i] || commType == '/' && b[i]->c == '\n') {
+            break;
+        }
+        const char c = b[i]->c;
+
         // Starting sequence
         if(commType == '\0') {
-            if(b[i] == '/' || b[i] == '*') {
-                commType = *b[i];
+            if(c == '/' || c == '*') {
+                commType = c;
                 continue;
             }
             else {  //! Starting sequence not found (this includes \n and \0 cases)
@@ -36,20 +43,15 @@ ulong misc::measureComment(StringPipe &b, ulong index) {
             }
         }
 
-        // Single character closing sequences (End of file or single line comments)
-        else if(!b[i].has_value() || commType == '/' && b[i] == '\n') {
-            break;
-        }
-
         // Double character closing sequences (Multi line comments)
-        else if(commType == '*' && last == '*' && b[i] == '/') {
+        else if(commType == '*' && last == '*' && c == '/') {
             ++i;
             break;
         }
 
         // Normal characters (part of the comment)
         else {
-            last = *b[i];
+            last = c;
             ++i;
         }
     }

@@ -15,33 +15,35 @@
  * @param index The index at which the literal starts.
  * @return The length of the literal, including the opening and closing character sequences, or 0 if none was found.
  */
-ulong misc::measureTextLiteral(StringPipe &b, ulong index) {
-    if(b[index].has_value()) return 0;
-    char literalType = b[index].value();
+ulong misc::measureTextLiteral(pre::SegmentedCleanSource<true> &b, ulong index) {
+    if(b[index]) return 0;
+    char literalType = b[index]->c;
     if(literalType != '"' && literalType != '\'') return 0;
 
 
     ulong i = index + 1;
     while(true) {
 
+        // Missing closing sequence
+        //! No need to print error messages. Text literals are validated during the tokenization phase.
+        if(!b[i] || b[i]->c == '\n') {
+            return std::min(i - 1, b.length() - 1) - index;
+        }
+        const char c = b[i]->c;
+
+
         // Escape sequences
         //! No need for custom logic for \u escapes.
         //! Additional characters can be safely treated as normal text literal characters and skipped.
-        if(b[i] == '\\') {
+        if(c == '\\') {
             i += 2;
         }
 
         // Closing sequence
         //! Macro definitions are skipped by the startCleanupPhase() function. No need to check.
-        else if(b[i] == literalType) {
+        else if(c == literalType) {
             ++i;
             break;
-        }
-
-        // Missing closing sequence
-        //! No need to print error messages. Text literals are validated during the tokenization phase.
-        else if(!b[i].has_value() || b[i] == '\n') {
-            return std::min(i - 1, b.length() - 1) - index;
         }
 
         // Normal characters

@@ -10,24 +10,29 @@
 
 /**
  * @brief Parses the alphanumeric token that starts at index <index> of the buffer <b>.
- *      The token stops at the first character that is not part of its pattern.
+ *      The token stops before the first character that is not part of its pattern.
  *      [a-zA-Z_][a-zA-Z_0-9]*      //! Alphanumeric identifiers
  *      [a-zA-Z_][a-zA-Z_0-9]*      //! All alphanumeric tokens [what this function checks, includes alphanumeric identifiers]
  * @param b The source code buffer.
  * @param index The starting index.
+ * @return The string value of the token, or an empty string if one was not found.
  */
-std::optional<std::string> cmp::parseAlphanumericToken(ptr<pre::SegmentedCleanSource> b, ulong index){
-    std::stringstream r;
-    std::optional<char> c = b->str[index];
-    if(!isAlphanumericCharFirst(*c)) return std::nullopt;
-    r << *c;
+std::string cmp::parseAlphanumericToken(ptr<pre::SegmentedCleanSource<true>> b, ulong index){
 
+    // Check and store first character
+    const auto c0 = (*b)[index];
+    if(!c0 || !isAlphanumericCharFirst(*c0)) return "";
+    std::stringstream r;
+    r << *c0;
+
+    // Check and store other characters
     ulong i = index + 1;
-    while(isAlphanumericChar(b->str[i])) {
-        r << *b->str[i];
+    while(true) {
+        const auto c = (*b)[i];
+        if(!c || !isAlphanumericChar(*c)) return r.str();
+        r << *c;
         ++i;
     }
-    return r.tellp() == 0 ? std::nullopt : (std::optional<std::string>)r.str();
 }
 
 
@@ -38,8 +43,8 @@ std::optional<std::string> cmp::parseAlphanumericToken(ptr<pre::SegmentedCleanSo
  * @param c The character to check.
  * @return Wether the character can be the first character of these elements.
  */
-bool cmp::isAlphanumericCharFirst(std::optional<char> const &c) {
-    return c.has_value() && (std::isalpha(*c) || c == '_');
+bool cmp::isAlphanumericCharFirst(const char c) {
+    return std::isalpha(c) || c == '_';
 }
 
 
@@ -50,8 +55,8 @@ bool cmp::isAlphanumericCharFirst(std::optional<char> const &c) {
  * @param c The character to check.
  * @return Wether the character can be part of these elements.
  */
-bool cmp::isAlphanumericChar(std::optional<char> const &c) {
-    return c.has_value() && (std::isalnum(*c) || c == '_');
+bool cmp::isAlphanumericChar(const char c) {
+    return std::isalnum(c) || c == '_';
 }
 
 
@@ -62,26 +67,42 @@ bool cmp::isAlphanumericChar(std::optional<char> const &c) {
 
 
 /**
- * @brief Parses the symbolic token that starts at index <index> of the buffer <b>.
- *      The token stops at the first character that is not part of its pattern.
- *      [!$%&*+\-/:<=>?@^`|~\[\].]+                 //! Symbolic identifiers
- *      [!$%&*+\-/:<=>?@^`|~\[\].,;\(\)\{\}]+       //! All symbolic tokens [what this function checks, includes identifiers]
+ * @brief Parses the symbolic identifier that starts at index <index> of the buffer <b>.
+ *      The identifier stops before the first character that is not part of its pattern.
+ *      The pattern of a symbolic identifier is: [!%&*+\-/:<=>?^`|~\[\]]+.
  * @param b The source code buffer.
  * @param index The starting index.
+ * @return The string value of the identifier, or an empty string if one was not found.
  */
-std::optional<std::string> cmp::parseSymbolicToken(ptr<pre::SegmentedCleanSource> b, ulong index){
-    std::stringstream r;
-    if(isCharReserved(*b->str[index])) {
-        return std::string(1, *b->str[index]);
-    }
-
-
+std::string cmp::parseSymbolicIdentifier(ptr<pre::SegmentedCleanSource<true>> b, ulong index){
+    //! Creating an empty string every time this fails is prob faster than creating a stringstream.
+    //! Short string concatenation overhead is negligible
+    //! Checking the first character before allocating would be better, but that makes the code less maintainable.
+    std::string r;
     ulong i = index;
-    while(isSymbolicChar(b->str[i])) {
-        r << *b->str[i];
+    while(true) {
+        const auto c = (*b)[i];
+        if(!c || !isSymbolicChar(*c)) return r;
+        r += *c;
         ++i;
     }
-    return r.tellp() == 0 ? std::nullopt : (std::optional<std::string>)r.str();
+}
+
+
+
+
+/**
+ * @brief Parses the symbolic keyword that starts at index <index> of the buffer <b>.
+ *      Symbolic keywords are at most 1 character long.
+ *      The pattern of a symbolic keyword is: [@$,;\(\)\{\}.].
+ * @param b The source code buffer.
+ * @param index The starting index.
+ * @return The string value of the keyword, or an empty string if one was not found.
+ */
+std::string cmp::parseSymbolicKeyword(ptr<pre::SegmentedCleanSource<true>> b, ulong index){
+    const auto c = (*b)[index];
+    if(!c || !isCharReserved(*c)) return "";
+    return std::string(1, *c);
 }
 
 
@@ -92,11 +113,11 @@ std::optional<std::string> cmp::parseSymbolicToken(ptr<pre::SegmentedCleanSource
  * @param c The character to check.
  * @return Wether the character can be part of these elements.
  */
-bool cmp::isSymbolicChar(std::optional<char> const &c) {
-    return c.has_value() && (
+bool cmp::isSymbolicChar(const char c) {
+    return
         c == '!' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == ':' || c == '<' || c == '[' ||
         c == '='             || c == '?' || c == '^' || c == '`' || c == '|' || c == '~' || c == '>' || c == ']'
-    );
+    ;
 }
 
 
@@ -109,12 +130,12 @@ bool cmp::isSymbolicChar(std::optional<char> const &c) {
  * @param c The character to check.
  * @return Wether the character is a keyword.
  */
-bool cmp::isCharReserved(std::optional<char> const &c) {
-    return c.has_value() && (
+bool cmp::isCharReserved(const char c) {
+    return
         c == '$' || c == '@' ||
         c == ';' || c == ',' ||
         c == '(' || c == ')' ||
         c == '{' || c == '}' ||
         c == '.'
-    );
+    ;
 }

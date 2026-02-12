@@ -1,9 +1,9 @@
 #pragma once
-#include "Utils/Containers/StringPipe.hpp"
+#include "Preprocessor/SegmentedCleanSource.hpp"
 
 
 
 
 namespace misc {
-    ulong measureLct(StringPipe &b, ulong index);
+    ulong measureLct(pre::SegmentedCleanSource<true> &b, ulong index);
 }

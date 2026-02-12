@@ -1,5 +1,4 @@
 #pragma once
-#include <optional>
 #include "Preprocessor/SegmentedCleanSource.hpp"
 #include "Utils/ptr.hpp"
 
@@ -7,12 +6,13 @@
 
 
 namespace cmp {
-    std::optional<std::string> parseAlphanumericToken(ptr<pre::SegmentedCleanSource> b, ulong index);
-    bool isAlphanumericChar(std::optional<char> const &c);
-    bool isAlphanumericCharFirst(std::optional<char> const &c);
+    std::string parseAlphanumericToken(ptr<pre::SegmentedCleanSource<true>> b, ulong index);
+    bool isAlphanumericChar(const char c);
+    bool isAlphanumericCharFirst(const char c);
 
 
-    std::optional<std::string> parseSymbolicToken(ptr<pre::SegmentedCleanSource> b, ulong index);
-    bool isSymbolicChar(std::optional<char> const &c);
-    bool isCharReserved(std::optional<char> const &c);
+    std::string parseSymbolicIdentifier(ptr<pre::SegmentedCleanSource<true>> b, ulong index);
+    std::string parseSymbolicKeyword(ptr<pre::SegmentedCleanSource<true>> b, ulong index);
+    bool isSymbolicChar(const char c);
+    bool isCharReserved(const char c);
 }

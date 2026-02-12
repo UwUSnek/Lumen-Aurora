@@ -117,9 +117,13 @@ set_target_properties(alc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ../Build)
 
 
 # GCC compilaiton options
+target_link_options(alc PRIVATE
+    -fsanitize=thread
+)
 target_compile_options(alc PRIVATE
-    -O0         # No optimizations
-    -g          # Save debug infos
+    -O0                 # No optimizations
+    -g                  # Save debug infos
+    -fsanitize=thread   # Check thread issues
 )
 
 

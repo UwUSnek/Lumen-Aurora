@@ -37,8 +37,53 @@ struct ElmCoords {
         overflow(_overflow) {
     }
 
-    ElmCoords(ptr<pre::SegmentedCleanSource> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
-    ElmCoords(ptr<cmp::TokenizedSource>      source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
-    ElmCoords(    pre::SegmentedCleanSource &source, ulong _start, ulong _end);
-    ElmCoords(    cmp::TokenizedSource      &source, ulong _start, ulong _end);
+
+
+
+    ElmCoords(ptr<pre::SegmentedCleanSource<true>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
+    ElmCoords(ptr<cmp::TokenizedSource<true>>      source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
+
+
+
+
+    template<bool sr> ElmCoords(pre::SegmentedCleanSource<sr> &source, ulong _start, ulong _end) {
+        if(source.length() == 0) {
+            filePathIndex = 0;
+            lineNum       = 0;
+            start         = 0;
+            end           = 0;
+        }
+        else {
+            overflow = _end >= source.length();
+            ulong actual_start = _start > source.length() ? source.length() - 1 : _start;
+            ulong actual_end   = _end   > source.length() ? source.length() - 1 : _end;
+
+            filePathIndex = source[actual_start]->meta.f;
+            lineNum       = source[actual_start]->meta.l;
+            start         = source[actual_start]->meta.i;
+            end           = source[actual_end  ]->meta.i;
+        }
+    }
+
+
+
+
+    template<bool sr> ElmCoords(cmp::TokenizedSource<sr> &source, ulong _start, ulong _end) {
+        if(source.length() == 0) {
+            filePathIndex = 0;
+            lineNum       = 0;
+            start         = 0;
+            end           = 0;
+        }
+        else {
+            overflow = _end >= source.length();
+            ulong actual_start = _start > source.length() ? source.length() - 1 : _start;
+            ulong actual_end   = _end   > source.length() ? source.length() - 1 : _end;
+
+            filePathIndex = source[actual_start]->start.f;
+            lineNum       = source[actual_start]->start.l;
+            start         = source[actual_start]->start.i;
+            end           = source[actual_end  ]->end  .i;
+        }
+    }
 };

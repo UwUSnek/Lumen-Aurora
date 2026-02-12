@@ -6,6 +6,6 @@
 
 
 namespace pre {
-    void __internal_startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r);
-    void            startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r);
+    void __internal_startLCTsPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r);
+    void            startLCTsPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r);
 }

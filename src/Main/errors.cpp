@@ -176,9 +176,9 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
 
 
     // Print full command and highlight relevant section and error
-    const char* lastColor;
-    cmd::ElmCoordsCL const &relPos = trimCoords(fullCommand, _relPos);
-    cmd::ElmCoordsCL const &errPos = trimCoords(fullCommand, _errPos);
+    const char* lastColor = nullptr;
+    const cmd::ElmCoordsCL &relPos = trimCoords(fullCommand, _relPos);
+    const cmd::ElmCoordsCL &errPos = trimCoords(fullCommand, _errPos);
     for(ulong i = 0; i < fullCommand.length(); ++i) {
 
         // Calculate current color based on the current character index and print it if it differs form the last one

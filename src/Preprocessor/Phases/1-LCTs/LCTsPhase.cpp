@@ -17,13 +17,13 @@
 
 
 
-void pre::__internal_startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
+void pre::__internal_startLCTsPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r) {
 
     ulong i = 0;
-    while(b->str[i].has_value()) {
+    while((*b)[i]) {
 
         // Skip LCTs
-        ulong lct = misc::measureLct(b->str, i);
+        ulong lct = misc::measureLct(*b, i);
         if(lct) {
             using enum PhaseID;
             decreaseMaxProgress(Preprocessor_Cleanup,  lct);
@@ -36,8 +36,7 @@ void pre::__internal_startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCl
         // Push normal characters
         else {
             increaseLocalProgress(1);
-            r->str  += b->str[i].value();
-            r->meta += b->meta[i].value();
+            *r += *(*b)[i];
             ++i;
         }
 
@@ -53,20 +52,18 @@ void pre::__internal_startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCl
 
 
 
-void pre::startLCTsPhase(ptr<SegmentedCleanSource> b, ptr<SegmentedCleanSource> r) {
+void pre::startLCTsPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r) {
 
     // Try to execute the subphase
     try {
         __internal_startLCTsPhase(b, r);
-        r->str.closePipe();
-        r->meta.closePipe();
+        r->closePipe();
     }
 
     // If errors occur, close the return pipes and return safely
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
-        r->str.closePipe();
-        r->meta.closePipe();
+        r->closePipe();
         // std::scoped_lock lock(phaseDataArrayLock);
         // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }

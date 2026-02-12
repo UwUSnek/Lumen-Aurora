@@ -48,11 +48,11 @@ const char* getLiteralName(const cmp::TextLiteralType literalType) {
  * @param literalType The type of literal this escape sequence is part of. This affects error messages.
  * @return The string value of the translated escape sequence, expressed in the UTF-8 format, or nullopt if one was not found.
  */
-std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource> b, ulong index, ulong *rawEscapeLen, cmp::TextLiteralType literalType) {
+std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawEscapeLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
 
     // Return if there is no escape sequence
-    if(const auto &c0 = b->str[index]; !c0.has_value() || c0 != '\\') {
+    if(const auto c0 = (*b)[index]; !c0 || *c0 != '\\') {
         *rawEscapeLen = 0;
         return std::nullopt;
     }
@@ -60,7 +60,7 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource> b
 
     // If there is
     ulong i = index + 1;
-    if(const auto &c = b->str[i]; c.has_value()) switch(*c) {
+    if(const auto c = (*b)[i]; c) switch(*c) {
 
 
         // Invalid escape sequences
@@ -69,7 +69,7 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource> b
                 ErrorCode::ERROR_CMP_ESCAPE_INVALID,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),
-                "Invalid escape sequence \"" + ansi::white + "\\" + *c + ansi::reset + "\".",
+                "Invalid escape sequence \"" + ansi::white + "\\" + **c + ansi::reset + "\".",
                 true //TODO recovery system. skip to the first token that makes sense
             );
         }
@@ -96,8 +96,8 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource> b
             // Parse the codepoint
             std::string codepoint;
             for(ulong j = 0; j < expectedDigits;) {
-                std::optional<char> const &c1 = b->str[i + j];
-                if(c1.has_value() && (std::isdigit(*c1) || c1 >= 'A' && c1 <= 'F' || c1 >= 'a' && c1 <= 'f')) {
+                const auto c1 = (*b)[i + j];
+                if(c1 && (std::isdigit(*c1) || *c1 >= 'A' && *c1 <= 'F' || *c1 >= 'a' && *c1 <= 'f')) {
                     codepoint += *c1;
                     ++j;
                 }
@@ -184,10 +184,10 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource> b
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal, or nullopt if one was not found.
  */
-ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource> b, ulong index, ulong *rawLiteralLen, cmp::TextLiteralType literalType) {
+ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawLiteralLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
     const char delimiter = literalType == cmp::TextLiteralType::STRING ? '"' : '\'';
-    if(const auto &c0 = b->str[index]; !c0.has_value() || c0 != delimiter) {
+    if(const auto c0 = (*b)[index]; !c0 || *c0 != delimiter) {
         *rawLiteralLen = 0;
         return nullptr;
     }
@@ -199,11 +199,11 @@ ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource> b, ulo
 //FIXME merge with string logic. they are ideantical but use different names and delimiters
     ulong i = index + 1;
     while(true) {
-        std::optional<char> c = b->str[i];
+        const auto c = (*b)[i];
 
 
         // Missing closing sequence
-        if(!c.has_value()) {
+        if(!c) {
             utils::printError(
                 ErrorCode::ERROR_CMP_STRING_INCOMPLETE_0,
                 utils::ErrType::COMPILER,
@@ -213,7 +213,7 @@ ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource> b, ulo
                 true //TODO recovery system. skip to the first token that makes sense
             );
         }
-        else if(c == '\n') {
+        else if(*c == '\n') {
             utils::printError(
                 ErrorCode::ERROR_CMP_STRING_INCOMPLETE_n,
                 utils::ErrType::COMPILER,
@@ -238,7 +238,7 @@ ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource> b, ulo
         }
 
         // Closing sequence (escaped closing sequences are parsed by the previous escape sequence step)
-        if(c == delimiter) {
+        if(*c == delimiter) {
             ++i;
             break;
         }

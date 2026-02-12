@@ -15,14 +15,14 @@
 
 
 
-void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, ptr<TokenizedSource> r) {
+void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>> b, ptr<TokenizedSource<true>> r) {
 
     ulong i = 0;
-    while(b->str[i].has_value()) {
+    while((*b)[i]) {
 
 
         // Detect whitespace and split tokens if any is found
-        if(ulong wsLen = misc::countWhitespace(b->str, i)) {
+        if(ulong wsLen = misc::countWhitespace(*b, i)) {
             increaseLocalProgress(wsLen);
             i += wsLen;
             continue;
@@ -37,7 +37,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, pt
         if(tokenValue) {
             increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
             increaseLocalProgress(lenOutput);
-            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput - 1]);
+            *r += Token(b->substr(i, lenOutput), tokenValue, (*b)[i]->meta, (*b)[i + lenOutput - 1]->meta);
             i += lenOutput;
             continue;
         }
@@ -46,9 +46,10 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, pt
 
 
         // Parse out alphanumeric and symbolic tokens (keywords, meta keywords and identifiers)
-        std::optional<std::string> token = parseAlphanumericToken(b, i);
-        if(!token.has_value())     token = parseSymbolicToken(b, i);
-        if(token.has_value()) {
+        std::optional<std::string> token;
+        token = parseSymbolicKeyword   (b, i); if(!token.has_value())
+        token = parseSymbolicIdentifier(b, i); if(!token.has_value())       //NOSONAR
+        token = parseAlphanumericToken (b, i); if( token.has_value()) {     //NOSONAR
             ptr<TokenValue> _tokenValue;
 
             // If the token is a known keyword
@@ -71,7 +72,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, pt
             // Push token to output array and update buffer index
             increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
             increaseLocalProgress(token->length());
-            *r += Token(b->str.substr(i, token->length()), _tokenValue, *b->meta[i], *b->meta[i + token->length() - 1]);
+            *r += Token(b->substr(i, token->length()), _tokenValue, (*b)[i]->meta, (*b)[i + token->length() - 1]->meta);
             i += token->length();
             continue;
         }
@@ -85,7 +86,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, pt
         if(tokenValue) {
             increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
             increaseLocalProgress(lenOutput);
-            *r += Token(b->str.substr(i, lenOutput), tokenValue, *b->meta[i], *b->meta[i + lenOutput - 1]);
+            *r += Token(b->substr(i, lenOutput), tokenValue, (*b)[i]->meta, (*b)[i + lenOutput - 1]->meta);
             i += lenOutput;
             continue;
         }
@@ -98,7 +99,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, pt
             ErrorCode::ERROR_CMP_CHARACTER_INVALID,
             utils::ErrType::COMPILER,
             ElmCoords(b, i, i),
-            std::string("Invalid character '") + *b->str[i] + "'.\n" +
+            std::string("Invalid character '") + (*b)[i]->c + "'.\n" +
             "This character is not allowed within Lumen or Aurora source code.",
             true //TODO recovery system. skip to the first token that makes sense
         );
@@ -113,7 +114,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, pt
 
 
 
-void cmp::startTokenizationPhase(ptr<pre::SegmentedCleanSource> b, ptr<TokenizedSource> r) {
+void cmp::startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>> b, ptr<TokenizedSource<true>> r) {
 
     // Try to execute the subphase
     try {

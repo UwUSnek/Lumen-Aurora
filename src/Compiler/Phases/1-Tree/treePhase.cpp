@@ -23,7 +23,7 @@ debug(
 
 
 
-ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource> b, ulong index, bool optional debug(, int indent)) {
+ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource<true>> b, ulong index, bool optional debug(, int indent)) {
     ulong i = index;
     debug(cout << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ";)
 
@@ -126,7 +126,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                         ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
                         ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
                         "Incomplete " + parentElementStr +
-                        ((*b)[i].has_value()
+                        ((*b)[i]
                             ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                             : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
                         ),
@@ -212,7 +212,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                         ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
                         ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
                         "Incomplete " + parentElementStr +
-                        ((*b)[i].has_value()
+                        ((*b)[i]
                             ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                             : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
                         ),
@@ -312,7 +312,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             ElmCoords(b, index, i), //FIXME bad starting coords for the relevant section
                             ElmCoords(b, i,     i), //FIXME bad starting coords for the relevant section
                             "Incomplete " + parentElementStr +
-                            ((*b)[i].has_value()
+                            ((*b)[i]
                                 ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                                 : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
                             ),
@@ -416,7 +416,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             ElmCoords(b, index, i),
                             ElmCoords(b, i,     i),
                             "Incomplete " + p->genDecoratedValue(false) +
-                            ((*b)[i].has_value()
+                            ((*b)[i]
                                 ? ".\n" + expectedElementStr + " was expected, but the " + (*b)[i]->genDecoratedValue() + " was found instead."
                                 : ": Unexpected end of file.\n" + expectedElementStr + " was expected."
                             ),
@@ -455,9 +455,9 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
             cout << ansi::blue << "Keyword " << keywordId << "\n" << ansi::reset;
         )
         const auto* p = pattern->asKeyword();
-        std::optional<Token> const &t = (*b)[index];
+        const auto t = (*b)[index];
 
-        if(!t.has_value() || !t->isKeyword(p->id)) {
+        if(!t || !t->isKeyword(p->id)) {
             debug(printFail(indent);)
             return newptr<TreeGenerationResult>(0, false);
         }
@@ -477,9 +477,9 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
     // Parse identifier tokens
     if(pattern->isIdentifier()) {
         debug(cout << ansi::blue << "Identifier\n" << ansi::reset;)
-        std::optional<Token> const &t = (*b)[index];
+        const auto t = (*b)[index];
 
-        if(!t.has_value() || !t->isIdentifier()) {
+        if(!t || !t->isIdentifier()) {
             debug(printFail(indent);)
             return newptr<TreeGenerationResult>(0, false);
         }
@@ -516,7 +516,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
 
-void cmp::__internal_startTreePhase(ptr<TokenizedSource> b, ptr<SourceTree> r) {
+void cmp::__internal_startTreePhase(ptr<TokenizedSource<true>> b, ptr<SourceTree> r) {
     const auto moduleTree = generateTree(re::Module(), b, 0, false debug(, 0));
     *r->cpp() = std::dynamic_pointer_cast<ST_Module>(moduleTree->trees[0]);
 }
@@ -528,7 +528,7 @@ void cmp::__internal_startTreePhase(ptr<TokenizedSource> b, ptr<SourceTree> r) {
 
 
 
-void cmp::startTreePhase(ptr<TokenizedSource> b, ptr<SourceTree> r) {
+void cmp::startTreePhase(ptr<TokenizedSource<true>> b, ptr<SourceTree> r) {
 
     // Try to execute the subphase
     try {
