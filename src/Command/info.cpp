@@ -14,8 +14,8 @@
 //TODO update compiler executable name
 std::string cmd::getHelpMessage(){
     std::string none______        = ansi::bright_black + " │ ";
-    std::string default1_         = ansi::reset + ansi::fill_magenta + ""         + (cmd::options->printColor ? " " : "█") + ansi::reset + " ";
-    std::string default__________ = ansi::reset + ansi::fill_magenta + " DEFAULT" + (cmd::options->printColor ? " " : "█") + ansi::reset + " ";
+    std::string default1_         = ansi::reset + ansi::fill_magenta + ""         + (cmd::options.printColor ? " " : "█") + ansi::reset + " ";
+    std::string default__________ = ansi::reset + ansi::fill_magenta + " DEFAULT" + (cmd::options.printColor ? " " : "█") + ansi::reset + " ";
 
 
     std::stringstream r;

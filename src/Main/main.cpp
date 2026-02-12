@@ -43,11 +43,11 @@ If you need to be able to read it, use a real terminal.
 
 void writeOutputFile(const std::string &code) {
     // Create directories
-    fs::create_directories(fs::path(cmd::options->outputFile).parent_path());
+    fs::create_directories(fs::path(cmd::options.outputFile).parent_path());
 
 
     // Write the file and print an error if it cannot be created
-    std::ofstream f(cmd::options->outputFile);
+    std::ofstream f(cmd::options.outputFile);
     if(f.is_open()) {
         f << code;
         f.close();
@@ -55,8 +55,8 @@ void writeOutputFile(const std::string &code) {
     else {
         utils::printErrorGeneric(
             ErrorCode::ERROR_OUTPUT_CANNOT_CREATE,
-            "Could not write output file \"" + cmd::options->outputFile + "\".\n" +
-            "Output path was interpreted as: \"" + ansi::white + fs::canonical(cmd::options->outputFile).string() + ansi::reset + "\".\n",
+            "Could not write output file \"" + cmd::options.outputFile + "\".\n" +
+            "Output path was interpreted as: \"" + ansi::white + fs::canonical(cmd::options.outputFile).string() + ansi::reset + "\".\n",
             true
         );
     }
@@ -90,18 +90,18 @@ int main(int argc, char* argv[]){
 
     // Parse command line options
     cmd::parseOptions(argc, argv, fullCommand);
-    if(cmd::options->isHelp) {
+    if(cmd::options.isHelp) {
         console::cout << cmd::getHelpMessage();
         exit(0);
     }
-    if(cmd::options->isVersion) {
+    if(cmd::options.isVersion) {
         console::cout << cmd::getVersionMessage();
         exit(0);
     }
 
     console::cout << "Executing command \"" << ansi::bold_white << fullCommand << ansi::reset << "\"...\n\n";
-    bool compileModule  = cmd::options->outputType == 'x' || cmd::options->outputType == 'm';
-    bool compileExec    = cmd::options->outputType == 'x';
+    bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
+    bool compileExec    = cmd::options.outputType == 'x';
 
 
 
@@ -119,11 +119,11 @@ int main(int argc, char* argv[]){
 
 
     // Preprocessing
-    std::ifstream f(cmd::options->sourceFile);
+    std::ifstream f(cmd::options.sourceFile);
     std::string s = utils::readFile(f);
     f.close();
     totalFiles.fetch_add(1);
-    auto preprocessedSourceCode = pre::loadSourceCode(s, cmd::options->sourceFile);
+    auto preprocessedSourceCode = pre::loadSourceCode(s, cmd::options.sourceFile);
     ptr<cmp::SourceTree> precompiledModule = nullptr;
     // pre::SegmentedCleanSource *convertedCode     = nullptr; //TODO
 

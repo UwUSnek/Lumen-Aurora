@@ -1,11 +1,12 @@
 #include <fstream>
 #include <cstring>
 #include <mutex>
+#include <sys/types.h>
 #include "Main/ALC.hpp"
 #include "Main/ErrorCode.hpp"
 #include "Main/FatalErrorException.hpp"
 #include "Misc/CommentCounter.hpp"
-#include "Misc/LctCounter.hpp"
+#include "Misc/LstCounter.hpp"
 #include "Misc/TextLiteralCounter.hpp"
 #include "Misc/whitespaceCounter.hpp"
 #include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
@@ -219,7 +220,7 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
 
                         // Update phase progress data
                         increaseMaxProgress(Preprocessor_Includes, fileCode->length()); //! Self
-                        increaseMaxProgress(Preprocessor_LCT,      fileCode->length());
+                        increaseMaxProgress(Preprocessor_LineSplicing,      fileCode->length());
                         increaseMaxProgress(Preprocessor_Cleanup,  fileCode->length());
                         increaseMaxProgress(Preprocessor_Macros,   fileCode->length());
                         increaseMaxProgress(Compiler_Tokenization, fileCode->length());
@@ -233,7 +234,7 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
                         }
                         ii = k;
                         increaseLocalProgress(i - old_i);
-                        decreaseMaxProgress(Preprocessor_LCT,      i - old_i);
+                        decreaseMaxProgress(Preprocessor_LineSplicing,      i - old_i);
                         decreaseMaxProgress(Preprocessor_Cleanup,  i - old_i);
                         decreaseMaxProgress(Preprocessor_Macros,   i - old_i);
                         decreaseMaxProgress(Compiler_Tokenization, i - old_i);

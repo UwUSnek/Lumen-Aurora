@@ -109,7 +109,7 @@ std::string pre::resolveFilePath(const std::string &rawFilePath, const std::stri
 
 
         // Check and categorize each include path
-        for(const std::string &dir : cmd::options->includePaths) {
+        for(const std::string &dir : cmd::options.includePaths) {
             const std::string &fullPath = fs::path(dir) / rawFilePath;
             utils::PathCheckResult const &result = utils::checkPath(fullPath);
             (result.exists ? validPaths : invalidPaths).addPath(fullPath, result);

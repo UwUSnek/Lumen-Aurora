@@ -105,16 +105,16 @@ extern std::atomic<bool> isComplete;
 
 //TODO make this more readable, maybe group stuff in namespaces
 
-#define LIST_PHASE_ID          \
-    X(Preprocessor_Includes)   \
-    X(Preprocessor_LCT)        \
-    X(Preprocessor_Cleanup)    \
-    X(Preprocessor_Macros)     \
-    X(Compiler_Tokenization)   \
-    X(Compiler_TreeCreation)   \
-    X(Compiler_Optimization)   \
-    X(Compiler_Conversion)     \
-    X(NUM)              \
+#define LIST_PHASE_ID               \
+    X(Preprocessor_Includes)        \
+    X(Preprocessor_LineSplicing)    \
+    X(Preprocessor_Cleanup)         \
+    X(Preprocessor_Macros)          \
+    X(Compiler_Tokenization)        \
+    X(Compiler_TreeCreation)        \
+    X(Compiler_Optimization)        \
+    X(Compiler_Conversion)          \
+    X(NUM)                          \
     // ^ The number of phases, not including this enum value.
 
 

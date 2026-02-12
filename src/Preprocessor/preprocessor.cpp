@@ -3,7 +3,7 @@
 #include "Main/ALC.hpp"
 #include "Preprocessor/Phases/0-Include/includePhase.hpp"
 #include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
-#include "Preprocessor/Phases/1-LCTs/LCTsPhase.hpp"
+#include "Preprocessor/Phases/1-LineSplicing/LineSplicingPhase.hpp"
 #include "Preprocessor/Phases/2-Cleanup/cleanupPhase.hpp"
 #include "Preprocessor/Phases/3-Macros/macroPhase.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
@@ -52,7 +52,7 @@ ptr<pre::AnnotatedSource<false>> pre::loadSourceCode(const std::string &s, const
     //TODO It might help with debugging
 
     // Start the other phases
-    startSubphaseAsync(PhaseID::Preprocessor_LCT,      true, startLCTsPhase,    r1, r2);
+    startSubphaseAsync(PhaseID::Preprocessor_LineSplicing,      true, startLineSplicingPhase,    r1, r2);
     startSubphaseAsync(PhaseID::Preprocessor_Cleanup,  true, startCleanupPhase, r2, r3);
     startSubphaseAsync(PhaseID::Preprocessor_Macros,   true, startMacroPhase,   r3, r4);
 

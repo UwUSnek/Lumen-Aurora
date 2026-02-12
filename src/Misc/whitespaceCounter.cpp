@@ -7,7 +7,7 @@
 
 
 
-
+//TODO rename to "measureWhitespace"
 /**
  * @brief Calculates the number of valid consecutive whitespace characters in <b> starting from the index <index>. `[ \t\n]+`
  * @param b The string pipe that contains the whitespace characters.

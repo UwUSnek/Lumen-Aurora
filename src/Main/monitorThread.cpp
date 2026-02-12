@@ -129,7 +129,7 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
             hasError ? "Errors were detected. Skipping file output." : std::format(
                 "Output written to \"{}{}{}\"."
                 "\n",
-                ansi::reset, fs::canonical(cmd::options->outputFile).string(), ansi::bold_bright_green
+                ansi::reset, fs::canonical(cmd::options.outputFile).string(), ansi::bold_bright_green
             )
         );
     }
@@ -187,7 +187,7 @@ void startMonitorThread(const std::string fullCommand){ //NOSONAR
 
 
         // Print status UI
-        if(cmd::options->printStatus) {
+        if(cmd::options.printStatus) {
             printStatusUI(fullCommand, loop, progressBarWidth, delayedIsCompleted);
         }
 

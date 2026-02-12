@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 
 
 
-cmd::Options *cmd::options = new cmd::Options();
+cmd::Options cmd::options = cmd::Options();
 
 
 
@@ -41,17 +41,17 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
         std::string o(argv[i]);
         if(o == "--no-color") {
             __internal_no_color = true;
-            options->printColor = false;
+            options.printColor = false;
         }
         else if(o == "--help") {
-            options->isHelp = true;
+            options.isHelp = true;
         }
         else if(o == "--version") {
-            options->isVersion = true;
+            options.isVersion = true;
         }
     }
     if(!__internal_no_color) ansi::enableEscapes();
-    if(options->isHelp || options->isVersion) return;
+    if(options.isHelp || options.isVersion) return;
 
 
 
@@ -83,11 +83,11 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             "Incompatible options: " +
                             DBG_fullCommand.substr(currentOutputTypeCoords.start, currentOutputTypeCoords.end - currentOutputTypeCoords.start) + " option used with " +
                             DBG_fullCommand.substr(   lastOutputTypeCoords.start,    lastOutputTypeCoords.end    - lastOutputTypeCoords.start),
-                            true, //TODO recovery system? if possible.
+                            true,
                             DBG_fullCommand
                         );
                     }
-                    options->outputType = c;
+                    options.outputType = c;
                     lastOutputTypeCoords = currentOutputTypeCoords;
 
 
@@ -100,13 +100,13 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             ElmCoordsCL(optionPosition, optionPosition + o.length()),
                             "Missing output path after " + o + " option.\n" +
                             "An output path must be specified.",
-                            true, //TODO recovery system? if possible.
+                            true,
                             DBG_fullCommand
                         );
                     }
 
                     // Valid option
-                    options->outputFile = argv[i];
+                    options.outputFile = argv[i];
                     optionPosition += strlen(argv[i]) + 1;
 
                     break;
@@ -126,11 +126,11 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             "Incompatible options: " +
                             DBG_fullCommand.substr(currentTargetPlatformCoords.start, currentTargetPlatformCoords.end - currentTargetPlatformCoords.start) + " option used with " +
                             DBG_fullCommand.substr(   lastTargetPlatformCoords.start,    lastTargetPlatformCoords.end    - lastTargetPlatformCoords.start),
-                            true, //TODO recovery system? if possible.
+                            true,
                             DBG_fullCommand
                         );
                     }
-                    options->outputType = c;
+                    options.outputType = c;
                     lastTargetPlatformCoords = currentTargetPlatformCoords;
 
                     break;
@@ -151,7 +151,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             optionCoords,
                             "Missing i" + w + "path after " + o + " option.\n"
                             "A path to a directory must be specified.",
-                            true, //TODO recovery system? if possible.
+                            true,
                             DBG_fullCommand
                         );
                     }
@@ -166,7 +166,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "Could not find directory \"" + path + "\".\n" +
                             "Current working directory is: \"" + ansi::white + fs::current_path().string() + ansi::reset + "\".",
-                            true, //TODO recovery system? if possible.
+                            true,
                             DBG_fullCommand
                         );
                     }
@@ -180,7 +180,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "The specified i" + w + " path \"" + path + "\" is not a directory.\n" +
                             "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
-                            true, //TODO recovery system? if possible.
+                            true,
                             DBG_fullCommand
                         );
                     }
@@ -193,14 +193,14 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                             cmd::ElmCoordsCL(pathPosition, pathPosition + path.length()),
                             "The specified i" + w + " directory \"" + path + "\" cannot be used: no read permission.\n" +
                             "I" + w + " path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
-                            true, //TODO recovery system? if possible.
+                            true,
                             DBG_fullCommand
                         );
                     }
 
 
                     // Push canonical path to the list and adjust the option position
-                    (c == 'I' ? options->includePaths : options->importPaths).push_back(canonicalPath);
+                    (c == 'I' ? options.includePaths : options.importPaths).push_back(canonicalPath);
                     optionPosition += path.length() + 1;
 
                     break;
@@ -215,17 +215,17 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                 //! This else-if is only used to let the parser recognize it as a valid option
             }
             else if(o == "--no-display") {
-                options->printDisplay = false;
+                options.printDisplay = false;
             }
             else if(o == "--no-errors") {
-                options->printErrors = false;
+                options.printErrors = false;
             }
             else if(o == "--no-status") {
-                options->printStatus = false;
+                options.printStatus = false;
             }
             else if(o == "--silent") {
-                options->silent = true;
-                options->printStatus = false;
+                options.silent = true;
+                options.printStatus = false;
             }
 
 
@@ -239,7 +239,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
                     cmd::ElmCoordsCL(optionPosition, optionPosition + o.length()),
                     "Unknown command line option \"" + ansi::white + o + ansi::reset + "\".",
-                    true, //TODO recovery system? if possible.
+                    true,
                     DBG_fullCommand
                 );
             }
@@ -258,7 +258,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     currentSourceCoords,
                     "Multiple source files specified.\n"
                     "Only one at a time is allowed.",
-                    true, //TODO recovery system? if possible.
+                    true,
                     DBG_fullCommand
                 );
                 lastSourceCoords = currentSourceCoords;
@@ -287,7 +287,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     currentSourceCoords,
                     "The specified source file path \"" + o + "\" is a directory.\n" +
                     "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
-                    true, //TODO recovery system? if possible.
+                    true,
                     DBG_fullCommand
                 );
             }
@@ -300,12 +300,12 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
                     currentSourceCoords,
                     "Could not open source file \"" + o + "\": no read permission.\n" +
                     "Source file path was interpreted as \"" + ansi::white + canonicalPath + ansi::reset + "\".",
-                    true, //TODO recovery system? if possible.
+                    true,
                     DBG_fullCommand
                 );
             }
 
-            options->sourceFile = canonicalPath;
+            options.sourceFile = canonicalPath;
         }
 
 
@@ -317,14 +317,14 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
 
 
     // Print error if no source file is specified
-    if(options->sourceFile.empty()) {
+    if(options.sourceFile.empty()) {
         utils::printErrorCL(
             ErrorCode::ERROR_CMD_SOURCE_MISSING,
             ElmCoordsCL(optionPosition - 1, optionPosition - 1),
             ElmCoordsCL(optionPosition - 1, optionPosition - 1),
             "Source code path is missing.\n"
             "A path to the input source code must be specified.",
-            true, //TODO recovery system? if possible.
+            true,
             DBG_fullCommand
         );
     }
@@ -334,17 +334,17 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
 
     // Use default type and path if not specified
     //! Output path is tied to the output type option
-    if(options->outputType == '\0') {
-        options->outputFile = options->sourceFile + ".out";
-        options->outputType = 'x';
+    if(options.outputType == '\0') {
+        options.outputFile = options.sourceFile + ".out";
+        options.outputType = 'x';
     }
 
 
 
 
     // Use default target platform if not specified
-    if(options->targetPlatform == '\0') {
-        options->targetPlatform = 'l';
+    if(options.targetPlatform == '\0') {
+        options.targetPlatform = 'l';
     }
 }
 

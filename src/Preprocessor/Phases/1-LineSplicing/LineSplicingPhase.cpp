@@ -1,7 +1,7 @@
-#include "Preprocessor/Phases/1-LCTs/LCTsPhase.hpp"
+#include "Preprocessor/Phases/1-LineSplicing/LineSplicingPhase.hpp"
 #include "Main/ALC.hpp"
 #include "Main/FatalErrorException.hpp"
-#include "Misc/LctCounter.hpp"
+#include "Misc/LstCounter.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
 
 
@@ -17,12 +17,12 @@
 
 
 
-void pre::__internal_startLCTsPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
+void pre::__internal_startLineSplicingPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
 
     ulong i = 0;
     while((*b)[i]) {
 
-        // Skip LCTs
+        // Skip Line continuation tokens
         ulong lct = misc::measureLct(*b, i);
         if(lct) {
             using enum PhaseID;
@@ -40,8 +40,8 @@ void pre::__internal_startLCTsPhase(ptr<AnnotatedSource<false>> b, ptr<Annotated
             ++i;
         }
 
-        //! Macro definitions and invocations cannot paste LCTs.
-        //! LCTs are removed before macros are parsed.
+        //! Macro definitions and invocations cannot paste LSTs.
+        //! LSTs are removed before macros are parsed.
         //! No need to check them.
     }
 }
@@ -52,11 +52,11 @@ void pre::__internal_startLCTsPhase(ptr<AnnotatedSource<false>> b, ptr<Annotated
 
 
 
-void pre::startLCTsPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
+void pre::startLineSplicingPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<false>> r) {
 
     // Try to execute the subphase
     try {
-        __internal_startLCTsPhase(b, r);
+        __internal_startLineSplicingPhase(b, r);
         r->closePipe();
     }
 

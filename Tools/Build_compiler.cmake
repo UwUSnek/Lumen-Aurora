@@ -38,7 +38,7 @@ add_executable(alc
 
     #../src/Misc
         ../src/Misc/CommentCounter.cpp
-        ../src/Misc/LctCounter.cpp
+        ../src/Misc/LstCounter.cpp
         ../src/Misc/TextLiteralCounter.cpp
         ../src/Misc/whitespaceCounter.cpp
 
@@ -52,8 +52,8 @@ add_executable(alc
                     ../src/Preprocessor/Phases/0-Include/includePhase.cpp
                     ../src/Preprocessor/Phases/0-Include/pathSolver.cpp
                     ../src/Preprocessor/Phases/0-Include/metadataGenerator.cpp
-                #../src/Preprocessor/Phases/1-LCTs
-                    ../src/Preprocessor/Phases/1-LCTs/LCTsPhase.cpp
+                #../src/Preprocessor/Phases/1-LineSplicing
+                    ../src/Preprocessor/Phases/1-LineSplicing/LineSplicingPhase.cpp
                 #../src/Preprocessor/Phases/2-Cleanup
                     ../src/Preprocessor/Phases/2-Cleanup/cleanupPhase.cpp
                 #../src/Preprocessor/Phases/3-Macros
