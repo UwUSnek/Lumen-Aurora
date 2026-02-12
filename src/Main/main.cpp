@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
     pthread_setname_np(pthread_self(), "Main Thread");
 
     // Set version number
-    versionNumer = new VersionNumber('L', 0, 1, 0, '\0'); //NOSONAR(cpp:S4792)
+    versionNumer = new VersionNumber('L', 0, 2, 0, '\0'); //NOSONAR(cpp:S4792)
 
 
 
