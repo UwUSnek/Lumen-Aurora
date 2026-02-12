@@ -9,7 +9,7 @@
 
 
 
-void pre::__internal_startMacroPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r){
+void pre::__internal_startMacroPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r){
     ulong i = 0;
     while((*b)[i]) {
 
@@ -36,7 +36,7 @@ void pre::__internal_startMacroPhase(ptr<SegmentedCleanSource<true>> b, ptr<Segm
 
 
 
-void pre::startMacroPhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r){
+void pre::startMacroPhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r){
 
     // Try to execute the subphase
     try {

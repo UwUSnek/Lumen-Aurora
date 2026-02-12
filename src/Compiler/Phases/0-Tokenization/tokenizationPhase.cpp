@@ -15,7 +15,7 @@
 
 
 
-void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>> b, ptr<TokenizedSource<true>> r) {
+void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<false>> b, ptr<TokenizedSource<false>> r) {
 
     ulong i = 0;
     while((*b)[i]) {
@@ -72,7 +72,8 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>>
             // Push token to output array and update buffer index
             increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
             increaseLocalProgress(token.length());
-            *r += Token(b->substr(i, token.length()), _tokenValue, (*b)[i]->meta, (*b)[i + token.length() - 1]->meta);
+            *r += Token(token, _tokenValue, (*b)[i]->meta, (*b)[i + token.length() - 1]->meta);
+            // *r += Token(b->substr(i, token.length()), _tokenValue, (*b)[i]->meta, (*b)[i + token.length() - 1]->meta);
             i += token.length();
             continue;
         }
@@ -114,7 +115,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>>
 
 
 
-void cmp::startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>> b, ptr<TokenizedSource<true>> r) {
+void cmp::startTokenizationPhase(ptr<pre::SegmentedCleanSource<false>> b, ptr<TokenizedSource<false>> r) {
 
     // Try to execute the subphase
     try {

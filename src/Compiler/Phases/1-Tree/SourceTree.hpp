@@ -76,7 +76,7 @@ namespace cmp {
         #undef X
     };
 
-    using SourceTree = GenericPipe<ptr<ST_Module>>;
+    struct SourceTree : GenericPipe<ptr<ST_Module>> { };
 
 
 

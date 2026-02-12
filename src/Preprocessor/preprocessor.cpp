@@ -6,11 +6,8 @@
 #include "Preprocessor/Phases/1-LCTs/LCTsPhase.hpp"
 #include "Preprocessor/Phases/2-Cleanup/cleanupPhase.hpp"
 #include "Preprocessor/Phases/3-Macros/macroPhase.hpp"
+#include "Preprocessor/SegmentedCleanSource.hpp"
 #include <mutex>
-
-
-
-
 
 
 
@@ -21,7 +18,7 @@
  * @param filePath The path of the original source code file.
  * @return The contents of the source file as a SegmentedCleanSource.
  */
-ptr<pre::SegmentedCleanSource<true>> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
+ptr<pre::SegmentedCleanSource<false>> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
     ulong pathIndex;
     {
         std::scoped_lock lock(sourceFilePathsLock);
@@ -37,15 +34,14 @@ ptr<pre::SegmentedCleanSource<true>> pre::loadSourceCode(const std::string &s, c
     //FIXME SAVE INCLUDE STACK
 
     // Load raw code of the root file
-    auto r0 = newptr<SegmentedCleanSource<true>>();
+    auto r0 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
     generateMetadata(s, r0, pathIndex);
 
-    SegmentedCleanSource<true>(5UL);
     // Create pipes
-    auto r1 = newptr<SegmentedCleanSource<true>>();
-    auto r2 = newptr<SegmentedCleanSource<true>>();
-    auto r3 = newptr<SegmentedCleanSource<true>>();
-    auto r4 = newptr<SegmentedCleanSource<true>>();
+    auto r1 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r2 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r3 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r4 = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
 
     // Include all files
     startSubphaseAsync(PhaseID::Preprocessor_Includes, true, startIncludePhase, r0, r1);

@@ -163,7 +163,7 @@ namespace cmp {
         pre::CleanSourceMeta end;       // The index, line, columns and file of the last  character relative to the original source code
 
 
-        Token() = default;
+        Token() = delete;
         Token(const Token &token) = default;
         Token(const std::string& _OG_Value, ptr<TokenValue> _value, pre::CleanSourceMeta const &_start, pre::CleanSourceMeta const &_end) :
             OG_Value(_OG_Value),

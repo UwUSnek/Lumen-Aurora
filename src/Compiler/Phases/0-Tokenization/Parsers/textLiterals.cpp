@@ -48,7 +48,7 @@ const char* getLiteralName(const cmp::TextLiteralType literalType) {
  * @param literalType The type of literal this escape sequence is part of. This affects error messages.
  * @return The string value of the translated escape sequence, expressed in the UTF-8 format, or nullopt if one was not found.
  */
-std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawEscapeLen, cmp::TextLiteralType literalType) {
+std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<false>> b, ulong index, ulong *rawEscapeLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
     *rawEscapeLen = 0;
     //! Set length to 0 before doing anything
@@ -190,7 +190,7 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<tr
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal, or nullopt if one was not found.
  */
-ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawLiteralLen, cmp::TextLiteralType literalType) {
+ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource<false>> b, ulong index, ulong *rawLiteralLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
     *rawLiteralLen = 0;
     //! Set length to 0 before doing anything

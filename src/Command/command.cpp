@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 
 
 
-cmd::Options *cmd::options = new Options();
+cmd::Options *cmd::options = new cmd::Options();
 
 
 
@@ -333,7 +333,7 @@ void cmd::parseOptions(int argc, char* argv[], const std::string &DBG_fullComman
 
 
     // Use default type and path if not specified
-    //! Outpuut path is tied to the output type option
+    //! Output path is tied to the output type option
     if(options->outputType == '\0') {
         options->outputFile = options->sourceFile + ".out";
         options->outputType = 'x';

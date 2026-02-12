@@ -16,7 +16,7 @@
  * @param index The index to check.
  * @return The number of characters the LCT occupies, or 0 if one was not found.
  */
-ulong misc::measureLct(pre::SegmentedCleanSource<true> &b, ulong index) {
+ulong misc::measureLct(pre::SegmentedCleanSource<false> &b, ulong index) {
     auto c0 = b[index];
     auto c1 = b[index + 1];
 

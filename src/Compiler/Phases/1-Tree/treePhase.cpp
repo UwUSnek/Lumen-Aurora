@@ -23,7 +23,7 @@ debug(
 
 
 
-ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource<true>> b, ulong index, bool optional debug(, int indent)) {
+ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource<false>> b, ulong index, bool optional debug(, int indent)) {
     ulong i = index;
     debug(cout << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ";)
 
@@ -516,7 +516,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
 
-void cmp::__internal_startTreePhase(ptr<TokenizedSource<true>> b, ptr<SourceTree> r) {
+void cmp::__internal_startTreePhase(ptr<TokenizedSource<false>> b, ptr<SourceTree> r) {
     const auto moduleTree = generateTree(re::Module(), b, 0, false debug(, 0));
     *r->cpp() = std::dynamic_pointer_cast<ST_Module>(moduleTree->trees[0]);
 }
@@ -528,7 +528,7 @@ void cmp::__internal_startTreePhase(ptr<TokenizedSource<true>> b, ptr<SourceTree
 
 
 
-void cmp::startTreePhase(ptr<TokenizedSource<true>> b, ptr<SourceTree> r) {
+void cmp::startTreePhase(ptr<TokenizedSource<false>> b, ptr<SourceTree> r) {
 
     // Try to execute the subphase
     try {

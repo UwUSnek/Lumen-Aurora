@@ -123,7 +123,7 @@ int main(int argc, char* argv[]){
     std::string s = utils::readFile(f);
     f.close();
     totalFiles.fetch_add(1);
-    ptr<pre::SegmentedCleanSource<true>> preprocessedSourceCode = pre::loadSourceCode(s, cmd::options->sourceFile);
+    auto preprocessedSourceCode = pre::loadSourceCode(s, cmd::options->sourceFile);
     ptr<cmp::SourceTree> precompiledModule = nullptr;
     // pre::SegmentedCleanSource *convertedCode     = nullptr; //TODO
 

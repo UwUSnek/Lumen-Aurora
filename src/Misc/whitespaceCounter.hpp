@@ -5,6 +5,6 @@
 
 
 namespace misc {
-    ulong countWhitespace(pre::SegmentedCleanSource<true> &b, ulong index);
+    ulong countWhitespace(pre::SegmentedCleanSource<false> &b, ulong index);
     bool  isWhitespaceChar(const char &c);
 }

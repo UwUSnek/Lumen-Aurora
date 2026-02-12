@@ -5,5 +5,5 @@
 
 
 namespace misc {
-    ulong measureTextLiteral(pre::SegmentedCleanSource<true> &b, ulong index);
+    ulong measureTextLiteral(pre::SegmentedCleanSource<false> &b, ulong index);
 }

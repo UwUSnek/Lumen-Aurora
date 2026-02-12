@@ -40,8 +40,8 @@ struct ElmCoords {
 
 
 
-    ElmCoords(ptr<pre::SegmentedCleanSource<true>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
-    ElmCoords(ptr<cmp::TokenizedSource<true>>      source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
+    ElmCoords(ptr<pre::SegmentedCleanSource<false>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
+    ElmCoords(ptr<cmp::TokenizedSource<false>>      source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
 
 
 

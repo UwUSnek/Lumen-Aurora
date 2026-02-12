@@ -15,7 +15,7 @@
  * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
  * @return The string value of the literal token, or nullptr if one was not found.
  */
-ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawLiteralLen) {
+ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource<false>> b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
     *rawLiteralLen = 0;
     //! Set length to 0 before doing anything

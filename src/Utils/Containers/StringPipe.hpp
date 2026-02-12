@@ -51,7 +51,7 @@ protected:
 
 
 public:
-    StringPipe() = delete;
+    StringPipe() = default;
 
     explicit StringPipe(ulong capacity) {
         this->cpp()->reserve(capacity);

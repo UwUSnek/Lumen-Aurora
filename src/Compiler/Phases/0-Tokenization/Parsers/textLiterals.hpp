@@ -12,5 +12,5 @@ namespace cmp {
         CHAR
     };
 
-    ptr<TokenValue> parseTextLiteral(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawLiteralLen, TextLiteralType literalType);
+    ptr<TokenValue> parseTextLiteral(ptr<pre::SegmentedCleanSource<false>> b, ulong index, ulong *rawLiteralLen, TextLiteralType literalType);
 }

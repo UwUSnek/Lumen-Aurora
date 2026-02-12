@@ -17,7 +17,7 @@ namespace pre {
         ulong f;               // The index of the original file of the character in the str buffer
 
 
-        CleanSourceMeta() = default;
+        CleanSourceMeta() = delete;
         CleanSourceMeta(const CleanSourceMeta &meta) = default;
         CleanSourceMeta(ulong _i, ulong _l, ulong _c, ulong _f) :
             i(_i),
@@ -35,7 +35,7 @@ namespace pre {
         CleanSourceMeta meta;
 
 
-        CleanSourceElm() = default;
+        CleanSourceElm() = delete;
         CleanSourceElm(const CleanSourceElm& elm) = default;
         CleanSourceElm(const char _c, const CleanSourceMeta& _meta) :
             c(_c),
@@ -134,7 +134,7 @@ namespace pre {
         }
 
 
-        SegmentedCleanSource() = default;
+        SegmentedCleanSource() = delete;
         using VectorPipe<CleanSourceElm, safeRealloc>::VectorPipe;
     };
 }

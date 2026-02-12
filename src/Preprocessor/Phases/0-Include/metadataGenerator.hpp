@@ -6,5 +6,5 @@
 
 
 namespace pre {
-    void generateMetadata(const std::string &rawCode, ptr<SegmentedCleanSource<true>> r, ulong DBG_filePathIndex);
+    void generateMetadata(const std::string &rawCode, ptr<SegmentedCleanSource<false>> r, ulong DBG_filePathIndex);
 }

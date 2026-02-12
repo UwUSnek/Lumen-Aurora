@@ -14,6 +14,7 @@
 #include "includePhase.hpp"
 #include "Utils/ansi.hpp"
 #include "pathSolver.hpp"
+#include "Preprocessor/preprocessor.hpp"
 
 
 
@@ -26,7 +27,7 @@ static constexpr const char* INCLUDE_TEXT = "#include";
 
 //! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b[i:]
-static std::string parseIncludeStatementName(ulong index, pre::SegmentedCleanSource<true> &b) {
+static std::string parseIncludeStatementName(ulong index, pre::SegmentedCleanSource<false> &b) {
 
     // Check include statement text
     std::string r;
@@ -60,7 +61,7 @@ static std::string parseIncludeStatementName(ulong index, pre::SegmentedCleanSou
 
 //! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b[i:]
-static std::string parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource<true> &b) {
+static std::string parseIncludeStatementPath(ulong index, pre::SegmentedCleanSource<false> &b) {
     std::string r;
 
 
@@ -123,7 +124,7 @@ static std::string parseIncludeStatementPath(ulong index, pre::SegmentedCleanSou
 
 
 
-void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource<true>> b0, ptr<SegmentedCleanSource<true>> r) {
+void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource<false>> b0, ptr<SegmentedCleanSource<false>> r) {
 
 
     // Clean the code, saving the result in a temporary buffer. Skip validation checks
@@ -131,7 +132,7 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource<true>> b0, ptr<S
     //! Performance overhead is negligible.
     ulong i  = 0; // b0 index
     ulong ii = 0; // b  index (clean)
-    auto b = newptr<SegmentedCleanSource<true>>();
+    auto b = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
     auto skipped = std::vector<ulong>(b0->length(), 0); //! Oversized. Extra elements are simply not used. Initialize to all 0s
     while((*b0)[i]) {
 
@@ -209,7 +210,7 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource<true>> b0, ptr<S
 
 
                         // Read and prepare code from the file
-                        auto fileCode = newptr<SegmentedCleanSource<true>>();
+                        auto fileCode = newptr<SegmentedCleanSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
                         totalFiles.fetch_add(1);
                         sourceFilePaths.push_back(actualFilePath);
                         auto newFilePathIndex = sourceFilePaths.size() - 1;
@@ -295,7 +296,7 @@ void pre::__internal_startIncludePhase(ptr<SegmentedCleanSource<true>> b0, ptr<S
 
 
 
-void pre::startIncludePhase(ptr<SegmentedCleanSource<true>> b, ptr<SegmentedCleanSource<true>> r) {
+void pre::startIncludePhase(ptr<SegmentedCleanSource<false>> b, ptr<SegmentedCleanSource<false>> r) {
 
     // Try to execute the subphase
     try {

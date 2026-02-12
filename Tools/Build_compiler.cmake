@@ -119,7 +119,7 @@ set_target_properties(alc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ../Build)
 # GCC compilaiton options
 target_link_options(alc PRIVATE
     $<$<CONFIG:Debug>:
-        -fsanitize=address      # Check Heap/stack overflows, use-after-free
+        -fsanitize=address      # Check Heap/stack overflows, use-after-free  # Incompatible with Valgrind
         -fsanitize=undefined    # Check UB: signed overflow, null deref, misaligned access...
         -fsanitize=leak         # Check Memory leaks (included in address on Linux, but explicit is fine)
         # -fsanitize=thread       # Check thread issues  # Incompatible with the other sanitizer options
@@ -135,7 +135,7 @@ target_compile_options(alc PRIVATE
         -fno-omit-frame-pointer # Reliable stack traces
         -fno-inline             # Don't inline functions
 
-        -fsanitize=address      # Check Heap/stack overflows, use-after-free
+        -fsanitize=address      # Check Heap/stack overflows, use-after-free  # Incompatible with Valgrind
         -fsanitize=undefined    # Check UB: signed overflow, null deref, misaligned access...
         -fsanitize=leak         # Check Memory leaks (included in address on Linux, but explicit is fine)
         # -fsanitize=thread       # Check thread issues  # Incompatible with the other sanitizer options
