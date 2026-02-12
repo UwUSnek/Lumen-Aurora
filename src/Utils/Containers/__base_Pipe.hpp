@@ -21,6 +21,9 @@ private:
 
 protected:
     __base_Pipe() = default;
+    explicit __base_Pipe(const t &elm) :
+        s(elm) {
+    }
 
     template<class ...u>
     explicit __base_Pipe(u &&...args)
@@ -66,9 +69,9 @@ public:
 
 
     /**
-     * @brief Returns the address to the base value used by this BasePipe.
+     * @brief Returns the address of the base value used by this BasePipe.
      *      Operations on this object are only thread-safe if .isOpen() returns false.
-     * @return A pointer to the base object.
+     * @return The address of the base object.
      */
     t *cpp() {
         return &s;
@@ -78,9 +81,9 @@ public:
 
 
     /**
-     * @brief Returns the address to the base value used by this BasePipe.
+     * @brief Returns the address of the base value used by this BasePipe.
      *      Operations on this object are only thread-safe if .isOpen() returns false.
-     * @return A pointer to the base object.
+     * @return The address of the base object.
      */
     t const *cpp() const {
         return &s;

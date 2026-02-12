@@ -18,6 +18,9 @@ private:
 
 public:
     GenericPipe() = default;
+    explicit GenericPipe(const t &elm) :
+        __base_Pipe<t>(elm) {
+    }
 
     template<class ...u>
     explicit GenericPipe(u &&...args)
