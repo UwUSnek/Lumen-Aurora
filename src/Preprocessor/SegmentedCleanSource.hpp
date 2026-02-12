@@ -16,14 +16,15 @@ namespace pre {
         ulong c;               // The original column number of the character in the str buffer (starts from 0)
         ulong f;               // The index of the original file of the character in the str buffer
 
+
+        CleanSourceMeta() = default;
+        CleanSourceMeta(const CleanSourceMeta &meta) = default;
         CleanSourceMeta(ulong _i, ulong _l, ulong _c, ulong _f) :
             i(_i),
             l(_l),
             c(_c),
             f(_f) {
         }
-
-        CleanSourceMeta(CleanSourceMeta const &meta) = default;
     };
 
 
@@ -32,6 +33,32 @@ namespace pre {
     struct CleanSourceElm {
         char c;
         CleanSourceMeta meta;
+
+
+        CleanSourceElm() = default;
+        CleanSourceElm(const CleanSourceElm& elm) = default;
+        CleanSourceElm(const char _c, const CleanSourceMeta& _meta) :
+            c(_c),
+            meta(_meta) {
+        }
+
+        char operator*() const {
+            return c;
+        }
+
+        bool operator==(const char _c) const {
+            return c == _c;
+        }
+
+        bool operator!=(const char _c) const {
+            return c != _c;
+        }
+
+        //! Intentionally not explicit
+        //! CleanSourceElm implicitly should be convertible to chars to make the code more readable
+        operator char() const { //NOSONAR
+            return c;
+        }
     };
 
 
@@ -43,14 +70,72 @@ namespace pre {
      *      It retains informations about any removed portion of code.
      *      If the original file is available, it allows every character of the code to be traced back to its original position.
      */
-    struct SegmentedCleanSource : VectorPipe<CleanSourceElm> {
+    template<bool safeRealloc=true> struct SegmentedCleanSource : VectorPipe<CleanSourceElm, safeRealloc> {
 
-        std::string substr(ulong index, ulong len);
-        bool strcmp(ulong i, const char* str);
-        bool strcmp(ulong i, const std::string &str);
+
+        std::string substr(ulong index, ulong len) requires(safeRealloc == true) {
+            auto lock = this->scoped_lock();
+            return __internal_finalizeSubstr(index, len);
+        }
+        std::string substr(ulong index, ulong len) requires(safeRealloc == false) {
+            return __internal_finalizeSubstr(index, len);
+        }
+        std::string __internal_finalizeSubstr(ulong index, ulong len) {
+
+            // Create result string with specified capacity and calculate end index
+            std::string r;
+            r.reserve(len);
+            const ulong end = index + len;
+
+            // Construct the substring
+            for(ulong i = index; i < end; ++i) {
+                const auto c = this->operator[](i);
+                if(!c) return r;
+                r += *c;
+            }
+            return r;
+        }
+
+
+
+
+
+        bool strcmp(ulong index, const char* str) requires(safeRealloc == true) {
+            auto lock = this->scoped_lock();
+            return __internal_finalizeStrcmp(index, str);
+        }
+        bool strcmp(ulong index, const char* str) requires(safeRealloc == false) {
+            return __internal_finalizeStrcmp(index, str);
+        }
+        bool __internal_finalizeStrcmp(ulong index, const char* str) {
+
+            // For each character of the pipe (starting at the specified index) and the string (starting at index 0)
+            for(ulong i = 0;; ++i) {
+                const auto &entry = this->operator[](i + index);
+                bool data_ended = !entry;
+                bool str_ended = (str[i] == '\0');
+
+                // Check if strings ended together (match)
+                if(data_ended && str_ended) return true;
+
+                // Check if only one string ended (no match)
+                if(data_ended || str_ended) return false;
+
+                // Compare characters (no match if different, keep checking otherwise)
+                if(entry->c != str[i]) return false;
+            }
+        }
+
+
+
+
+        bool strcmp(ulong index, const std::string &str) {
+            //! Scoped lock is handled by the override
+            return strcmp(index, str.c_str()); //NOSONAR
+        }
 
 
         SegmentedCleanSource() = default;
-        using VectorPipe::VectorPipe;
+        using VectorPipe<CleanSourceElm, safeRealloc>::VectorPipe;
     };
 }

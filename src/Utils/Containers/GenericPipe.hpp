@@ -25,6 +25,6 @@ public:
         __base_Pipe<t>(std::forward<u>(args)...) {
     }
 
-    void   lock(){ m.  lock(); } //NOSONAR
-    void unlock(){ m.unlock(); } //NOSONAR
+    void   lock(){ m.  lock(); } //NOSONAR //TODO check if this is actually needed. find all references
+    void unlock(){ m.unlock(); } //NOSONAR //TODO check if this is actually needed. find all references
 };
