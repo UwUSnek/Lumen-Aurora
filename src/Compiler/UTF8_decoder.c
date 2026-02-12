@@ -30,8 +30,14 @@
 
 
 
-#include <stddef.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wextra"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 
+#include <stddef.h>
 #include "UTF8_decoder.h"
 
 
@@ -464,3 +470,4 @@ void utf8chr(const int32_t codepoint, utf8chr_t* dest)
 #undef END
 #undef UTF8_BAD_CHAR
 #undef UTF8_GOOD_CHAR
+#pragma GCC diagnostic pop

@@ -14,7 +14,7 @@ std::recursive_mutex console::__internal_consoleLock;
 int console::__internal_cout_stream_t::overflow(int c) {
     if(c != EOF) {
         if(c == '\n') std::cout << "\033[K";
-        std::cout.put(c); //NOSONAR
+        std::cout.put((char)c);
     }
     return c;
 }
@@ -29,7 +29,7 @@ console::__internal_cout_stream_t_wrapper console::cout;
 int console::__internal_cerr_stream_t::overflow(int c) {
     if(c != EOF) {
         if(c == '\n') std::cerr << "\033[K";
-        std::cerr.put(c); //NOSONAR
+        std::cerr.put((char)c);
     }
     return c;
 }

@@ -30,7 +30,7 @@ void cmp::Pattern_Elm_StructElmCluster::init() {
     __base_Pattern_Composite::__internal_init(
         re::Type(),
         re::StructElm(),
-        op::Optional((ulong)-1, op::Loop(1,
+        op::Optional((ulong)-1, op::Loop(1UL,
             tk::Keyword(KEYWORD_COMMA),
             re::StructElm()
         )),

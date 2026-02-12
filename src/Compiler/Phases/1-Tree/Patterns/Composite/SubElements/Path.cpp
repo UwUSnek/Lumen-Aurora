@@ -28,7 +28,7 @@ ulong cmp::Pattern_Elm_Path::getCertaintyThreshold() const {
 void cmp::Pattern_Elm_Path::init(){
     __base_Pattern_Composite::__internal_init(
         tk::Identifier(),
-        op::Optional((ulong)-1, op::Loop(1,
+        op::Optional((ulong)-1, op::Loop(1UL,
             tk::Keyword(ReservedTokenId::KEYWORD_DOT), //FIXME add reflection paths
             tk::Identifier()
         ))

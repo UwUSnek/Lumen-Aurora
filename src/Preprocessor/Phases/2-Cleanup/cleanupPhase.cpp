@@ -31,7 +31,7 @@ void pre::__internal_startCleanupPhase(ptr<SegmentedCleanSource<false>> b, ptr<S
         // Skip (and preserve) literals
         if(auto literalLen = misc::measureTextLiteral(*b, i); literalLen) {
             increaseLocalProgress(literalLen);
-            for(int j = 0; j < literalLen; ++j) {
+            for(ulong j = 0; j < literalLen; ++j) {
                 *r += *(*b)[i + j];
             }
             i += literalLen;

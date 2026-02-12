@@ -28,7 +28,7 @@ ulong cmp::Pattern_Elm_EnumElm::getCertaintyThreshold() const {
 void cmp::Pattern_Elm_EnumElm::init() {
     __base_Pattern_Composite::__internal_init(
         tk::Identifier(),
-        op::Optional(1,
+        op::Optional(1UL,
             tk::Keyword(ReservedTokenId::META_KEYWORD_ASSIGN)
             //FIXME expression
         ),

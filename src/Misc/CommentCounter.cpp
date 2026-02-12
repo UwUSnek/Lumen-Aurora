@@ -27,7 +27,7 @@ ulong misc::measureComment(pre::SegmentedCleanSource<false> &b, ulong index) {
     while(true) {
 
         // Single character closing sequences (End of file or single line comments)
-        if(!b[i] || commType == '/' && b[i]->c == '\n') {
+        if(!b[i] || (commType == '/' && b[i]->c == '\n')) {
             break;
         }
         const char c = b[i]->c;

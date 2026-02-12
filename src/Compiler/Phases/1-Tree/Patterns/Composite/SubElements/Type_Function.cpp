@@ -7,7 +7,10 @@ std::string cmp::ST_FunctionType::getCategoryName(bool plural) const {
 }
 
 std::string cmp::Pattern_Elm_Type_Function::genDecoratedValue(bool article) const {
-    return "" debug("Debug:TypePathFunction");
+    return article
+        ? "a Function Type Path"
+        :   "Function Type Path"
+    ;
 }
 
 ulong cmp::Pattern_Elm_Type_Function::getCertaintyThreshold() const {
@@ -29,7 +32,7 @@ void cmp::Pattern_Elm_Type_Function::init() {
         tk::Keyword(KEYWORD_ROUND_L),
         op::Optional((ulong)-1,
             re::Type(),
-            op::Optional((ulong)-1, op::Loop(1,
+            op::Optional((ulong)-1, op::Loop(1UL,
                 tk::Keyword(KEYWORD_COMMA),
                 re::Type()
             ))
