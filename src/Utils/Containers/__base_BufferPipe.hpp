@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include <optional>
 #include <type_traits>
 #include <mutex>
@@ -122,25 +121,24 @@ public:
 
 
     /**
-     * @brief Retrieves the element at the requested index and returns its address.
+     * @brief Retrieves the element at the requested index and returns a copy of it.
      * @param i The index.
-     * @return The address of the requested element, or nullptr if the pipe was closed before reaching the required size.
+     * @return A copy of the requested element wrapped in an optional, or nullopt if the pipe was closed before reaching the required size.
      */
-    elmt* operator[](ulong i) {
+    std::optional<elmt> operator[](ulong i) {
         while(len.load(std::memory_order_acquire) <= i) {
-            if(!__base_Pipe<t>::isOpen() && len.load(std::memory_order_acquire) <= i)  {
-                return nullptr;
+            if(!this->isOpen() && len.load(std::memory_order_acquire) <= i)  {
+                return std::nullopt;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-        return &(*__base_Pipe<t>::cpp())[i];
-        // return __internal_finalizeGetPtr<safeRealloc>(i);
+        if constexpr(safeRealloc) {
+            auto lock = scoped_lock();
+            if(i >= (*this->cpp()).size()) return std::nullopt;
+            return (*this->cpp())[i];
+        }
+        else {
+            return (*this->cpp())[i];
+        }
     }
-    // template<bool sr> elmt* __internal_finalizeGetPtr(ulong i) requires(sr == true) {
-    //     auto lock = scoped_lock();
-    //     return __internal_finalizeGetPtr<false>(i);
-    // }
-    // template<bool sr> elmt* __internal_finalizeGetPtr(ulong i) requires(sr == false) {
-    //     return &(*__base_Pipe<t>::cpp())[i];
-    // }
 };

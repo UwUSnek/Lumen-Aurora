@@ -46,14 +46,14 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>>
 
 
         // Parse out alphanumeric and symbolic tokens (keywords, meta keywords and identifiers)
-        std::optional<std::string> token;
-        token = parseSymbolicKeyword   (b, i); if(!token.has_value())
-        token = parseSymbolicIdentifier(b, i); if(!token.has_value())       //NOSONAR
-        token = parseAlphanumericToken (b, i); if( token.has_value()) {     //NOSONAR
+        auto               token = parseSymbolicKeyword   (b, i);
+        if( token.empty()) token = parseSymbolicIdentifier(b, i);
+        if( token.empty()) token = parseAlphanumericToken (b, i);
+        if(!token.empty()) {
             ptr<TokenValue> _tokenValue;
 
             // If the token is a known keyword
-            if(auto keywordType = reservedTokensMap.find(*token); keywordType != reservedTokensMap.end()) {
+            if(auto keywordType = reservedTokensMap.find(token); keywordType != reservedTokensMap.end()) {
                 switch(keywordType->second) {
                     using enum cmp::ReservedTokenId;
                     case TMP_LITERAL_TRUE:  { _tokenValue = newptr<TK_Bool   >(true);  break; }
@@ -66,14 +66,14 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::SegmentedCleanSource<true>>
 
             // If not, treat it as an identifier
             else {
-                _tokenValue = newptr<TK_Identifier>(token.value());
+                _tokenValue = newptr<TK_Identifier>(token);
             }
 
             // Push token to output array and update buffer index
             increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
-            increaseLocalProgress(token->length());
-            *r += Token(b->substr(i, token->length()), _tokenValue, (*b)[i]->meta, (*b)[i + token->length() - 1]->meta);
-            i += token->length();
+            increaseLocalProgress(token.length());
+            *r += Token(b->substr(i, token.length()), _tokenValue, (*b)[i]->meta, (*b)[i + token.length() - 1]->meta);
+            i += token.length();
             continue;
         }
 

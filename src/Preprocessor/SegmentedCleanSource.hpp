@@ -73,14 +73,15 @@ namespace pre {
     template<bool safeRealloc=true> struct SegmentedCleanSource : VectorPipe<CleanSourceElm, safeRealloc> {
 
 
-        std::string substr(ulong index, ulong len) requires(safeRealloc == true) {
-            auto lock = this->scoped_lock();
-            return __internal_finalizeSubstr(index, len);
-        }
-        std::string substr(ulong index, ulong len) requires(safeRealloc == false) {
-            return __internal_finalizeSubstr(index, len);
-        }
-        std::string __internal_finalizeSubstr(ulong index, ulong len) {
+        // std::string substr(ulong index, ulong len) requires(safeRealloc == true) {
+        //     auto lock = this->scoped_lock();
+        //     return __internal_finalizeSubstr(index, len);
+        // }
+        // std::string substr(ulong index, ulong len) requires(safeRealloc == false) {
+        //     return __internal_finalizeSubstr(index, len);
+        // }
+        std::string substr(ulong index, ulong len) {
+        // std::string __internal_finalizeSubstr(ulong index, ulong len) {
 
             // Create result string with specified capacity and calculate end index
             std::string r;
@@ -100,26 +101,25 @@ namespace pre {
 
 
 
-        bool strcmp(ulong index, const char* str) requires(safeRealloc == true) {
-            auto lock = this->scoped_lock();
-            return __internal_finalizeStrcmp(index, str);
-        }
-        bool strcmp(ulong index, const char* str) requires(safeRealloc == false) {
-            return __internal_finalizeStrcmp(index, str);
-        }
-        bool __internal_finalizeStrcmp(ulong index, const char* str) {
+        // bool strcmp(ulong index, const char* str) requires(safeRealloc == true) {
+        //     auto lock = this->scoped_lock();
+        //     return __internal_finalizeStrcmp(index, str);
+        // }
+        // bool strcmp(ulong index, const char* str) requires(safeRealloc == false) {
+        //     return __internal_finalizeStrcmp(index, str);
+        // }
+        bool strcmp(ulong index, const char* str) {
+        // bool __internal_finalizeStrcmp(ulong index, const char* str) {
 
             // For each character of the pipe (starting at the specified index) and the string (starting at index 0)
             for(ulong i = 0;; ++i) {
                 const auto &entry = this->operator[](i + index);
-                bool data_ended = !entry;
-                bool str_ended = (str[i] == '\0');
 
-                // Check if strings ended together (match)
-                if(data_ended && str_ended) return true;
+                // Check if desired string ended (match)
+                if(str[i] == '\0') return true;
 
-                // Check if only one string ended (no match)
-                if(data_ended || str_ended) return false;
+                // Check if only the source code ended (no match)
+                if(!entry) return false;
 
                 // Compare characters (no match if different, keep checking otherwise)
                 if(entry->c != str[i]) return false;
