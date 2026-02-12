@@ -9,8 +9,8 @@
             "program": "${workspaceFolder}/Build/alc",
             "args": [
                 "./Test/main.lmn",
-                "-I", "./Tests/BigSource",
-                "-I", "./Tests/HugeSource",
+                "-I", "./Tests/LargeSource",
+                "-I", "./Tests/LargeTree",
                 "-I", "./Tests/Includes",
                 "-m", "./Test/out",
                 "--no-status"

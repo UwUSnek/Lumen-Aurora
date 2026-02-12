@@ -1,0 +1,11 @@
+
+namespace LARGE_2_FILE_a { #include "./largeSource3.lmn" }
+namespace LARGE_2_FILE_b { #include "./largeSource3.lmn" }
+namespace LARGE_2_FILE_c { #include   "largeSource3.lmn" }
+namespace LARGE_2_FILE_d { #include "./largeSource3.lmn" }
+namespace LARGE_2_FILE_e { #include "./largeSource3.lmn" }
+namespace LARGE_2_FILE_f { #include "./largeSource3.lmn" }
+namespace LARGE_2_FILE_g { #include   "largeSource3.lmn" }
+namespace LARGE_2_FILE_h { #include "./largeSource3.lmn" }
+namespace LARGE_2_FILE_i { #include   "largeSource3.lmn" }
+namespace LARGE_2_FILE_j { #include   "largeSource3.lmn" }

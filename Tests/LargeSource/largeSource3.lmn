@@ -1,0 +1,5 @@
+namespace LARGE_2_FILE_a { #include "largeSource4.lmn" }
+namespace LARGE_2_FILE_b { #include "largeSource4.lmn" }
+namespace LARGE_2_FILE_c { #include "largeSource4.lmn" }
+// error test
+namespace LARGE_2_FILE_d { #include "largeSource4.lmn" }
