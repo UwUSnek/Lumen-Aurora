@@ -17,12 +17,14 @@
  */
 ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawLiteralLen) {
     std::stringstream r;
+    *rawLiteralLen = 0;
+    //! Set length to 0 before doing anything
+    //! Printing errors can leave it uninitialize and mess up downstream threads
 
 
     // Check first character
     const auto c0 = (*b)[index];
     if(!c0 || !std::isdigit(*c0)) {
-        *rawLiteralLen = 0;
         return nullptr;
     }
     //! inf, nan, true and false are checked by the keyword parser

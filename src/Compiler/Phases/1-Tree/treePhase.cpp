@@ -103,7 +103,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             break;
                         }
                     }
-                    parentElementStr[0] = std::toupper(parentElementStr[0]);
+                    parentElementStr[0] = (char)std::toupper(parentElementStr[0]);
 
 
                     // Find the element that caused the error (skip operators)
@@ -117,7 +117,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             break;
                         }
                     }
-                    expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+                    expectedElementStr[0] = (char)std::toupper(expectedElementStr[0]);
 
 
                     // Actually print the error
@@ -189,7 +189,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             break;
                         }
                     }
-                    parentElementStr[0] = std::toupper(parentElementStr[0]);
+                    parentElementStr[0] = (char)std::toupper(parentElementStr[0]);
 
 
                     // Find the element that caused the error (skip operators)
@@ -203,7 +203,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             break;
                         }
                     }
-                    expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+                    expectedElementStr[0] = (char)std::toupper(expectedElementStr[0]);
 
 
                     // Actually print the error
@@ -289,7 +289,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                                 break;
                             }
                         }
-                        parentElementStr[0] = std::toupper(parentElementStr[0]);
+                        parentElementStr[0] = (char)std::toupper(parentElementStr[0]);
 
 
                         // Find the element that caused the error (skip operators)
@@ -303,7 +303,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                                 break;
                             }
                         }
-                        expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+                        expectedElementStr[0] = (char)std::toupper(expectedElementStr[0]);
 
 
                         // Actually print the error
@@ -407,7 +407,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                                 break;
                             }
                         }
-                        expectedElementStr[0] = std::toupper(expectedElementStr[0]);
+                        expectedElementStr[0] = (char)std::toupper(expectedElementStr[0]);
 
 
                         // Actually print the error
@@ -440,7 +440,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return newptr<TreeGenerationResult>(std::vector<typeof r>{ r }, true );
+        return newptr<TreeGenerationResult>(std::vector<decltype(r)>{ r }, true );
     }
     //FIXME fix trees' parent pointer not getting set
 
@@ -468,7 +468,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return newptr<TreeGenerationResult>(std::vector<typeof r>{ r }, true );
+        return newptr<TreeGenerationResult>(std::vector<decltype(r)>{ r }, true );
     }
 
 
@@ -490,7 +490,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
         r->tokenBgn = index;
         r->tokenEnd = i - 1;
         debug(printSuccess(indent);)
-        return newptr<TreeGenerationResult>(std::vector<typeof r>{ r }, true );
+        return newptr<TreeGenerationResult>(std::vector<decltype(r)>{ r }, true );
     }
 
 

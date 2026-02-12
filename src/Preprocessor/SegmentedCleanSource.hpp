@@ -81,7 +81,6 @@ namespace pre {
         //     return __internal_finalizeSubstr(index, len);
         // }
         std::string substr(ulong index, ulong len) {
-        // std::string __internal_finalizeSubstr(ulong index, ulong len) {
 
             // Create result string with specified capacity and calculate end index
             std::string r;
@@ -115,11 +114,11 @@ namespace pre {
             for(ulong i = 0;; ++i) {
                 const auto &entry = this->operator[](i + index);
 
-                // Check if desired string ended (match)
-                if(str[i] == '\0') return true;
-
                 // Check if only the source code ended (no match)
                 if(!entry) return false;
+
+                // Check if desired string ended (match)
+                if(str[i] == '\0') return true;
 
                 // Compare characters (no match if different, keep checking otherwise)
                 if(entry->c != str[i]) return false;

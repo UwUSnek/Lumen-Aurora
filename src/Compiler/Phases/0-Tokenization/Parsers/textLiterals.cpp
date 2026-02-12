@@ -50,10 +50,13 @@ const char* getLiteralName(const cmp::TextLiteralType literalType) {
  */
 std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawEscapeLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
+    *rawEscapeLen = 0;
+    //! Set length to 0 before doing anything
+    //! Printing errors can leave it uninitialize and mess up downstream threads
+
 
     // Return if there is no escape sequence
     if(const auto c0 = (*b)[index]; !c0 || *c0 != '\\') {
-        *rawEscapeLen = 0;
         return std::nullopt;
     }
 
@@ -72,6 +75,9 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<tr
                 "Invalid escape sequence \"" + ansi::white + "\\" + **c + ansi::reset + "\".",
                 true //TODO recovery system. skip to the first token that makes sense
             );
+
+            //! No actually reached. Break is here so GCC doesn't cry about fallthrough
+            break;
         }
 
 
@@ -97,7 +103,7 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<tr
             std::string codepoint;
             for(ulong j = 0; j < expectedDigits;) {
                 const auto c1 = (*b)[i + j];
-                if(c1 && (std::isdigit(*c1) || *c1 >= 'A' && *c1 <= 'F' || *c1 >= 'a' && *c1 <= 'f')) {
+                if(c1 && (std::isdigit(*c1) || (*c1 >= 'A' && *c1 <= 'F') || (*c1 >= 'a' && *c1 <= 'f'))) {
                     codepoint += *c1;
                     ++j;
                 }
@@ -186,17 +192,17 @@ std::optional<std::string> decodeEscapeSequence(ptr<pre::SegmentedCleanSource<tr
  */
 ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::SegmentedCleanSource<true>> b, ulong index, ulong *rawLiteralLen, cmp::TextLiteralType literalType) {
     std::stringstream r;
+    *rawLiteralLen = 0;
+    //! Set length to 0 before doing anything
+    //! Printing errors can leave it uninitialize and mess up downstream threads
+
+
     const char delimiter = literalType == cmp::TextLiteralType::STRING ? '"' : '\'';
     if(const auto c0 = (*b)[index]; !c0 || *c0 != delimiter) {
-        *rawLiteralLen = 0;
         return nullptr;
     }
 
 
-//FIXME merge with string logic. they are ideantical but use different names and delimiters
-//FIXME merge with string logic. they are ideantical but use different names and delimiters
-//FIXME merge with string logic. they are ideantical but use different names and delimiters
-//FIXME merge with string logic. they are ideantical but use different names and delimiters
     ulong i = index + 1;
     while(true) {
         const auto c = (*b)[i];

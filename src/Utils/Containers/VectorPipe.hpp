@@ -54,8 +54,8 @@ protected:
 public:
     VectorPipe() = default;
 
-    explicit VectorPipe(ulong capacity) :
-        __base_BufferPipe<std::vector<t>, t>(capacity){
+    explicit VectorPipe(ulong capacity) {
+        this->cpp()->reserve(capacity);
     }
 
     explicit VectorPipe(ulong size, t value) :

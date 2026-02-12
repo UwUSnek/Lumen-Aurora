@@ -56,7 +56,10 @@ namespace cmp {
         //TODO also set the root module's parent to NULL
 
 
-        virtual std::string getCategoryName(bool plural = false) const { return ""; }
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wunused-parameter"
+        virtual std::string getCategoryName(bool plural = false) const { return "invalid tree"; }
+        #pragma GCC diagnostic pop
 
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
         virtual ~__base_ST() = default;

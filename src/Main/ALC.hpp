@@ -188,7 +188,7 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
     threadType = ThreadType::SUBPHASE;
     std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - 1 /*Prefix "S"*/ - 1 /*Phase number*/ - 3 /*Separator*/);
     char threadName[MAX_THR_NAME_LEN]; //NOSONAR
-    snprintf(threadName, sizeof(threadName), "S%d | %s", phaseId, truncatedName.c_str()); //NOSONAR
+    snprintf(threadName, sizeof(threadName), "S%d | %s", (ulong)phaseId, truncatedName.c_str()); //NOSONAR
     pthread_setname_np(pthread_self(), threadName);
 
 

@@ -168,7 +168,7 @@ int main(int argc, char* argv[]){
         preprocessedSourceCode->awaitClose(mainCheckErrors);
         if(exitMainRequest.load()) goto skip_file_output;
 
-        auto lock = preprocessedSourceCode->scoped_lock();
+        // auto lock = preprocessedSourceCode->scoped_lock();
         writeOutputFile(preprocessedSourceCode->substr(0, preprocessedSourceCode->length()));
     }
 
