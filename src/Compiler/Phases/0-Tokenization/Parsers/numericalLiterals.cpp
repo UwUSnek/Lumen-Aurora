@@ -56,7 +56,7 @@ ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::SegmentedCleanSource<tr
             }
             case 'x': {
                 base = 16;
-                isDigitValid = [](char c) { return c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F'; };
+                isDigitValid = [](char c) { return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); };
                 baseName = "hexadecimal";
                 break;
             }
@@ -211,7 +211,7 @@ ulong cmp::strToLng(const std::string &s, uint base) {
         char digit = c;
         auto value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
         r *= base;
-        r += value;
+        r += (ulong)value;
     });
 
 

@@ -4,9 +4,23 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "BUILD | Build compiler",
+            "label": "BUILD | Build compiler [Debug]",
             "command": "./Tools/Build_compiler.sh",
-            "args": [],
+            "args": [ "Debug" ],
+            "problemMatcher": [ "$gcc" ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "clear": true,
+                "showReuseMessage": true,
+            }
+        },
+        {
+            "type": "shell",
+            "label": "BUILD | Build compiler [Release]",
+            "command": "./Tools/Build_compiler.sh",
+            "args": [ "Release" ],
             "problemMatcher": [ "$gcc" ],
             "options": { "cwd": "${workspaceFolder}" },
             "group": "build",

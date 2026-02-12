@@ -3,6 +3,15 @@ original_dir=$(pwd)     # Save original directory
 set -e                  # Exit immedialy if a command fails
 
 
+# Parse and validate build type
+case "$1" in
+    Debug|Release|RelWithDebInfo)
+        BUILD_TYPE=$1 ;;
+    "")
+        echo "Usage: $0 [Debug|Release|RelWithDebInfo]"; exit 1 ;;
+    *)
+        echo "Unknown build type: $1"; exit 1 ;;
+esac
 
 
 
@@ -39,7 +48,7 @@ buildNumberPlaceholder="__BUILD_NUMBER_PLACEHOLDER__*__SHA1SUM__" #! Same number
 
 # Create build directory and run cmake
 mkdir -p ./Build
-cmake -B ./Build -S ./Tools
+cmake -B ./Build -S ./Tools -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
 # Build the source code (8 threads)
 cd ./Build

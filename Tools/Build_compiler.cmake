@@ -118,12 +118,41 @@ set_target_properties(alc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ../Build)
 
 # GCC compilaiton options
 target_link_options(alc PRIVATE
-    -fsanitize=thread
+    $<$<CONFIG:Debug>:
+        -fsanitize=address      # Check Heap/stack overflows, use-after-free
+        -fsanitize=undefined    # Check UB: signed overflow, null deref, misaligned access...
+        -fsanitize=leak         # Check Memory leaks (included in address on Linux, but explicit is fine)
+        # -fsanitize=thread       # Check thread issues  # Incompatible with the other sanitizer options
+    >
+    $<$<CONFIG:Release>:
+        -flto                   # Link-time optimizations - increases linking step times for runtime speed
+    >
 )
 target_compile_options(alc PRIVATE
-    -O0                 # No optimizations
-    -g                  # Save debug infos
-    -fsanitize=thread   # Check thread issues
+    $<$<CONFIG:Debug>:
+        -O0                     # No optimizations
+        -g3                     # Save all debug infos
+        -fno-omit-frame-pointer # Reliable stack traces
+        -fno-inline             # Don't inline functions
+
+        -fsanitize=address      # Check Heap/stack overflows, use-after-free
+        -fsanitize=undefined    # Check UB: signed overflow, null deref, misaligned access...
+        -fsanitize=leak         # Check Memory leaks (included in address on Linux, but explicit is fine)
+        # -fsanitize=thread       # Check thread issues  # Incompatible with the other sanitizer options
+
+        -Wall                   # Common warnings
+        -Wextra                 # Extra warnings
+        -Wpedantic              # Pedantic warnings
+        -Wshadow                # Variable shadowing
+        -Wconversion            # Implicit type conversions
+        -Wnull-dereference      # Potential null dereference
+        -Wformat=2              # Potential format string issues
+    >
+    $<$<CONFIG:Release>:
+        -O3                     # Maximum optimizations
+        -flto                   # Link-time optimizations - increases linking step times for runtime speed
+        -DNDEBUG                # Disable asserts
+    >
 )
 
 
