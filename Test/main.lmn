@@ -1,10 +1,10 @@
 
 // A
-#include/*aa*/  	"../Tests/HugeSource/huge.lum"
+#include/*aa*/  	"../Tests/HugeSource/huge.lmn"
 
 //#in/*
 //     */clud/*
-//  */e"test.lum"
+//  */e"test.lmn"
 
 // broken code test <- this should fail
 // alias test3.test as a

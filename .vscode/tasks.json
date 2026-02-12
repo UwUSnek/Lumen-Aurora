@@ -49,7 +49,7 @@
             "label": "TEST | Run manual testing",
             "command": "./Build/alc",
             "args": [
-                "./Test/main.lum",
+                "./Test/main.lmn",
                 "-I", "./Tests/BigSource",
                 "-I", "./Tests/HugeSource",
                 "-I", "./Tests/Includes",

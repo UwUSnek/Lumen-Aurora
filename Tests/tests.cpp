@@ -73,25 +73,25 @@ int main(){
 
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy 1",
-        "A#include  \t\"basic.lum\"B",
+        "A#include  \t\"basic.lmn\"B",
         "AtestB",
         "-I Tests/Includes/Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy 2",
-        "A#include  \t\"inception2.lum\"B",
+        "A#include  \t\"inception2.lmn\"B",
         "AtestB",
         "-I Tests/Includes/Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy - comment only",
-        "A#include  \t\"commentOnly.lum\"B",
+        "A#include  \t\"commentOnly.lmn\"B",
         "AB",
         "-I Tests/Includes/Accuracy"
     ));
     tests.push_back(new TestPreprocessorOutput(
         "include accuracy - comment boundaries",
-        "A#include  \t\"commentBoundaries.lum\"B",
+        "A#include  \t\"commentBoundaries.lmn\"B",
         "AtestB",
         "-I Tests/Includes/Accuracy"
     ));
@@ -100,13 +100,13 @@ int main(){
 
     tests.push_back(new TestExitValue(
         "include conflict",
-        "A#include   \t\"test.lum\"B",
+        "A#include   \t\"test.lmn\"B",
         ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,
         "-I Tests/Includes/Conflict1 -I Tests/Includes/Conflict2"
     ));
     tests.push_back(new TestExitValue(
         "include path merging",
-        "A#include   \t\"test.lum\"B",
+        "A#include   \t\"test.lmn\"B",
         ErrorCode::SUCCESS,
         "-I Tests/Includes/Conflict1 -I Tests/Includes/Conflict1 -I Tests/Includes/./../Includes/Conflict1"
     ));
