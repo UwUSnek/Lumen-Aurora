@@ -1,6 +1,5 @@
 #include <fstream>
 #include <cstring>
-#include <mutex>
 #include <sys/types.h>
 #include "Main/ALC.hpp"
 #include "Main/ErrorCode.hpp"
@@ -13,7 +12,6 @@
 #include "Preprocessor/SegmentedCleanSource.hpp"
 #include "Main/errors.hpp"
 #include "includePhase.hpp"
-#include "Utils/ansi.hpp"
 #include "pathSolver.hpp"
 #include "Preprocessor/preprocessor.hpp"
 
@@ -29,28 +27,10 @@ static constexpr const char* INCLUDE_TEXT = "#include";
 //! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^#include[a-zA-Z0-9_]*[ \t]/ on b[i:]
 static std::string parseIncludeStatementName(ulong index, pre::AnnotatedSource<false> &b) {
-
-    // Check include statement text
-    std::string r;
     if(b.strcmp(index, INCLUDE_TEXT)) {
-        r += INCLUDE_TEXT;
+        return INCLUDE_TEXT;
     }
     else return "";
-
-
-    //FIXME what even is the point of this?
-    //FIXME delete this if not needed. only check the actual statement name
-    // Check and store specified include path
-    ulong i = index + strlen(INCLUDE_TEXT);
-    while(true) {
-        char c = b[i]->c;
-        if(std::isdigit(c) || std::isalpha(c) || c == '_') {
-            r += c;
-            ++i;
-        }
-        else break;
-    }
-    return r;
 }
 
 
@@ -196,7 +176,7 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
     while((*b)[ii]) {
 
         // If an include directive is detected, replace it with the preprocessed contents of the file
-        std::string match = parseIncludeStatementName(ii, *b); //FIXME allow comments and LCTs inside of the include statement and path
+        std::string match = parseIncludeStatementName(ii, *b);
         if(!match.empty()) {
             ulong j = ii + match.length();
             ElmCoords relevantCoords(b, ii, j - 1);

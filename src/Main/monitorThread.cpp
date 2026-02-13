@@ -177,11 +177,13 @@ void renderFrame(const std::string &fullCommand, ulong loop, const ulong progres
     cout << "\033[1;1H";
     cout << "\033[J";
 
+
     // Print status UI
     cout << std::format("\033[{};1H", 1);
     if(cmd::options.printStatus) {
         printStatusUI(fullCommand, loop, progressBarWidth, _isComplete, errorMsg.has_value());
     }
+
 
     // Print errors if present. Print list of active files/modules otherwise
     cout << "\n\n\n\n" << ansi::reset;

@@ -1,7 +1,8 @@
 
 // A
 // #include/*aa*/  	"../Tests/LargeSource/largeSource.lmn"
-#include/*aa*/  	"../Tests/LargeTree/largeTree.lmn"
+#include/*aa*/  	\
+"../Tests/LargeTree/largeTr     \\ee.lmn"
 
 //#in/*
 //     */clud/*
