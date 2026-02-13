@@ -35,7 +35,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, 
         ulong lenOutput;
         auto tokenValue = parseNumericalLiteral(b, i, &lenOutput);
         if(tokenValue) {
-            increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
+            increaseMaxProgress(1, PhaseID::C1_TreeCreation);
             increaseLocalProgress(lenOutput);
             *r += Token(b->substr(i, lenOutput), tokenValue, (*b)[i]->meta, (*b)[i + lenOutput - 1]->meta);
             i += lenOutput;
@@ -70,7 +70,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, 
             }
 
             // Push token to output array and update buffer index
-            increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
+            increaseMaxProgress(1, PhaseID::C1_TreeCreation);
             increaseLocalProgress(token.length());
             *r += Token(token, _tokenValue, (*b)[i]->meta, (*b)[i + token.length() - 1]->meta);
             // *r += Token(b->substr(i, token.length()), _tokenValue, (*b)[i]->meta, (*b)[i + token.length() - 1]->meta);
@@ -85,7 +85,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, 
         /**/            tokenValue = parseTextLiteral(b, i, &lenOutput, TextLiteralType::STRING);
         if(!tokenValue) tokenValue = parseTextLiteral(b, i, &lenOutput, TextLiteralType::CHAR);
         if(tokenValue) {
-            increaseMaxProgress(PhaseID::Compiler_TreeCreation, 1);
+            increaseMaxProgress(1, PhaseID::C1_TreeCreation);
             increaseLocalProgress(lenOutput);
             *r += Token(b->substr(i, lenOutput), tokenValue, (*b)[i]->meta, (*b)[i + lenOutput - 1]->meta);
             i += lenOutput;
@@ -128,6 +128,6 @@ void cmp::startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, ptr<Tokeniz
     catch(const FatalErrorException&) {
         r->closePipe();
         // std::scoped_lock lock(phaseDataArrayLock);
-        // phaseDataArray[(int)PhaseID::Compiler_Tokenization].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
+        // phaseDataArray[(int)PhaseID::C0_Tokenization].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
     }
 }

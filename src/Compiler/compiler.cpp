@@ -24,8 +24,8 @@ ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::AnnotatedSource
     auto r2 = newptr<SourceTree>();
 
     // Start subphases
-    startSubphaseAsync(PhaseID::Compiler_Tokenization, true, startTokenizationPhase, b, r1);
-    startSubphaseAsync(PhaseID::Compiler_TreeCreation, true, startTreePhase,        r1, r2);
+    startSubphaseAsync(PhaseID::C0_Tokenization, true, startTokenizationPhase, b, r1);
+    startSubphaseAsync(PhaseID::C1_TreeCreation, true, startTreePhase,        r1, r2);
 
     return r2;
 }

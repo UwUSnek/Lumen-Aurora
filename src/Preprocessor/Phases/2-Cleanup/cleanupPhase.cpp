@@ -20,8 +20,8 @@ void pre::__internal_startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<Annota
 
         // Skip (and remove) comments
         if(ulong commentLen = misc::measureComment(*b, i); commentLen) {
-            decreaseMaxProgress(PhaseID::Preprocessor_Macros,   commentLen);
-            decreaseMaxProgress(PhaseID::Compiler_Tokenization, commentLen);
+            using enum PhaseID;
+            decreaseMaxProgress(commentLen, P3_Macros, C0_Tokenization);
             increaseLocalProgress(commentLen);
             i += commentLen;
             continue;
@@ -47,9 +47,11 @@ void pre::__internal_startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<Annota
 
 
         // Save normal characters
-        increaseLocalProgress(1);
-        *r += *(*b)[i];
-        ++i;
+        else {
+            increaseLocalProgress(1);
+            *r += *(*b)[i];
+            ++i;
+        }
     }
 }
 

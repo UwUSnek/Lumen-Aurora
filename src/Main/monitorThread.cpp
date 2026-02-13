@@ -57,7 +57,7 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
         );
     }
     else {
-        bar->render((int)(-3 /*Separator*/ + progressBarWidth - 2 /*Separator*/ - timeElapsedStrLen - 4 /*right margin*/));
+        bar->render(-3 /*Separator*/ + (int)progressBarWidth - 2 /*Separator*/ - (int)timeElapsedStrLen - 4 /*right margin*/);
         cout << std::format(
             "{}│{} {:<{}}", // MM:ss.mmm
             ansi::bright_black, ansi::reset,
@@ -72,7 +72,7 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
 //TODO ^ more readable code, easier to use. escape sequences will still be available.
 
 
-static void printStatusUI(const std::string &fullCommand, ulong loop, const int progressBarWidth, const bool _isComplete) {
+static void printStatusUI(const std::string &fullCommand, ulong loop, const ulong progressBarWidth, const bool _isComplete) {
     bool hasError = exitMainRequest.load();
     cout++;
 
@@ -84,18 +84,17 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
         "{}"
         "\033[999;999H"      // Move cursor to bottom-left corner
         "\033[8A",           // Move cursor 8 lines up (make space for the status UI)
-        std::string(8, '\n')
+        std::string(6, '\n') //TODO calculate the number of lines automatically
     );
 
 
     // Print the command
     if(_isComplete) {
         cout << std::format(
-            "\n{}{}{} completed {}.",
-            hasError ? ansi::bold_bright_red : ansi::bold_bright_green,
-            fullCommand,
-            ansi::reset,
-            hasError ? "with errors" : "successfully"
+            "\nTask completed {}."
+            "\n{}{}{} ",
+            hasError ? "with errors" : "successfully",
+            hasError ? ansi::bold_bright_red : ansi::bold_bright_green, fullCommand, ansi::reset
         );
     }
     else {
@@ -108,11 +107,13 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const int 
             if(i == loadingPosWrapped) cout << ansi::white << loadingStr << ansi::bright_black;
             else cout << "─";
         }
+        cout << "\n" << ansi::reset << ansi::bold_white << fullCommand;
     }
 
 
     // Print the status of each phase, in order
     {
+        cout << "\n";
         std::scoped_lock lock(phaseDataArrayLock);
         for(ulong i = 0; i < phaseDataArray.size(); ++i) {
             renderProgressBar(i, progressBarWidth);
@@ -188,7 +189,7 @@ void startMonitorThread(const std::string fullCommand){ //NOSONAR
 
         // Print status UI
         if(cmd::options.printStatus) {
-            printStatusUI(fullCommand, loop, progressBarWidth, delayedIsCompleted);
+            printStatusUI(fullCommand, loop, (ulong)progressBarWidth, delayedIsCompleted);
         }
 
 

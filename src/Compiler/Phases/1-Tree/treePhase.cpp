@@ -541,6 +541,6 @@ void cmp::startTreePhase(ptr<TokenizedSource<false>> b, ptr<SourceTree> r) {
     catch(const FatalErrorException&) {
         r->closePipe();
         // std::scoped_lock lock(phaseDataArrayLock);
-        // phaseDataArray[Compiler_TreeCreation].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
+        // phaseDataArray[C1_TreeCreation].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
     }
 }

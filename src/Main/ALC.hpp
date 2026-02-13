@@ -1,7 +1,9 @@
 #pragma once
 
+#include <concepts>
 #include <thread>
 #include <mutex>
+#include <type_traits>
 #include <vector>
 
 #include "Utils/utils.hpp"
@@ -105,16 +107,16 @@ extern std::atomic<bool> isComplete;
 
 //TODO make this more readable, maybe group stuff in namespaces
 
-#define LIST_PHASE_ID               \
-    X(Preprocessor_Includes)        \
-    X(Preprocessor_LineSplicing)    \
-    X(Preprocessor_Cleanup)         \
-    X(Preprocessor_Macros)          \
-    X(Compiler_Tokenization)        \
-    X(Compiler_TreeCreation)        \
-    X(Compiler_Optimization)        \
-    X(Compiler_Conversion)          \
-    X(NUM)                          \
+#define LIST_PHASE_ID       \
+    X(P0_Includes)          \
+    X(P1_LineSplicing)      \
+    X(P2_Cleanup)           \
+    X(P3_Macros)            \
+    X(C0_Tokenization)      \
+    X(C1_TreeCreation)      \
+    X(C2_Optimization)      \
+    X(C3_Conversion)        \
+    X(NUM)                  \
     // ^ The number of phases, not including this enum value.
 
 
@@ -167,12 +169,28 @@ extern thread_local ptr<DynamicProgressBar> maxProgress;
 void increaseLocalProgress(ulong n);
 void increaseMaxProgress(ulong n);
 void decreaseMaxProgress(ulong n);
-
-void increaseMaxProgress(PhaseID phaseId, ulong n);
-void decreaseMaxProgress(PhaseID phaseId, ulong n);
 ulong fetchMaxProgress(PhaseID phaseId);
 
 
+/**
+ * @brief Increases the max progress value of the specified phases.
+ * @param n The amount of progress steps to add.
+ * @param phaseIDs The IDs of the phases to affect.
+ */
+template<class ...t> void increaseMaxProgress(ulong n, t ...phaseIDs) requires(std::same_as<t, PhaseID> && ...) {
+    std::scoped_lock lock(phaseDataArrayLock);
+    ((phaseDataArray[(ulong)phaseIDs].totalProgress->increaseMax(n)), ...);
+};
+
+/**
+ * @brief Decreases the max progress value of the specified phases.
+ * @param n The amount of progress steps to subtract.
+ * @param phaseIDs The IDs of the phases to affect.
+ */
+template<class ...t> void decreaseMaxProgress(ulong n, t ...phaseIDs) requires(std::same_as<t, PhaseID> && ...) {
+    std::scoped_lock lock(phaseDataArrayLock);
+    (phaseDataArray[(ulong)phaseIDs].totalProgress->decreaseMax(n), ...);
+};
 
 
 
@@ -186,9 +204,9 @@ template<class func_t, class... args_t> void __internal_subphase_exec(PhaseID ph
 
     // Set thread name and type
     threadType = ThreadType::SUBPHASE;
-    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN - 1 /*Prefix "S"*/ - 1 /*Phase number*/ - 3 /*Separator*/);
+    std::string truncatedName = phaseIdTotring(phaseId).substr(0, MAX_THR_NAME_LEN);
     char threadName[MAX_THR_NAME_LEN]; //NOSONAR
-    snprintf(threadName, sizeof(threadName), "S%lu | %s", (ulong)phaseId, truncatedName.c_str()); //NOSONAR
+    snprintf(threadName, sizeof(threadName), "%s", truncatedName.c_str()); //NOSONAR
     pthread_setname_np(pthread_self(), threadName);
 
 

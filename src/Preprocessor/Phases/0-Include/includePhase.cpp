@@ -172,7 +172,6 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
 
         // Skip it and store the amount of skipped characters
         if(skipLen) {
-            increaseLocalProgress(skipLen);
             skipped[ii] += skipLen;
             i += skipLen;
         }
@@ -241,14 +240,6 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
                         generateMetadata(utils::readFile(actualFile), fileCode, newFilePathIndex);
 
 
-                        // Update phase progress data
-                        increaseMaxProgress(Preprocessor_Includes, fileCode->length()); //! Self
-                        increaseMaxProgress(Preprocessor_LineSplicing,      fileCode->length());
-                        increaseMaxProgress(Preprocessor_Cleanup,  fileCode->length());
-                        increaseMaxProgress(Preprocessor_Macros,   fileCode->length());
-                        increaseMaxProgress(Compiler_Tokenization, fileCode->length());
-
-
                         // Increase index (skip include and file path)
                         //! Update dirty buffer index, taking into account all of the stripped characters
                         const ulong old_i = i;
@@ -256,11 +247,12 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
                             i += 1 + skipped[jj];
                         }
                         ii = k;
+
+
+                        // Update phase progress data
+                        increaseMaxProgress(fileCode->length(), P0_Includes, P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
+                        decreaseMaxProgress(i - old_i,                       P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
                         increaseLocalProgress(i - old_i);
-                        decreaseMaxProgress(Preprocessor_LineSplicing,      i - old_i);
-                        decreaseMaxProgress(Preprocessor_Cleanup,  i - old_i);
-                        decreaseMaxProgress(Preprocessor_Macros,   i - old_i);
-                        decreaseMaxProgress(Compiler_Tokenization, i - old_i);
 
 
                         // Append file data to r and process its includes recursively
@@ -333,6 +325,6 @@ void pre::startIncludePhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<f
     catch(const FatalErrorException&) {
         r->closePipe();
         std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[(int)PhaseID::Preprocessor_Includes].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
+        phaseDataArray[(int)PhaseID::P0_Includes].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
     }
 }

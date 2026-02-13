@@ -149,25 +149,6 @@ void decreaseMaxProgress(ulong n) {
     maxProgress->decreaseMax(n);
 };
 
-
-/**
- * @brief Increases the max progress value of the specified phase.
- * @param n The amount of progress steps to add.
- */
-void increaseMaxProgress(PhaseID phaseId, ulong n) {
-    std::scoped_lock lock(phaseDataArrayLock);
-    phaseDataArray[(ulong)phaseId].totalProgress->increaseMax(n);
-};
-
-/**
- * @brief Decreases the max progress value of the specified phase.
- * @param n The amount of progress steps to subtract.
- */
-void decreaseMaxProgress(PhaseID phaseId, ulong n) {
-    std::scoped_lock lock(phaseDataArrayLock);
-    phaseDataArray[(ulong)phaseId].totalProgress->decreaseMax(n);
-};
-
 /**
  * @brief Retrieves the max progress value of the specified phase.
  * @param n The max progress value.
