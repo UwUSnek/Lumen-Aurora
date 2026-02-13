@@ -1,10 +1,9 @@
-#include "Main/ALC.hpp"
-#include <iomanip>
-
+#include "DynamicProgressBar.hpp"
+#include "Utils/ansi.hpp"
 #include "Utils/console.hpp"
 #include "Utils/format.hpp"
-#include "Utils/ansi.hpp"
-#include "DynamicProgressBar.hpp"
+#include <algorithm>
+#include <format>
 
 
 
@@ -19,7 +18,7 @@
  * @param consoleWidth The number of spaces dedicated to the progress bar.
  *      Values lower than 0 are considered 0.
  */
-void DynamicProgressBar::render(int consoleWidth) const {
+void DynamicProgressBar::render(int consoleWidth, const std::string &progressColor, const std::string &missingColor) const {
     using namespace console;
     ulong _progress = progress.load();
     ulong _max = max.load();
@@ -37,10 +36,9 @@ void DynamicProgressBar::render(int consoleWidth) const {
 
 
     // Print line and progress values
-    cout << std::format(
-        "{}{:━<{}}"
-        "{}{:━<{}}"
-        " {}{:>{}}/{:<{}} ",
+    console::cout << std::format(
+        "{}{:━<{}}{}{:━<{}} "
+        "{}{:>{}}/{:<{}} ",
         progressColor, "", filledWidth,
         missingColor,  "", missingWidth,
         ansi::reset,

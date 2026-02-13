@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <chrono>
+#include <sys/ioctl.h>
 
 
 
@@ -13,7 +14,7 @@ namespace utils {
     }
 
 
-    int getConsoleWidth();
+    winsize getConsoleSize();
     std::string readFile(std::ifstream &f);
 
 

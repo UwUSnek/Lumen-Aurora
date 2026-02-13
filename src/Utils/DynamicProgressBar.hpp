@@ -14,34 +14,33 @@
  *      It features a render function that draws a progress bar to stdout.
  */
 struct DynamicProgressBar {
-    std::atomic<ulong> progress;     // The current progress in units
-    std::atomic<ulong> max;          // The total units of progress required to reach 100%
-
-    std::string progressColor;
-    std::string missingColor;
+private:
+    std::atomic<ulong> progress = 0;    // The current progress in units
+    std::atomic<ulong> max;             // The total units of progress required to reach 100%
+    std::atomic<bool> error = false;    // Whether the process using represented by this progress generated errors
 
 
 
 
 public:
     DynamicProgressBar() = delete;
-    DynamicProgressBar(ulong _max, const std::string &_progressColor, const std::string &_missingColor) :
-        progress(0),
-        max(_max),
-        progressColor(_progressColor),
-        missingColor(_missingColor) {
+    explicit DynamicProgressBar(ulong _max) :
+        max(_max) {
     }
 
 
+    // Progress
     void    increase(ulong n) { progress.fetch_add(n); }
     void increaseMax(ulong n) {      max.fetch_add(n); }
     void decreaseMax(ulong n) {      max.fetch_sub(n); }
+    ulong getProgress() const { return progress.load(); }
+    ulong getMax() const { return max.load(); }
 
-    void render(int terminalWidth) const;
+    // Errorrs
+    void flagError() { error.store(true); }
+    bool hasError() const { return error.load(); }
+
+    // Rendering
+    void render(int terminalWidth, const std::string &progressColor, const std::string &missingColor) const;
     // bool isComplete() const { return progress.load() >= max.load(); }
-
-
-    void setProgressColor(const std::string_view &newProgressColor) {
-        progressColor = newProgressColor;
-    }
 };

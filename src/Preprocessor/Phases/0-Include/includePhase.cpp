@@ -324,7 +324,6 @@ void pre::startIncludePhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<f
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
         r->closePipe();
-        std::scoped_lock lock(phaseDataArrayLock);
-        phaseDataArray[(int)PhaseID::P0_Includes].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
+        flagLocalError();
     }
 }

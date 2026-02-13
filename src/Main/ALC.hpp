@@ -167,6 +167,7 @@ extern std::mutex                subphaseDataArrayLock;
 extern thread_local ptr<std::atomic<ulong>> localProgress;
 extern thread_local ptr<DynamicProgressBar> maxProgress;
 void increaseLocalProgress(ulong n);
+void flagLocalError();
 void increaseMaxProgress(ulong n);
 void decreaseMaxProgress(ulong n);
 ulong fetchMaxProgress(PhaseID phaseId);

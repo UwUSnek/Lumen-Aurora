@@ -48,7 +48,6 @@ void pre::startMacroPhase(ptr<AnnotatedSource<false>> b, ptr<AnnotatedSource<fal
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
         r->closePipe();
-        // std::scoped_lock lock(phaseDataArrayLock);
-        // phaseDataArray[Preprocessing_A].totalProgress->setProgressColor(ansi::red); //FIXME change bar color to red if failed
+        flagLocalError();
     }
 }

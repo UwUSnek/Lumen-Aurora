@@ -11,6 +11,7 @@
 #include "Command/command.hpp"
 #include "Utils/console.hpp"
 #include "Utils/format.hpp"
+#include "Utils/utils.hpp"
 
 namespace fs = std::filesystem;
 using namespace console;
@@ -44,25 +45,26 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
     const bool isPhaseComplete = phaseDataArray[i].timeEnd  ->load() > 0;
     const bool isPhaseActive   = phaseDataArray[i].timeStart->load() > 0;
     const auto bar = phaseDataArray[i].totalProgress;
+    const auto mainColor = !bar->getProgress() ? ansi::bold_bright_black : (bar->hasError() ? ansi::bold_bright_red : ansi::bold_bright_green);
 
     cout << std::format(
         "{}"
         "\n    {:<{}} │ ",
-        isPhaseComplete ? ansi::bold_bright_green : ansi::bold_bright_black,
+        mainColor,
         phaseIdTotring((PhaseID)i), maxPhaseNameLen
     );
-    if(isPhaseComplete) {
+    if(!bar->hasError() && isPhaseComplete) {
         cout << std::format(
             "{}{:<{}} {}│{} {} steps", // MM:ss.mmm
             ansi::reset,
             format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load(), true), timeElapsedStrLen,
             ansi::bright_black, ansi::reset,
-            format::amount(bar->max.load())
+            format::amount(bar->getMax())
             //FIXME subtract pipe waiting times from this
         );
     }
     else {
-        bar->render(-3 /*Separator*/ + (int)progressBarWidth - 2 /*Separator*/ - (int)timeElapsedStrLen - 4 /*right margin*/);
+        bar->render(-3 /*Separator*/ + (int)progressBarWidth - 2 /*Separator*/ - (int)timeElapsedStrLen - 4 /*right margin*/, mainColor, ansi::bold_bright_black);
         cout << std::format(
             "{}│{} {:<{}}", // MM:ss.mmm
             ansi::bright_black, ansi::reset,
@@ -95,6 +97,8 @@ static void printFileListUI() {
 
 
 static void printStatusUI(const std::string &fullCommand, ulong loop, const ulong progressBarWidth, const bool _isComplete, const bool hasError) {
+    const auto mainColor = hasError ? ansi::bold_bright_red : ansi::bold_bright_green;
+
 
     // Print the command
     if(_isComplete) {
@@ -102,7 +106,7 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const ulon
             "\nTask completed {}."
             "\n{}{}{} ",
             hasError ? "with errors" : "successfully",
-            hasError ? ansi::bold_bright_red : ansi::bold_bright_green, fullCommand, ansi::reset
+            mainColor, fullCommand, ansi::reset
         );
     }
     else {
@@ -134,7 +138,7 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const ulon
         cout << std::format(
             "\n"
             "\n    {}{}",
-            hasError ? ansi::bold_bright_red : ansi::bold_bright_green,
+            mainColor,
             hasError ? "Errors were detected. Skipping file output." : std::format(
                 "Output written to \"{}{}{}\"."
                 "\n",
@@ -162,31 +166,30 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const ulon
 
 
 
-void renderFrame(const std::string &fullCommand, ulong loop, const ulong progressBarWidth, const bool _isComplete) {
+void renderFrame(const std::string &fullCommand, ulong loop, const ulong progressBarWidth, const bool _isComplete, const winsize consoleSize) {
     const auto errorMsg = utils::getErrorMessage();
     cout++;
 
 
     // Set up render area
-    // (Move cursor to top-left corner)
-    // (Clear console from current character to last line)
-    cout << "\033[1;999H";
+    // - Move cursor to top-left corner
+    // - Clear console from current character to last line (without moving the cursor)
+    cout << "\033[1;1H";
     cout << "\033[J";
 
-    // Move cursor to bottom-left corner
     // Print status UI
-    cout << "\033[999;999H";
+    cout << std::format("\033[{};1H", 1);
     if(cmd::options.printStatus) {
         printStatusUI(fullCommand, loop, progressBarWidth, _isComplete, errorMsg.has_value());
     }
 
-    // Move cursor to top-left corner
     // Print errors if present. Print list of active files/modules otherwise
-    cout << "\033[1;999H";
+    cout << "\n\n\n\n" << ansi::reset;
     if(errorMsg.has_value()) cout << errorMsg.value() << ansi::reset;
     else printFileListUI();
 
 
+    cout << "\n\n\n\n" << ansi::reset;
     cout--;
 }
 
@@ -207,6 +210,7 @@ void startMonitorThread(const std::string fullCommand){ //NOSONAR
     ulong loop = 0;
     int progressBarWidth;
     bool delayedIsCompleted;
+    const auto consoleSize = utils::getConsoleSize();
     do {
         delayedIsCompleted = isComplete.load(std::memory_order_acquire); //! Delay completion detection by 1 iteration to allow the last frame to be fully printed before returning
 
@@ -221,13 +225,13 @@ void startMonitorThread(const std::string fullCommand){ //NOSONAR
 
 
         // Calculate progress bar width
-        progressBarWidth = utils::getConsoleWidth() - maxPhaseNameLen - 4 /* Indentation */;
+        progressBarWidth = consoleSize.ws_col - maxPhaseNameLen - 4 /* Indentation */;
         if(progressBarWidth == -1) progressBarWidth = 16; //! 16 is an arbitrary value
 
 
         // Render frame - limit output refresh rate to 20fps
         const ulong interval = 1000UL / 20UL;
-        renderFrame(fullCommand, loop, (ulong)progressBarWidth, delayedIsCompleted);
+        renderFrame(fullCommand, loop, (ulong)progressBarWidth, delayedIsCompleted, consoleSize);
         std::this_thread::sleep_for(std::chrono::milliseconds(interval));
 
 

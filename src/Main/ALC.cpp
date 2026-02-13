@@ -106,7 +106,7 @@ std::string phaseIdTotring(PhaseID phaseId) {
 
 
 PhaseData::PhaseData() :
-    totalProgress(newptr<DynamicProgressBar>(0, ansi::bright_green, ansi::bright_black)),
+    totalProgress(newptr<DynamicProgressBar>(0)),
     timeStart    (newptr<std::atomic<long>>(0)),
     timeEnd      (newptr<std::atomic<long>>(0)) {
 }
@@ -132,6 +132,14 @@ void increaseLocalProgress(ulong n) {
 };
 
 /**
+ * @brief Flags the phase as having encountered an issue.
+ *      This function can only be called by a phase thread.
+ */
+void flagLocalError() {
+    maxProgress->flagError();
+}
+
+/**
  * @brief Increases the max progress value of the associated phase.
  *      This function can only be called by a phase thread.
  * @param n The amount of progress steps to add.
@@ -155,9 +163,13 @@ void decreaseMaxProgress(ulong n) {
  */
 ulong fetchMaxProgress(PhaseID phaseId) {
     std::scoped_lock lock(phaseDataArrayLock);
-    ulong r = phaseDataArray[(ulong)phaseId].totalProgress->max.load();
+    ulong r = phaseDataArray[(ulong)phaseId].totalProgress->getMax();
     return r;
 };
+
+
+
+
 
 
 

@@ -127,7 +127,6 @@ void cmp::startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, ptr<Tokeniz
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
         r->closePipe();
-        // std::scoped_lock lock(phaseDataArrayLock);
-        // phaseDataArray[(int)PhaseID::C0_Tokenization].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
+        flagLocalError();
     }
 }

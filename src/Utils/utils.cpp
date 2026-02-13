@@ -15,15 +15,15 @@ namespace fs = std::filesystem;
 
 
 /**
- * @brief Tries to retrieve the width of the output console.
- * @return The width in characters, or -1 if the it cannot be determined.
+ * @brief Tries to retrieve the size of the output console.
+ * @return The size in characters, or (-1, -1) if the it cannot be determined.
  */
-int utils::getConsoleWidth() {
+winsize utils::getConsoleSize() {
     struct winsize w;
-    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
-        return w.ws_col;
+    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
+        return w;
     }
-    return -1;
+    return { (ushort)-1, (ushort)-1, (ushort)-1, (ushort)-1 };
 }
 
 

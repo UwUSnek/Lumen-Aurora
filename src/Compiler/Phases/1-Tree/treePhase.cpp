@@ -540,7 +540,6 @@ void cmp::startTreePhase(ptr<TokenizedSource<false>> b, ptr<SourceTree> r) {
     // This lets any dependant subphase join and the main thread exit the program
     catch(const FatalErrorException&) {
         r->closePipe();
-        // std::scoped_lock lock(phaseDataArrayLock);
-        // phaseDataArray[C1_TreeCreation].totalProgress->setProgressColor(ansi::red); //FIXME change progress bar color on failure
+        flagLocalError();
     }
 }
