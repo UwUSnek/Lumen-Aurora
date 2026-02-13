@@ -1,6 +1,9 @@
 #include <mutex>
+#include <optional>
 #include <regex>
 #include <fstream>
+#include <sstream>
+#include <string_view>
 
 #include "Main/errors.hpp"
 #include "Utils/console.hpp"
@@ -17,6 +20,34 @@
 
 static const auto RESET_CODE_SEARCH_REGEX = std::regex("\033\\[0m");
 using namespace console;
+
+std::mutex  utils::errorMutex;
+bool        utils::errorPresent = false;
+std::string utils::errorMessage = "";
+
+
+void utils::storeErrorMessage(const std::string_view &msg){
+    std::scoped_lock lock(errorMutex);
+    if(!errorPresent) {
+        errorPresent = true;
+        errorMessage = msg;
+    }
+}
+
+
+std::optional<std::string> utils::getErrorMessage(){
+    std::scoped_lock lock(errorMutex);
+    if(errorPresent) {
+        return errorMessage;
+    }
+    else{
+        return std::nullopt;
+    }
+}
+
+
+
+
 
 
 
@@ -99,13 +130,13 @@ static inline cmd::ElmCoordsCL trimCoords(const std::string &fullCommand, const 
 
 
 /**
- * @brief Prints a formatted line indicator and colors it black.
+ * @brief Creates a formatted line indicator and colors it black.
  *      The color is NOT reset after. The caller function will have to manually change it back.
- *      This function is NOT thread safe. Use a mutex to ensure other threads don't print at the same time.
  * @param n The number of the line. They start from 0, but the shown number is automatically increased by 1 to make it consistent with text exitors.
+ * @return The formatted line number as a string.
  */
-static inline void printLineNum(ulong n) {
-    console::cerr << std::format(
+static inline std::string getLineNumStr(ulong n) {
+    return std::format(
         "\n{}{}{:>8} │ ",
         ansi::reset, ansi::bold_black, n + 1
     );
@@ -137,7 +168,7 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
     if(exitMainRequest.load()) return;
 
 
-    cerr << std::format(
+    storeErrorMessage(std::format(
         "{}Error:"
         "\n    {}"
         "\n",
@@ -147,10 +178,9 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
             RESET_CODE_SEARCH_REGEX,
             ansi::bold_red
         )
-    );
+    ));
 
     // Stop the program if needed
-    cerr << ansi::reset;
     if(fatal) exitMain((int)errorCode);
 }
 
@@ -162,13 +192,13 @@ void utils::printErrorGeneric(ErrorCode errorCode, const std::string &message, c
 
 //TODO comment
 void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, cmd::ElmCoordsCL const &_errPos, const std::string &message, const bool fatal, const std::string &fullCommand) {
+    std::stringstream r;
 
     // Suppress error if other errors have occurred before it
     if(exitMainRequest.load()) return;
 
 
-    cerr++;
-    cerr << std::format(
+    r << std::format(
         "{}Could not parse command:"
         "\n    ",
         ansi::bold_red
@@ -187,17 +217,17 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
             (i >= relPos.start && i <= relPos.end) ? ansi::magenta :
             /**/                                     ansi::bright_black)
         ).c_str(); curColor != lastColor) {
-            cerr << curColor;
+            r << curColor;
             lastColor = curColor;
         }
 
         // Actually print the formatted character
-        cerr << format::whitespace(fullCommand[i], i, true);
+        r << format::whitespace(fullCommand[i], i, true);
     }
 
 
     // Print the actual error after indenting it by 4 spaces
-    cerr << std::format(
+    r << std::format(
         "\n"
         "\n    {}{}"
         "\n",
@@ -207,11 +237,12 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
             RESET_CODE_SEARCH_REGEX, ansi::bold_red
         )
     );
-    cerr--;
+
+
+    storeErrorMessage(r.str());
 
 
     // Stop the program if needed
-    cerr << ansi::reset;
     if(fatal) exitMain((int)errorCode);
 }
 
@@ -252,6 +283,8 @@ void utils::printErrorCL(ErrorCode errorCode, cmd::ElmCoordsCL const &_relPos, c
  * @param fatal Whether the error was fatal or it can be recovered from. If true, calls exitMain().
  */
 void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_relPos, ElmCoords const &_errPos, const std::string &message, const bool fatal) {
+    std::stringstream r;
+
 
     // Suppress error if other errors have occurred before it
     if(exitMainRequest.load()) return;
@@ -265,23 +298,20 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
         errFilePath = sourceFilePaths[_errPos.filePathIndex];
     }
 
-    cerr++;
-    cerr << std::format(
+    r << std::format(
         "{}{} error:",
         ansi::bold_red,
         getErrTypeName(errType)
     );
-    cerr--;
 
 
 
     // Check original file
-    cerr++;
     if(std::ifstream f(errFilePath); !f.is_open()) {
 
         // Print location
         if(errFilePath.length()) {
-            cerr << std::format(
+            r << std::format(
                 "\n{}    File │ {}{}{} (source file unavailable){}"
                 "\n{}    Line │ {}{}{}",
                 ansi::bold_red, ansi::reset, errFilePath, ansi::bright_black, ansi::reset,
@@ -306,7 +336,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
         // Print location
         ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
         if(errFilePath.length()) {
-            cerr << std::format(
+            r << std::format(
                 "\n{}    File │ {}{}{}"
                 "\n{}    Line │ {}{}{}",
                 ansi::bold_red, ansi::reset, errFilePath, ansi::reset,
@@ -320,8 +350,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
         // Print all the interested lines and change color according to the indices of the relevant and offending sections
-        cerr << "\n";
-        printLineNum(curLine);
+        r << "\n" << getLineNumStr(curLine);
         ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
         ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
         const char* lastColor = nullptr;
@@ -334,20 +363,20 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
             if(errPos.overflow) {
                 const char* curColor = ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black).c_str();
                 if(curColor != lastColor) {
-                    cerr << curColor;
+                    r << curColor;
                     lastColor = curColor;
                 }
 
                 // Print (missing code indicator) if needed
                 if(!overflowed && i > errPos.end) {
                     overflowed = true;
-                    cerr << ansi::bold_bright_red << " ﹏﹏" << curColor;
+                    r << ansi::bold_bright_red << " ﹏﹏" << curColor;
                 }
             }
             else {
                 const char* curColor = ((i >= errPos.start && i <= errPos.end) ? ansi::bold_red : ((i >= relPos.start && i <= relPos.end) ? ansi::magenta : ansi::bright_black)).c_str();
                 if(curColor != lastColor) {
-                    cerr << curColor;
+                    r << curColor;
                     lastColor = curColor;
                 }
             }
@@ -355,7 +384,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
             // Actually print the formatted character and line number. Manually break if the current line exceeds the last line visible in the code output
             if(s[i] != '\0') {
-                cerr << format::whitespace(s[i], col, false);
+                r << format::whitespace(s[i], col, false);
                 ++col;
                 if(s[i] == '\n') {
                     col = 0;
@@ -363,8 +392,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
                     if(curLine > targetLineNum) {
                         break;
                     }
-                    printLineNum(curLine);
-                    cerr << lastColor;
+                    r << getLineNumStr(curLine) << lastColor;
                 }
             }
             else break;
@@ -375,7 +403,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
     // Print the actual error after indenting it by 4 spaces
-    cerr << std::format(
+    r << std::format(
         "\n"
         "\n    {}{}"
         "\n",
@@ -386,10 +414,11 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
             ansi::bold_red
         )
     );
-    cerr--;
+
+
+    storeErrorMessage(r.str());
 
 
     // Stop the program if needed
-    cerr << ansi::reset;
     if(fatal) exitMain((int)errorCode);
 }

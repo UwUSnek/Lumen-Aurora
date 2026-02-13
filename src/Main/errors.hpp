@@ -7,6 +7,13 @@
 
 
 namespace utils {
+    extern std::mutex  errorMutex;
+    extern bool        errorPresent;
+    extern std::string errorMessage;
+
+    void storeErrorMessage(const std::string_view &msg);
+    std::optional<std::string> getErrorMessage();
+
     enum class ErrType:int {
         PREPROCESSOR,
         COMPILER

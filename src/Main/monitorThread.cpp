@@ -6,6 +6,7 @@
 #include <filesystem>
 #include "monitorThread.hpp"
 #include "Main/ALC.hpp"
+#include "Main/errors.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
 #include "Utils/console.hpp"
@@ -31,6 +32,10 @@ static int const maxPhaseNameLen = [] {
     #undef X
     return (int)std::ranges::max_element(names, {}, std::mem_fn(&std::string::length))->length();
 }();
+
+
+
+
 
 
 
@@ -72,21 +77,24 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
 //TODO ^ more readable code, easier to use. escape sequences will still be available.
 
 
-static void printStatusUI(const std::string &fullCommand, ulong loop, const ulong progressBarWidth, const bool _isComplete) {
-    bool hasError = exitMainRequest.load();
-    cout++;
 
 
-    // Adjust position and clear the console
-    cout << std::format(
-        "\033[s"             // Save current cursor position
-        "\033[J"             // Clear console from current character to last line
-        "{}"
-        "\033[999;999H"      // Move cursor to bottom-left corner
-        "\033[8A",           // Move cursor 8 lines up (make space for the status UI)
-        std::string(6, '\n') //TODO calculate the number of lines automatically
-    );
 
+
+
+
+static void printFileListUI() {
+    //TODO list of file/modules. idk based on what
+}
+
+
+
+
+
+
+
+
+static void printStatusUI(const std::string &fullCommand, ulong loop, const ulong progressBarWidth, const bool _isComplete, const bool hasError) {
 
     // Print the command
     if(_isComplete) {
@@ -137,17 +145,48 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const ulon
     else {
         cout << std::format(
             "\n"
-            "\n    {}t: {}{}/{}  |  {}f: {}{}  |  {}m: {}{}"
+            "\n    {}threads: {}{}/{}  |  {}files read: {}{}  |  {}modules loaded: {}{}"
             "\n",
             ansi::bold_bright_green, ansi::reset, activeThreads.load(), totalThreads.load(),
             ansi::bold_bright_green, ansi::reset, totalFiles   .load(),
             ansi::bold_bright_green, ansi::reset, totalModules .load()
         );
     }
+}
 
 
-    // Restore cursor position and unlock output
-    cout << "\033[u";
+
+
+
+
+
+
+
+void renderFrame(const std::string &fullCommand, ulong loop, const ulong progressBarWidth, const bool _isComplete) {
+    const auto errorMsg = utils::getErrorMessage();
+    cout++;
+
+
+    // Set up render area
+    // (Move cursor to top-left corner)
+    // (Clear console from current character to last line)
+    cout << "\033[1;999H";
+    cout << "\033[J";
+
+    // Move cursor to bottom-left corner
+    // Print status UI
+    cout << "\033[999;999H";
+    if(cmd::options.printStatus) {
+        printStatusUI(fullCommand, loop, progressBarWidth, _isComplete, errorMsg.has_value());
+    }
+
+    // Move cursor to top-left corner
+    // Print errors if present. Print list of active files/modules otherwise
+    cout << "\033[1;999H";
+    if(errorMsg.has_value()) cout << errorMsg.value() << ansi::reset;
+    else printFileListUI();
+
+
     cout--;
 }
 
@@ -159,7 +198,6 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const ulon
 
 
 void startMonitorThread(const std::string fullCommand){ //NOSONAR
-    const ulong interval = 100;
 
     // Set thread name and type
     threadType = ThreadType::MONITOR;
@@ -187,14 +225,13 @@ void startMonitorThread(const std::string fullCommand){ //NOSONAR
         if(progressBarWidth == -1) progressBarWidth = 16; //! 16 is an arbitrary value
 
 
-        // Print status UI
-        if(cmd::options.printStatus) {
-            printStatusUI(fullCommand, loop, (ulong)progressBarWidth, delayedIsCompleted);
-        }
-
-
-        // Limit output refresh rate to 10fps
+        // Render frame - limit output refresh rate to 20fps
+        const ulong interval = 1000UL / 20UL;
+        renderFrame(fullCommand, loop, (ulong)progressBarWidth, delayedIsCompleted);
         std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+
+
+        // Update loop counter
         ++loop;
 
     } while(!delayedIsCompleted);
