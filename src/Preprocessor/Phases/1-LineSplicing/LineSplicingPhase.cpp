@@ -37,8 +37,13 @@ void pre::__internal_startLineSplicingPhase(ptr<AnnotatedSource<false>> b, ptr<A
         }
         else if(whitespaceL) {
             for(ulong j = 0; j < whitespaceL; ++j) {
-                *b += *(*b)[i + j];
+                *r += *(*b)[i + j];
             }
+            using enum PhaseID;
+            decreaseMaxProgress(Preprocessor_Cleanup,  whitespaceL);
+            decreaseMaxProgress(Preprocessor_Macros,   whitespaceL);
+            decreaseMaxProgress(Compiler_Tokenization, whitespaceL);
+            increaseLocalProgress(whitespaceL);
             i += whitespaceL;
             continue;
             //! Set data manually and go to the next iteration
