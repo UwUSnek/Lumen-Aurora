@@ -48,7 +48,9 @@ protected:
     public:
         explicit scoped_lock_t(__base_BufferPipe& parent)
             : lock_(parent.sReallocLock) {
-            debug(if(safeRealloc == false) throw std::logic_error("Attempted to create a scoped lock on a pipe with safeRealloc=false. This should never happen");)
+            debug(if(safeRealloc == false) {
+                throw std::logic_error("Attempted to create a scoped lock from a pipe with safeRealloc=false. This should never happen");
+            })
         }
     };
 
@@ -122,16 +124,28 @@ public:
 
     /**
      * @brief Retrieves the element at the requested index and returns a copy of it.
+     *     This function makes the thread wait until the element is available or the pipe is closed.
      * @param i The index.
      * @return A copy of the requested element wrapped in an optional, or nullopt if the pipe was closed before reaching the required size.
      */
     std::optional<elmt> operator[](ulong i) {
+
+
+        // Wait for the element (or the pipe getting closed)
         while(len.load(std::memory_order_acquire) <= i) {
             if(!this->isOpen() && len.load(std::memory_order_acquire) <= i)  {
                 return std::nullopt;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            //! A condition varable could be used instead of polling,
+            //! but that can create unnecessary overhead as its logic can get quite complicated when multiple reader threads are involved.
+            //! Polling every 10ms has a negligible overhead and is fast enough to not be noticeable by the user.
+            //! 5-50ms is the weet spot.
+            //! Waiting less than 5ms could work but is probably too fast. More than 50ms works too, but it adds noticeable delay between phases.
         }
+
+
+        // Retrieve the element
         if constexpr(safeRealloc) {
             auto lock = scoped_lock();
             if(i >= (*this->cpp()).size()) return std::nullopt;
