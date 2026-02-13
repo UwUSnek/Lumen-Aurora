@@ -136,9 +136,32 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
     auto b = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
     auto skipped = std::vector<ulong>(b0->length(), 0); //! Oversized. Extra elements are simply not used. Initialize to all 0s
     while((*b0)[i]) {
+        ulong skipLen = 0;
+
+
+        // Custom logic for LJTs (they need backwards lookup)
+        //! Backwards lookup not actually implemented bc of design constraints.
+        //! Instead, this checks for whitespace sequences and stores them if not removed by an adjacent LJT.
+        //! Removes both the whitespace and LJT otherwise.
+        const ulong whitespaceL = misc::countWhitespace(*b0, i);
+        if(const ulong ljt = misc::measureLjt(*b0, i + whitespaceL); ljt) {
+            const ulong whitespaceR = misc::countWhitespace(*b0, i + whitespaceL + ljt);
+            skipLen = whitespaceL + ljt + whitespaceR;
+            //! Set skipLen and let the if(skipLen) barch handle it
+        }
+        else if(whitespaceL) {
+            for(ulong j = 0; j < whitespaceL; ++j) {
+                *b += *(*b0)[i + j];
+            }
+            ii += whitespaceL;
+            i  += whitespaceL;
+            continue;
+            //! Set data manually and go to the next iteration
+        }
+
 
         // Measure text to skip
-        ulong        skipLen = misc::measureLct        (*b0, i);  // Skip (and preserve) LCTs
+        if(!skipLen) skipLen = misc::measureLct        (*b0, i);  // Skip (and preserve) LCTs
         if(!skipLen) skipLen = misc::measureComment    (*b0, i);  // Skip (and preserve) comments
         if(!skipLen) skipLen = misc::measureTextLiteral(*b0, i);  // Skip (and preserve) literals
                                                                       // Skip (and preserve) macro definitions and invocations //FIXME

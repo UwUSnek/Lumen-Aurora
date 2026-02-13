@@ -28,7 +28,8 @@ void pre::__internal_startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<Annota
         }
 
 
-        // Skip (and preserve) literals
+        // Skip (and preserve) text literals
+        //! This is done in order to not false flag comment-like sequences found within strings
         if(auto literalLen = misc::measureTextLiteral(*b, i); literalLen) {
             increaseLocalProgress(literalLen);
             for(ulong j = 0; j < literalLen; ++j) {
