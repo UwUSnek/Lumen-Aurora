@@ -45,26 +45,29 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
     const bool isPhaseComplete = phaseDataArray[i].timeEnd  ->load() > 0;
     const bool isPhaseActive   = phaseDataArray[i].timeStart->load() > 0;
     const auto bar = phaseDataArray[i].totalProgress;
-    const auto mainColor = !bar->getProgress() ? ansi::bold_bright_black : (bar->hasError() ? ansi::bold_bright_red : ansi::bold_bright_green);
+
+    const auto barColor = bar->hasError() ? ansi::bold_bright_red : ansi::bold_bright_green;
+    const auto textColor = !bar->getProgress() || bar->getProgress() < bar->getMax() ? ansi::bold_bright_black : barColor;
 
     cout << std::format(
         "{}"
         "\n    {:<{}} │ ",
-        mainColor,
+        textColor,
         phaseIdTotring((PhaseID)i), maxPhaseNameLen
     );
     if(!bar->hasError() && isPhaseComplete) {
         cout << std::format(
-            "{}{:<{}} {}│{} {} steps", // MM:ss.mmm
-            ansi::reset,
-            format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load(), true), timeElapsedStrLen,
-            ansi::bright_black, ansi::reset,
+            "{}{}Completed in {:<}{}, {} steps", // MM:ss.mmm
+            ansi::reset, textColor,
+            format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load(), true),
+            ansi::bright_black,
             format::amount(bar->getMax())
             //FIXME subtract pipe waiting times from this
         );
+        cout << "     " << bar->getProgress() << "/" << bar->getMax();
     }
     else {
-        bar->render(-3 /*Separator*/ + (int)progressBarWidth - 2 /*Separator*/ - (int)timeElapsedStrLen - 4 /*right margin*/, mainColor, ansi::bold_bright_black);
+        bar->render(-3 /*Separator*/ + (int)progressBarWidth - 2 /*Separator*/ - (int)timeElapsedStrLen - 4 /*right margin*/, barColor, ansi::bold_bright_black);
         cout << std::format(
             "{}│{} {:<{}}", // MM:ss.mmm
             ansi::bright_black, ansi::reset,
