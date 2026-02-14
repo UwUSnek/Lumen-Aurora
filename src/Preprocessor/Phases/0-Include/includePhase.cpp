@@ -8,7 +8,7 @@
 #include "Preprocessor/Counters/TextLiteralCounter.hpp"
 #include "Preprocessor/Counters/whitespaceCounter.hpp"
 #include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
-#include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Preprocessor/AnnotatedSource.hpp"
 #include "Main/errors.hpp"
 #include "includePhase.hpp"
 #include "pathSolver.hpp"

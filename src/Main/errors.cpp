@@ -334,7 +334,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
 
         // Print location
-        ulong errHeight = std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
+        ulong errHeight = (ulong)std::count(s.c_str() + errPos.start, s.c_str() + errPos.end, '\n');
         if(errFilePath.length()) {
             r << std::format(
                 "\n{}    File │ {}{}{}"
@@ -351,7 +351,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
 
         // Print all the interested lines and change color according to the indices of the relevant and offending sections
         r << "\n" << getLineNumStr(curLine);
-        ulong relHeight = std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
+        ulong relHeight = (ulong)std::count(s.c_str() + relPos.start, s.c_str() + relPos.end, '\n');
         ulong targetLineNum = std::max(errPos.lineNum + errHeight, relPos.lineNum + relHeight) + 1; //! No need to check useRelevant as its line is always 0 when unused
         const char* lastColor = nullptr;
         ulong col = 0;

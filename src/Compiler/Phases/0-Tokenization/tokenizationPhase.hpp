@@ -1,5 +1,5 @@
 #pragma once
-#include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Preprocessor/AnnotatedSource.hpp"
 #include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Utils/ptr.hpp"
 

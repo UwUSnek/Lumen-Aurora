@@ -6,7 +6,7 @@
 #include "Preprocessor/Phases/1-LineSplicing/LineSplicingPhase.hpp"
 #include "Preprocessor/Phases/2-Cleanup/cleanupPhase.hpp"
 #include "Preprocessor/Phases/3-Macros/macroPhase.hpp"
-#include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Preprocessor/AnnotatedSource.hpp"
 #include <mutex>
 
 
@@ -20,7 +20,7 @@
  * @brief Load the source code, including all of the files included by it and processes any preprocessor directives.
  * @param s The source code as a string.
  * @param filePath The path of the original source code file.
- * @return The contents of the source file as a SegmentedCleanSource.
+ * @return The contents of the source file as a AnnotatedSource.
  */
 ptr<pre::AnnotatedSource<false>> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
     ulong pathIndex;
@@ -58,6 +58,7 @@ ptr<pre::AnnotatedSource<false>> pre::loadSourceCode(const std::string &s, const
 
     // Start phases and return the output buffer
     startSubphaseAsync(P0_Includes,     true, startIncludePhase,      r0, r1);
+    r1->awaitClose(mainCheckErrors); //TODO remove
     startSubphaseAsync(P1_LineSplicing, true, startLineSplicingPhase, r1, r2);
     startSubphaseAsync(P2_Cleanup,      true, startCleanupPhase,      r2, r3);
     startSubphaseAsync(P3_Macros,       true, startMacroPhase,        r3, r4);

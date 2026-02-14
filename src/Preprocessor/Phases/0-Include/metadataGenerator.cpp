@@ -1,4 +1,4 @@
-#include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Preprocessor/AnnotatedSource.hpp"
 #include "metadataGenerator.hpp"
 
 
@@ -8,7 +8,7 @@
 
 
 
-//FIXME rename segmentedcleansource to something better.
+//FIXME rename AnnotatedSource to something better.
 //FIXME it's just source code with metadata
 void pre::generateMetadata(const std::string &rawCode, ptr<AnnotatedSource<false>> r, ulong DBG_filePathIndex) {
     ulong i = 0; // The current character index. Starts from 0

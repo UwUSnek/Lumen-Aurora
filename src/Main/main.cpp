@@ -5,7 +5,6 @@
 
 #include "Main/ALC.hpp"
 #include "Main/errors.hpp"
-#include "Preprocessor/SegmentedCleanSource.hpp"
 #include "Utils/ansi.hpp"
 #include "Command/command.hpp"
 #include "Preprocessor/preprocessor.hpp"
@@ -125,7 +124,7 @@ int main(int argc, char* argv[]){
     totalFiles.fetch_add(1);
     auto preprocessedSourceCode = pre::loadSourceCode(s, cmd::options.sourceFile);
     ptr<cmp::SourceTree> precompiledModule = nullptr;
-    // pre::SegmentedCleanSource *convertedCode     = nullptr; //TODO
+    // pre::AnnotatedSource *convertedCode     = nullptr; //TODO
 
 
     if(compileModule) {

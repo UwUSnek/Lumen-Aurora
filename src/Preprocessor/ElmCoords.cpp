@@ -1,5 +1,5 @@
 #include "ElmCoords.hpp"
-#include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Preprocessor/AnnotatedSource.hpp"
 #include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 
 

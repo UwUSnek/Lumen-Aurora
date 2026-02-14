@@ -45,7 +45,7 @@ add_executable(alc
 
     #../src/Preprocessor
         ../src/Preprocessor/preprocessor.cpp
-        ../src/Preprocessor/SegmentedCleanSource.cpp
+        ../src/Preprocessor/AnnotatedSource.cpp
         ../src/Preprocessor/ElmCoords.cpp
             #../src/Preprocessor/Phases
                 #../src/Preprocessor/Phases/0-Include
