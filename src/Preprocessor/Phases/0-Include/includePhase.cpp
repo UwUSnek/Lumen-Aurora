@@ -1,13 +1,12 @@
 #include <fstream>
-#include <cstring>
 #include <sys/types.h>
 #include "Main/ALC.hpp"
 #include "Main/ErrorCode.hpp"
 #include "Main/FatalErrorException.hpp"
-#include "Misc/CommentCounter.hpp"
-#include "Misc/LstCounter.hpp"
-#include "Misc/TextLiteralCounter.hpp"
-#include "Misc/whitespaceCounter.hpp"
+#include "Preprocessor/Counters/CommentCounter.hpp"
+#include "Preprocessor/Counters/LstCounter.hpp"
+#include "Preprocessor/Counters/TextLiteralCounter.hpp"
+#include "Preprocessor/Counters/whitespaceCounter.hpp"
 #include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
 #include "Main/errors.hpp"
@@ -102,6 +101,21 @@ static std::string parseIncludeStatementPath(ulong index, pre::AnnotatedSource<f
 
 
 
+template<typename f>
+static ulong realignIndices(ulong& dirtyIndex, ulong& cleanIndex, const std::vector<ulong>& equivalentAmountVector, ulong jumpSize, f action) {
+    const ulong dirtyIndexOld = dirtyIndex;
+    for(ulong n = 0; n < jumpSize; ++n, ++cleanIndex) {
+        for(ulong l = 0; l < equivalentAmountVector[cleanIndex]; ++l, ++dirtyIndex) {
+            action(dirtyIndex);
+        }
+    }
+    return dirtyIndex - dirtyIndexOld;
+}
+
+
+
+
+
 
 
 
@@ -114,7 +128,7 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
     ulong i  = 0; // b0 index
     ulong ii = 0; // b  index (clean)
     auto b = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
-    auto skipped = std::vector<ulong>(b0->length(), 0); //! Oversized. Extra elements are simply not used. Initialize to all 0s
+    auto equivalent = std::vector<ulong>(b0->length(), 0); //! Oversized. Extra elements are simply not used. Initialize to all 0s
     while((*b0)[i]) {
         ulong skipLen = 0;
 
@@ -131,6 +145,7 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
         }
         else if(whitespaceL) {
             for(ulong j = 0; j < whitespaceL; ++j) {
+                ++equivalent[ii + j];
                 *b += *(*b0)[i + j];
             }
             ii += whitespaceL;
@@ -152,13 +167,14 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
 
         // Skip it and store the amount of skipped characters
         if(skipLen) {
-            skipped[ii] += skipLen;
+            equivalent[ii] += skipLen;
             i += skipLen;
         }
 
         // Save character if not to be skipped
         else {
             *b += *(*b0)[i];
+            ++equivalent[ii];
             ++ii;
             ++i;
         }
@@ -185,8 +201,7 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
             j += misc::countWhitespace(*b, j);
 
             // Detect specified file path
-            std::string filePathMatch = parseIncludeStatementPath(j, *b);
-            if(!filePathMatch.empty()) {
+            if(const auto filePathMatch = parseIncludeStatementPath(j, *b); !filePathMatch.empty()) {
                 ulong k = j + filePathMatch.length();
                 ElmCoords filePathCoords(b, j, k - 1);
 
@@ -209,7 +224,11 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
                         // Calculate the actual file path and open the file
                         std::string actualFilePath = resolveFilePath(rawIncludeFilePath, sourceFilePaths[(*b)[j]->meta.f], relevantCoords, filePathCoords);
                         std::ifstream actualFile(actualFilePath);
-                        //FIXME add a function that reads a file and saves it in a global array so they don't go out of scope
+                        //FIXME add a function that reads a file and saves it in a global array so they can be reused (identified by their absolute path index)
+                        //FIXME save raw files
+                        //FIXME save preprocessed files
+                        //FIXME save precompiled modules
+                        //TODO save standard files & modules (by name, separate from files)
 
 
                         // Read and prepare code from the file
@@ -222,17 +241,13 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
 
                         // Increase index (skip include and file path)
                         //! Update dirty buffer index, taking into account all of the stripped characters
-                        const ulong old_i = i;
-                        for(ulong jj = ii; jj < k; ++jj) {
-                            i += 1 + skipped[jj];
-                        }
-                        ii = k;
+                        ulong delta = realignIndices(i, ii, equivalent, k - ii, [](ulong){ /* Empty */ });
 
 
                         // Update phase progress data
                         increaseMaxProgress(fileCode->length(), P0_Includes, P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
-                        decreaseMaxProgress(i - old_i,                       P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
-                        increaseLocalProgress(i - old_i);
+                        decreaseMaxProgress(delta,                           P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
+                        increaseLocalProgress(delta);
 
 
                         // Append file data to r and process its includes recursively
@@ -271,16 +286,24 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
 
 
         // If not, copy normal characters and increase index counter
-        //! Also appends all of the characters stripped from the dirty buffer
+        //! Also append all of the characters stripped from the dirty buffer
         else {
-            const ulong old_i = i;
-            for(ulong l = 0; l < 1 + skipped[ii]; ++l) {
-                *r += *(*b0)[i];
-                ++i;
-            }
-            increaseLocalProgress(i - old_i);
-            ++ii;
+            const ulong delta = realignIndices(i, ii, equivalent, 1, [&r, &b0](ulong dirtyIndex){
+                *r += *(*b0)[dirtyIndex];
+            });
+            increaseLocalProgress(delta);
         }
+    }
+
+
+    // Process stripped characters at the end of the buffer
+    //! Stripped sequences at the end of the buffer are not processed by the while loop as there is no next include statement to initiate the logic.
+    //! This forcefully processes them. This is required in order to properly keep track of process and preserve all of the source code.
+    if(i < b0->length()) {
+        ulong delta = realignIndices(i, ii, equivalent, 1, [&r, &b0](ulong dirtyIndex){
+            *r += *(*b0)[dirtyIndex];
+        });
+        increaseLocalProgress(delta);
     }
 }
 
