@@ -211,20 +211,20 @@ ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::AnnotatedSource<false>> b, u
         // Missing closing sequence
         if(!c) {
             utils::printError(
-                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_0,
+                literalType == TextLiteralType::STRING ? ErrorCode::ERROR_CMP_STRING_INCOMPLETE_0 : ErrorCode::ERROR_CMP_CHAR_INCOMPLETE_0,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
-                ElmCoords(b, i - 1, i - 1),
+                ElmCoords(b, i, i),
                 std::format("{} literal is missing a closing {} character.", getLiteralName(literalType), delimiter),
                 true //TODO recovery system. skip to the first token that makes sense
             );
         }
         else if(*c == '\n') {
             utils::printError(
-                ErrorCode::ERROR_CMP_STRING_INCOMPLETE_n,
+                literalType == TextLiteralType::STRING ? ErrorCode::ERROR_CMP_STRING_INCOMPLETE_n : ErrorCode::ERROR_CMP_CHAR_INCOMPLETE_n,
                 utils::ErrType::COMPILER,
                 ElmCoords(b, index, i - 1),//FIXME CHECK IF '' and 'a' AT THE END OF THE FILE ARE DETECTED AND SHOWN CORRECTLY
-                ElmCoords(b, i - 1, i - 1),
+                ElmCoords(b, i, i),
                 std::format(
                     "{} literal is missing a closing {} character.\n"
                     "If you wish to include a newline character in the literal, use the escape sequence \"{}\".",
