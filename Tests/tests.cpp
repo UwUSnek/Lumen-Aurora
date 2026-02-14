@@ -1,6 +1,6 @@
 #include <string>
 #include <vector>
-#include "Main/ALC.hpp"
+#include "Utils/console.hpp"
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 int main(){
 
     fs::create_directory(tmpDirLocation);
-    cout << "Running tests...\n\n";
+    console::cout << "Running tests...\n\n";
 
 
 
@@ -104,10 +104,10 @@ int main(){
         ErrorCode::ERROR_PRE_PATH_AMBIGUOUS,
         "-I Tests/Includes/Conflict1 -I Tests/Includes/Conflict2"
     ));
-    tests.push_back(new TestExitValue(
+    tests.push_back(new TestPreprocessorOutput(
         "include path merging",
         "A#include   \t\"test.lmn\"B",
-        ErrorCode::SUCCESS,
+        "AhelloB",
         "-I Tests/Includes/Conflict1 -I Tests/Includes/Conflict1 -I Tests/Includes/./../Includes/Conflict1"
     ));
 
@@ -122,9 +122,9 @@ int main(){
 
 
 
-    cout << "\n\n";
-    cout << (passedTests == totalTests ? ansi::bold_bright_green : ansi::reset) << "Passed: " << passedTests << "/" << totalTests << "\n";
-    cout << (failedTests > 0           ? ansi::bold_red   : ansi::reset) << "Failed: " << failedTests << "/" << totalTests << "\n";
-    cout << ansi::reset;
+    console::cout << "\n\n";
+    console::cout << (passedTests == totalTests ? ansi::bold_bright_green : ansi::reset) << "Passed: " << passedTests << "/" << totalTests << "\n";
+    console::cout << (failedTests > 0           ? ansi::bold_red   : ansi::reset) << "Failed: " << failedTests << "/" << totalTests << "\n";
+    console::cout << ansi::reset;
     return 0;
 }

@@ -6,8 +6,10 @@ g++                                         \
     ./src/Preprocessor/ElmCoords.cpp        \
     ./src/Utils/ansi.cpp                    \
     ./src/Utils/utils.cpp                   \
-    ./src/Utils/errors.cpp                  \
-    ./src/ALC.cpp                           \
+    ./src/Utils/format.cpp                  \
+    ./src/Utils/console.cpp                 \
+    ./src/Main/errors.cpp                   \
+    ./src/Main/ALC.cpp                      \
     \
     ./Tests/tests.cpp                       \
     ./Tests/UnitTest.cpp                    \
