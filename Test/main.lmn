@@ -1,38 +1,10 @@
 
 // A
-// #include/*aa*/  	"../Tests/LargeSource/largeSource.lmn"
+
+
 #include/*aa*/  	\
 "../Tests/LargeTree/largeTr     \\
     ee.lmn"
 
-//#in/*
-//     */clud/*
-//  */e"test.lmn"
-
-// broken code test <- this should fail
-// alias test3.test as a
-// ;
-
-
-
-// enum a : int {
-//     elm =;
-// }
-
-// // struct s {
-// //     fn(int, float, double, fn(double)) exec=;
-// // }
-// // export;
-// // export a as b;
-// // import a as a;
-// // from math as a import sum.b as test;
-
-// //TODO test trailing commas on element clusters. they should print an error
-
-// namespace a {
-
-// }
-// fejuwi
-// namespace a {
 
 // }

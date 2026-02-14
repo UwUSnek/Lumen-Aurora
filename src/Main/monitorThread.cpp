@@ -62,9 +62,7 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
             format::milliseconds(phaseDataArray[i].timeEnd->load() - phaseDataArray[i].timeStart->load(), true),
             ansi::bright_black,
             format::amount(bar->getMax())
-            //FIXME subtract pipe waiting times from this
         );
-        cout << "     " << bar->getProgress() << "/" << bar->getMax();
     }
     else {
         bar->render(-3 /*Separator*/ + (int)progressBarWidth - 2 /*Separator*/ - (int)timeElapsedStrLen - 4 /*right margin*/, barColor, ansi::bold_bright_black);
@@ -72,7 +70,6 @@ static void renderProgressBar(const ulong i, const ulong progressBarWidth) {
             "{}│{} {:<{}}", // MM:ss.mmm
             ansi::bright_black, ansi::reset,
             format::milliseconds(isPhaseActive ? utils::getEpochMs() - phaseDataArray[i].timeStart->load() : 0, true), timeElapsedStrLen
-            //FIXME subtract pipe waiting times from this
         );
     }
 }

@@ -37,10 +37,10 @@ add_executable(alc
 
 
     #../src/Misc
-        ../src/Misc/CommentCounter.cpp
-        ../src/Misc/LstCounter.cpp
-        ../src/Misc/TextLiteralCounter.cpp
-        ../src/Misc/whitespaceCounter.cpp
+        ../src/Preprocessor/Counters/CommentCounter.cpp
+        ../src/Preprocessor/Counters/LstCounter.cpp
+        ../src/Preprocessor/Counters/TextLiteralCounter.cpp
+        ../src/Preprocessor/Counters/whitespaceCounter.cpp
 
 
     #../src/Preprocessor

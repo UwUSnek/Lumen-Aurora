@@ -3,7 +3,7 @@
 #include "Main/FatalErrorException.hpp"
 #include "Main/errors.hpp"
 
-#include "Misc/whitespaceCounter.hpp"
+#include "Preprocessor/Counters/whitespaceCounter.hpp"
 #include "Parsers/keywordsIdentifiers.hpp"
 #include "Parsers/textLiterals.hpp"
 #include "Parsers/numericalLiterals.hpp"

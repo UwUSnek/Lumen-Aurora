@@ -1,0 +1,11 @@
+the Caches directory contains cached data
+
+- read files (raw)
+- preprocessed files (idk about this yet. might not be possible)
+- precompiled modules
+
+
+This data is stored in runtime maps & arrays, but also written to file whenever updated.
+The data is loaded from file at startup to enable incremental compilation.
+
+Changes to the files trigger the recomputation of all dependant cache entries.

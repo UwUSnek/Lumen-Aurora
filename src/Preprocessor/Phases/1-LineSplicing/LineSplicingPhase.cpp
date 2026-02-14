@@ -1,8 +1,8 @@
 #include "Preprocessor/Phases/1-LineSplicing/LineSplicingPhase.hpp"
 #include "Main/ALC.hpp"
 #include "Main/FatalErrorException.hpp"
-#include "Misc/LstCounter.hpp"
-#include "Misc/whitespaceCounter.hpp"
+#include "Preprocessor/Counters/LstCounter.hpp"
+#include "Preprocessor/Counters/whitespaceCounter.hpp"
 #include "Preprocessor/SegmentedCleanSource.hpp"
 
 

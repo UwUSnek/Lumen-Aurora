@@ -1,0 +1,4 @@
+the Registers directory contains static data available to all phases,
+such as tokens, patterns and strings.
+
+These are baked into the compiler and cannot be changed externally

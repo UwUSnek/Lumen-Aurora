@@ -2,8 +2,8 @@
 
 #include "cleanupPhase.hpp"
 #include "Main/FatalErrorException.hpp"
-#include "Misc/TextLiteralCounter.hpp"
-#include "Misc/CommentCounter.hpp"
+#include "Preprocessor/Counters/TextLiteralCounter.hpp"
+#include "Preprocessor/Counters/CommentCounter.hpp"
 
 
 
