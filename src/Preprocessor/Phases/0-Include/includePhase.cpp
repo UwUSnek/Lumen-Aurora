@@ -137,9 +137,9 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
         //! Backwards lookup not actually implemented bc of design constraints.
         //! Instead, this checks for whitespace sequences and stores them if not removed by an adjacent LJT.
         //! Removes both the whitespace and LJT otherwise.
-        const ulong whitespaceL = misc::countWhitespace(*b0, i);
+        const ulong whitespaceL = misc::measureWhitespace(*b0, i);
         if(const ulong ljt = misc::measureLjt(*b0, i + whitespaceL); ljt) {
-            const ulong whitespaceR = misc::countWhitespace(*b0, i + whitespaceL + ljt);
+            const ulong whitespaceR = misc::measureWhitespace(*b0, i + whitespaceL + ljt);
             skipLen = whitespaceL + ljt + whitespaceR;
             //! Set skipLen and let the if(skipLen) barch handle it
         }
@@ -198,7 +198,7 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
             ElmCoords relevantCoords(b, ii, j - 1);
 
             // Skip whitespace if present
-            j += misc::countWhitespace(*b, j);
+            j += misc::measureWhitespace(*b, j);
 
             // Detect specified file path
             if(const auto filePathMatch = parseIncludeStatementPath(j, *b); !filePathMatch.empty()) {

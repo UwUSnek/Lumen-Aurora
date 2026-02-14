@@ -29,9 +29,9 @@ void pre::__internal_startLineSplicingPhase(ptr<AnnotatedSource<false>> b, ptr<A
         //! Backwards lookup not actually implemented bc of design constraints.
         //! Instead, this checks for whitespace sequences and stores them if not removed by an adjacent LJT.
         //! Removes both the whitespace and LJT otherwise.
-        const ulong whitespaceL = misc::countWhitespace(*b, i);
+        const ulong whitespaceL = misc::measureWhitespace(*b, i);
         if(const ulong ljt = misc::measureLjt(*b, i + whitespaceL); ljt) {
-            const ulong whitespaceR = misc::countWhitespace(*b, i + whitespaceL + ljt);
+            const ulong whitespaceR = misc::measureWhitespace(*b, i + whitespaceL + ljt);
             skipLen = whitespaceL + ljt + whitespaceR;
             //! Set skipLen and let the if(skipLen) barch handle it
         }

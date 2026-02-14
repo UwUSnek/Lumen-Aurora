@@ -5,6 +5,6 @@
 
 
 namespace misc {
-    ulong countWhitespace(pre::AnnotatedSource<false> &b, ulong index);
+    ulong measureWhitespace(pre::AnnotatedSource<false> &b, ulong index);
     bool  isWhitespaceChar(const char &c);
 }

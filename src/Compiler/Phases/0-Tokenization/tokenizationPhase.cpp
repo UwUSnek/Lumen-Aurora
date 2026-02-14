@@ -22,7 +22,7 @@ void cmp::__internal_startTokenizationPhase(ptr<pre::AnnotatedSource<false>> b, 
 
 
         // Detect whitespace and split tokens if any is found
-        if(ulong wsLen = misc::countWhitespace(*b, i)) {
+        if(ulong wsLen = misc::measureWhitespace(*b, i)) {
             increaseLocalProgress(wsLen);
             i += wsLen;
             continue;
