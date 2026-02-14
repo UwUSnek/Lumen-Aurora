@@ -370,7 +370,7 @@ void utils::printError(ErrorCode errorCode, ErrType errType, ElmCoords const &_r
                 // Print (missing code indicator) if needed
                 if(!overflowed && i > errPos.end) {
                     overflowed = true;
-                    r << ansi::bold_bright_red << " ﹏﹏" << curColor;
+                    r << ansi::bold_bright_red << " ﹏" << curColor;
                 }
             }
             else {

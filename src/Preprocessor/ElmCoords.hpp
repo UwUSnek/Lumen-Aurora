@@ -40,8 +40,8 @@ struct ElmCoords {
 
 
 
-    ElmCoords(ptr<pre::AnnotatedSource<false>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
-    ElmCoords(ptr<cmp::TokenizedSource<false>>      source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
+    template<bool sr> ElmCoords(ptr<pre::AnnotatedSource<sr>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
+    template<bool sr> ElmCoords(ptr<cmp::TokenizedSource<sr>> source, ulong _start, ulong _end) : ElmCoords(*source, _start, _end) {};
 
 
 
@@ -55,8 +55,8 @@ struct ElmCoords {
         }
         else {
             overflow = _end >= source.length();
-            ulong actual_start = _start > source.length() ? source.length() - 1 : _start;
-            ulong actual_end   = _end   > source.length() ? source.length() - 1 : _end;
+            ulong actual_start = _start >= source.length() ? source.length() - 1 : _start;
+            ulong actual_end   = _end   >= source.length() ? source.length() - 1 : _end;
 
             filePathIndex = source[actual_start]->meta.f;
             lineNum       = source[actual_start]->meta.l;
@@ -77,8 +77,8 @@ struct ElmCoords {
         }
         else {
             overflow = _end >= source.length();
-            ulong actual_start = _start > source.length() ? source.length() - 1 : _start;
-            ulong actual_end   = _end   > source.length() ? source.length() - 1 : _end;
+            ulong actual_start = _start >= source.length() ? source.length() - 1 : _start;
+            ulong actual_end   = _end   >= source.length() ? source.length() - 1 : _end;
 
             filePathIndex = source[actual_start]->start.f;
             lineNum       = source[actual_start]->start.l;
