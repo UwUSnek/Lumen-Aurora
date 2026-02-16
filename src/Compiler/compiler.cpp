@@ -25,7 +25,7 @@ ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::AnnotatedSource
 
     // Start subphases
     startSubphaseAsync(PhaseID::C0_Tokenization, true, startTokenizationPhase, b, r1);
-    r1->awaitClose(mainCheckErrors);
+    // r1->awaitClose(mainCheckErrors); //TODO remove
     startSubphaseAsync(PhaseID::C1_TreeCreation, true, startTreePhase,        r1, r2);
 
     return r2;

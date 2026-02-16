@@ -58,7 +58,7 @@ ptr<pre::AnnotatedSource<false>> pre::loadSourceCode(const std::string &s, const
 
     // Start phases and return the output buffer
     startSubphaseAsync(P0_Includes,     true, startIncludePhase,      r0, r1);
-    r1->awaitClose(mainCheckErrors); //TODO remove
+    // r1->awaitClose(mainCheckErrors); //TODO remove
     startSubphaseAsync(P1_LineSplicing, true, startLineSplicingPhase, r1, r2);
     startSubphaseAsync(P2_Cleanup,      true, startCleanupPhase,      r2, r3);
     startSubphaseAsync(P3_Macros,       true, startMacroPhase,        r3, r4);

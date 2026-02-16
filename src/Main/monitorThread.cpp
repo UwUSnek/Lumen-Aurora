@@ -138,22 +138,22 @@ static void printStatusUI(const std::string &fullCommand, ulong loop, const ulon
         cout << std::format(
             "\n"
             "\n    {}{}",
-            mainColor,
+            ansi::reset,
             hasError ? "Errors were detected. Skipping file output." : std::format(
-                "Output written to \"{}{}{}\"."
+                "Output written to \"{}\"."
                 "\n",
-                ansi::reset, fs::canonical(cmd::options.outputFile).string(), ansi::bold_bright_green
+                fs::canonical(cmd::options.outputFile).string()
             )
         );
     }
     else {
         cout << std::format(
             "\n"
-            "\n    {}threads: {}{}/{}  |  {}files read: {}{}  |  {}modules loaded: {}{}"
+            "\n    {}threads: {}/{}  |  files read: {}  |  modules loaded: {}"
             "\n",
-            ansi::bold_bright_green, ansi::reset, activeThreads.load(), totalThreads.load(),
-            ansi::bold_bright_green, ansi::reset, totalFiles   .load(),
-            ansi::bold_bright_green, ansi::reset, totalModules .load()
+            ansi::reset, activeThreads.load(), totalThreads.load(),
+            totalFiles   .load(),
+            totalModules .load()
         );
     }
 }
