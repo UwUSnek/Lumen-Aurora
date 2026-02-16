@@ -1,0 +1,6 @@
+namespace a { #include "largeTree2.lmn" }
+namespace b { #include "largeTree2.lmn" }
+namespace c { #include "largeTree2.lmn" }
+namespace d { #include "largeTree2.lmn" }
+namespace e { #include "largeTree2.lmn" }
+namespace f { #include "largeTree2.lmn" }

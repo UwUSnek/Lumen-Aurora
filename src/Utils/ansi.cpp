@@ -8,29 +8,29 @@
 
 
 // Normal colors
-std::string ansi::black = "";             std::string ansi::bold_black = "";              std::string ansi::fill_black = "";
-std::string ansi::red = "";               std::string ansi::bold_red = "";                std::string ansi::fill_red = "";
-std::string ansi::green = "";             std::string ansi::bold_green = "";              std::string ansi::fill_green = "";
-std::string ansi::yellow = "";            std::string ansi::bold_yellow = "";             std::string ansi::fill_yellow = "";
-std::string ansi::blue = "";              std::string ansi::bold_blue = "";               std::string ansi::fill_blue = "";
-std::string ansi::magenta = "";           std::string ansi::bold_magenta = "";            std::string ansi::fill_magenta = "";
-std::string ansi::cyan = "";              std::string ansi::bold_cyan = "";               std::string ansi::fill_cyan = "";
-std::string ansi::white = "";             std::string ansi::bold_white = "";              std::string ansi::fill_white = "";
+std::string ansi::black   = "";           std::string ansi::bold_black   = "";           std::string ansi::fill_black   = "";
+std::string ansi::red     = "";           std::string ansi::bold_red     = "";           std::string ansi::fill_red     = "";
+std::string ansi::green   = "";           std::string ansi::bold_green   = "";           std::string ansi::fill_green   = "";
+std::string ansi::yellow  = "";           std::string ansi::bold_yellow  = "";           std::string ansi::fill_yellow  = "";
+std::string ansi::blue    = "";           std::string ansi::bold_blue    = "";           std::string ansi::fill_blue    = "";
+std::string ansi::magenta = "";           std::string ansi::bold_magenta = "";           std::string ansi::fill_magenta = "";
+std::string ansi::cyan    = "";           std::string ansi::bold_cyan    = "";           std::string ansi::fill_cyan    = "";
+std::string ansi::white   = "";           std::string ansi::bold_white   = "";           std::string ansi::fill_white   = "";
 
 // High intensity colors
-std::string ansi::bright_black = "";      std::string ansi::bold_bright_black = "";      std::string ansi::fill_bright_black = "";
-std::string ansi::bright_red = "";        std::string ansi::bold_bright_red = "";        std::string ansi::fill_bright_red = "";
-std::string ansi::bright_green = "";      std::string ansi::bold_bright_green = "";      std::string ansi::fill_bright_green = "";
-std::string ansi::bright_yellow = "";     std::string ansi::bold_bright_yellow = "";     std::string ansi::fill_bright_yellow = "";
-std::string ansi::bright_blue = "";       std::string ansi::bold_bright_blue = "";       std::string ansi::fill_bright_blue = "";
+std::string ansi::bright_black   = "";    std::string ansi::bold_bright_black   = "";    std::string ansi::fill_bright_black   = "";
+std::string ansi::bright_red     = "";    std::string ansi::bold_bright_red     = "";    std::string ansi::fill_bright_red     = "";
+std::string ansi::bright_green   = "";    std::string ansi::bold_bright_green   = "";    std::string ansi::fill_bright_green   = "";
+std::string ansi::bright_yellow  = "";    std::string ansi::bold_bright_yellow  = "";    std::string ansi::fill_bright_yellow  = "";
+std::string ansi::bright_blue    = "";    std::string ansi::bold_bright_blue    = "";    std::string ansi::fill_bright_blue    = "";
 std::string ansi::bright_magenta = "";    std::string ansi::bold_bright_magenta = "";    std::string ansi::fill_bright_magenta = "";
-std::string ansi::bright_cyan = "";       std::string ansi::bold_bright_cyan = "";       std::string ansi::fill_bright_cyan = "";
-std::string ansi::bright_white = "";      std::string ansi::bold_bright_white = "";      std::string ansi::fill_bright_white = "";
+std::string ansi::bright_cyan    = "";    std::string ansi::bold_bright_cyan    = "";    std::string ansi::fill_bright_cyan    = "";
+std::string ansi::bright_white   = "";    std::string ansi::bold_bright_white   = "";    std::string ansi::fill_bright_white   = "";
 
 // Lone formatting
-std::string ansi::bold = "";         std::string ansi::boldOff = "";
-std::string ansi::underline = "";    std::string ansi::underlineOff = "";
-std::string ansi::inverse = "";      std::string ansi::inverseOff = "";
+std::string ansi::bold      = "";         std::string ansi::boldOff      = "";
+std::string ansi::underline = "";         std::string ansi::underlineOff = "";
+std::string ansi::inverse   = "";         std::string ansi::inverseOff   = "";
 
 // Reset
 std::string ansi::reset = "";

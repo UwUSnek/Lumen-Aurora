@@ -1,9 +1,9 @@
-#include "ALC.hpp"
-#include <iomanip>
-
-#include "Utils/utils.hpp"
-#include "Utils/ansi.hpp"
 #include "DynamicProgressBar.hpp"
+#include "Utils/ansi.hpp"
+#include "Utils/console.hpp"
+#include "Utils/format.hpp"
+#include <algorithm>
+#include <format>
 
 
 
@@ -18,7 +18,8 @@
  * @param consoleWidth The number of spaces dedicated to the progress bar.
  *      Values lower than 0 are considered 0.
  */
-void DynamicProgressBar::render(int consoleWidth) const {
+void DynamicProgressBar::render(int consoleWidth, const std::string &progressColor, const std::string &missingColor) const {
+    using namespace console;
     ulong _progress = progress.load();
     ulong _max = max.load();
 
@@ -29,24 +30,19 @@ void DynamicProgressBar::render(int consoleWidth) const {
     if(consoleWidth < 0) consoleWidth = 0;
 
 
-    // Calculate the normalized progress. Goes from 0 to 1 instead of from 0 to total
-    float normProgress = (float)_progress / (float)_max;
-    // Calculate the amount of normalized progress each 1-character step is worth (depends on the width of the progress bar)
-    float stepSize = 1.0f / (float)consoleWidth;
+    // Calculate filled and missing width of the line in characters
+    auto filledWidth = std::clamp((int)((float)_progress / (float)_max * (float)consoleWidth), 0, consoleWidth);
+    int missingWidth = consoleWidth - filledWidth;
 
 
-    // For each step
-    for(float i = 0; i < 0.9999f; i += stepSize) {
-        cout << (i < normProgress ? progressColor : missingColor) << "━";
-    }
-
-
-    // Reset colors and print value
-    cout << ansi::reset <<
-        " " <<
-        std::right << std::setw(valueWidth) << utils::shortenInteger(_progress) <<
-        "/" <<
-        std::left << std::setw(valueWidth) << utils::shortenInteger(_max) <<
-        " "
-    ;
+    // Print line and progress values
+    console::cout << std::format(
+        "{}{:━<{}}{}{:━<{}} "
+        "{}{:>{}}/{:<{}} ",
+        progressColor, "", filledWidth,
+        missingColor,  "", missingWidth,
+        ansi::reset,
+        format::shortenInteger(_progress), valueWidth,
+        format::shortenInteger(_max),      valueWidth
+    );
 }

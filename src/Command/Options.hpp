@@ -6,12 +6,12 @@
 namespace cmd {
     struct Options {
         // Input and output file paths
-        std::string sourceFile;
-        std::string outputFile;
+        std::string sourceFile = "";
+        std::string outputFile = "";
 
         // Include and Import paths
-        std::vector<std::string> includePaths;
-        std::vector<std::string> importPaths;
+        std::vector<std::string> includePaths = std::vector<std::string>();
+        std::vector<std::string> importPaths  = std::vector<std::string>();
 
         // Command overrides
         bool isHelp = false;
@@ -29,18 +29,17 @@ namespace cmd {
 
 
 
-        //TODO implement these options
         // Output control
         bool printColor = true;
-        bool printDisplay = true;
-        bool printErrors = true;
+        bool printDisplay = true; //TODO implement this option
+        bool printErrors = true;  //TODO implement this option
         bool printStatus = true;
-        bool silent = false;
+        bool silent = false;      //TODO implement this option
 
-        //TODO implement these options
+
         //TODO add optimization options
 
-        Options(){}
+        Options() = default;
     };
 }
 

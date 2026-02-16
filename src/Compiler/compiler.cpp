@@ -1,29 +1,32 @@
-#include "ALC.hpp"
+#include "Compiler/Phases/1-Tree/SourceTree.hpp"
+#include "Main/ALC.hpp"
 #include "compiler.hpp"
-#include "TokenizationPhase/tokenizationPhase.hpp"
-#include "TreePhase/treePhase.hpp"
+#include "Compiler/Phases/0-Tokenization/tokenizationPhase.hpp"
+#include "Compiler/Phases/1-Tree/treePhase.hpp"
+#include "Utils/ptr.hpp"
+#include <memory>
 
 
 
 
+//FIXME make this a command line option
+// The size of the token buffer
+#define COMPILER_BUFFER_SIZE_MB 5000
+#define COMPILER_BUFFER_SIZE ((COMPILER_BUFFER_SIZE_MB * 1000UL * 1000UL) / sizeof(cmp::Token))
 
 
 
 
-cmp::SourceTree* cmp::compilePreprocessedSourceCode(pre::SegmentedCleanSource* b) { //TODO fix return type and value
-
-    // Set max progress (updated dynamically by preprocessor threads whenever they remove stuff after merging the files) //TODO remove comment
-    // increaseMaxProgress(fetchMaxProgress(Preprocessing) * 2); //FIXME use *n for n subphases //TODO remove comment
-    // increaseMaxProgress(Compilation, fetchMaxProgress(Preprocessing) * 1); //TODO remove comment
-    //! Max progress is calculted and set by preprocessor subpahses
+ptr<cmp::SourceTree> cmp::compilePreprocessedSourceCode(ptr<pre::AnnotatedSource<false>> b) { //TODO fix return type and value
 
     // Create subphase buffers
-    TokenizedSource *r1 = new TokenizedSource();
-    SourceTree      *r2 = new SourceTree();
+    auto r1 = newptr<TokenizedSource<false>>(COMPILER_BUFFER_SIZE);
+    auto r2 = newptr<SourceTree>();
 
     // Start subphases
-    startSubphaseAsync(Compilation, false, startTokenizationPhase, b, r1);
-    startSubphaseAsync(Compilation, true, startTreePhase,        r1, r2); //FIXME set islast to false and use true in the subphase that's actually last
+    startSubphaseAsync(PhaseID::C0_Tokenization, true, startTokenizationPhase, b, r1);
+    // r1->awaitClose(mainCheckErrors); //TODO remove
+    startSubphaseAsync(PhaseID::C1_TreeCreation, true, startTreePhase,        r1, r2);
 
     return r2;
 }

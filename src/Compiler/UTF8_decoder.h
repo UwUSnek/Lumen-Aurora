@@ -30,6 +30,13 @@
 
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wextra"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+
 #ifndef UTF8_DECODER_H
 #define UTF8_DECODER_H
 
@@ -91,3 +98,4 @@ extern int32_t utf8codepoint(const char* str);
 extern void utf8chr(const int32_t codepoint, utf8chr_t* dest);
 
 #endif
+#pragma GCC diagnostic pop

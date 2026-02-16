@@ -1,12 +1,32 @@
 #pragma once
+#include <functional>
 #include <string>
 
-#include "Preprocessor/SegmentedCleanSource.hpp"
+#include "Preprocessor/AnnotatedSource.hpp"
+#include "Utils/ptr.hpp"
 
 
+
+
+
+//FIXME make this a command line option
+// The size of the character buffers (one for each phase)
+#define PREPROCESSOR_BUFFER_SIZE_LARGE_MB 500UL
+#define PREPROCESSOR_BUFFER_SIZE_SMALL_MB 5000UL
+#define PREPROCESSOR_BUFFER_SIZE_LARGE ((PREPROCESSOR_BUFFER_SIZE_LARGE_MB * 1000UL * 1000UL) / sizeof(pre::AnnotatedSourceElm))
+#define PREPROCESSOR_BUFFER_SIZE_SMALL ((PREPROCESSOR_BUFFER_SIZE_SMALL_MB * 1000UL * 1000UL) / sizeof(pre::AnnotatedSourceElm))
 
 
 namespace pre {
-    SegmentedCleanSource* loadSourceCode_loop(std::string const *s, std::string const &filePath, void (*awaitTask)() = [](){});
-    SegmentedCleanSource*      loadSourceCode(std::string const *s, std::string const &filePath);
+
+    ptr<AnnotatedSource<false>> loadSourceCode_loop(
+        const std::string &s,
+        const std::string &filePath,
+        const std::function<bool()> &awaitTask = [](){ return true; }
+    );
+
+    ptr<AnnotatedSource<false>> loadSourceCode(
+        const std::string &s,
+        const std::string &filePath
+    );
 }

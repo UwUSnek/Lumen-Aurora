@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <functional>
 #include <thread>
 #include <chrono>
 
@@ -13,13 +14,22 @@
 template<class t> struct __base_Pipe {
 private:
     std::atomic<bool> _isOpen = true;
+    t s;
 
 
 
 
 protected:
-    t s;
-    __base_Pipe(){}
+    __base_Pipe() = default;
+    explicit __base_Pipe(const t &elm) :
+        s(elm) {
+    }
+
+    template<class ...u>
+    explicit __base_Pipe(u &&...args)
+        requires(!(std::same_as<std::remove_cvref_t<u>, __base_Pipe> || ...)) :
+        s(std::forward<u>(args)...) {
+    }
 
 
 
@@ -44,11 +54,13 @@ public:
 
 
     /**
-     * @brief Makes the thread sleep until the pipe closes.
+     * @brief Makes the thread sleep until the pipe closes or the provided function returns false.
+     * @param task The task to run at each iteration. If this returns false, awaitClose returns instantly.
+     *     The caller is responsible for error codes and messages. awaitClose provides no error handling.
      */
-    void awaitClose(void (*task)() = [](){}) const {
+    void awaitClose(const std::function<bool()> &task) const { //NOSONAR
         while(isOpen()) {
-            task();
+            if(!task()) return;
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
@@ -57,9 +69,9 @@ public:
 
 
     /**
-     * @brief Returns the address to the base value used by this BasePipe.
+     * @brief Returns the address of the base value used by this BasePipe.
      *      Operations on this object are only thread-safe if .isOpen() returns false.
-     * @return A pointer to the base object.
+     * @return The address of the base object.
      */
     t *cpp() {
         return &s;
@@ -69,9 +81,9 @@ public:
 
 
     /**
-     * @brief Returns the address to the base value used by this BasePipe.
+     * @brief Returns the address of the base value used by this BasePipe.
      *      Operations on this object are only thread-safe if .isOpen() returns false.
-     * @return A pointer to the base object.
+     * @return The address of the base object.
      */
     t const *cpp() const {
         return &s;

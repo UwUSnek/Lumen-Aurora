@@ -1,1 +1,4 @@
 Build/**
+build/**
+.cache/**
+vgcore*

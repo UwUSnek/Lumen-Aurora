@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <chrono>
+#include <sys/ioctl.h>
 
 
 
@@ -13,15 +14,8 @@ namespace utils {
     }
 
 
-    int getConsoleWidth();
-
-    std::string formatChar(char c, ulong col, bool useColor = false);
-    std::string shortenInteger(ulong n);
-    std::string formatMilliseconds(long n);
-
+    winsize getConsoleSize();
     std::string readFile(std::ifstream &f);
-
-
 
 
     struct PathCheckResult {
@@ -31,5 +25,5 @@ namespace utils {
         bool canWrite = false;
         bool canExec  = false;
     };
-    PathCheckResult checkPath(std::string const &path);
+    PathCheckResult checkPath(const std::string &path);
 }

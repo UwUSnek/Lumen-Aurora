@@ -1,0 +1,201 @@
+#include <string>
+#include <fstream>
+#include <filesystem>
+#include <thread>
+
+#include "Main/ALC.hpp"
+#include "Main/errors.hpp"
+#include "Utils/ansi.hpp"
+#include "Command/command.hpp"
+#include "Preprocessor/preprocessor.hpp"
+#include "Compiler/compiler.hpp"
+#include "Command/info.hpp"
+#include "Utils/console.hpp"
+#include "monitorThread.hpp"
+#include "Compiler/Phases/1-Tree/SourceTree.hpp"
+
+namespace fs = std::filesystem;
+
+
+
+
+/*
+-----------------------------------------------------------------------------------------------------
+
+NOTICE: VSCode output
+
+VSCode can sometimes cut off the output if a large amount of lines is printed
+right before the program stops.
+If you need to be able to read it, use a real terminal.
+
+-----------------------------------------------------------------------------------------------------
+*/
+
+
+
+
+
+
+
+
+
+
+void writeOutputFile(const std::string &code) {
+    // Create directories
+    fs::create_directories(fs::path(cmd::options.outputFile).parent_path());
+
+
+    // Write the file and print an error if it cannot be created
+    std::ofstream f(cmd::options.outputFile);
+    if(f.is_open()) {
+        f << code;
+        f.close();
+    }
+    else {
+        utils::printErrorGeneric(
+            ErrorCode::ERROR_OUTPUT_CANNOT_CREATE,
+            "Could not write output file \"" + cmd::options.outputFile + "\".\n" +
+            "Output path was interpreted as: \"" + ansi::white + fs::canonical(cmd::options.outputFile).string() + ansi::reset + "\".\n",
+            true
+        );
+    }
+}
+
+
+
+
+
+
+
+int main(int argc, char* argv[]){
+
+    // Set thread name and type
+    threadType = ThreadType::MAIN;
+    pthread_setname_np(pthread_self(), "Main Thread");
+
+    // Set version number
+    versionNumer = new VersionNumber('L', 0, 2, 0, '\0'); //NOSONAR(cpp:S4792)
+
+
+
+
+    // Recreate full command
+    std::string fullCommand;
+    for(int i = 0; i < argc; ++i) {
+        if(i) fullCommand += " ";
+        fullCommand += std::string(argv[i]);
+    }
+
+
+    // Parse command line options
+    cmd::parseOptions(argc, argv, fullCommand);
+    if(cmd::options.isHelp) {
+        console::cout << cmd::getHelpMessage();
+        exit(0);
+    }
+    if(cmd::options.isVersion) {
+        console::cout << cmd::getVersionMessage();
+        exit(0);
+    }
+
+    console::cout << "Executing command \"" << ansi::bold_white << fullCommand << ansi::reset << "\"...\n\n";
+    bool compileModule  = cmd::options.outputType == 'x' || cmd::options.outputType == 'm';
+    bool compileExec    = cmd::options.outputType == 'x';
+
+
+
+
+
+
+    // Start monitor thread
+    ThreadManager::addThread(std::jthread(startMonitorThread, fullCommand));
+
+
+    // Initialize phase data
+    initPhaseData();
+
+
+
+
+    // Preprocessing
+    std::ifstream f(cmd::options.sourceFile);
+    std::string s = utils::readFile(f);
+    f.close();
+    totalFiles.fetch_add(1);
+    auto preprocessedSourceCode = pre::loadSourceCode(s, cmd::options.sourceFile);
+    ptr<cmp::SourceTree> precompiledModule = nullptr;
+    // pre::AnnotatedSource *convertedCode     = nullptr; //TODO
+
+
+    if(compileModule) {
+        // Compilation
+        // preprocessedSourceCode->str.awaitClose([](){});
+        precompiledModule = cmp::compilePreprocessedSourceCode(preprocessedSourceCode);
+
+
+        // Optimization
+        //TODO actually optimize the code
+    }
+
+
+    if(compileExec) {
+        // Conversion to C and gcc compilation
+        //TODO actually convert the code
+    }
+
+
+
+
+
+
+    //TODO only print additional timings and info if requested through the command
+    //TODO cross out skipped phases when using -e, -p or --o-none
+
+
+
+    // Write output file
+    if(compileExec) {
+        //TODO write exec
+        // if(exitMainRequest.load()) goto skip_file_output; //TODO
+    }
+    else if(compileModule) {
+        precompiledModule->awaitClose(mainCheckErrors);
+        if(exitMainRequest.load()) goto skip_file_output;
+        //TODO write module
+    }
+    else {
+        preprocessedSourceCode->awaitClose(mainCheckErrors);
+        if(exitMainRequest.load()) goto skip_file_output;
+
+        // auto lock = preprocessedSourceCode->scoped_lock();
+        writeOutputFile(preprocessedSourceCode->substr(0, preprocessedSourceCode->length()));
+    }
+
+
+
+    // Join subphase and monitor threads
+    //! isComplete signals them that the main is ready to return
+    skip_file_output:
+    isComplete.store(true, std::memory_order_release);
+    ThreadManager::joinAll();
+    return exitMainRequest.load();
+}
+
+
+
+
+
+
+
+
+
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators
+//FIXME print error if symbolic identifiers are used for anything other than operators

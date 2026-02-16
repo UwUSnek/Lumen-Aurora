@@ -15,7 +15,19 @@ template<class t> struct GenericPipe : public __base_Pipe<t> {
 private:
     std::mutex m;
 
+
 public:
-    void   lock(){ m.  lock(); }
-    void unlock(){ m.unlock(); }
+    GenericPipe() = default;
+    explicit GenericPipe(const t &elm) :
+        __base_Pipe<t>(elm) {
+    }
+
+    template<class ...u>
+    explicit GenericPipe(u &&...args)
+        requires(!(std::same_as<std::remove_cvref_t<u>, GenericPipe> || ...)) :
+        __base_Pipe<t>(std::forward<u>(args)...) {
+    }
+
+    void   lock(){ m.  lock(); } //NOSONAR //TODO check if this is actually needed. find all references
+    void unlock(){ m.unlock(); } //NOSONAR //TODO check if this is actually needed. find all references
 };

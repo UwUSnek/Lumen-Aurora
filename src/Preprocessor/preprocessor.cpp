@@ -1,53 +1,13 @@
 
 #include "preprocessor.hpp"
-#include "ALC.hpp"
-#include "ElmCoords.hpp"
-#include "LCTsPhase/LCTsPhase.hpp"
-#include "CleanupPhase/cleanupPhase.hpp"
-#include "IncludePhase/includePhase.hpp"
-#include "MacroPhase/macroPhase.hpp"
-
-
-
-
-
-
-
-
-/**
- * @brief The part of loadSourceCode that does the recursive things.
- *      Waits for the subphases to finish before returning the output.
- */
-pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::string const &filePath, void (*awaitTask)()) {
-    sourceFilePathsLock.lock();
-    sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to check for them before starting the preprocessor
-    ulong pathIndex = sourceFilePaths.size() - 1;
-    sourceFilePathsLock.unlock();
-
-
-    //FIXME ^automatically fish up cached files if found. loop through them (for now)
-    //FIXME                                               ^ use a hash map to save the paths of the preprocessed files
-
-    //FIXME CHECK CIRCULAR DEPENDENCIES
-    //FIXME SAVE INCLUDE STACK
-
-
-    SegmentedCleanSource *r1 = new SegmentedCleanSource();
-    SegmentedCleanSource *r2 = new SegmentedCleanSource();
-    SegmentedCleanSource *r3 = new SegmentedCleanSource();
-
-
-    // Start the loop subphases
-    startSubphaseAsync(Preprocessing, false, startLCTsPhase,     s, pathIndex, r1);
-    startSubphaseAsync(Preprocessing, false, startCleanupPhase, r1,            r2);
-    startSubphaseAsync(Preprocessing, false, startIncludePhase, r2,            r3);
-
-
-    // Wait for the subphases to finish, then update the max progress of the next phase and return the output buffer
-    r3-> str.awaitClose(awaitTask); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
-    r3->meta.awaitClose(awaitTask); //! Wait for include phase to finish to improve the progress estimation //FIXME dont block the main thread but make the other phases wait for this one
-    return r3;
-}
+#include "Main/ALC.hpp"
+#include "Preprocessor/Phases/0-Include/includePhase.hpp"
+#include "Preprocessor/Phases/0-Include/metadataGenerator.hpp"
+#include "Preprocessor/Phases/1-LineSplicing/LineSplicingPhase.hpp"
+#include "Preprocessor/Phases/2-Cleanup/cleanupPhase.hpp"
+#include "Preprocessor/Phases/3-Macros/macroPhase.hpp"
+#include "Preprocessor/AnnotatedSource.hpp"
+#include <mutex>
 
 
 
@@ -58,27 +18,57 @@ pre::SegmentedCleanSource* pre::loadSourceCode_loop(std::string const *s, std::s
 
 /**
  * @brief Load the source code, including all of the files included by it and processes any preprocessor directives.
- * @param b The source code as a string.
+ * @param s The source code as a string.
  * @param filePath The path of the original source code file.
- * @return The contents of the source file as a SegmentedCleanSource.
+ * @return The contents of the source file as a AnnotatedSource.
  */
-pre::SegmentedCleanSource* pre::loadSourceCode(std::string const *s, std::string const &filePath) {
+ptr<pre::AnnotatedSource<false>> pre::loadSourceCode(const std::string &s, const std::string &filePath) {
+    ulong pathIndex;
+    using enum PhaseID;
+    {
+        std::scoped_lock lock(sourceFilePathsLock);
+        sourceFilePaths.push_back(filePath); //TODO cache preprocessed files somewhere and add a function to check for them before starting the preprocessor
+        pathIndex = sourceFilePaths.size() - 1;
+    }
 
-    // Load and merge all the files
-    SegmentedCleanSource *r3 = loadSourceCode_loop(s, filePath, mainCheckErrors);
-    SegmentedCleanSource *r4 = new SegmentedCleanSource();
+
+    //FIXME ^automatically fish up cached files if found. loop through them (for now)
+    //FIXME                                               ^ use a hash map to save the paths of the preprocessed files
+
+    //FIXME CHECK CIRCULAR DEPENDENCIES
+
+    //TODO SAVE INCLUDE STACK (replaces meta->f)
+    //TODO use a map of include stacks (arrays of path indices)
+    //TODO each path index represents the file of the stack's entry
+    //TODO each character contains the index of the stack entry in the map. identical stacks use the same index. compare with the hash of the path index array
 
 
-    // Set the max progress of the compilation phase
-    increaseMaxProgress(Compilation, r3->str.length());
+    // Load raw code of the root file
+    auto r0 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_SMALL);
+    generateMetadata(s, r0, pathIndex);
+    increaseMaxProgress(r0->length(), P0_Includes, P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
 
 
-    // Start the macro replacment phase and return the output
-    startSubphaseAsync(Preprocessing, true, startMacroPhase, r3, r4);
+    // Create pipes
+    auto r1 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r2 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r3 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+    auto r4 = newptr<AnnotatedSource<false>>(PREPROCESSOR_BUFFER_SIZE_LARGE);
+
+
+    // Start phases and return the output buffer
+    startSubphaseAsync(P0_Includes,     true, startIncludePhase,      r0, r1);
+    // r1->awaitClose(mainCheckErrors); //TODO remove
+    startSubphaseAsync(P1_LineSplicing, true, startLineSplicingPhase, r1, r2);
+    startSubphaseAsync(P2_Cleanup,      true, startCleanupPhase,      r2, r3);
+    startSubphaseAsync(P3_Macros,       true, startMacroPhase,        r3, r4);
     return r4;
 }
 
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
-//TODO FREE ALL THE SHARED BUFFERS WHEN NOT NEEDED ANYMORE.
+
+
+// r1->str.awaitClose(mainCheckErrors);
+// r1->meta.awaitClose(mainCheckErrors);
+//TODO add a command line option to run one phase at a time.
+//TODO This option will make progress calculation more reliable but significantly slow down compilation times.
+//TODO It might help with debugging

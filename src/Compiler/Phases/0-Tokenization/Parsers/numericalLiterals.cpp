@@ -1,0 +1,222 @@
+#include <algorithm>
+#include <sstream>
+#include <cmath>
+#include "numericalLiterals.hpp"
+#include "Main/errors.hpp"
+
+
+
+
+
+/**
+ * @brief Parses the long or double literal that strarts at index <index> and ends before the first character t hat's not in its pattern.
+ * @param b The buffer that contains the numerical literal.
+ * @param index The index at which the numerical literal starts.
+ * @param rawLiteralLen The raw length of the literal (the number of characters it occupies in the original source code)
+ * @return The string value of the literal token, or nullptr if one was not found.
+ */
+ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::AnnotatedSource<false>> b, ulong index, ulong *rawLiteralLen) {
+    std::stringstream r;
+    *rawLiteralLen = 0;
+    //! Set length to 0 before doing anything
+    //! Printing errors can leave it uninitialize and mess up downstream threads
+
+
+    // Check first character
+    const auto c0 = (*b)[index];
+    if(!c0 || !std::isdigit(*c0)) {
+        return nullptr;
+    }
+    //! inf, nan, true and false are checked by the keyword parser
+
+
+
+
+    // Find the base of the literal and set the starting index
+    uint base = 0;
+    std::string baseName;
+    bool (*isDigitValid)(char);
+    ulong i;
+    const auto c1 = (*b)[index + 1];
+    if(*c0 == '0' && c1 && std::isalpha(*c1)) {
+        i = index + 2;
+        switch(*c1) {
+            case 'b': {
+                base = 2;
+                isDigitValid = [](char c) { return c == '0' || c == '1'; };
+                baseName = "binary";
+                break;
+            }
+            case 'o': {
+                base = 2;
+                isDigitValid = [](char c) { return c >= '0' && c <= '7'; };
+                baseName = "octal";
+                break;
+            }
+            case 'd': {
+                goto decimal;
+            }
+            case 'x': {
+                base = 16;
+                isDigitValid = [](char c) { return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); };
+                baseName = "hexadecimal";
+                break;
+            }
+            default: {
+                utils::printError(
+                    ErrorCode::ERROR_CMP_LITERAL_BASE_INVALID,
+                    utils::ErrType::COMPILER,
+                    ElmCoords(b, index, index + 1),
+                    std::string("Unknown numerical base prefix \"0") + **c1 + "\".\n" + R"(Valid prefixes are "0b", "0o", "0d", "0x".)",
+                    true //TODO recovery system. skip to the first token that makes sense
+                );
+            }
+        }
+    }
+    else {
+        i = index;
+        decimal:
+        base = 10;
+        isDigitValid = [](char c) { return c >= '0' && c <= '9'; };
+        baseName = "decimal";
+    }
+
+
+
+
+    // Parse the string and check its digits
+    bool isFloat = false;
+    while(true) {
+        if((*b)[i]) {
+            const char c = (*b)[i]->c;
+            // if(pattern.find(*c)) {
+            if(isDigitValid(c)) {
+                r << c;
+                ++i;
+            }
+            else if(c == '_') {
+                ++i;
+            }
+            else if(c == '.') {
+                if(isFloat) {
+                    utils::printError(
+                        ErrorCode::ERROR_CMP_LITERAL_DIGITS_MISSING,
+                        utils::ErrType::COMPILER,
+                        ElmCoords(b, index, i - 1),
+                        ElmCoords(b, i, i),
+                        "Duplicate radix point in " + baseName + " literal.\n"
+                        "Only one is allowed.",
+                        true //TODO recovery system. skip to the first token that makes sense
+                    );
+                }
+                r << c;
+                isFloat = true;
+                ++i;
+            }
+            else if(std::isalnum(c)) {
+                utils::printError(
+                    ErrorCode::ERROR_CMP_LITERAL_DIGITS_INVALID,
+                    utils::ErrType::COMPILER,
+                    ElmCoords(b, index, i),
+                    ElmCoords(b, i, i),
+                    std::string("Invalid digit \"") + c + "\" in " + baseName + " literal.\n",
+                    true //TODO recovery system. skip to the first token that makes sense
+                );
+            }
+            else break;
+        }
+        else break;
+    }
+    if(r.tellp() == 0) {
+        utils::printError(
+            ErrorCode::ERROR_CMP_LITERAL_DIGITS_MISSING,
+            utils::ErrType::COMPILER,
+            ElmCoords(b, index, index + 1),
+            ElmCoords(b, index + 2, index + 2),
+            "Missing digits in " + baseName + " literal.\n"
+            "At least 1 digit is required.",
+            true //TODO recovery system. skip to the first token that makes sense
+        );
+    }
+
+
+
+
+    // Set the raw lenght and return the value
+    *rawLiteralLen = i - index;
+    if(isFloat) {
+        return newptr<TK_Double>(strToDbl(r.str(), base));
+    }
+    else {
+        std::string debug = r.str(); //TODO REMOVE
+        return newptr<TK_Long>(strToLng(r.str(), base));
+    }
+}
+
+
+
+
+
+
+
+
+/**
+ * @brief Converts a string to a double value.
+ * @param s The string.
+ * @param base The numerical base of the value.
+ * @return The value as a double.
+ */
+double cmp::strToDbl(const std::string &s, uint base) {
+    double r = 0;
+
+    // Calculate integer part
+    ulong i;
+    for(i = 0; s[i] != '.'; ++i) {
+        char digit = s[i];
+        double value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
+        r *= base;
+        r += value;
+    }
+
+
+    // Calculate fractional part
+    for(ulong j = i + 1; j < s.length(); ++j) {
+        char digit = s[i];
+        double value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
+        double fraction = pow(10, (double)(j - i)); //! 10 for first digit, 100 for second etc...
+        r += value / fraction;
+    }
+
+
+    // Return the calculated value
+    return r;
+}
+
+
+
+
+
+
+
+
+/**
+ * @brief Converts a string to an unsigned long.
+ * @param s The string.
+ * @param base The numerical base of the value.
+ * @return The value as an unsigned long.
+ */
+ulong cmp::strToLng(const std::string &s, uint base) {
+    ulong r = 0; //FIXME print an error if the value is larger than the max ulong
+
+    // Calculate value
+    std::ranges::for_each(s, [&](char c){
+        char digit = c;
+        auto value = digit - (std::isdigit(digit) ? '0' : (std::isupper(digit) ? 'A' : 'a') - 10);
+        r *= base;
+        r += (ulong)value;
+    });
+
+
+    // Return the calculated value
+    return r;
+}
