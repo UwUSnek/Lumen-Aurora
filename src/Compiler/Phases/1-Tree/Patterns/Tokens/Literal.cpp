@@ -10,6 +10,6 @@ std::string cmp::Pattern_Literal::genDecoratedValue(bool article) const {
     ;
 }
 
-ulong   cmp::Pattern_Literal::getCertaintyThreshold() const {
+ulong cmp::Pattern_Literal::getCertaintyThreshold() const {
     return 1;
 }

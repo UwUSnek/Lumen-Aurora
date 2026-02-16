@@ -81,23 +81,15 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
             for(ulong k = 0; k < result->trees.size(); ++k) {
                 r->trees.push_back(result->trees[k]);
                 i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                // increaseLocalProgress(progress);
-                // i += progress;
             }
 
-            // // If the generation failed, mark r as failed and return the elements that were matched so far
-            // if(!result->isComplete) {
-            // If the generation failed and the element is not optional, mark r as failed and return the elements that were matched so far
-            // if(!result->isComplete && !pElm->isOptional()) {
-            // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
+            // If the generation failed, mark r as failed and return the elements that were matched so far
             if(!result->isComplete) {
-                // if(result->trees.size() >= pElm->getCertaintyThreshold()) { //BUG prob needs to check if it's optional as well. or something like that
                 if(j >= p->getCertaintyThreshold()) {
+
                     // Find the element that caused the error (walk up the tree and skip operators)
                     std::string parentElementStr;
                     for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
-                        // if(curPattern->isComposite() || curPattern->isToken()) {
                         if(!curPattern->isOperator()) {
                             parentElementStr = curPattern->genDecoratedValue(false);
                             break;
@@ -108,10 +100,8 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
                     // Find the element that caused the error (skip operators)
                     std::string expectedElementStr;
-                    // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
                     //FIXME check if it's always [0] or it can be other indices as well
                     for(auto curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
-                        // if(curPattern->isComposite() || curPattern->isToken()) {
                         if(!curPattern->isOperator()) {
                             expectedElementStr = curPattern->genDecoratedValue(true);
                             break;
@@ -134,10 +124,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                     );
                 }
                 else {
-                    // debug(printFail(indent);)
                     debug(printSuccess(indent);)
-                    // r->isComplete = false;
-                    // return r;
                     return newptr<TreeGenerationResult>(0, true );
                 }
             }
@@ -170,20 +157,15 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
             for(ulong k = 0; k < result->trees.size(); ++k) {
                 r->trees.push_back(result->trees[k]);
                 i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                // increaseLocalProgress(progress);
-                // i += progress;
             }
 
-            // If the generation failed and the element is not optional, mark r as failed and return the elements that were matched so far
-            // if(!result->isComplete && !pElm->isOptional()) {
-            // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
+            // If the generation failed, mark r as failed and return the elements that were matched so far
             if(!result->isComplete) {
                 if(j >= p->getCertaintyThreshold()) { //FIXME messed up error coords
+
                     // Find the element that caused the error (walk up the tree and skip operators)
                     std::string parentElementStr;
                     for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
-                        // if(curPattern->isComposite() || curPattern->isToken()) {
                         if(!curPattern->isOperator()) {
                             parentElementStr = curPattern->genDecoratedValue(false);
                             break;
@@ -194,10 +176,8 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
                     // Find the element that caused the error (skip operators)
                     std::string expectedElementStr;
-                    // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
                     //FIXME check if it's always [0] or it can be other indices as well
                     for(auto curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
-                        // if(curPattern->isComposite() || curPattern->isToken()) {
                         if(!curPattern->isOperator()) {
                             expectedElementStr = curPattern->genDecoratedValue(true);
                             break;
@@ -269,21 +249,16 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                     for(ulong k = 0; k < result->trees.size(); ++k) {
                         r->trees.push_back(result->trees[k]);
                         i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                        // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                        // increaseLocalProgress(progress);
-                        // i += progress;
                     }
                 }
 
-                // If it fails and the result is not optional, stop parsing
-                // if(!result->isComplete && !pElm->isOptional()) {
-                // if(!result->isComplete && (!pElm->isOptional() || i >= pElm->getCertaintyThreshold())) {
+                // If it fails, stop parsing
                 if(!result->isComplete) {
                     if(j >= p->getCertaintyThreshold()) { //FIXME messed up error coords
+
                         // Find the element that caused the error (walk up the tree and skip operators)
                         std::string parentElementStr;
                         for(__base_Pattern* curPattern = p;; curPattern = curPattern->asOperator()->parent) {
-                            // if(curPattern->isComposite() || curPattern->isToken()) {
                             if(!curPattern->isOperator()) {
                                 parentElementStr = curPattern->genDecoratedValue(false);
                                 break;
@@ -294,7 +269,6 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
                         // Find the element that caused the error (skip operators)
                         std::string expectedElementStr;
-                        // for(__base_Pattern* curPattern = pElm; curPattern = curPattern->asOperator()->v[0];) { //FIXME check if it's always [0] or it can be other indices as well
                         //FIXME check if it's always [0] or it can be other indices as well
                         for(auto curPattern = pElm;; curPattern = curPattern->asOperator()->v[0]) {
                             // if(curPattern->isComposite() || curPattern->isToken()) {
@@ -365,9 +339,6 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
             for(ulong k = 0; k < result->trees.size(); ++k) {
                 genSource.push_back(result->trees[k]);
                 i += result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                // const auto progress = result->trees[k]->tokenEnd - result->trees[k]->tokenBgn + 1;
-                // increaseLocalProgress(progress);
-                // i += progress;
             }
 
 
@@ -496,7 +467,6 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
 
-    //TODO
     // if(pattern->isLiteral()) {
     //     __base_Pattern_Token* p = pattern->asLitisLiteral();
 
