@@ -15,25 +15,29 @@
 namespace cmp {
 
     #define LIST_SOURCE_TREE_TYPES_NAMES         \
-        X(ST_Sub_Identifier,   Identifier)       \
-        X(ST_Sub_Keyword,      Keyword)          \
-        /* X(ST_Sub_Literal,      Identifier)    //TODO*/\
+        X(ST_Sub_Identifier,    Identifier)      \
+        X(ST_Sub_Keyword,       Keyword)         \
+        X(ST_Sub_BoolLiteral,   BoolLiteral)     \
+        X(ST_Sub_CharLiteral,   CharLiteral)     \
+        X(ST_Sub_DoubleLiteral, DoubleLiteral)   \
+        X(ST_Sub_StrLiteral,    StrLiteral)      \
+        X(ST_Sub_UlongLiteral,  UlongLiteral)    \
         \
-        X(ST_Sub_Path,         Path)             \
-        X(ST_BasicType,        BasicType)        \
-        X(ST_FunctionType,     FunctionType)     \
-        X(ST_Type,             Type)             \
+        X(ST_Sub_Path,          Path)             \
+        X(ST_BasicType,         BasicType)        \
+        X(ST_FunctionType,      FunctionType)     \
+        X(ST_Type,              Type)             \
         \
-        X(ST_Statement,        Statement)        \
+        X(ST_Statement,         Statement)        \
         \
-        X(ST_Module,           Module)           \
-        X(ST_Namespace,        Namespace)        \
-        X(ST_Enum,             Enum)             \
-        X(ST_EnumElm,          EnumElm)          \
-        X(ST_Struct,           Struct)           \
-        X(ST_StructElm,        StructElm)        \
-        X(ST_StructElmCluster, StructElmCluster) \
-        X(ST_Alias,            Alias)
+        X(ST_Module,            Module)           \
+        X(ST_Namespace,         Namespace)        \
+        X(ST_Enum,              Enum)             \
+        X(ST_EnumElm,           EnumElm)          \
+        X(ST_Struct,            Struct)           \
+        X(ST_StructElm,         StructElm)        \
+        X(ST_StructElmCluster,  StructElmCluster) \
+        X(ST_Alias,             Alias)
 
 
 
@@ -45,7 +49,10 @@ namespace cmp {
     #undef X
 
 
+
+
     struct ST_Module;
+
     /**
      * @brief The base Source Tree structure
      */
@@ -63,8 +70,6 @@ namespace cmp {
 
         // Make the destructor virtual so that dynamic_cast sees TokenValue* as polymorphic
         virtual ~__base_ST() = default;
-
-
 
 
         #define X(type, name) \

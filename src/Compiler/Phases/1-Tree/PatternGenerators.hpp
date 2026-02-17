@@ -28,7 +28,11 @@
 
 #include "Patterns/Tokens/Keyword.hpp"
 #include "Patterns/Tokens/Identifier.hpp"
-#include "Patterns/Tokens/Literal.hpp"
+#include "Patterns/Tokens/Literals/BoolLiteral.hpp"
+#include "Patterns/Tokens/Literals/CharLiteral.hpp"
+#include "Patterns/Tokens/Literals/DoubleLiteral.hpp"
+#include "Patterns/Tokens/Literals/StrLiteral.hpp"
+#include "Patterns/Tokens/Literals/UlongLiteral.hpp"
 
 
 
@@ -59,6 +63,7 @@ namespace cmp {
             template<class ...t> type *name(t... subPatterns) {                                           \
                 if(!__internal_cache_##name) {                                                            \
                     __internal_cache_##name = __internal_forwardNew<type>();                              \
+                    __internal_cache_##name->nodeType = PatternNodeType::RE_##name;                       \
                     debug(cout << "allocated   " << __internal_cache_##name << " | "#name << "\n";)       \
                     __internal_forwardInit<type>(__internal_cache_##name);                                \
                     debug(cout << "initialized " << __internal_cache_##name << " | "#name << "\n";)       \
@@ -81,6 +86,7 @@ namespace cmp {
         #define X(type, name)                                                   \
             template<class ...t> type *name(t... subPatterns) {                 \
                 type* r = re::__internal_forwardNew<type>();                    \
+                r->nodeType = PatternNodeType::OP_##name;                       \
                 re::__internal_forwardInit<type, t...>(r, subPatterns...);      \
                 debug(cout << "created     " << r << " | "#name << "\n";)       \
                 return r;                                                       \
@@ -97,6 +103,7 @@ namespace cmp {
         #define X(type, name)                                                   \
             template<class ...t> type *name(t... expectedValue) {               \
                 type* r = re::__internal_forwardNew<type>();                    \
+                r->nodeType = PatternNodeType::TK_##name;                       \
                 re::__internal_forwardInit<type, t...>(r, expectedValue...);    \
                 debug(cout << "created     " << r << " | "#name << "\n";)       \
                 return r;                                                       \

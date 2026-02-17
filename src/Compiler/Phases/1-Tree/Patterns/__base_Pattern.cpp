@@ -10,10 +10,26 @@
     /**/  cmp::type *cmp::__base_Pattern::as##name()       { return dynamic_cast<      type*>(this); } \
     /**/       bool  cmp::__base_Pattern::is##name() const { return dynamic_cast<const type*>(this); } \
     /**/       bool  cmp::__base_Pattern::is##name()       { return dynamic_cast<      type*>(this); }
-LIST_PATTERN_OPERATOR_TYPES_NAMES
-LIST_PATTERN_BASES_TYPES_NAMES
-LIST_PATTERN_TOKENS_TYPES_NAMES
+    LIST_PATTERN_BASES_TYPES_NAMES
 #undef X
+
+#define Y(type, name, prefix) \
+    const cmp::type *cmp::__base_Pattern::as##name() const { return dynamic_cast<const type*>(this); } \
+    /**/  cmp::type *cmp::__base_Pattern::as##name()       { return dynamic_cast<      type*>(this); } \
+    /**/       bool  cmp::__base_Pattern::is##name() const { return nodeType == PatternNodeType::prefix##_##name; } \
+    /**/       bool  cmp::__base_Pattern::is##name()       { return nodeType == PatternNodeType::prefix##_##name; }
+
+    #define X(type, name) Y(type, name, OP)
+    LIST_PATTERN_OPERATOR_TYPES_NAMES
+    #undef X
+    #define X(type, name) Y(type, name, RE)
+    LIST_PATTERN_ELM_TYPES_NAMES
+    #undef X
+    #define X(type, name) Y(type, name, TK)
+    LIST_PATTERN_TOKENS_TYPES_NAMES
+    #undef X
+#undef Y
+
 
 
 

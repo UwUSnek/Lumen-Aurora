@@ -8,7 +8,7 @@
 
 
 
-// Tree isType and asType functions
+// Tree node isType and asType functions
 #define X(type, name) \
     const cmp::type *cmp::__base_ST::as##name() const { return dynamic_cast<const type*>(this); } \
     /**/  cmp::type *cmp::__base_ST::as##name()       { return dynamic_cast<      type*>(this); } \

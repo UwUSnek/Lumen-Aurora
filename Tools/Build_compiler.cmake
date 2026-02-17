@@ -104,7 +104,12 @@ add_executable(alc
                     #../src/Compiler/Phases/1-Tree/Patterns/Tokens
                         ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Identifier.cpp
                         ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Keyword.cpp
-                        ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Literal.cpp
+                        #../src/Compiler/Phases/1-Tree/Patterns/Tokens/Literals
+                            ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Literals/BoolLiteral.cpp
+                            ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Literals/CharLiteral.cpp
+                            ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Literals/DoubleLiteral.cpp
+                            ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Literals/StrLiteral.cpp
+                            ../src/Compiler/Phases/1-Tree/Patterns/Tokens/Literals/UlongLiteral.cpp
 )
 
 

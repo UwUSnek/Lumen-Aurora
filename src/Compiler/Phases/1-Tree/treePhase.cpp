@@ -1,4 +1,5 @@
 #include "treePhase.hpp"
+#include "Compiler/Phases/1-Tree/Patterns/__base_Pattern.hpp"
 #include "Main/ALC.hpp"
 #include "Main/FatalErrorException.hpp"
 #include "Main/errors.hpp"
@@ -26,12 +27,13 @@ debug(
 ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource<false>> b, ulong index, bool optional debug(, int indent)) {
     ulong i = index;
     debug(cout << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ";)
+    switch(pattern->nodeType) {
 
 
 
 
     // Parse OneOf operator
-    if(pattern->isOneOf()) {
+    case PatternNodeType::OP_OneOf: {
         debug(cout << ansi::bright_black << "One Of\n" << ansi::reset;)
         auto p = pattern->asOneOf();
 
@@ -65,7 +67,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
     // Parse optional operator
     //FIXME account for custom threshold
     //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
-    if(pattern->isOptional()) {
+    case PatternNodeType::OP_Optional: {
         debug(cout << ansi::bright_black << "Optional\n" << ansi::reset;)
         __Pattern_Operator_Optional* p = pattern->asOptional();
         auto r = newptr<TreeGenerationResult>(0, true );
@@ -141,7 +143,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
     // Parse Sequence operator
     //FIXME account for custom threshold
     //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
-    if(pattern->isSequence()) {
+    case PatternNodeType::OP_Sequence: {
         debug(cout << ansi::bright_black << "Sequence\n" << ansi::reset;)
         __Pattern_Operator_Sequence* p = pattern->asSequence();
         auto r = newptr<TreeGenerationResult>(0, true );
@@ -216,7 +218,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
     // Parse Loop operator
-    if(pattern->isLoop()) {
+    case PatternNodeType::OP_Loop: {
         debug(cout << ansi::bright_black << "Loop\n" << ansi::reset;)
         __Pattern_Operator_Loop* p = pattern->asLoop();
         auto r = newptr<TreeGenerationResult>(0, true );
@@ -323,7 +325,10 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
     // Parse composite patterns
-    if(pattern->isComposite()) {
+    #define X(type, name) case PatternNodeType::RE_##name:
+        LIST_PATTERN_ELM_TYPES_NAMES
+    #undef X
+    {
         debug(cout << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue(false) << ")\n" << ansi::reset;)
         auto* p = pattern->asComposite();
 
@@ -419,7 +424,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
     // Parse keyword tokens
-    if(pattern->isKeyword()) {
+    case PatternNodeType::TK_Keyword: {
         debug(
             std::string keywordId;
             for(auto const &pair : reservedTokensMap) if(pair.second == pattern->asKeyword()->id) { keywordId = pair.first; break; }
@@ -446,7 +451,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
     // Parse identifier tokens
-    if(pattern->isIdentifier()) {
+    case PatternNodeType::TK_Identifier: {
         debug(cout << ansi::blue << "Identifier\n" << ansi::reset;)
         const auto t = (*b)[index];
 
@@ -467,16 +472,27 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
 
 
-    // if(pattern->isLiteral()) {
-    //     __base_Pattern_Token* p = pattern->asLitisLiteral();
+    // // Parse literal tokens
+    // if(pattern->isBoolLiteral()) {
+    //     debug(cout << ansi::blue << "Bool Literal\n" << ansi::reset;)
+    //     const auto t = (*b)[index];
 
+    //     if(!t || !t->isBool()) {
+    //         debug(printFail(indent);)
+    //         return newptr<TreeGenerationResult>(0, false);
+    //     }
+
+    //     increaseLocalProgress(1);
+    //     __base_Pattern_Token* p = pattern->asLiteral();
     // }
 
 
 
-
-    //! Bogus return value to silence GCC
-    return newptr<TreeGenerationResult>(0, false );
+        default: {
+            //! Bogus return value to silence GCC
+            return newptr<TreeGenerationResult>(0, false );
+        }
+    }
 }
 
 
