@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_Module::getCategoryName(bool plural) const {
-    return plural ? "module" : "modules";
+    return plural ? "modules" : "module";
 }
 
 std::string cmp::Pattern_Elm_Module::genDecoratedValue(bool article) const {

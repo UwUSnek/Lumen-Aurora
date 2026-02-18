@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_EnumElm::getCategoryName(bool plural) const {
-    return plural ? "enum element" : "enum elements";
+    return plural ? "enum elements" : "enum element";
 }
 
 std::string cmp::Pattern_Elm_EnumElm::genDecoratedValue(bool article) const {

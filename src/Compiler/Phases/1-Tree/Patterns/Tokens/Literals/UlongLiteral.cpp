@@ -1,5 +1,9 @@
 #include "UlongLiteral.hpp"
 
+std::string cmp::ST_Sub_UlongLiteral::getCategoryName(bool plural) const {
+    return plural ? "ulong literals" : "ulong literal";
+}
+
 
 
 

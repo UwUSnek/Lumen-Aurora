@@ -1,5 +1,9 @@
 #include "StrLiteral.hpp"
 
+std::string cmp::ST_Sub_StrLiteral::getCategoryName(bool plural) const {
+    return plural ? "string literals" : "string literal";
+}
+
 
 
 

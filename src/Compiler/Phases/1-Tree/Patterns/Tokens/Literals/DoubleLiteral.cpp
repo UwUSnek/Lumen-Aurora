@@ -1,5 +1,9 @@
 #include "DoubleLiteral.hpp"
 
+std::string cmp::ST_Sub_DoubleLiteral::getCategoryName(bool plural) const {
+    return plural ? "double literals" : "double literal";
+}
+
 
 
 

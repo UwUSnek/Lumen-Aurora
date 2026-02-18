@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_BasicType::getCategoryName(bool plural) const {
-    return plural ? "basic type" : "basic types";
+    return plural ? "basic types" : "basic type";
 }
 
 std::string cmp::Pattern_Elm_Type_Basic::genDecoratedValue(bool article) const {

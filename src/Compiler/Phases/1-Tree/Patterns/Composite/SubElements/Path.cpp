@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_Sub_Path::getCategoryName(bool plural) const {
-    return plural ? "symbol path" : "symbol paths";
+    return plural ? "symbol paths" : "symbol path";
 }
 
 std::string cmp::Pattern_Elm_Path::genDecoratedValue(bool article) const {

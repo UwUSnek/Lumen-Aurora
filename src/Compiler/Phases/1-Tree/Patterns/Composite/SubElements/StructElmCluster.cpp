@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_StructElmCluster::getCategoryName(bool plural) const {
-    return plural ? "struct element" : "struct elements";
+    return plural ? "struct elements" : "struct element";
 }
 
 std::string cmp::Pattern_Elm_StructElmCluster::genDecoratedValue(bool article) const {

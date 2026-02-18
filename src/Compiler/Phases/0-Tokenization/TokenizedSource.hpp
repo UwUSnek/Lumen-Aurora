@@ -101,9 +101,9 @@ namespace cmp {
 
 
     // String literal
-    struct TK_String : TokenValue {
+    struct TK_Str : TokenValue {
         std::string v;
-        explicit TK_String(const std::string&_v) : v(_v) {}
+        explicit TK_Str(const std::string&_v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
@@ -115,9 +115,9 @@ namespace cmp {
     };
 
     // Ulong literal
-    struct TK_Long : TokenValue {
+    struct TK_Ulong : TokenValue {
         ulong v;
-        explicit TK_Long(ulong _v) : v(_v) {}
+        explicit TK_Ulong(ulong _v) : v(_v) {}
         std::string getCategoryName() const override;
     };
 
@@ -172,7 +172,7 @@ namespace cmp {
             end(_end) {
         }
         std::string genDecoratedValue() const {
-            return isString() || isChar()
+            return isStr() || isChar()
                 ? value->getCategoryName() + " \"" + OG_Value.substr(1, OG_Value.length() - 2) + "\""
                 : value->getCategoryName() + " \"" + OG_Value + "\""
             ;
@@ -181,17 +181,17 @@ namespace cmp {
 
 
 
-        const std::string &getValue_String    () const;
+        const std::string &getValue_Str       () const;
         char               getValue_Char      () const;
-        ulong              getValue_Long      () const;
+        ulong              getValue_Ulong     () const;
         double             getValue_Double    () const;
         bool               getValue_Bool      () const;
         const std::string &getValue_Identifier() const;
         ReservedTokenId    getValue_Keyword   () const;
 
-        bool isString    () const;
+        bool isStr       () const;
         bool isChar      () const;
-        bool isLong      () const;
+        bool isUlong     () const;
         bool isDouble    () const;
         bool isBool      () const;
         bool isIdentifier() const;

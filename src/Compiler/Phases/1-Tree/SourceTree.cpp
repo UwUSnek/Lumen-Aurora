@@ -21,6 +21,4 @@ LIST_SOURCE_TREE_TYPES_NAMES
 
 
 //TODO check if these are all needed
-std::string cmp::ST_Sub_Identifier::getCategoryName(bool plural) const { return plural ? "identifier"  : "identifiers"; } //TODO check if plural is needed
-std::string cmp::ST_Sub_Keyword   ::getCategoryName(bool plural) const { return plural ? "keyword"     : "keywords";    } //TODO check if plural is needed
-std::string cmp::ST_Statement     ::getCategoryName(bool plural) const { return plural ? "statement"   : "statements";  } //TODO check if plural is needed
+std::string cmp::ST_Statement::getCategoryName(bool plural) const { return plural ? "statements" : "statement";  } //TODO check if plural is needed

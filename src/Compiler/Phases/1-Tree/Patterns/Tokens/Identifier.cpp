@@ -1,5 +1,9 @@
 #include "Identifier.hpp"
 
+std::string cmp::ST_Sub_Identifier::getCategoryName(bool plural) const {
+    return plural ? "identifiers"  : "identifier";
+}
+
 
 
 

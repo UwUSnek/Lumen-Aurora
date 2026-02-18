@@ -293,7 +293,7 @@ ptr<cmp::TokenValue> cmp::parseTextLiteral(ptr<pre::AnnotatedSource<false>> b, u
     *rawLiteralLen = i - index;
     if(literalType == cmp::TextLiteralType::STRING) {
         std::string rStr = r.str();
-        return newptr<TK_String>(rStr.substr(1, rStr.length() - 2));
+        return newptr<TK_Str>(rStr.substr(1, rStr.length() - 2));
     }
     else {
         return newptr<TK_Char>(r.str()[0]);

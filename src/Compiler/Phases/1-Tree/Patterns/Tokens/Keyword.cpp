@@ -1,5 +1,9 @@
 #include "Keyword.hpp"
 
+std::string cmp::ST_Sub_Keyword::getCategoryName(bool plural) const {
+    return plural ? "keywords" : "keyword";
+}
+
 
 
 

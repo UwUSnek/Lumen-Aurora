@@ -1,5 +1,9 @@
 #include "BoolLiteral.hpp"
 
+std::string cmp::ST_Sub_BoolLiteral::getCategoryName(bool plural) const {
+    return plural ? "boolean literals" : "boolean literal";
+}
+
 
 
 

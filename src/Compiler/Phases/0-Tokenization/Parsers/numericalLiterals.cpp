@@ -148,8 +148,7 @@ ptr<cmp::TokenValue> cmp::parseNumericalLiteral(ptr<pre::AnnotatedSource<false>>
         return newptr<TK_Double>(strToDbl(r.str(), base));
     }
     else {
-        std::string debug = r.str(); //TODO REMOVE
-        return newptr<TK_Long>(strToLng(r.str(), base));
+        return newptr<TK_Ulong>(strToLng(r.str(), base));
     }
 }
 

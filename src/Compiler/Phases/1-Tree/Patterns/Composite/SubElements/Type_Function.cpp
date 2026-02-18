@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_FunctionType::getCategoryName(bool plural) const {
-    return plural ? "function type" : "function types";
+    return plural ? "function types" : "function type";
 }
 
 std::string cmp::Pattern_Elm_Type_Function::genDecoratedValue(bool article) const {

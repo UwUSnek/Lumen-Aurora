@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_Type::getCategoryName(bool plural) const {
-    return plural ? "type" : "types";
+    return plural ? "types" : "type";
 }
 
 std::string cmp::Pattern_Elm_Type::genDecoratedValue(bool article) const {

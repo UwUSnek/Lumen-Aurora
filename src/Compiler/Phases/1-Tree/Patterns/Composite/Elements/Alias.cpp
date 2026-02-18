@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_Alias::getCategoryName(bool plural) const {
-    return plural ? "symbol alias" : "symbol aliases";
+    return plural ? "symbol aliases" : "symbol alias";
 }
 
 std::string cmp::Pattern_Elm_Alias::genDecoratedValue(bool article) const {

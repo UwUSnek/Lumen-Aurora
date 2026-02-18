@@ -3,7 +3,7 @@
 #include <memory>
 
 std::string cmp::ST_Export::getCategoryName(bool plural) const {
-    return plural ? "export directive" : "exporte directives";
+    return plural ? "export directives" : "exporte directive";
 }
 
 std::string cmp::Pattern_Elm_Export::genDecoratedValue(bool article) const {
