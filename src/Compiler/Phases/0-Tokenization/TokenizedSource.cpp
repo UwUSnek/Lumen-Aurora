@@ -9,7 +9,6 @@ std::map<std::string, cmp::ReservedTokenId, std::less<>> cmp::reservedTokensMap 
     { "enum",      ReservedTokenId::KEYWORD_ENUM      },
     { "struct",    ReservedTokenId::KEYWORD_STRUCT    },
     { "const",     ReservedTokenId::KEYWORD_CONST     },
-    { "fn",        ReservedTokenId::KEYWORD_FN        },
     { "auto",      ReservedTokenId::KEYWORD_AUTO      },
     { "typeof",    ReservedTokenId::KEYWORD_TYPEOF    },
     { "alias",     ReservedTokenId::KEYWORD_ALIAS     },

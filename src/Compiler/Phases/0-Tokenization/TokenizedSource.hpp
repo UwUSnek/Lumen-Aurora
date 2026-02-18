@@ -10,7 +10,6 @@
     X(KEYWORD_ENUM)             /* enum */                                                                         \
     X(KEYWORD_STRUCT)           /* struct */                                                                       \
     X(KEYWORD_CONST)            /* const */                                                                        \
-    X(KEYWORD_FN)               /* fn */                                                                           \
     X(KEYWORD_AUTO)             /* auto */                                                                         \
     X(KEYWORD_TYPEOF)           /* typeof */                                                                       \
     X(KEYWORD_ALIAS)            /* alias */                                                                        \
