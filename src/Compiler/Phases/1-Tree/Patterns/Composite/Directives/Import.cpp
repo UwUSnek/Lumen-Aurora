@@ -1,5 +1,6 @@
 #include "Import.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include "Utils/console.hpp"
 #include <memory>
 
 std::string cmp::ST_Import::getCategoryName(bool plural) const {
@@ -33,32 +34,32 @@ void cmp::Pattern_Elm_Import::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
         op::OneOf(
-            op::Sequence(1,
+            op::Sequence(1UL,
                 tk::Keyword(KEYWORD_FROM),
                 tk::Identifier(), //FIXME use a string literal
-                op::Optional(1,
+                op::Optional(1UL,
                     tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 ),
                 tk::Keyword(KEYWORD_IMPORT),
                 re::Path(),
-                op::Optional(1,
+                op::Optional(1UL,
                     tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 ),
-                op::Optional((ulong)-1, op::Loop(1,
+                op::Optional((ulong)-1, op::Loop(1UL,
                     tk::Keyword(KEYWORD_COMMA),
                     re::Path(),
-                    op::Optional(1,
+                    op::Optional(1UL,
                         tk::Keyword(META_KEYWORD_AS),
                         tk::Identifier()
                     )
                 ))
             ),
-            op::Sequence(1,
+            op::Sequence(1UL,
                 tk::Keyword(KEYWORD_IMPORT),
                 tk::Identifier(), //FIXME use a string literal
-                op::Optional(1,
+                op::Optional(1UL,
                     tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 )
@@ -150,7 +151,7 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Import::generateData(std::vector<ptr<__base
 
     // Print debug info and return value
     ret:
-    debug(cout << "found import directive\n";)
+    debug(console::cout << "found import directive\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }
 

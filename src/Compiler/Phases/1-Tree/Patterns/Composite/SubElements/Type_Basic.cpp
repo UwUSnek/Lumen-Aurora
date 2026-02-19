@@ -1,4 +1,5 @@
 #include "Type_Basic.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include <memory>
 
@@ -29,7 +30,7 @@ void cmp::Pattern_Elm_Type_Basic::init() {
     __base_Pattern_Composite::__internal_init(
         re::Path(),
         op::Optional((ulong)-1, op::Loop((ulong)-1,
-            tk::Keyword(KEYWORD_PTR)
+            tk::Keyword(META_KEYWORD_PTR)
         ))
     );
 }

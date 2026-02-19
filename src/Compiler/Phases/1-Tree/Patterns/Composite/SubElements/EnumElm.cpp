@@ -1,5 +1,6 @@
 #include "EnumElm.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include "Utils/console.hpp"
 #include <memory>
 
 std::string cmp::ST_EnumElm::getCategoryName(bool plural) const {
@@ -45,6 +46,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_EnumElm::generateData(std::vector<ptr<__bas
     r->name = results[0]->asIdentifier();
 
     // Print debug info and return
-    debug(cout << "Found enum element " << r->name << "\n";)
+    debug(console::cout << "Found enum element " << r->name << "\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

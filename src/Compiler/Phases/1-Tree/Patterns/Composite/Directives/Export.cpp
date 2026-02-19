@@ -1,5 +1,6 @@
 #include "Export.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include "Utils/console.hpp"
 #include <memory>
 
 std::string cmp::ST_Export::getCategoryName(bool plural) const {
@@ -31,14 +32,14 @@ void cmp::Pattern_Elm_Export::init() {
         tk::Keyword(KEYWORD_EXPORT),
         op::Optional((ulong)-1,
             re::Path(),
-            op::Optional(1,
+            op::Optional(1UL,
                 tk::Keyword(META_KEYWORD_AS),
                 tk::Identifier()
             ),
-            op::Optional((ulong)-1, op::Loop(1,
+            op::Optional((ulong)-1, op::Loop(1UL,
                 tk::Keyword(KEYWORD_COMMA),
                 re::Path(),
-                op::Optional(1,
+                op::Optional(1UL,
                     tk::Keyword(META_KEYWORD_AS),
                     tk::Identifier()
                 )
@@ -90,6 +91,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Export::generateData(std::vector<ptr<__base
         }
     }
 
-    debug(cout << "found export directive\n";)
+    debug(console::cout << "found export directive\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

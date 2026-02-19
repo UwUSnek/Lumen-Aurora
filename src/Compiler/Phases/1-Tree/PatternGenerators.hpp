@@ -33,6 +33,7 @@
 #include "Patterns/Tokens/Literals/DoubleLiteral.hpp"
 #include "Patterns/Tokens/Literals/StrLiteral.hpp"
 #include "Patterns/Tokens/Literals/UlongLiteral.hpp"
+#include "Utils/console.hpp"
 
 
 
@@ -58,20 +59,20 @@ namespace cmp {
         // Pattern singletons and value generators
         // Usage: re::<name>(<patterns>)
         //! Placement new prevents circular dependencies between patterns
-        #define X(type, name)                                                                             \
-            extern type *__internal_cache_##name;                                                         \
-            template<class ...t> type *name(t... subPatterns) {                                           \
-                if(!__internal_cache_##name) {                                                            \
-                    __internal_cache_##name = __internal_forwardNew<type>();                              \
-                    __internal_cache_##name->nodeType = PatternNodeType::RE_##name;                       \
-                    debug(cout << "allocated   " << __internal_cache_##name << " | "#name << "\n";)       \
-                    __internal_forwardInit<type>(__internal_cache_##name);                                \
-                    debug(cout << "initialized " << __internal_cache_##name << " | "#name << "\n";)       \
-                }                                                                                         \
-                else {                                                                                    \
-                    debug(cout << "found       " << __internal_cache_##name << " | "#name << "\n";)       \
-                }                                                                                         \
-                return __internal_cache_##name;                                                           \
+        #define X(type, name)                                                                                \
+            extern type *__internal_cache_##name;                                                            \
+            template<class ...t> type *name(t... subPatterns) {                                              \
+                if(!__internal_cache_##name) {                                                               \
+                    __internal_cache_##name = __internal_forwardNew<type>();                                 \
+                    __internal_cache_##name->nodeType = PatternNodeType::RE_##name;                          \
+                    debug(console::cout << "allocated   " << __internal_cache_##name << " | "#name << "\n";) \
+                    __internal_forwardInit<type>(__internal_cache_##name);                                   \
+                    debug(console::cout << "initialized " << __internal_cache_##name << " | "#name << "\n";) \
+                }                                                                                            \
+                else {                                                                                       \
+                    debug(console::cout << "found       " << __internal_cache_##name << " | "#name << "\n";) \
+                }                                                                                            \
+                return __internal_cache_##name;                                                              \
             }
         LIST_PATTERN_ELM_TYPES_NAMES
         #undef X
@@ -83,13 +84,13 @@ namespace cmp {
     namespace op {
         // Value generators for pattern operators (they don't need singletons and are stored in a different namespace)
         // Usage: op::<name>(<patterns>)
-        #define X(type, name)                                                   \
-            template<class ...t> type *name(t... subPatterns) {                 \
-                type* r = re::__internal_forwardNew<type>();                    \
-                r->nodeType = PatternNodeType::OP_##name;                       \
-                re::__internal_forwardInit<type, t...>(r, subPatterns...);      \
-                debug(cout << "created     " << r << " | "#name << "\n";)       \
-                return r;                                                       \
+        #define X(type, name)                                                      \
+            template<class ...t> type *name(t... subPatterns) {                    \
+                type* r = re::__internal_forwardNew<type>();                       \
+                r->nodeType = PatternNodeType::OP_##name;                          \
+                re::__internal_forwardInit<type, t...>(r, subPatterns...);         \
+                debug(console::cout << "created     " << r << " | "#name << "\n";) \
+                return r;                                                          \
             }
         LIST_PATTERN_OPERATOR_TYPES_NAMES
         #undef X
@@ -100,13 +101,13 @@ namespace cmp {
     namespace tk {
         // Value generators for token operators (they don't need singletons and are stored in a different namespace)
         // Usage: tk::<name>(<expected value>?)
-        #define X(type, name)                                                   \
-            template<class ...t> type *name(t... expectedValue) {               \
-                type* r = re::__internal_forwardNew<type>();                    \
-                r->nodeType = PatternNodeType::TK_##name;                       \
-                re::__internal_forwardInit<type, t...>(r, expectedValue...);    \
-                debug(cout << "created     " << r << " | "#name << "\n";)       \
-                return r;                                                       \
+        #define X(type, name)                                                      \
+            template<class ...t> type *name(t... expectedValue) {                  \
+                type* r = re::__internal_forwardNew<type>();                       \
+                r->nodeType = PatternNodeType::TK_##name;                          \
+                re::__internal_forwardInit<type, t...>(r, expectedValue...);       \
+                debug(console::cout << "created     " << r << " | "#name << "\n";) \
+                return r;                                                          \
             }
         LIST_PATTERN_TOKENS_TYPES_NAMES
         #undef X

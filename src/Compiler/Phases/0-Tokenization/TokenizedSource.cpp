@@ -15,9 +15,9 @@ std::map<std::string, cmp::ReservedTokenId, std::less<>> cmp::reservedTokensMap 
     { "from",      ReservedTokenId::KEYWORD_FROM      },
     { "import",    ReservedTokenId::KEYWORD_IMPORT    },
     { "export",    ReservedTokenId::KEYWORD_EXPORT    },
+    { "addr",      ReservedTokenId::KEYWORD_ADDR      },
+    { "@",         ReservedTokenId::KEYWORD_DEREF     },
 
-    { "@",         ReservedTokenId::KEYWORD_PTR       },
-    { "$",         ReservedTokenId::KEYWORD_ADDR      },
     { "if",        ReservedTokenId::KEYWORD_IF        },
     { "else",      ReservedTokenId::KEYWORD_ELSE      },
     { "for",       ReservedTokenId::KEYWORD_FOR       },
@@ -58,6 +58,7 @@ std::map<std::string, cmp::ReservedTokenId, std::less<>> cmp::reservedTokensMap 
     { "as",        ReservedTokenId::META_KEYWORD_AS       },
     { "to",        ReservedTokenId::META_KEYWORD_TO       },
     { "=",         ReservedTokenId::META_KEYWORD_ASSIGN   },
+    { "*",         ReservedTokenId::META_KEYWORD_PTR      },
 
 
 

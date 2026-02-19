@@ -1,5 +1,6 @@
 #include "Alias.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include "Utils/console.hpp"
 #include <memory>
 
 std::string cmp::ST_Alias::getCategoryName(bool plural) const {
@@ -44,6 +45,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Alias::generateData(std::vector<ptr<__base_
     r->original = results[1]->asPath();
     r->name     = results[3]->asIdentifier();
 
-    debug(cout << "found alias " << r->name->s << "\n";)
+    debug(console::cout << "found alias " << r->name->s << "\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

@@ -2,6 +2,7 @@
 #include "Compiler/Phases/1-Tree/SourceTree.hpp"
 #include "Compiler/Phases/1-Tree/Patterns/__base_Pattern.hpp"
 #include "Main/ALC.hpp"
+#include "Utils/console.hpp"
 
 
 
@@ -14,7 +15,7 @@ namespace cmp {
             return r.str();
         }
     )
-    debug(void printPatternElmInfo(__base_Pattern* p, int indent);)
+    debug(void printPatternElmInfo(__base_Pattern* p, ulong indent);)
     struct __base_Pattern_Composite : public virtual __base_Pattern {
         std::vector<__base_Pattern*> v;
 
@@ -23,10 +24,11 @@ namespace cmp {
             v = std::vector<__base_Pattern*>{ dynamic_cast<__base_Pattern*>(_v)... };
             initParentReferences();
             debug(
+                using namespace console;
                 cout++;
                 cout << "\n" << this << " Composite pattern initialized with:\n";
                 for(ulong i = 0; i < v.size(); ++i) {
-                    printPatternElmInfo(v[i], 1);
+                    printPatternElmInfo(v[i], 1UL);
                 }
                 cout << "\n";
                 cout--;

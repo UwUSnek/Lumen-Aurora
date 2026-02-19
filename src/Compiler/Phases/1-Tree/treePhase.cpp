@@ -5,6 +5,8 @@
 #include "Main/FatalErrorException.hpp"
 #include "Main/errors.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include "Utils/ansi.hpp"
+#include "Utils/console.hpp"
 #include <memory>
 
 
@@ -13,9 +15,9 @@
 
 
 debug(
-    static std::string genIndentation(int indent) { return cmp::__internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent);   }
-    static void        printFail     (int indent) { cout << genIndentation(indent) << ansi::bold_bright_red   << "[FAIL]\n" << ansi::reset; }
-    static void        printSuccess  (int indent) { cout << genIndentation(indent) << ansi::bold_bright_green << "[OK]  \n" << ansi::reset; }
+    static std::string genIndentation(ulong indent) { return cmp::__internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent);   }
+    static void        printFail     (ulong indent) { console::cout << genIndentation(indent) << ansi::bold_bright_red   << "[FAIL]\n" << ansi::reset; }
+    static void        printSuccess  (ulong indent) { console::cout << genIndentation(indent) << ansi::bold_bright_green << "[OK]  \n" << ansi::reset; }
 )
 
 
@@ -25,9 +27,9 @@ debug(
 
 
 
-ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource<false>> b, ulong index, bool optional debug(, int indent)) {
+ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<TokenizedSource<false>> b, ulong index, bool optional debug(, ulong indent)) {
     ulong i = index;
-    debug(cout << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ";)
+    debug(console::cout << genIndentation(indent) << ansi::green << pattern << ansi::bright_black << " @" << i << " ";)
     switch(pattern->nodeType) {
 
 
@@ -35,7 +37,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
         // Parse OneOf operator
         case PatternNodeType::OP_OneOf: {
-            debug(cout << ansi::bright_black << "One Of\n" << ansi::reset;)
+            debug(console::cout << ansi::bright_black << "One Of\n" << ansi::reset;)
             auto p = pattern->asOneOf();
 
             // For each element of the OneOf's sequence
@@ -69,7 +71,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
         //FIXME account for custom threshold
         //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
         case PatternNodeType::OP_Optional: {
-            debug(cout << ansi::bright_black << "Optional\n" << ansi::reset;)
+            debug(console::cout << ansi::bright_black << "Optional\n" << ansi::reset;)
             __Pattern_Operator_Optional* p = pattern->asOptional();
             auto r = newptr<TreeGenerationResult>(0, true );
 
@@ -145,7 +147,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
         //FIXME account for custom threshold
         //FIXME FIX ALL OF 0-THRESHOLD FOR THIS OPERATOR
         case PatternNodeType::OP_Sequence: {
-            debug(cout << ansi::bright_black << "Sequence\n" << ansi::reset;)
+            debug(console::cout << ansi::bright_black << "Sequence\n" << ansi::reset;)
             __Pattern_Operator_Sequence* p = pattern->asSequence();
             auto r = newptr<TreeGenerationResult>(0, true );
 
@@ -220,7 +222,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
         // Parse Loop operator
         case PatternNodeType::OP_Loop: {
-            debug(cout << ansi::bright_black << "Loop\n" << ansi::reset;)
+            debug(console::cout << ansi::bright_black << "Loop\n" << ansi::reset;)
             __Pattern_Operator_Loop* p = pattern->asLoop();
             auto r = newptr<TreeGenerationResult>(0, true );
 
@@ -330,7 +332,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
             LIST_PATTERN_ELM_TYPES_NAMES
         #undef X
         {
-            debug(cout << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue(false) << ")\n" << ansi::reset;)
+            debug(console::cout << ansi::bold_bright_magenta << "Composite (" << pattern->genDecoratedValue(false) << ")\n" << ansi::reset;)
             auto* p = pattern->asComposite();
 
             // For each of element of the composite's sequence
@@ -429,7 +431,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
             debug(
                 std::string keywordId;
                 for(auto const &pair : reservedTokensMap) if(pair.second == pattern->asKeyword()->id) { keywordId = pair.first; break; }
-                cout << ansi::blue << "Keyword " << keywordId << "\n" << ansi::reset;
+                console::cout << ansi::blue << "Keyword " << keywordId << "\n" << ansi::reset;
             )
             const auto* p = pattern->asKeyword();
             const auto t = (*b)[index];
@@ -453,7 +455,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
         // Parse identifier tokens
         case PatternNodeType::TK_Identifier: {
-            debug(cout << ansi::blue << "Identifier\n" << ansi::reset;)
+            debug(console::cout << ansi::blue << "Identifier\n" << ansi::reset;)
             const auto t = (*b)[index];
 
             if(!t || !t->isIdentifier()) {
@@ -476,7 +478,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
         // Parse literal tokens
         #define GEN_LITERAL_TOKEN_CODE(name)                                                                         \
             case PatternNodeType::TK_##name##Literal: {                                                              \
-                debug(cout << ansi::blue << #name " Literal\n" << ansi::reset;)                                      \
+                debug(console::cout << ansi::blue << #name " Literal\n" << ansi::reset;)                             \
                 const auto t = (*b)[index];                                                                          \
                 \
                 if(!t || !t->is##name()) {                                                                           \

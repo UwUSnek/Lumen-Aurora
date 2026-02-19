@@ -16,8 +16,8 @@
     X(KEYWORD_FROM)             /* from */                                                                         \
     X(KEYWORD_IMPORT)           /* import */                                                                       \
     X(KEYWORD_EXPORT)           /* export */                                                                       \
-    X(KEYWORD_PTR)              /* @ */                                                                            \
-    X(KEYWORD_ADDR)             /* $ */                                                                            \
+    X(KEYWORD_ADDR)             /* addr */                                                                         \
+    X(KEYWORD_DEREF)            /* @ */                                                                            \
     \
     X(KEYWORD_IF)               /* if */                                                                           \
     X(KEYWORD_ELSE)             /* else */                                                                         \
@@ -54,7 +54,8 @@
     X(META_KEYWORD_AS)          /* as */                           /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_TO)          /* to */                           /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_ASSIGN)      /* = */                            /*FIXME check these in identifier patterns */   \
-    X(META_KEYWORD_COLON)        /* : */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_COLON)       /* : */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_PTR)         /* * */                            /*FIXME check these in identifier patterns */   \
     /* META_KEYWORD_ //TODO : */\
     /* META_KEYWORD_ //TODO & */\
     \

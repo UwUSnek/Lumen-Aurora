@@ -108,21 +108,34 @@ std::string cmp::parseSymbolicKeyword(ptr<pre::AnnotatedSource<false>> b, ulong 
 
 
 
+static bool __internal_isSymbolicChar_arr[128]{ false };
+static int __internal_init_a = [](){
+    for(char c : std::string("!$%&*+-/<=>?[]^`|~")) {
+        __internal_isSymbolicChar_arr[(int)c] = true;
+    }
+    return 0;
+}();
 /**
- * @brief Checks if a character can be part of either a symbolic identifier, a meta keyword or a keyword.
+ * @brief Checks if a character can be part of a symbolic identifier.
  * @param c The character to check.
- * @return Wether the character can be part of these elements.
+ * @return Wether the character can be part of a symbolic identifier.
  */
 bool cmp::isSymbolicChar(const char c) {
-    return
-        c == '!' || c == '%' || c == '&' || c == '*' || c == '+' || c == '-' || c == ':' || c == '<' || c == '[' ||
-        c == '='             || c == '?' || c == '^' || c == '`' || c == '|' || c == '~' || c == '>' || c == ']'
-    ;
+    return __internal_isSymbolicChar_arr[(int)c];
 }
 
 
 
 
+
+
+static bool __internal_isCharReserved_arr[128]{ false };
+static int __internal_init_b = [](){
+    for(char c : std::string(":;.,(){}@")) {
+        __internal_isSymbolicChar_arr[(int)c] = true;
+    }
+    return 0;
+}();
 /**
  * @brief Checks if a character is reserved for keywords.
  *      ! This kind of keywords can only be composed by a single character as
@@ -131,11 +144,5 @@ bool cmp::isSymbolicChar(const char c) {
  * @return Wether the character is a keyword.
  */
 bool cmp::isCharReserved(const char c) {
-    return
-        c == '$' || c == '@' ||
-        c == ';' || c == ',' ||
-        c == '(' || c == ')' ||
-        c == '{' || c == '}' ||
-        c == '.'
-    ;
+    return __internal_isCharReserved_arr[(int)c];
 }

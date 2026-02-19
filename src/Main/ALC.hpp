@@ -13,7 +13,7 @@
 
 
 //FIXME actually control this from somewhere
-#define PRINT_DEBUG_INFO 0
+#define PRINT_DEBUG_INFO 1
 
 #if PRINT_DEBUG_INFO == 1
     #define debug(...) __VA_ARGS__

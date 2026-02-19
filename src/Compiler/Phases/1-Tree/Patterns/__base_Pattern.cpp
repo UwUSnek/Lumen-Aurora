@@ -1,5 +1,7 @@
 #include "__base_Pattern.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include "Utils/ansi.hpp"
+#include "Utils/console.hpp"
 
 
 
@@ -50,23 +52,23 @@ namespace cmp {
 
 
 debug(
-    void cmp::printPatternElmInfo(__base_Pattern* p, int indent) {
+    void cmp::printPatternElmInfo(__base_Pattern* p, ulong indent) {
         if(p->isOneOf()) {
             __Pattern_Operator_OneOf *p2 = p->asOneOf();
-            cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << p << " (" << p2 << " as OneOf)\n";
+            console::cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << p << " (" << p2 << " as OneOf)\n";
             for(ulong i = 0; i < p2->v.size(); ++i){
                 printPatternElmInfo(p2->v[i], indent + 1);
             }
         }
         else if(p->isLoop()) {
             __Pattern_Operator_Loop *p2 = p->asLoop();
-            cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << p << " (" << p2 << " as Loop)\n";
+            console::cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << p << " (" << p2 << " as Loop)\n";
             for(ulong i = 0; i < p2->v.size(); ++i){
                 printPatternElmInfo(p2->v[i], indent + 1);
             }
         }
         else {
-            cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << p << "\n";
+            console::cout << __internal_repeat(ansi::bright_black + "│ " + ansi::reset, indent) << p << "\n";
         }
     }
 )

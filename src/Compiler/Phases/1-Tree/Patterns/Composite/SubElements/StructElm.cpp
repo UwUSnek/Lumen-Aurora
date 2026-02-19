@@ -1,5 +1,6 @@
 #include "StructElm.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
+#include "Utils/console.hpp"
 #include <memory>
 
 std::string cmp::ST_StructElm::getCategoryName(bool plural) const {
@@ -45,6 +46,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_StructElm::generateData(std::vector<ptr<__b
     //FIXME expression
 
     // Print debug info and return
-    debug(cout << "Found struct element " << r->name << "\n";)
+    debug(console::cout << "Found struct element " << r->name << "\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

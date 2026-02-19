@@ -39,7 +39,7 @@ void cmp::Pattern_Elm_Type_Function::init() {
         ),
         tk::Keyword(KEYWORD_ROUND_R),
         op::Optional((ulong)-1, op::Loop((ulong)-1,
-            tk::Keyword(KEYWORD_PTR)
+            tk::Keyword(META_KEYWORD_PTR)
         ))
     );
 }
