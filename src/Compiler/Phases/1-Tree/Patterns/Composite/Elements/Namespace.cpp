@@ -4,13 +4,13 @@
 #include <memory>
 
 std::string cmp::ST_Namespace::getCategoryName(bool plural) const {
-    return plural ? "namespace definitions" : "namespace definition";
+    return plural ? "namespace declarations" : "namespace declaration";
 }
 
 std::string cmp::Pattern_Elm_Namespace::genDecoratedValue(bool article) const {
     return article
-        ? "a Namespace Definition"
-        :   "Namespace Definition"
+        ? "a Namespace declaration"
+        :   "Namespace declaration"
     ;
 }
 

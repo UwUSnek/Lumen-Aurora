@@ -300,7 +300,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             //FIXME list possible elements when none of a OneOf's choices are found, instead of saying "expected <firstElement>, but..."
 
                             //FIXME "Incomplete Module. Found unexpected Identifier "idk" //TODO this is already printed
-                            //FIXME "Only one of these is allowed: Struct definition, Import directive, Export directive, Routine definition"
+                            //FIXME "Only one of these is allowed: Struct declaration, Import directive, Export directive, Routine declaration"
                         }
                         else {
                             break;
@@ -404,7 +404,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
                             //FIXME list possible elements when none of a OneOf's choices are found, instead of saying "expected <firstElement>, but..."
 
                             //FIXME "Incomplete Module. Found unexpected Identifier "idk" //TODO this is already printed
-                            //FIXME "Only one of these is allowed: Struct definition, Import directive, Export directive, Routine definition"
+                            //FIXME "Only one of these is allowed: Struct declaration, Import directive, Export directive, Routine declaration"
                         // }
                     }
                     else {

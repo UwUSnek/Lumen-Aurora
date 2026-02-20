@@ -9,8 +9,8 @@ std::string cmp::ST_Alias::getCategoryName(bool plural) const {
 
 std::string cmp::Pattern_Elm_Alias::genDecoratedValue(bool article) const {
     return article
-        ? "a Symbol Alias Definition"
-        :   "Symbol Alias Definition"
+        ? "a Symbol Alias declaration"
+        :   "Symbol Alias declaration"
     ;
 }
 

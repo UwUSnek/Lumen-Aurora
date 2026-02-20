@@ -4,13 +4,13 @@
 #include <memory>
 
 std::string cmp::ST_Enum::getCategoryName(bool plural) const {
-    return plural ? "enum definitions" : "enum definition";
+    return plural ? "enum declarations" : "enum declaration";
 }
 
 std::string cmp::Pattern_Elm_Enum::genDecoratedValue(bool article) const {
     return article
-        ? "an Enum definition"
-        :    "Enum definition"
+        ? "an Enum declaration"
+        :    "Enum declaration"
     ;
 }
 

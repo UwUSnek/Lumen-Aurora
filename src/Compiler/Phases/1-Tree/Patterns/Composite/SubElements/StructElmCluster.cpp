@@ -8,8 +8,8 @@ std::string cmp::ST_StructElmCluster::getCategoryName(bool plural) const {
 
 std::string cmp::Pattern_Elm_StructElmCluster::genDecoratedValue(bool article) const {
     return article
-        ? "a Struct Element Cluster Definition"
-        :   "Struct Element Cluster Definition"
+        ? "a Struct Element Cluster declaration"
+        :   "Struct Element Cluster declaration"
     ;
 }
 

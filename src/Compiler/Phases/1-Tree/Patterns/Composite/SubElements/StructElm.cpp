@@ -9,8 +9,8 @@ std::string cmp::ST_StructElm::getCategoryName(bool plural) const {
 
 std::string cmp::Pattern_Elm_StructElm::genDecoratedValue(bool article) const {
     return article
-        ? "a Struct Element Definition"
-        :   "Struct Element Definition"
+        ? "a Struct Element declaration"
+        :   "Struct Element declaration"
     ;
 }
 

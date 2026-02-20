@@ -4,13 +4,13 @@
 #include <memory>
 
 std::string cmp::ST_Struct::getCategoryName(bool plural) const {
-    return plural ? "struct definitions" : "struct definition";
+    return plural ? "struct declarations" : "struct declaration";
 }
 
 std::string cmp::Pattern_Elm_Struct::genDecoratedValue(bool article) const {
     return article
-        ? "a Struct Definition"
-        :   "Struct Definition"
+        ? "a Struct declaration"
+        :   "Struct declaration"
     ;
 }
 

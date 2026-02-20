@@ -9,8 +9,8 @@ std::string cmp::ST_EnumElm::getCategoryName(bool plural) const {
 
 std::string cmp::Pattern_Elm_EnumElm::genDecoratedValue(bool article) const {
     return article
-        ? "an Enum Element Definition"
-        :    "Enum Element Definition"
+        ? "an Enum Element declaration"
+        :    "Enum Element declaration"
     ;
 }
 
