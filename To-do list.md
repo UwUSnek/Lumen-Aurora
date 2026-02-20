@@ -22,10 +22,9 @@
     - Nested string literals: Each level of nesting is colored differently
 
 - add ? and * and ** to include paths, check codumentation
-  - use a custom parser instead of the standard string literal
-    - write that include paths are slightly different from string literals as they cannot be Raw or Format, and have the special escape sequences. 
-    - They do however support all of string literals' escape sequences
-  - check if .. for the parent directory already works or needs implementing
+  - use the standard string literal parser, add special support for <>
+    - write that include paths are just normal string literals with all of the supported escape sequences, but <> can be used to include standard modules
+  - file names can't contain *, ?, ", <, or >
   - 0 includes if glob patterns don't match anything
   - file can't be named "." or "..
-  - add escapes for *?"<>\
+  - add a specific error in case ~ is used (~ is not the home directory but the literal character ~)
