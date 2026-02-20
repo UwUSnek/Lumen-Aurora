@@ -10,9 +10,15 @@
 - Avoid printing gigantic "affected source code" in errors when showing errors about incomplete large composite elements
 
 - Add a "layers" button or something in the extension that shows the code colored based on different criteria or displays/hides informations
-  - Expanded macros
-  - kept/optimized out
-  - Executed in compile time
-  - Show lines merged with LSTs
-  - Hide comments
-  - Replace aliases with original name
+  - THIS DATA IS ON-DEMAND THROUGH COMPILER OPTIONS
+  - store it in a serializable "DecoratedSource" that contains extra optional info as opposed to only the position of the character like with AnnotatedSource
+  - layers:
+    - Expanded macros
+    - kept/optimized out
+    - Executed in compile time
+    - Show lines merged with LSTs
+    - Hide comments
+    - Replace aliases with original name
+    - Nested string literals: Each level of nesting is colored differently
+
+- add ? and * to include paths, check codumentation
