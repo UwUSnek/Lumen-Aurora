@@ -8,6 +8,7 @@
   - Better progress and debugging, much longer compilation times
 
 - Avoid printing gigantic "affected source code" in errors when showing errors about incomplete large composite elements
+- Show list of allowed elements when OneOf fails, instead of whatever the first element specified in the pattern is
 
 - Add a "layers" button or something in the extension that shows the code colored based on different criteria or displays/hides informations
   - THIS DATA IS ON-DEMAND THROUGH COMPILER OPTIONS
@@ -21,10 +22,19 @@
     - Replace aliases with original name
     - Nested string literals: Each level of nesting is colored differently
 
-- add ? and * and ** to include paths, check codumentation
+- add ? and * and ** to include paths, check documentation
   - use the standard string literal parser, add special support for <>
     - write that include paths are just normal string literals with all of the supported escape sequences, but <> can be used to include standard modules
   - file names can't contain *, ?, ", <, or >
   - 0 includes if glob patterns don't match anything
   - file can't be named "." or "..
-  - add a specific error in case ~ is used (~ is not the home directory but the literal character ~)
+  - add a specific error in case ~ is used at the start of a non existing path (~ is not the home directory but the literal character ~)
+
+- we need some flattening phase or something?
+  - this must be done before checking the code's logic and optimization
+  - this lets subsequent phases check and reference semantics easily
+  - This phase must:
+    - replace aliases with the proper name (and import/export renames)
+    - generate specializations and separate them into different unique routines/structs/enum/whatever (this might need to be in a separate phase)
+    - flatten all paths and specializations into unique names (merge namespaces)
+    - collect all unique instances of each category of element into the same group
