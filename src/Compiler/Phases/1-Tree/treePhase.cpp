@@ -7,6 +7,7 @@
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/ansi.hpp"
 #include "Utils/console.hpp"
+#include <cassert>
 #include <memory>
 
 
@@ -506,6 +507,7 @@ ptr<cmp::TreeGenerationResult> cmp::generateTree(__base_Pattern *pattern, ptr<To
 
         default: {
             //! Bogus return value to silence GCC
+            assert(false);
             return newptr<TreeGenerationResult>(0, false );
         }
     }

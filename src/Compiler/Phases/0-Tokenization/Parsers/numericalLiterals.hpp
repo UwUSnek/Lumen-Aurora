@@ -1,3 +1,4 @@
+#pragma once
 #include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Utils/ptr.hpp"
 

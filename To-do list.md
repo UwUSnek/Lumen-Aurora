@@ -21,6 +21,7 @@
     - Hide comments
     - Replace aliases with original name
     - Nested string literals: Each level of nesting is colored differently
+    - highlight implicitly converted values (can show multiple stacked levels)
 
 - add ? and * and ** to include paths, check documentation
   - use the standard string literal parser, add special support for <>
@@ -38,3 +39,9 @@
     - generate specializations and separate them into different unique routines/structs/enum/whatever (this might need to be in a separate phase)
     - flatten all paths and specializations into unique names (merge namespaces)
     - collect all unique instances of each category of element into the same group
+
+
+
+
+- rename "routine parameters" to "simple parameters". routine parameters should encompass all types of parameters. use a __base_ST_Parameter for that
+- add error paths to syntax patterns. these take the pattern and an error code, which is then used to specify the proper "not allowed here" error if matching
