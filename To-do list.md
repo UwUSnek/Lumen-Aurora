@@ -49,8 +49,23 @@
     - writing "elif" or "elseif" after an if statement
     - using "class" or "typename" in a template parameter
 
+- statement expressions
+  @<statement>, result value is whatever gets yielded first
+  - while, do-while, for, if, match. includes chained else statements
+
+- REMOVE EXPRESSION STATEMENTS
+  - replace them with routine call statements
+    - though they could just be warnings. also add the disclaimer in the expression statement page?
+    - "value is discarded (@if(n) f();). This can be replaced with if(n) f();"
+  - raw expressions such as "2" or "try { ... }" whose result value is discarded are completely pointless and likely indicate a bug in the code.
+    - no point in keeping them as no-ops like C does. just print an error. anything with side-effects is either an operator call or a function call.
+    - @<statement> expressions could technically be used as non-call-expressions with side-effects, but at that point, just write a normal loop or smt.
+
 - try expression: Compiles a portion of code using the same options as the parent module. Evaluates to true if the code doesn't generate errors.
   - template<t> void f(t n) {
       bool r = test { n.inc(); }
       if(!r) //qualche cosa per un errore compile time
     }
+
+- Check if meta keywords actually work
+- Check if meta keywords conflict with keywords with the same name. They are meant to have priority over keywords when in dedicated places
