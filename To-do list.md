@@ -40,8 +40,17 @@
     - flatten all paths and specializations into unique names (merge namespaces)
     - collect all unique instances of each category of element into the same group
 
-
-
-
 - rename "routine parameters" to "simple parameters". routine parameters should encompass all types of parameters. use a __base_ST_Parameter for that
+
 - add error paths to syntax patterns. these take the pattern and an error code, which is then used to specify the proper "not allowed here" error if matching
+  - we need something like this for syntaxes and suggestions / warnings.
+  - writing stuff that doesn't exist in this language but works in C? tree creation phase should be able to parse it and print an error + suggestion
+    - writing "default" as a case in a match statement
+    - writing "elif" or "elseif" after an if statement
+    - using "class" or "typename" in a template parameter
+
+- try expression: Compiles a portion of code using the same options as the parent module. Evaluates to true if the code doesn't generate errors.
+  - template<t> void f(t n) {
+      bool r = test { n.inc(); }
+      if(!r) //qualche cosa per un errore compile time
+    }

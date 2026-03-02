@@ -52,12 +52,13 @@
     X(META_KEYWORD_WHEN)        /* when */                         /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_PRIORITY)    /* priority */                     /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_AS)          /* as */                           /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_IN)          /* in */                           /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_TO)          /* to */                           /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_ASSIGN)      /* = */                            /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_COLON)       /* : */                            /*FIXME check these in identifier patterns */   \
     X(META_KEYWORD_PTR)         /* * */                            /*FIXME check these in identifier patterns */   \
-    /* META_KEYWORD_ //TODO : */\
-    /* META_KEYWORD_ //TODO & */\
+    X(META_KEYWORD_AND)         /* & */                            /*FIXME check these in identifier patterns */   \
+    X(META_KEYWORD_ELLIPSIS)    /* ... */                          /*FIXME check these in identifier patterns */   \
     \
     \
     \

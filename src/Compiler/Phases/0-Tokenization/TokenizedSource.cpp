@@ -57,8 +57,11 @@ std::map<std::string, cmp::ReservedTokenId, std::less<>> cmp::reservedTokensMap 
     { "priority",  ReservedTokenId::META_KEYWORD_PRIORITY },
     { "as",        ReservedTokenId::META_KEYWORD_AS       },
     { "to",        ReservedTokenId::META_KEYWORD_TO       },
+    { "in",        ReservedTokenId::META_KEYWORD_IN       },
     { "=",         ReservedTokenId::META_KEYWORD_ASSIGN   },
     { "*",         ReservedTokenId::META_KEYWORD_PTR      },
+    { "&",         ReservedTokenId::META_KEYWORD_AND      },
+    { "...",       ReservedTokenId::META_KEYWORD_ELLIPSIS },
 
 
 

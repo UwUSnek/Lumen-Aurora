@@ -5,7 +5,7 @@
 #include <optional>
 
 std::string cmp::ST_Function::getCategoryName(bool plural) const {
-    return plural ? "function declaration" : "function declaration";
+    return plural ? "function declarations" : "function declaration";
 }
 
 std::string cmp::Pattern_Elm_Function::genDecoratedValue(bool article) const {

@@ -27,11 +27,7 @@ void cmp::Pattern_Elm_BasicParameter::init() {
     using enum ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
         re::Type(),
-        tk::Identifier(),
-        op::Optional(1UL,
-            tk::Keyword(ReservedTokenId::META_KEYWORD_ASSIGN),
-            tk::Identifier() //BUG implement expressions
-        )
+        tk::Identifier()
     );
 }
 
@@ -43,7 +39,6 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_BasicParameter::generateData(std::vector<pt
 
     r->type = results[0]->asType();
     r->name = results[1]->asIdentifier();
-    //BUG implement expressions & default values
 
     // Print debug info and return
     debug(console::cout << "Found basic parameter " << r->name << "\n";)
