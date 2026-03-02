@@ -56,7 +56,8 @@
 - REMOVE EXPRESSION STATEMENTS
   - replace them with routine call statements
     - though they could just be warnings. also add the disclaimer in the expression statement page?
-    - "value is discarded (@if(n) f();). This can be replaced with if(n) f();"
+    - allowing them but printing warnings is probably the more sensible way to go about it
+    - "value is discarded (@if(n) f();). This can be replaced with if(n) f();" or something
   - raw expressions such as "2" or "try { ... }" whose result value is discarded are completely pointless and likely indicate a bug in the code.
     - no point in keeping them as no-ops like C does. just print an error. anything with side-effects is either an operator call or a function call.
     - @<statement> expressions could technically be used as non-call-expressions with side-effects, but at that point, just write a normal loop or smt.

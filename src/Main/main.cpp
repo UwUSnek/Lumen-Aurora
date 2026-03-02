@@ -41,6 +41,7 @@ If you need to be able to read it, use a real terminal.
 
 
 void writeOutputFile(const std::string &code) {
+
     // Create directories
     fs::create_directories(fs::path(cmd::options.outputFile).parent_path());
 
@@ -55,7 +56,7 @@ void writeOutputFile(const std::string &code) {
         utils::printErrorGeneric(
             ErrorCode::ERROR_OUTPUT_CANNOT_CREATE,
             "Could not write output file \"" + cmd::options.outputFile + "\".\n" +
-            "Output path was interpreted as: \"" + ansi::white + fs::canonical(cmd::options.outputFile).string() + ansi::reset + "\".\n",
+            "Output path was interpreted as: \"" + ansi::white + fs::path(cmd::options.outputFile).lexically_normal().string() + ansi::reset + "\".\n",
             true
         );
     }
