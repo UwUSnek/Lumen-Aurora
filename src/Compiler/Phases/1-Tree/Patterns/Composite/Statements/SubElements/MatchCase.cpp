@@ -45,7 +45,9 @@ void cmp::Pattern_Sttm_Sub_MatchCase::init() {
                 tk::Keyword(META_KEYWORD_TO),
                 re::ANY_Expression()
             )
-        )
+        ),
+        tk::Keyword(META_KEYWORD_COLON),
+        re::ANY_Statement()
     );
     //FIXME add error paths - check other declarations etc.
     //FIXME might need to automate a "check all known declarations" or something. fallback to "unexpected token" if no node is recognized beyond doubt
@@ -56,8 +58,28 @@ void cmp::Pattern_Sttm_Sub_MatchCase::init() {
 
 ptr<cmp::__base_ST> cmp::Pattern_Sttm_Sub_MatchCase::generateData(std::vector<ptr<__base_ST>> const &results) const {
     auto r = newptr<ST_Sttm_Sub_MatchCase>();
+    ulong i = 0;
+
+
 
     // Save data
+    while(!(results[i]->isKeyword() && results[i]->asKeyword()->id == ReservedTokenId::META_KEYWORD_COLON)) {
+        if(results[i + 1]->isKeyword() && results[i + 1]->asKeyword()->id == ReservedTokenId::META_KEYWORD_TO) {
+            r->ranges.emplace_back(results[i], results[i + 2]);
+            i += 3;
+        }
+        else {
+            r->ranges.emplace_back(results[i], nullptr);
+            i++;
+        }
+        if(results[i]->isKeyword() && results[i]->asKeyword()->id == ReservedTokenId::KEYWORD_COMMA) {
+            ++i;
+        }
+    }
+    ++i;
+    r->statement = results[i];
+
+
 
     // Print debug info and return
     debug(console::cout << "found match case\n";)

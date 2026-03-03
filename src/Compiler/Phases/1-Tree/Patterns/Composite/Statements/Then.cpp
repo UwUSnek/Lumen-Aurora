@@ -29,6 +29,8 @@ ulong cmp::Pattern_Sttm_Then::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_Then::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_THEN),
+        re::ANY_Statement()
     );
 }
 
@@ -39,6 +41,7 @@ ptr<cmp::__base_ST> cmp::Pattern_Sttm_Then::generateData(std::vector<ptr<__base_
     auto r = newptr<ST_Sttm_Then>();
 
     // Save data
+    r->statement = results[1];
 
     // Print debug info and return
     debug(console::cout << "found then statement\n";)

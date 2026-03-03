@@ -36,7 +36,6 @@ void cmp::Pattern_ANY_Statement::init() {
             re::Sttm_Once(),
             re::Sttm_Then(),
             re::Sttm_Return(),
-            re::Sttm_Defer(),
             re::Sttm_Else(),
             re::Sttm_UnnamedScope(),
             re::Sttm_ExpressioStatement(),

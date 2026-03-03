@@ -11,8 +11,7 @@
 
 
 namespace cmp {
-    struct ST_Sttm_UnnamedScope : public virtual __base_ST {
-        ptr<__base_ST> value;
+    struct ST_Sttm_UnnamedScope : public virtual __base_ST, public virtual __base_ST_Container {
         std::string getCategoryName(bool plural = false) const override;
     };
 

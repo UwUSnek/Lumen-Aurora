@@ -1,4 +1,5 @@
 #include "WhileHeader.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
 #include <memory>
@@ -29,6 +30,10 @@ ulong cmp::Pattern_Sttm_WhileHeader::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_WhileHeader::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_WHILE),
+        tk::Keyword(KEYWORD_ROUND_L),
+        re::ANY_Expression(),
+        tk::Keyword(KEYWORD_ROUND_R),
     );
 }
 
@@ -39,6 +44,7 @@ ptr<cmp::__base_ST> cmp::Pattern_Sttm_WhileHeader::generateData(std::vector<ptr<
     auto r = newptr<ST_Sttm_WhileHeader>();
 
     // Save data
+    r->condition = results[2];
 
     // Print debug info and return
     debug(console::cout << "found while header\n";)

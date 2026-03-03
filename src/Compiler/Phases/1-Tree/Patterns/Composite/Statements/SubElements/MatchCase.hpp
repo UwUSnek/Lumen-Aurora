@@ -18,7 +18,11 @@ namespace cmp {
         //! The list of ranges this match case activates with.
         //! Each element contains the [from] and [to] values of the range.
         //! [to] can be a nullptr in case of single-value entries.
-        std::vector<std::tuple<ptr<__base_ST>>> ranges;
+        std::vector<std::pair<ptr<__base_ST>, ptr<__base_ST>>> ranges;
+
+        //! The statement
+        ptr<__base_ST> statement;
+
 
         std::string getCategoryName(bool plural = false) const override;
     };

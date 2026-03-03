@@ -11,7 +11,7 @@
 
 
 namespace cmp {
-    struct ST_Sttm_Match : public virtual __base_ST {
+    struct ST_Sttm_Match : public virtual __base_ST, public virtual __base_ST_Container {
         ptr<__base_ST> value;
         std::string getCategoryName(bool plural = false) const override;
     };

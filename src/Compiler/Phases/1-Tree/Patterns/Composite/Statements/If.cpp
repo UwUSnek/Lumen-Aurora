@@ -29,6 +29,11 @@ ulong cmp::Pattern_Sttm_If::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_If::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_IF),
+        tk::Keyword(KEYWORD_ROUND_L),
+        tk::ANY_Expression(),
+        tk::Keyword(KEYWORD_ROUND_R),
+        re::ANY_Statement()
     );
 }
 

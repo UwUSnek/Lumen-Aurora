@@ -12,7 +12,7 @@
 
 namespace cmp {
     struct ST_Sttm_Once : public virtual __base_ST {
-        ptr<__base_ST> value;
+        ptr<__base_ST> statement;
         std::string getCategoryName(bool plural = false) const override;
     };
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "Compiler/Phases/1-Tree/SourceTree.hpp"
 #include "Compiler/Phases/1-Tree/Patterns/Composite/__base_Pattern_Composite.hpp"
-#include <cstddef>
 
 
 

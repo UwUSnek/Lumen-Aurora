@@ -1,7 +1,6 @@
 #pragma once
 #include "Compiler/Phases/1-Tree/SourceTree.hpp"
 #include "Compiler/Phases/1-Tree/Patterns/Composite/__base_Pattern_Composite.hpp"
-#include <cstddef>
 
 
 
@@ -12,7 +11,7 @@
 
 namespace cmp {
     struct ST_Sttm_Break : public virtual __base_ST {
-        ptr<__base_ST> value;
+        ulong amount;
         std::string getCategoryName(bool plural = false) const override;
     };
 

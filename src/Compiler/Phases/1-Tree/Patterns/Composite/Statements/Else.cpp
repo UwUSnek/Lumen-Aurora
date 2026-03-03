@@ -1,4 +1,5 @@
 #include "Else.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
 #include <memory>
@@ -29,6 +30,8 @@ ulong cmp::Pattern_Sttm_Else::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_Else::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_ELSE),
+        re::ANY_Statement()
     );
 }
 
@@ -39,6 +42,7 @@ ptr<cmp::__base_ST> cmp::Pattern_Sttm_Else::generateData(std::vector<ptr<__base_
     auto r = newptr<ST_Sttm_Else>();
 
     // Save data
+    r->statement = results[1];
 
     // Print debug info and return
     debug(console::cout << "found else statement\n";)

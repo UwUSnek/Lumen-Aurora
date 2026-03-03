@@ -1,4 +1,5 @@
 #include "Return.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
 #include <memory>
@@ -29,6 +30,9 @@ ulong cmp::Pattern_Sttm_Return::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_Return::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_RETURN),
+        re::ANY_Expression(),
+        tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
 
@@ -39,6 +43,7 @@ ptr<cmp::__base_ST> cmp::Pattern_Sttm_Return::generateData(std::vector<ptr<__bas
     auto r = newptr<ST_Sttm_Return>();
 
     // Save data
+    r->value = results[1];
 
     // Print debug info and return
     debug(console::cout << "found return statement\n";)

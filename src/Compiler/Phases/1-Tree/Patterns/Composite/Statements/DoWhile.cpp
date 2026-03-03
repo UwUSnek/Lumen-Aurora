@@ -1,4 +1,5 @@
 #include "DoWhile.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
 #include <memory>
@@ -29,6 +30,9 @@ ulong cmp::Pattern_Sttm_DoWhile::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_DoWhile::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_DO),
+        re::ANY_Statement(),
+        re::Sttm_WhileHeader()
     );
 }
 
@@ -39,6 +43,8 @@ ptr<cmp::__base_ST> cmp::Pattern_Sttm_DoWhile::generateData(std::vector<ptr<__ba
     auto r = newptr<ST_Sttm_DoWhile>();
 
     // Save data
+    r->statement = results[1];
+    r->header    = results[2];
 
     // Print debug info and return
     debug(console::cout << "found do-while statement\n";)

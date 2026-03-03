@@ -1,4 +1,5 @@
 #include "EmptyStatement.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
 #include <memory>
@@ -29,6 +30,7 @@ ulong cmp::Pattern_Sttm_EmptyStatement::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_EmptyStatement::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
 
@@ -38,7 +40,7 @@ void cmp::Pattern_Sttm_EmptyStatement::init() {
 ptr<cmp::__base_ST> cmp::Pattern_Sttm_EmptyStatement::generateData(std::vector<ptr<__base_ST>> const &results) const {
     auto r = newptr<ST_Sttm_EmptyStatement>();
 
-    // Save data
+    //! No data
 
     // Print debug info and return
     debug(console::cout << "found empty statement\n";)

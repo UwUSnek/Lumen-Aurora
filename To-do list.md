@@ -70,3 +70,34 @@
 
 - Check if meta keywords actually work
 - Check if meta keywords conflict with keywords with the same name. They are meant to have priority over keywords when in dedicated places
+
+- constraints issue (compile time values)
+  - // test
+    bool n = true;
+    void f(when n){ io.print("a"); }
+    void f(when !n){ io.print("b"); }
+    void main(){
+      f(); //prints "a"
+      n = false;
+      f(); //prints "b"
+    }
+  - they should probably depend on literals and tempalte value parameters only
+    - but then we wouldn't be able to call functions to calculate the condition.
+      - (do we actually need functions in conditions? probably not, right? they are quite simple. complex conditions indicate a design flaw)
+    - this also prevents actual compile time values from being usable
+      - these might actually be marginally useful, as opposed to function calls. think of global values that indicate debugging state or something like that
+  - allowing any compile time value has that issue in the example.
+    - so compile time values must absolutely not be freely usable in constraints
+    - that example is unacceptably unreadable and counter intuitive
+
+- defer statement must only allow routine calls
+  - this is because all of the parameters need to be computed from the statement's position and the routine called later
+  - parameters of a deferred call cannot be modified after the defer statement is queued
+  - add this to documentation
+
+- add call types. defer statement is one of them. add them to function call syntax
+  - call (default, redundant. only used for clarity)
+  - defer
+  - async
+  - process
+  - compute (run an aurora gpu shader)

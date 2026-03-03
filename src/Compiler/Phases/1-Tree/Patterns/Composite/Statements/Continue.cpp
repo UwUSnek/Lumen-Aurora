@@ -1,4 +1,5 @@
 #include "Continue.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
 #include <memory>
@@ -29,6 +30,8 @@ ulong cmp::Pattern_Sttm_Continue::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_Continue::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        tk::Keyword(KEYWORD_CONTINUE),
+        tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
 
@@ -38,7 +41,7 @@ void cmp::Pattern_Sttm_Continue::init() {
 ptr<cmp::__base_ST> cmp::Pattern_Sttm_Continue::generateData(std::vector<ptr<__base_ST>> const &results) const {
     auto r = newptr<ST_Sttm_Continue>();
 
-    // Save data
+    //! No data to save
 
     // Print debug info and return
     debug(console::cout << "found continue statement\n";)

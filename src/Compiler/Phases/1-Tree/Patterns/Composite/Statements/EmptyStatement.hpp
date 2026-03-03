@@ -12,7 +12,6 @@
 
 namespace cmp {
     struct ST_Sttm_EmptyStatement : public virtual __base_ST {
-        ptr<__base_ST> value;
         std::string getCategoryName(bool plural = false) const override;
     };
 

@@ -29,6 +29,8 @@ ulong cmp::Pattern_Sttm_While::getCertaintyThreshold() const {
 void cmp::Pattern_Sttm_While::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
+        re::Sttm_WhileHeader(),
+        re::ANY_Statement()
     );
 }
 
@@ -39,6 +41,8 @@ ptr<cmp::__base_ST> cmp::Pattern_Sttm_While::generateData(std::vector<ptr<__base
     auto r = newptr<ST_Sttm_While>();
 
     // Save data
+    r->header    = results[0];
+    r->statement = results[1];
 
     // Print debug info and return
     debug(console::cout << "found while statement\n";)

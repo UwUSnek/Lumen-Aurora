@@ -19,15 +19,17 @@ std::map<std::string, cmp::ReservedTokenId, std::less<>> cmp::reservedTokensMap 
     { "@",         ReservedTokenId::KEYWORD_DEREF     },
 
     { "if",        ReservedTokenId::KEYWORD_IF        },
-    { "else",      ReservedTokenId::KEYWORD_ELSE      },
+    { "match",     ReservedTokenId::KEYWORD_MATCH     },
     { "for",       ReservedTokenId::KEYWORD_FOR       },
     { "while",     ReservedTokenId::KEYWORD_WHILE     },
     { "do",        ReservedTokenId::KEYWORD_DO        },
     { "continue",  ReservedTokenId::KEYWORD_CONTINUE  },
     { "break",     ReservedTokenId::KEYWORD_BREAK     },
     { "once",      ReservedTokenId::KEYWORD_ONCE      },
+    { "else",      ReservedTokenId::KEYWORD_ELSE      },
     { "then",      ReservedTokenId::KEYWORD_THEN      },
     { "return",    ReservedTokenId::KEYWORD_RETURN    },
+
     { "delay",     ReservedTokenId::KEYWORD_DELAY     },
     { "async",     ReservedTokenId::KEYWORD_ASYNC     },
 
