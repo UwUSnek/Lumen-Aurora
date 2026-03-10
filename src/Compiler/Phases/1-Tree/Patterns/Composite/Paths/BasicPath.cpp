@@ -1,21 +1,22 @@
-#include "Literal.hpp"
+#include "Compiler/Phases/0-Tokenization/TokenizedSource.hpp"
+#include "BasicPath.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
 #include <memory>
 
 
-std::string cmp::ST_Expr_Literal::getCategoryName(bool plural) const {
-    return plural ? "literal expressions" : "literal expression";
+std::string cmp::ST_Path_Basic::getCategoryName(bool plural) const {
+    return plural ? "basic paths" : "basic path";
 }
 
-std::string cmp::Pattern_Expr_Literal::genDecoratedValue(bool article) const {
+std::string cmp::Pattern_Path_Basic::genDecoratedValue(bool article) const {
     return article
-        ? "a Literal expression"
-        :   "Literal expression"
+        ? "a Basic path"
+        :   "Basic path"
     ;
 }
 
-ulong cmp::Pattern_Expr_Literal::getCertaintyThreshold() const {
+ulong cmp::Pattern_Path_Basic::getCertaintyThreshold() const {
     return 1;
 }
 
@@ -26,15 +27,13 @@ ulong cmp::Pattern_Expr_Literal::getCertaintyThreshold() const {
 
 
 
-void cmp::Pattern_Expr_Literal::init() {
+void cmp::Pattern_Path_Basic::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
-        op::OneOf(
-            tk::UlongLiteral(),
-            tk::DoubleLiteral(),
-            tk::BoolLiteral(),
-            tk::CharLiteral(),
-            tk::StrLiteral()
+        tk::Identifier(),
+        op::Optional((ulong)-1,
+            tk::Keyword(KEYWORD_DOT),
+            tk::Identifier()
         )
     );
 }
@@ -42,22 +41,16 @@ void cmp::Pattern_Expr_Literal::init() {
 
 
 
-ptr<cmp::__base_ST> cmp::Pattern_Expr_Literal::generateData(std::vector<ptr<__base_ST>> const &results) const {
-    auto r = newptr<ST_Expr_Literal>();
+ptr<cmp::__base_ST> cmp::Pattern_Path_Basic::generateData(std::vector<ptr<__base_ST>> const &results) const {
+    auto r = newptr<ST_Path_Basic>();
 
     // Save value
-    if(
-        results[0]->isUlongLiteral()  ||
-        results[0]->isDoubleLiteral() ||
-        results[0]->isBoolLiteral()   ||
-        results[0]->isCharLiteral()   ||
-        results[0]->isStrLiteral()
-    ) {
-        r->value = results[0];
+    for(ulong i = 0; i < results.size(); i += 2) {
+        r->paths.emplace_back(results[i]->asIdentifier());
     }
 
 
     // Print debug info and return
-    debug(console::cout << "found literal expression\n";)
+    debug(console::cout << "found basic path\n";)
     return std::dynamic_pointer_cast<__base_ST>(r);
 }

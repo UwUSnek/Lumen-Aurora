@@ -16,7 +16,7 @@ std::map<std::string, cmp::ReservedTokenId, std::less<>> cmp::reservedTokensMap 
     { "import",    ReservedTokenId::KEYWORD_IMPORT    },
     { "export",    ReservedTokenId::KEYWORD_EXPORT    },
     { "addr",      ReservedTokenId::KEYWORD_ADDR      },
-    { "@",         ReservedTokenId::KEYWORD_DEREF     },
+    { "@",         ReservedTokenId::KEYWORD_AT        },
 
     { "if",        ReservedTokenId::KEYWORD_IF        },
     { "match",     ReservedTokenId::KEYWORD_MATCH     },

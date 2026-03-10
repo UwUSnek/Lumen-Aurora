@@ -31,13 +31,17 @@ void cmp::Pattern_ANY_Expression::init() {
             re::Expr_TemporaryVariable(),
             re::Expr_FunctionCall(),
 
-            //! Either a variable or a routine parameter
-            //! Variables and routine parameters are indistinguishable until the declarations are fully parsed
-            re::Expr_VariableOrParameter(),
+            //! These are indistinguishable until the declarations are fully parsed
+            //!     - Routine parameters
+            //!     - Variables
+            //!     - Function values
+            //!     - Temporary variables
+            re::Expr_SimpleReferenceExpression()
 
-            //! One of the identifiers of an operator call
-            //! The parameters aren't determined until the declaration is found and fully parsed
-            re::Expr_OperatorCallPart()
+            //FIXME implement operator calls
+            // //! One of the identifiers of an operator call
+            // //! The parameters aren't determined until the declaration is found and fully parsed
+            // re::Expr_OperatorCallPart()
         )
     );
 }

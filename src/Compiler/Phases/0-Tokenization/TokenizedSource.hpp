@@ -17,7 +17,7 @@
     X(KEYWORD_IMPORT)           /* import */                                                                       \
     X(KEYWORD_EXPORT)           /* export */                                                                       \
     X(KEYWORD_ADDR)             /* addr */                                                                         \
-    X(KEYWORD_DEREF)            /* @ */                                                                            \
+    X(KEYWORD_AT)               /* @ */                                                                            \
     \
     X(KEYWORD_IF)               /* if */                                                                           \
     X(KEYWORD_MATCH)            /* match */                                                                        \

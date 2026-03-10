@@ -12,7 +12,7 @@
 namespace cmp {
     struct ST_Function : public virtual __base_ST {
         ST_FunctionSignature *signature;
-        std::vector<std::pair<std::optional<ptr<ST_Constraint>>, ptr<ST_RoutineBody>>> bodies;
+        std::vector<std::pair<ptr<ST_Constraint>, ptr<ST_RoutineBody>>> bodies;
         //! Identifier and return type are stored in the signature
 
         std::string getCategoryName(bool plural = false) const override;

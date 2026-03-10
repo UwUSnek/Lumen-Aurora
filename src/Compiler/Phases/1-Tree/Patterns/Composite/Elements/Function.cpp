@@ -1,6 +1,7 @@
 #include "Function.hpp"
 #include "Compiler/Phases/1-Tree/PatternGenerators.hpp"
 #include "Utils/console.hpp"
+#include "Utils/ptr.hpp"
 #include <memory>
 #include <optional>
 
@@ -49,15 +50,15 @@ ptr<cmp::__base_ST> cmp::Pattern_Elm_Function::generateData(std::vector<ptr<__ba
 
     // Save bodies
     for(ulong i = 1; i < results.size(); ++i) {
-        std::optional<ptr<ST_Constraint>> _constraint;
+        ptr<ST_Constraint> _constraint;
         if(results[i].isConstraint()) {
             _constraint = results[i].asConstriant();
             ++i;
         }
         else {
-            _constraint = std::nullopt;
+            _constraint = nullptr;
         }
-        r->bodies.emplace_back(_constraint, results[i].asRoutineSignature());
+        r->bodies.emplace_back(_constraint, results[i].asRoutineBody());
     }
 
 

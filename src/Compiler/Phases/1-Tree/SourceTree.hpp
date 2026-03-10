@@ -93,7 +93,7 @@ namespace cmp {
 
 
 
-    // Base struct for every first-pass semantic element
+    // Base struct for every element that introduces a new scope
     struct __base_ST_Container : public virtual __base_ST {
         std::vector<ptr<__base_ST>> children;
 
@@ -102,37 +102,6 @@ namespace cmp {
             c->parent = this;
         }
     };
-
-
-
-
-    // Expressions
-    //! The array of children contains the sub-expressions
-    struct ST_Expr : public virtual __base_ST_Container {
-        std::string getCategoryName(bool plural = false) const override;
-    };//FIXME parse this in the generic scope parser
-
-    //FIXME basic expression types
-        //FIXME path
-            //TODO linkage phase:    operator call
-            //TODO linkage phase:    function call
-            //TODO linkage phase:    variable/parameter
-            //TODO linkage phase:    enum value
-        //FIXME reflection path
-        //FIXME literal
-        //FIXME (
-        //FIXME )
-
-
-    // // Reflection path expression
-    // struct ST_Expr_Reflection : public virtual __base_ST {
-    //     ST_Sub_Path* symbolPath;
-    //     ST_Sub_Path* reflectionIdList;
-    // }; //FIXME parse this in the generic scope parser
-
-    //TODO
-    //TODO
-    //TODO
 
 
 
@@ -147,24 +116,4 @@ namespace cmp {
     struct __base_ST_Typed : public virtual __base_ST {
         ST_Type *type;
     };
-
-
-
-
-
-
-
-
-    // Statements
-    struct ST_Statement : public virtual __base_ST {
-        // bool isChildAllowed(__base_ST* c) const override;
-        std::string getCategoryName(bool plural = false) const override;
-    };//FIXME parse this in the generic scope parser
-
-    //FIXME specialized statement types
-        //FIXME expression statements
-        //FIXME while
-        //FIXME for
-        //FIXME if
-        //FIXME etc...
 }

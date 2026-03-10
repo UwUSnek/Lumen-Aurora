@@ -10,15 +10,16 @@
 
 
 namespace cmp {
-    struct ST_Expr_Literal : public virtual __base_ST {
-        ptr<__base_ST> value;
+    struct ST_Type_Function : public virtual __base_ST {
+        ptr<__base_ST> returnType;
+        std::vector<ptr<__base_ST>> paramTypes;
         std::string getCategoryName(bool plural = false) const override;
     };
 
 
 
 
-    struct Pattern_Expr_Literal : public virtual __base_Pattern_Composite {
+    struct Pattern_Type_Function : public virtual __base_Pattern_Composite {
         void init();
         ptr<__base_ST> generateData(std::vector<ptr<__base_ST>> const &results) const override;
         std::string genDecoratedValue(bool article) const override;

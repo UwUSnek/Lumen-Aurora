@@ -11,7 +11,10 @@
 
 namespace cmp {
     struct ST_Sttm_Break : public virtual __base_ST {
-        ulong amount;
+
+        //! nullptr if not specified (equivalent to 1)
+        ptr<__base_ST> amount;
+
         std::string getCategoryName(bool plural = false) const override;
     };
 

@@ -27,9 +27,11 @@ void cmp::Pattern_ANY_Path::init() {
     __base_Pattern_Composite::__internal_init(
         op::OneOf(
             re::Path_Basic(),
+            re::Path_TemporaryVariable(),
             re::Path_Template(),
             re::Path_Reflection(),
-            re::ANY_Type(),
+            re::ANY_Type() //TODO check if this causes an infinite loop.
+            //TODO ANY_Type -> BasicType -> ANY_Path
         )
     );
 }

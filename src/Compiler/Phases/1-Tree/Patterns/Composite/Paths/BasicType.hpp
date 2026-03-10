@@ -10,15 +10,22 @@
 
 
 namespace cmp {
-    struct ST_Expr_Literal : public virtual __base_ST {
-        ptr<__base_ST> value;
+
+    //! Simple reference to a known type. This is valid for:
+    //!     - Template type parameters
+    //!     - Declared enums
+    //!     - Declared structs
+    //!     - Variables
+    //!     - Function values
+    struct ST_Type_Basic : public virtual __base_ST {
+        ptr<__base_ST> path;
         std::string getCategoryName(bool plural = false) const override;
     };
 
 
 
 
-    struct Pattern_Expr_Literal : public virtual __base_Pattern_Composite {
+    struct Pattern_Type_Basic : public virtual __base_Pattern_Composite {
         void init();
         ptr<__base_ST> generateData(std::vector<ptr<__base_ST>> const &results) const override;
         std::string genDecoratedValue(bool article) const override;

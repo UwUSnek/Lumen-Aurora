@@ -46,15 +46,7 @@ ptr<cmp::__base_ST> cmp::Pattern_Expr_Literal::generateData(std::vector<ptr<__ba
     auto r = newptr<ST_Expr_Literal>();
 
     // Save value
-    if(
-        results[0]->isUlongLiteral()  ||
-        results[0]->isDoubleLiteral() ||
-        results[0]->isBoolLiteral()   ||
-        results[0]->isCharLiteral()   ||
-        results[0]->isStrLiteral()
-    ) {
-        r->value = results[0];
-    }
+    r->value = results[0];
 
 
     // Print debug info and return

@@ -14,6 +14,7 @@
   - THIS DATA IS ON-DEMAND THROUGH COMPILER OPTIONS
   - store it in a serializable "DecoratedSource" that contains extra optional info as opposed to only the position of the character like with AnnotatedSource
   - layers:
+    - value/routine constness
     - Expanded macros
     - kept/optimized out
     - Executed in compile time
@@ -99,5 +100,30 @@
   - call (default, redundant. only used for clarity)
   - defer
   - async
-  - process
   - compute (run an aurora gpu shader)
+
+- rename compile-time values to CONSTANT VALUES:
+  - either a literal, a value template argument or a const variable.
+  - const variables can only be initialized with constant values.
+  - routines can be called, but ones that depend on non-const values are detected and cannot be used to create const values (this is logged as error)
+  - specify that values that can be computed in compile time are compile time values but cannot be used for const values. these are only used for optimization
+
+- Rename pattern and tree "elements" to "declarations" (Decl_)
+
+- function calls and function types can have the same form to the tree generator.
+  - cases in which both are allowed, such as in template arguments, this gets ambiguous
+
+- template paths can decay into < and > operator calls
+  - ONLY IF used in an expression context and the symbol is not a known template and none of the arguments are valid, recognized type paths.
+  - this is done in subsequent phases. The first pass of the tree generator just reads all something<...> as template paths.
+  - expressions that don't just happen to match valid template path syntax fail silently and are not parsed as template paths, so they are not an issue.
+  - they just get registered as normal operator calls
+
+  - make sure to log this error properly.
+  - it decaying into an operator call could be confusing in cases where the programmer simply forgets to declare or import the template
+
+  - add this to the documentation or something?
+  - maybe specify that one of the compilation phases does this
+
+- Structs might need an implicit export *; that makes everything inside of the struct visible to the outside
+  - it can be replaced with a user-defined export ...;

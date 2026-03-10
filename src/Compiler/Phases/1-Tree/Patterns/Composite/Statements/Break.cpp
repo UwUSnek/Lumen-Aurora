@@ -31,7 +31,7 @@ void cmp::Pattern_Sttm_Break::init() {
     using enum cmp::ReservedTokenId;
     __base_Pattern_Composite::__internal_init(
         tk::Keyword(KEYWORD_BREAK),
-        op::Optional(1UL, tk::UlongLiteral()),
+        op::Optional(1UL, re::ANY_Expression()),
         tk::Keyword(KEYWORD_SEMICOLON)
     );
 }
@@ -43,13 +43,13 @@ ptr<cmp::__base_ST> cmp::Pattern_Sttm_Break::generateData(std::vector<ptr<__base
     auto r = newptr<ST_Sttm_Break>();
 
     // Save data
-    if(results[1]->isUlongLiteral()) {
-        r->amount = results[1]->asUlongLiteral()->value;
+    if(!results[1]->isKeyword()) {
+        r->amount = results[1];
         //FIXME check amount in subsequent phases
         //FIXME must be >0 and < current nested loop depth
     }
     else {
-        r->amount = 1;
+        r->amount = nullptr;
     }
 
     // Print debug info and return
