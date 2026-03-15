@@ -19,22 +19,23 @@ void pre::generateMetadata(const std::string &rawCode, ptr<AnnotatedSource<false
     // For each character in the string
     while(i < rawCode.length()) {
 
-        // Fully ignore carriage return characters
-        if(rawCode[i] != '\r') {
-
-            // Save the metadata in the return pipe
-            *r += AnnotatedSourceElm(
-                rawCode[i],
-                AnnotatedSourceMeta(i, l, c, DBG_filePathIndex)
-            );
-
-            // Calculate metadata for the next character
-            if(rawCode[i] == '\n') {
-                ++l;
-                c = 0;
-            }
+        // Fully ignore carriage return characters (skip i but don't increase column number)
+        if(rawCode[i] == '\r') {
+            ++i;
+            continue;
         }
 
+        // Save the metadata in the return pipe
+        *r += AnnotatedSourceElm(
+            rawCode[i],
+            AnnotatedSourceMeta(i, l, c, DBG_filePathIndex)
+        );
+
+        // Calculate metadata for the next character
+        if(rawCode[i] == '\n') {
+            ++l;
+            c = 0;
+        }
         ++i;
         ++c;
     }
