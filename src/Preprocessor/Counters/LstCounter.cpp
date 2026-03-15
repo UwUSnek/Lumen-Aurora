@@ -24,7 +24,8 @@ ulong misc::measureLjt(pre::AnnotatedSource<false> &b, ulong index) {
     if(c0 && *c0 == '\\') {
         if(!c1) return 0;
         if(c1 == '\\') {
-            if(!c2) return 2;
+            //! Check for file index changes. This signals that the file has ended after being included
+            if(!c2 || c1->meta.f != c2->meta.f) return 2;
             if(*c2 == '\n') return 3;
         }
     }
@@ -47,7 +48,8 @@ ulong misc::measureLct(pre::AnnotatedSource<false> &b, ulong index) {
     auto c1 = b[index + 1];
 
     if(c0 && *c0 == '\\') {
-        if(!c1) return 1;
+        //! Check for file index changes. This signals that the file has ended after being included
+        if(!c1 || c0->meta.f != c1->meta.f) return 1;
         if(*c1 == '\n') return 2;
     }
     return 0;

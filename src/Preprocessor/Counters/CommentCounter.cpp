@@ -22,12 +22,14 @@ ulong misc::measureComment(pre::AnnotatedSource<false> &b, ulong index) {
 
 
     char last = b[index]->c;
+    ulong lastFileIndex = b[index]->meta.f;
     char commType = '\0'; // '\0' if unknow, '/' if single line, '*' if multiline
     ulong i = index + 1;
     while(true) {
 
         // Single character closing sequences (End of file or single line comments)
-        if(!b[i] || (commType == '/' && b[i]->c == '\n')) {
+        //! Check for file index changes. This signals that the file has ended after being included
+        if(!b[i] || lastFileIndex != b[i]->meta.f || (commType == '/' && b[i]->c == '\n')) {
             break;
         }
         const char c = b[i]->c;
@@ -52,6 +54,7 @@ ulong misc::measureComment(pre::AnnotatedSource<false> &b, ulong index) {
         // Normal characters (part of the comment)
         else {
             last = c;
+            lastFileIndex = b[i]->meta.f;
             ++i;
         }
     }

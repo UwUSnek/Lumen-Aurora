@@ -2,7 +2,8 @@
 // A
 
 
-#include/*aa*/  	\
+#include "../Test/UnclosedComment.lmn"
+#/*ddwe*/includ/*aa*/e  	\
 "../Tests/LargeTree/largeTr     \\
     ee.lmn"
 
