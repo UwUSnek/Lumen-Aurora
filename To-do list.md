@@ -10,7 +10,6 @@
 - Avoid printing gigantic "affected source code" in errors when showing errors about incomplete large composite elements
 
 - Add a "layers" button or something in the extension that shows the code colored based on different criteria or displays/hides informations
-  - Expanded macros
   - kept/optimized out
   - Executed in compile time
   - Show lines merged with LSTs

@@ -111,7 +111,6 @@ extern std::atomic<bool> isComplete;
     X(P0_Includes)          \
     X(P1_LineSplicing)      \
     X(P2_Cleanup)           \
-    X(P3_Macros)            \
     X(C0_Tokenization)      \
     X(C1_TreeCreation)      \
     X(C2_Optimization)      \

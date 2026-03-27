@@ -21,7 +21,7 @@ void pre::__internal_startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<Annota
         // Skip (and remove) comments
         if(ulong commentLen = misc::measureComment(*b, i); commentLen) {
             using enum PhaseID;
-            decreaseMaxProgress(commentLen, P3_Macros, C0_Tokenization);
+            decreaseMaxProgress(commentLen, C0_Tokenization);
             increaseLocalProgress(commentLen);
             i += commentLen;
             continue;
@@ -38,12 +38,6 @@ void pre::__internal_startCleanupPhase(ptr<AnnotatedSource<false>> b, ptr<Annota
             i += literalLen;
             continue;
         }
-
-
-        // FIXME
-        // Skip and store macro definitions and invocations
-        // #define name...\n     // Can include anything, including " and '
-        // #name(...)            // Can include valid indentifiers, valid tokens, and `-limited parameters (which can contain anything)
 
 
         // Save normal characters

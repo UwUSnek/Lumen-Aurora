@@ -39,6 +39,9 @@ static std::string parseIncludeStatementName(ulong index, pre::AnnotatedSource<f
 
 
 
+//FIXME this is now a normal string literal.
+//FIXME read it as a string literal, remove the custom parser.
+//BUG text literals are removed during the initial cleanup. it might be necessary to read the path from the dirty buffer
 //! Manual regex because std doesn't support the custom pipe.
 //! Equivalent to checking /^("(?:\\.|[^\\"])*?")|(<(?:\\.|[^\\>])*?>)/ on b[i:]
 static std::string parseIncludeStatementPath(ulong index, pre::AnnotatedSource<false> &b) {
@@ -159,10 +162,6 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
         if(!skipLen) skipLen = misc::measureLct        (*b0, i);  // Skip (and preserve) LCTs
         if(!skipLen) skipLen = misc::measureComment    (*b0, i);  // Skip (and preserve) comments
         if(!skipLen) skipLen = misc::measureTextLiteral(*b0, i);  // Skip (and preserve) literals
-                                                                      // Skip (and preserve) macro definitions and invocations //FIXME
-        // FIXME
-        // #define name...\n     // Can include anything, including " and '
-        // #name(...)            // Can include valid indentifiers, valid tokens, and `-limited parameters (which can contain anything)
 
 
         // Skip it and store the amount of skipped characters
@@ -201,6 +200,9 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
             j += misc::measureWhitespace(*b, j);
 
             // Detect specified file path
+            //FIXME this is now a normal string literal.
+            //FIXME read it as a string literal, remove the custom parser.
+            //BUG text literals are removed during the initial cleanup. it might be necessary to read the path from the dirty buffer
             if(const auto filePathMatch = parseIncludeStatementPath(j, *b); !filePathMatch.empty()) {
                 ulong k = j + filePathMatch.length();
                 ElmCoords filePathCoords(b, j, k - 1);
@@ -245,8 +247,8 @@ void pre::__internal_startIncludePhase(ptr<AnnotatedSource<false>> b0, ptr<Annot
 
 
                         // Update phase progress data
-                        increaseMaxProgress(fileCode->length(), P0_Includes, P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
-                        decreaseMaxProgress(delta,                           P1_LineSplicing, P2_Cleanup, P3_Macros, C0_Tokenization);
+                        increaseMaxProgress(fileCode->length(), P0_Includes, P1_LineSplicing, P2_Cleanup, C0_Tokenization);
+                        decreaseMaxProgress(delta,                           P1_LineSplicing, P2_Cleanup, C0_Tokenization);
                         increaseLocalProgress(delta);
 
 

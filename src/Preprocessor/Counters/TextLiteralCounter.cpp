@@ -40,7 +40,6 @@ ulong misc::measureTextLiteral(pre::AnnotatedSource<false> &b, ulong index) {
         }
 
         // Closing sequence
-        //! Macro definitions are skipped by the startCleanupPhase() function. No need to check.
         else if(c == literalType) {
             ++i;
             break;

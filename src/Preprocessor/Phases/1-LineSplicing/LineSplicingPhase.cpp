@@ -50,7 +50,7 @@ void pre::__internal_startLineSplicingPhase(ptr<AnnotatedSource<false>> b, ptr<A
         if(!skipLen) skipLen = misc::measureLct(*b, i);
         if(skipLen) {
             using enum PhaseID;
-            decreaseMaxProgress(skipLen, P2_Cleanup, P3_Macros, C0_Tokenization);
+            decreaseMaxProgress(skipLen, P2_Cleanup, C0_Tokenization);
             increaseLocalProgress(skipLen);
             i += skipLen;
         }
@@ -62,11 +62,6 @@ void pre::__internal_startLineSplicingPhase(ptr<AnnotatedSource<false>> b, ptr<A
             *r += *(*b)[i];
             ++i;
         }
-
-
-        //! Macro definitions and invocations cannot paste LSTs.
-        //! LSTs are removed before macros are parsed.
-        //! No need to check them.
     }
 }
 

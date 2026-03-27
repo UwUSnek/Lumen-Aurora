@@ -56,8 +56,6 @@ add_executable(alc
                     ../src/Preprocessor/Phases/1-LineSplicing/LineSplicingPhase.cpp
                 #../src/Preprocessor/Phases/2-Cleanup
                     ../src/Preprocessor/Phases/2-Cleanup/cleanupPhase.cpp
-                #../src/Preprocessor/Phases/3-Macros
-                    ../src/Preprocessor/Phases/3-Macros/macroPhase.cpp
 
 
     #../src/Compiler
